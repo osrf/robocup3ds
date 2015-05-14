@@ -48,7 +48,7 @@
     <!-- Load the plugin for Razer Hydra -->
     <!--<plugin name="hydra" filename="libHydraPlugin.so"></plugin>-->
 
-    <plugin name="game_controller" filename="librobocup3ds.so">
+    <plugin name="game_controller" filename="librobocup3dsPlugin.so">
       <ball>soccer_ball</ball>
     </plugin>
   </world>
