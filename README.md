@@ -50,3 +50,46 @@ prerequisites). Warnings alert of optional packages that are missing.
 1. Install robocup3ds:
 
         sudo make install
+
+### Running an example world
+
+Run an simple robocup world to check your installation.
+
+1. First move to the robocup3ds directory:
+
+        cd ~/robocup3ds
+
+1. Then run the world in verbose mode:
+
+        gazebo --verbose worlds/robocup3d.world
+
+A world with a soccer field should appear and there should be no errors printed in the terminal, so we know the plugins are running.
+
+### Running tests
+
+You can run the tests for the plugins as follows:
+
+1. First move to the robocup3ds directory:
+
+        cd ~/robocup3ds
+
+1. Then run a unit test, like:
+
+        ./build/src/UNIT_Robocup3dsPlugin_TEST
+
+### Code checking
+
+Code checking is done with cppchecker. Make sure you have it installed:
+
+        sudo apt-get install cppcheck
+
+Then to run the check:
+
+1. First move to the robocup3ds directory:
+
+        cd ~/robocup3ds
+
+1. Then run the checker:
+
+        . tools/code_check.sh
+
