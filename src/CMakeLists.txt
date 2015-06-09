@@ -1,5 +1,21 @@
 set (sources
   Robocup3dsPlugin.cc
+  states/State.cc
+  states/BeforeKickOffState.cc
+  states/CornerKickLeftState.cc
+  states/CornerKickRightState.cc
+  states/FreeKickLeftState.cc
+  states/FreeKickRightState.cc
+  states/GameOverState.cc
+  states/GoalKickLeftState.cc
+  states/GoalKickRightState.cc
+  states/GoalLeftState.cc
+  states/GoalRightState.cc
+  states/KickInLeftState.cc
+  states/KickInRightState.cc
+  states/KickOffLeftState.cc
+  states/KickOffRightState.cc
+  states/PlayState.cc
 )
 
 set (gtest_sources

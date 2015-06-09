@@ -2,6 +2,21 @@ include (${project_cmake_dir}/Utils.cmake)
 
 set (headers
   Robocup3dsPlugin.hh
+  states/BeforeKickOffState.hh
+	states/CornerKickLeftState.hh
+	states/CornerKickRightState.hh
+	states/FreeKickLeftState.hh
+	states/FreeKickRightState.hh
+	states/GameOverState.hh
+	states/GoalKickLeftState.hh
+	states/GoalKickRightState.hh
+	states/GoalLeftState.hh
+	states/GoalRightState.hh
+	states/KickInLeftState.hh
+	states/KickInRightState.hh
+	states/KickOffLeftState.hh
+	states/KickOffRightState.hh
+	states/PlayState.hh
 )
 
 set (robocup3ds_headers "" CACHE INTERNAL "RoboCup 3DS headers" FORCE)
