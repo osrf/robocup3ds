@@ -1,6 +1,5 @@
 set (sources
-  Robocup3dsPlugin.cc
-  states/State.cc
+  Geometry.cc
   states/BeforeKickOffState.cc
   states/CornerKickLeftState.cc
   states/CornerKickRightState.cc
@@ -16,6 +15,9 @@ set (sources
   states/KickOffLeftState.cc
   states/KickOffRightState.cc
   states/PlayState.cc
+  states/State.cc
+  GameState.cc
+  Robocup3dsPlugin.cc
 )
 
 set (gtest_sources

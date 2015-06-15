@@ -16,17 +16,15 @@
 */
 
 #include <string>
-#include <gazebo/common/Time.hh>
-#include <gazebo/physics/Model.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/FreeKickLeftState.hh"
 
-using namespace gazebo;
+using namespace ignition;
 
 /////////////////////////////////////////////////
 FreeKickLeftState::FreeKickLeftState(const std::string &_name,
-                         Robocup3dsPlugin *_plugin)
-  : State(_name, _plugin)
+                                     GameState *_gameState)
+  : State(_name, _gameState)
 {
 }
 
@@ -34,27 +32,34 @@ FreeKickLeftState::FreeKickLeftState(const std::string &_name,
 void FreeKickLeftState::Initialize()
 {
   State::Initialize();
-
   // Position the ball.
-  if (this->plugin->ball)
-    this->plugin->ball->SetWorldPose(math::Pose(this->pos.x,
-      this->pos.y, this->pos.z, 0, 0, 0));
+  gameState->MoveBall(pos);
 }
 
 /////////////////////////////////////////////////
 void FreeKickLeftState::Update()
 {
+  if (getElapsedTime() < GameState::SecondsKickInPause) {
+    return;
+  } else if (not hasInitialized) {
+    Initialize();
+  }
+
   // The right team is not allowed to be close to the ball.
-  this->plugin->DropBallImpl(0);
+  gameState->DropBallImpl(GameState::Team::LEFT);
+  State::Update();
 
   // After some time, go to play mode.
-  common::Time elapsed = this->timer.GetElapsed();
-  if (elapsed.sec > 5)
-    this->plugin->SetCurrent(this->plugin->playState.get());
+  if (getElapsedTime() > GameState::SecondsKickIn) {
+    gameState->DropBallImpl(GameState::Team::NEITHER);
+    gameState->SetCurrent(gameState->playState.get());
+  } else if (gameState->getLastTeamTouchedBall() != NULL) {
+    gameState->SetCurrent(gameState->playState.get());
+  }
 }
 
 /////////////////////////////////////////////////
-void FreeKickLeftState::SetPos(const math::Vector3 &_pos)
+void FreeKickLeftState::SetPos(const math::Vector3<double> &_pos)
 {
-  this->pos = _pos;
+  pos = _pos;
 }

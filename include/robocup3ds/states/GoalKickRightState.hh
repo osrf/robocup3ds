@@ -19,24 +19,22 @@
 #define _GAZEBO_GOAL_KICK_RIGHT_STATE_HH_
 
 #include <string>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/State.hh"
 
-namespace gazebo
+/// \class GoalKickRightState GoalKickRightState.hh
+/// \brief State that handles the goal kick right state.
+class GoalKickRightState : public State
 {
-  /// \class GoalKickRightState GoalKickRightState.hh
-  /// \brief State that handles the goal kick right state.
-  class GoalKickRightState : public State
-  {
-    /// Documentation inherited.
-    public: GoalKickRightState(const std::string &_name,
-                               Robocup3dsPlugin *_plugin);
+  /// Documentation inherited.
+  public: GoalKickRightState(const std::string &_name,
+                             GameState *_gameState);
 
-    /// Documentation inherited.
-    public: virtual void Initialize();
+  /// Documentation inherited.
+  public: virtual void Initialize();
 
-    // Documentation inherited
-    public: virtual void Update();
-  };
-}
+  // Documentation inherited
+  public: virtual void Update();
+};
+
 #endif

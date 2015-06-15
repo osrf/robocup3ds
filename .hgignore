@@ -6,3 +6,7 @@ build_*
 Ogre.log
 .DS_Store
 *.swp
+*.tags
+*.tags_*
+*.o
+

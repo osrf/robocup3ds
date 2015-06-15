@@ -16,18 +16,16 @@
 */
 
 #include <string>
-#include <gazebo/common/Time.hh>
-#include <gazebo/physics/Model.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
-#include "robocup3ds/states/KickInLeftState.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
+#include "robocup3ds/states/KickInLeftState.hh"
 
-using namespace gazebo;
+using namespace ignition;
 
 /////////////////////////////////////////////////
 KickInLeftState::KickInLeftState(const std::string &_name,
-                         Robocup3dsPlugin *_plugin)
-  : State(_name, _plugin)
+                                 GameState *_gameState)
+  : State(_name, _gameState)
 {
 }
 
@@ -35,26 +33,27 @@ KickInLeftState::KickInLeftState(const std::string &_name,
 void KickInLeftState::Initialize()
 {
   State::Initialize();
-
-  // Get the position of the ball in the field reference frame.
-  math::Pose ballPose = this->plugin->GetBall();
-
-  // Calculate the new ball position.
-  ballPose.pos.y =
-    (fabs(ballPose.pos.y) / ballPose.pos.y) * SoccerField::HalfFieldWidth;
-
   // Move the ball to the sideline.
-  this->plugin->MoveBall(ballPose);
+  gameState->MoveBallInBounds();
 }
 
 /////////////////////////////////////////////////
 void KickInLeftState::Update()
 {
+  if (getElapsedTime() < GameState::SecondsKickInPause) {
+    return;
+  } else if (not hasInitialized) {
+    Initialize();
+  }
   // The right team is not allowed to be close to the ball.
-  this->plugin->DropBallImpl(0);
+  gameState->DropBallImpl(GameState::Team::LEFT);
+  State::Update();
 
   // After some time, go to play mode.
-  common::Time elapsed = this->timer.GetElapsed();
-  if (elapsed.sec > 5)
-    this->plugin->SetCurrent(this->plugin->playState.get());
+  if (getElapsedTime() > GameState::SecondsKickIn) {
+    gameState->DropBallImpl(GameState::Team::NEITHER);
+    gameState->SetCurrent(gameState->playState.get());
+  } else if (gameState->getLastTeamTouchedBall() != NULL) {
+    gameState->SetCurrent(gameState->playState.get());
+  }
 }

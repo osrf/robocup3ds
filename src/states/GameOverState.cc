@@ -16,27 +16,28 @@
 */
 
 #include <string>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/GameOverState.hh"
 
-using namespace gazebo;
+using namespace ignition;
 
 /////////////////////////////////////////////////
 GameOverState::GameOverState(const std::string &_name,
-                             Robocup3dsPlugin *_plugin)
-  : State(_name, _plugin)
+                             GameState *_gameState)
+	: State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
 void GameOverState::Initialize()
 {
-  State::Initialize();
-
-  this->plugin->StopClock();
+	State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void GameOverState::Update()
 {
+	if (not hasInitialized) {
+		Initialize();
+	}
 }

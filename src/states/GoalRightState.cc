@@ -16,33 +16,45 @@
 */
 
 #include <string>
-#include <gazebo/common/Time.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/GoalRightState.hh"
 
-using namespace gazebo;
+using namespace ignition;
 
 /////////////////////////////////////////////////
 GoalRightState::GoalRightState(const std::string &_name,
-                         Robocup3dsPlugin *_plugin)
-  : State(_name, _plugin)
+                               GameState *_gameState)
+	: State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
 void GoalRightState::Initialize()
 {
-  State::Initialize();
+	State::Initialize();
+  validGoal = true;
 
-  // Register the right team goal.
-  this->plugin->scoreRight++;
+	// Register the right team goal.
+  for (size_t i = 0; i < gameState->teams.size(); ++i) {
+    GameState::Team *team = gameState->teams.at(i);
+    if (team->side == GameState::Team::RIGHT) {
+      if (team->canScore) {
+        team->score++;
+      } else {
+        validGoal = false;
+      }
+    }
+  }
 }
 
 /////////////////////////////////////////////////
 void GoalRightState::Update()
 {
-  // After some time, go to left team kick off mode.
-  common::Time elapsed = this->timer.GetElapsed();
-  if (elapsed.sec > 2)
-    this->plugin->SetCurrent(this->plugin->kickOffLeftState.get());
+	if (not hasInitialized) {
+		Initialize();
+	}
+	// After some time, go to left team kick off mode.
+	if (getElapsedTime() > GameState::SecondsGoalPause or not validGoal) {
+		gameState->SetCurrent(gameState->kickOffLeftState.get());
+	}
 }

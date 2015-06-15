@@ -16,17 +16,15 @@
 */
 
 #include <string>
-#include <gazebo/common/Time.hh>
-#include <gazebo/physics/Model.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/FreeKickLeftState.hh"
 
-using namespace gazebo;
+using namespace ignition;
 
 /////////////////////////////////////////////////
 FreeKickRightState::FreeKickRightState(const std::string &_name,
-                         Robocup3dsPlugin *_plugin)
-  : State(_name, _plugin)
+                                       GameState *_gameState)
+  : State(_name, _gameState)
 {
 }
 
@@ -34,27 +32,33 @@ FreeKickRightState::FreeKickRightState(const std::string &_name,
 void FreeKickRightState::Initialize()
 {
   State::Initialize();
-
-  // Position the ball.
-  if (this->plugin->ball)
-    this->plugin->ball->SetWorldPose(math::Pose(this->pos.x,
-      this->pos.y, this->pos.z, 0, 0, 0));
+  // Move ball in bounds
+  gameState->MoveBall(pos);
 }
 
 /////////////////////////////////////////////////
 void FreeKickRightState::Update()
 {
+  if (getElapsedTime() < GameState::SecondsKickInPause) {
+    return;
+  } else if (not hasInitialized) {
+    Initialize();
+  }
   // The left team is not allowed to be close to the ball.
-  this->plugin->DropBallImpl(1);
+  gameState->DropBallImpl(GameState::Team::RIGHT);
+  State::Update();
 
   // After some time, go to play mode.
-  common::Time elapsed = this->timer.GetElapsed();
-  if (elapsed.sec > 5)
-    this->plugin->SetCurrent(this->plugin->playState.get());
+  if (getElapsedTime() > GameState::SecondsKickIn) {
+    gameState->DropBallImpl(GameState::Team::NEITHER);
+    gameState->SetCurrent(gameState->playState.get());
+  } else if (gameState->getLastTeamTouchedBall() != NULL) {
+    gameState->SetCurrent(gameState->playState.get());
+  }
 }
 
 /////////////////////////////////////////////////
-void FreeKickRightState::SetPos(const math::Vector3 &_pos)
+void FreeKickRightState::SetPos(const math::Vector3<double> &_pos)
 {
-  this->pos = _pos;
+  pos = _pos;
 }

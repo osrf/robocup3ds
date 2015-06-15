@@ -19,32 +19,29 @@
 #define _GAZEBO_FREE_KICK_LEFT_STATE_HH_
 
 #include <string>
-#include <gazebo/math/Vector3.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/State.hh"
 
-namespace gazebo
+/// \class FreeKickLeftState FreeKickLeftState.hh
+/// \brief State that handles the free kick left state.
+class FreeKickLeftState : public State
 {
-  /// \class FreeKickLeftState FreeKickLeftState.hh
-	/// \brief State that handles the free kick left state.
-  class FreeKickLeftState : public State
-  {
-    /// Documentation inherited.
-    public: FreeKickLeftState(const std::string &_name,
-                              Robocup3dsPlugin *_plugin);
+  /// Documentation inherited.
+  public: FreeKickLeftState(const std::string &_name,
+                            GameState *_gameState);
 
-    /// Documentation inherited.
-    public: virtual void Initialize();
+  /// Documentation inherited.
+  public: virtual void Initialize();
 
-    // Documentation inherited
-    public: virtual void Update();
+  // Documentation inherited
+  public: virtual void Update();
 
-    /// \brief Set the position where the ball will be located.
-    /// \param[in] _ballPos Desired ball position.
-    public: void SetPos(const math::Vector3 &_pos);
+  /// \brief Set the position where the ball will be located.
+  /// \param[in] _ballPos Desired ball position.
+  public: void SetPos(const ignition::math::Vector3<double> &_pos);
 
-    /// \brief Used to select the position where the ball will be moved.
-    private: math::Vector3 pos;
-  };
-}
+  /// \brief Used to select the position where the ball will be moved.
+  private: ignition::math::Vector3<double> pos;
+};
+
 #endif

@@ -16,34 +16,45 @@
 */
 
 #include <string>
-#include <gazebo/physics/Model.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
-#include "robocup3ds/states/GoalKickLeftState.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
+#include "robocup3ds/states/GoalKickLeftState.hh"
 
-using namespace gazebo;
+using namespace ignition;
 
 /////////////////////////////////////////////////
 GoalKickLeftState::GoalKickLeftState(const std::string &_name,
-                         Robocup3dsPlugin *_plugin)
-  : State(_name, _plugin)
+                                     GameState *_gameState)
+	: State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
 void GoalKickLeftState::Initialize()
 {
-  State::Initialize();
+	State::Initialize();
 
-  // Get the position of the ball in the field reference frame.
-  math::Pose ballPose = this->plugin->GetBall();
-
-  // Move the ball.
-  this->plugin->MoveBall(
-    math::Pose(-SoccerField::FieldHeight * 0.45, 0, ballPose.pos.z, 0, 0, 0));
+	// Move the ball.
+	gameState->MoveBallToCenter();
 }
 
 /////////////////////////////////////////////////
 void GoalKickLeftState::Update()
 {
+	if (getElapsedTime() < GameState::SecondsKickInPause) {
+		return;
+	} else if (not hasInitialized) {
+		Initialize();
+	}
+
+	gameState->DropBallImpl(GameState::Team::LEFT);
+	State::Update();
+	
+	// After some time, go to play mode.
+  if (getElapsedTime() > GameState::SecondsKickIn) {
+    gameState->DropBallImpl(GameState::Team::NEITHER);
+    gameState->SetCurrent(gameState->playState.get());
+  } else if (gameState->getLastTeamTouchedBall() != NULL) {
+    gameState->SetCurrent(gameState->playState.get());
+  }
 }

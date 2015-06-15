@@ -19,26 +19,24 @@
 #define _GAZEBO_CORNER_KICK_LEFT_STATE_HH_
 
 #include <string>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/State.hh"
 
-namespace gazebo
+/// \class CornerKickLeftState CornerKickLeftState.hh
+/// \brief State that handles the corner kick left state.
+class CornerKickLeftState : public State 
 {
-  /// \class CornerKickLeftState CornerKickLeftState.hh
-  /// \brief State that handles the corner kick left state.
-  class CornerKickLeftState : public State 
-  {
-    /// \brief Constructor.
-    /// \param[in] _name Name of this state.
-    /// \param[in] _plugin Robocup3dsPlugin to be used inside the state.
-    public: CornerKickLeftState(const std::string &_name,
-                                Robocup3dsPlugin *_plugin);
+  /// \brief Constructor.
+  /// \param[in] _name Name of this state.
+  /// \param[in] _gameState GameState to be used inside the state.
+  public: CornerKickLeftState(const std::string &_name,
+                              GameState *_gameState);
 
-    /// Documentation inherited.
-    public: virtual void Initialize();
+  /// Documentation inherited.
+  public: virtual void Initialize();
 
-    // Documentation inherited
-    public: virtual void Update();
-  };
-}
+  // Documentation inherited
+  public: virtual void Update();
+};
+
 #endif

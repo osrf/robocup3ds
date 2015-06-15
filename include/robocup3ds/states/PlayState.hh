@@ -19,24 +19,22 @@
 #define _GAZEBO_PLAY_STATE_HH_
 
 #include <string>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/State.hh"
 
-namespace gazebo
+/// \class PlayState PlayState.hh
+/// \brief State that handles regular gameplay.
+class PlayState : public State
 {
-  /// \class PlayState PlayState.hh
-  /// \brief State that handles regular gameplay.
-  class PlayState : public State
-  {
-    /// Documentation inherited.
-    public: PlayState(const std::string &_name,
-                      Robocup3dsPlugin *_plugin);
+  /// Documentation inherited.
+  public: PlayState(const std::string &_name,
+                    GameState *_gameState);
 
-    /// Documentation inherited.
-    public: virtual void Initialize();
+  /// Documentation inherited.
+  public: virtual void Initialize();
 
-    // Documentation inherited
-    public: virtual void Update();
-  };
-}
+  // Documentation inherited
+  public: virtual void Update();
+};
+
 #endif

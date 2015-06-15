@@ -16,44 +16,17 @@
 */
 
 #include <string>
-#include <gazebo/common/Time.hh>
-#include <gazebo/math/Pose.hh>
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
-#include "robocup3ds/states/KickOffRightState.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
+#include "robocup3ds/states/KickOffRightState.hh"
 
-using namespace gazebo;
+using namespace ignition;
 
 /////////////////////////////////////////////////
 KickOffRightState::KickOffRightState(const std::string &_name,
-                         Robocup3dsPlugin *_plugin)
-  : State(_name, _plugin)
+                                     GameState *_gameState)
+  : State(_name, _gameState)
 {
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose1);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose2);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose3);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose4);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose5);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose6);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose7);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose8);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose9);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose10);
-  this->leftInitialPoses.push_back(SoccerField::LeftInitPose11);
-
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff1);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff2);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff3);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff4);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff5);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff6);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff7);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff8);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff9);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff10);
-  this->rightInitialKickOffPoses.push_back(SoccerField::RightInitPoseKickOff11);
 }
 
 /////////////////////////////////////////////////
@@ -61,49 +34,72 @@ void KickOffRightState::Initialize()
 {
   State::Initialize();
 
-  this->plugin->ReleasePlayers();
-
-  // Make sure the ball is at the center of the field
-  this->plugin->MoveBall(math::Pose(0, 0, 0, 0, 0, 0));
-
-  // Reposition the players
-  for (size_t i = 0; i < this->plugin->teams.size(); ++i)
-  {
-    std::vector<math::Pose> initPoses;
-
-    if (i == 0)
-    {
-      // Left team
-      initPoses = this->leftInitialPoses;
-    }
-    else
-    {
-      // Right team
-      initPoses = this->rightInitialKickOffPoses;
-    }
-
-    for (size_t j = 0; j < this->plugin->teams.at(i)->members.size(); ++j)
-    {
-      std::string name = this->plugin->teams.at(i)->members.at(j).second;
-      physics::ModelPtr model = this->plugin->world->GetModel(name);
-      if (model)
-      {
-        model->SetWorldPose(
-          initPoses.at(this->plugin->teams.at(i)->members.at(j).first - 1));
-      }
-      else
-        std::cerr << "Model (" << name << ") not found." << std::endl;
-    }
+  gameState->touchBallKickoff = NULL;
+  for (size_t i = 0; i < gameState->teams.size(); i++) {
+    GameState::Team* team = gameState->teams.at(i);
+    team->canScore = false;
   }
+  gameState->MoveBallToCenter();
+  gameState->ReleasePlayers();
+
+  // std::vector<math::Pose3<double> > initPoses;
+  // for (size_t i = 0; i < gameState->teams.size(); ++i)
+  // {
+  //   GameState::Team *currTeam = gameState->teams.at(i);
+  //   // Left team
+  //   if (currTeam->side == GameState::Team::LEFT)
+  //   {
+  //     initPoses = SoccerField::leftInitPose;
+  //   }
+  //   // Right team
+  //   else
+  //   {
+  //     initPoses = SoccerField::rightKickOffPose;
+  //   }
+
+  //   for (size_t j = 0; j < currTeam->members.size(); ++j)
+  //   {
+  //     GameState::Agent& agent = currTeam->members.at(j);
+  //     gameState->MoveAgent(agent, initPoses.at(j).Pos(), agent.rot = initPoses.at(j).Rot());
+  //   }
+
+  // }
 }
 
 /////////////////////////////////////////////////
 void KickOffRightState::Update()
 {
-  this->plugin->StopPlayers();
+  //check for agents that violate sides
+  for (size_t i = 0; i < gameState->teams.size(); ++i) {
+    GameState::Team *currTeam = gameState->teams.at(i);
+    for (size_t j = 0; j < currTeam->members.size(); ++j) {
+      GameState::Agent &agent = currTeam->members.at(j);
+      math::Vector3<double> agentPosNoZ(agent.pos.X(), agent.pos.Y(), 0);
+      //if on kicking team, must stay in circle and own side.
+      if (currTeam->side == GameState::Team::RIGHT and (agent.pos.X() > 0 and agentPosNoZ.Distance(SoccerField::CenterOfField) > SoccerField::CenterCircleRadius)) {
+        // move them to side of field for now
+        gameState->MoveAgentToSide(agent);
 
-  // After some time, go to play mode.
-  common::Time elapsed = this->timer.GetElapsed();
-  if (elapsed.sec > 2)
-    this->plugin->SetCurrent(this->plugin->playState.get());
+        //if on defending team, cannot cross line or go inside circle.
+      } else if (currTeam->side == GameState::Team::LEFT and (agent.pos.X() < 0 or agentPosNoZ.Distance(SoccerField::CenterOfField) < SoccerField::CenterCircleRadius)) {
+        // move them to side of field for now
+        gameState->MoveAgentToSide(agent);
+      }
+    }
+  }
+
+  State::Update();
+
+  // Check for double touching, if found, award kickoff to opponents
+  if (gameState->doubleTouchBall()) {
+    gameState->SetCurrent(gameState->kickOffRightState.get());
+  } else
+    // After some time, go to play mode.
+    if (getElapsedTime() > GameState::SecondsKickOff) {
+      gameState->DropBallImpl(GameState::Team::NEITHER);
+      gameState->SetCurrent(gameState->playState.get());
+    } else if (gameState->getLastTeamTouchedBall() != NULL) {
+      gameState->touchBallKickoff = gameState->getLastBallContact();
+      gameState->SetCurrent(gameState->playState.get());
+    }
 }

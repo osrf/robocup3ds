@@ -19,29 +19,25 @@
 #define _GAZEBO_BEFORE_KICKOFF_STATE_PLUGIN_HH_
 
 #include <string>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/State.hh"
 
-namespace gazebo
+/// \class BeforeKickOffState BeforeKickOffState.hh
+/// \brief State that handles the initial state.
+class BeforeKickOffState : public State
 {
-  /// \class BeforeKickOffState BeforeKickOffState.hh
-  /// \brief State that handles the initial state.
-  class BeforeKickOffState : public State
-  {
-    /// \brief Constructor.
-    /// \param[in] _name Name of this state.
-    /// \param[in] _plugin Robocup3dsPlugin to be used inside the state.
-    public: BeforeKickOffState(const std::string &_name,
-                               Robocup3dsPlugin *_plugin);
+  /// \brief Constructor.
+  /// \param[in] _name Name of this state.
+  /// \param[in] _gameState GameState to be used inside the state.
+  public: BeforeKickOffState(const std::string &_name,
+                             GameState *_gameState);
 
-    /// Documentation inherited.
-    public: virtual void Initialize();
+  /// Documentation inherited.
+  public: virtual void Initialize();
 
-    // Documentation inherited
-    public: virtual void Update();
+  // Documentation inherited
+  public: virtual void Update();
 
-    public: std::vector<std::string> leftInitPoses;
-    public: std::vector<std::string> rightInitPoses;
-  };
-}
+};
+
 #endif

@@ -16,35 +16,29 @@
 */
 
 #include <string>
-#include <gazebo/common/Time.hh>
-#include <gazebo/math/Pose.hh>
-#include <gazebo/physics/Model.hh>
-#include <gazebo/physics/World.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/PlayState.hh"
 
-using namespace gazebo;
-
 /////////////////////////////////////////////////
-PlayState::PlayState(const std::string &_name, Robocup3dsPlugin *_plugin)
-  : State(_name, _plugin)
+PlayState::PlayState(const std::string &_name, GameState *_gameState)
+	: State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
 void PlayState::Initialize()
 {
-  State::Initialize();
-
-  this->plugin->ReleasePlayers();
-  this->plugin->SetHalf(1);
-  this->plugin->ResetClock();
+	State::Initialize();
+	gameState->ReleasePlayers();
 }
 
 /////////////////////////////////////////////////
 void PlayState::Update()
 {
-  this->plugin->CheckTiming();
-  this->plugin->CheckBall();
-  //this->plugin->CheckPlayerCollisions();
+	if (not hasInitialized) {
+		Initialize();
+	}
+	gameState->CheckCanScore();
+	gameState->CheckBall();
+	State::Update();
 }

@@ -17,43 +17,56 @@
 
 #include <string>
 #include <vector>
-#include <gazebo/common/Time.hh>
-#include <gazebo/math/Pose.hh>
-#include <gazebo/math/Vector3.hh>
-#include <gazebo/physics/physics.hh>
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/State.hh"
 
-using namespace gazebo;
+using namespace ignition;
 
 /////////////////////////////////////////////////
 State::State(const std::string &_name,
-             Robocup3dsPlugin *_plugin)
-  : name(_name), plugin(_plugin)
+             GameState *_gameState)
+  : name(_name), gameState(_gameState)
 {
+  hasInitialized = false;
+  initTime = -1;
 }
 
+/////////////////////////////////////////////////
 void State::Initialize()
 {
-  std::cout << "New state: " << this->name << std::endl;
+  // std::cout << "New state: " << name << std::endl;
+  gameState->clearBallContactHistory();
 
-  this->plugin->lastPlayerTouchedBall.first = -1;
-  this->plugin->lastPlayerTouchedBall.second = "None";
+  gameState->setBallVel(math::Vector3<double>(0, 0, 0));
+  gameState->setBallAngVel(math::Vector3<double>(0, 0, 0));
 
-  // Stop the ball
-  if (this->plugin->ball)
-  {
-    this->plugin->ball->SetLinearVel(math::Vector3(0, 0, 0));
-    this->plugin->ball->SetAngularVel(math::Vector3(0, 0, 0));
-    this->plugin->ball->SetLinearAccel(math::Vector3(0, 0, 0));
-    this->plugin->ball->SetAngularAccel(math::Vector3(0, 0, 0));
-  }
+  hasInitialized = true;
+}
 
-  this->timer.Start();
+/////////////////////////////////////////////////
+void State::preInitialize()
+{
+  initTime = gameState->getElapsedGameTime();
+  hasInitialized = false;
+}
+
+/////////////////////////////////////////////////
+void State::Update()
+{
+  gameState->CheckTiming();
+  gameState->CheckIllegalDefense();
+  gameState->CheckCrowding();
+  gameState->CheckImmobility();
+}
+
+/////////////////////////////////////////////////
+double State::getElapsedTime()
+{
+  return gameState->getElapsedGameTime() - initTime;
 }
 
 /////////////////////////////////////////////////
 std::string State::GetName()
 {
-  return this->name;
+  return name;
 }
