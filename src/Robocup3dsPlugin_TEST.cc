@@ -15,7 +15,7 @@
  *
 */
 
-#include "robocup3ds/GameState.hh"
+#include "robocup3ds/Robocup3dsPlugin.hh"
 #include "gtest/gtest.h"
 
 //////////////////////////////////////////////////

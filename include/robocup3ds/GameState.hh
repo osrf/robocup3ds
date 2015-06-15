@@ -147,6 +147,25 @@ class GameState
         }
     };
 
+    /// \brief Container for storing ball contact information
+  public: class BallContact
+    {
+      public:
+        int uNum;
+        Team::Side side;
+        double lastContactTime;
+        ignition::math::Vector3<double> contactPos;
+        Agent *agent;
+
+        BallContact(int _uNum, Team::Side _side, double _lastContactTime, ignition::math::Vector3<double> _contactPos, Agent *_agent):
+          uNum(_uNum),
+          side(_side),
+          lastContactTime(_lastContactTime),
+          contactPos(_contactPos),
+          agent(_agent)
+        {}
+    };
+
     /*
     member and class variables
     */
@@ -212,27 +231,6 @@ class GameState
 
 /// \brief Enum for which half it is
   public: enum Half {FIRST_HALF, SECOND_HALF};
-/// \brief Complete history of ball contacts, expressed as a (uNum, side) tuple (including when neither team is touching). Updated every time the ball changes ownership.
-
-    /// \brief Container for storing ball contact information
-  public: class BallContact
-    {
-      public:
-        int uNum;
-        Team::Side side;
-        double lastContactTime;
-        ignition::math::Vector3<double> contactPos;
-        Agent *agent;
-
-        BallContact(int _uNum, Team::Side _side, double _lastContactTime, ignition::math::Vector3<double> _contactPos, Agent *_agent):
-          uNum(_uNum),
-          side(_side),
-          lastContactTime(_lastContactTime),
-          contactPos(_contactPos),
-          agent(_agent)
-        {}
-    };
-
 /// \brief History of ball contacts;
   public: std::vector<BallContact *> ballContactHistory;
 /// \brief The uNum of the agent who initially touches the ball

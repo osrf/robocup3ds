@@ -15,12 +15,23 @@
  *
 */
 
-#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
+#include "robocup3ds/SoccerField.hh"
 #include "gtest/gtest.h"
 
-//////////////////////////////////////////////////
-/// \brief
-TEST(GameControllerTest, aTest)
+/// \brief Test for GameState constructor and destructor
+TEST(constructor_destructor_test, GameState_cons_dest)
 {
-  SUCCEED();
+	GameState* gameState = new GameState();
+	delete gameState;
+	SUCCEED();
 }
+
+int main(int argc, char **argv)
+{
+	// Set a specific seed to avoid occasional test failures due to
+	// statistically unlikely, but possible results.
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}
+
