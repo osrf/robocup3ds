@@ -28,8 +28,6 @@ namespace SoccerField
   static const double HalfFieldWidth = FieldWidth * 0.5;
   static const double FieldHeight = 20.0;
   static const double HalfFieldHeight = FieldHeight * 0.5;
-  static const double FreeKickMoveDist = 2.0;
-  static const double FreeKickDist = 9.15;
   static const double GoalWidth = 2.1;
   static const double HalfGoalWidth = GoalWidth * 0.5;
   static const double GoalDepth = 0.6;

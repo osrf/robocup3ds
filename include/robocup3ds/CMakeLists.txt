@@ -1,9 +1,10 @@
 include (${project_cmake_dir}/Utils.cmake)
 
 set (headers
-  Robocup3dsPlugin.hh
+  # Geometery.hh
+  # SoccerField.hh
   GameState.hh
-  SoccerField.hh
+  Robocup3dsPlugin.hh
   # Geometery.hh
   # states/BeforeKickOffState.hh
 	# states/CornerKickLeftState.hh

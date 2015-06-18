@@ -18,9 +18,9 @@
 #include <boost/bind.hpp>
 #include <sdf/sdf.hh>
 
-#include "robocup3ds/GameState.hh"
-#include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/Geometry.hh"
+#include "robocup3ds/SoccerField.hh"
+#include "robocup3ds/GameState.hh"
 
 using namespace ignition;
 
@@ -56,6 +56,7 @@ const double GameState::crowdingReposDist2 = 0.4;
 const double GameState::crowdingReposDist3 = 1.0;
 const double GameState::immobilityTimeLimit = 15;
 const double GameState::fallenTimeLimit = 30;
+const double GameState::dropBallRadius = 2;
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -111,12 +112,13 @@ void GameState::Update()
   if (GameState::useCounterForGameTime) {
     gameTime = cycleCounter * 0.02;
   }
-  prevCycleGameTime = gameTime;
 
   hasCurrentStateChanged = false;
   if (currentState) {
     currentState->Update();
   }
+
+  prevCycleGameTime = gameTime;
 }
 
 /////////////////////////////////////////////////
@@ -161,39 +163,36 @@ void GameState::SetCurrent(State *_newState)
 /////////////////////////////////////////////////
 void GameState::DropBallImpl(const Team::Side _teamAllowed)
 {
-  // Check if the player is withing FREE_KICK distance.
+  //Check if the player is withing FREE_KICK distance.
   for (size_t i = 0; i < teams.size(); ++i) {
     Team *team = teams.at(i);
 
     if (team->side != _teamAllowed) {
       for (size_t j = 0; j < team->members.size(); ++j) {
         Agent &agent = team->members.at(j);
-        if (agent.pos.Distance(ballPos) < SoccerField::FreeKickMoveDist) {
-          MoveAgentToSide(agent);
+        //Move the player if it's close enough to the ball.
+        if (agent.pos.Distance(ballPos) < GameState::dropBallRadius) {
+          // Calculate the general form equation of a line from two points.
+          // a = y1 - y2
+          // b = x2 - x1
+          // c = (x1-x2)*y1 + (y2-y1)*x1
+          math::Vector3<double> v(ballPos.Y() - agent.pos.Y(),
+                                  agent.pos.X() - ballPos.X(),
+                                  (ballPos.X() - agent.pos.X()) * ballPos.Y() +
+                                  (agent.pos.Y() - ballPos.Y()) * ballPos.X());
+          math::Vector3<double> newPos;
+          newPos.Set(0, 0, beamHeight);
+          math::Vector3<double> newPos2;
+          newPos2.Set(0, 0, beamHeight);
+          if (Geometry::IntersectionCircunferenceLine(v, ballPos, 1.25 * GameState::dropBallRadius, newPos, newPos2)) {
+            if (agent.pos.Distance(newPos) < agent.pos.Distance(newPos2)) {
+              MoveAgent(agent, newPos);
+            } else {
+              MoveAgent(agent, newPos2);
+            }
+          }
         }
-        // math::Vector3<double> agentPos = agent.pos;
-        // Move the player if it's close enough to the ball.
-        // if (agentPos.Distance(ballPos) < SoccerField::FreeKickMoveDist) {
 
-        //  // Calculate the general form equation of a line from two points.
-        //  // a = y1 - y2
-        //  // b = x2 - x1
-        //  // c = (x1-x2)*y1 + (y2-y1)*x1
-        //  math::Vector3<double> v(ballPos.Y() - agentPos.Y(),
-        //                          agentPos.X() - ballPos.X(),
-        //                          (ballPos.X() - agentPos.X()) * ballPos.Y() +
-        //                          (agentPos.Y() - ballPos.Y()) * ballPos.X());
-        //  math::Vector3<double> int1;
-        //  int1.Set(0, 0, beamHeight);
-        //  math::Vector3<double> int2;
-        //  int2.Set(0, 0, beamHeight);
-        //  if (Geometry::IntersectionCircunferenceLine(
-        //        v, ballPos, SoccerField::FreeKickMoveDist, int1, int2)) {
-        //    if (agentPos.Distance(int1) < agentPos.Distance(int2))
-        //      MoveAgent(agent, int1);
-        //    else
-        //      MoveAgent(agent, int2);
-        //  }
       }
     }
   }
@@ -339,19 +338,24 @@ void GameState::CheckIllegalDefense_helper(Team *team)
         agent.inPenaltyBox = true;
       } else if (penaltyBox.Contains(agent.pos) and team->numPlayersInPenaltyBox >= GameState::penaltyBoxLimit)  {
         //if agent is not goalie: move agent away if penalty box is already crowded
-        //if agent is goalie: move another agent away
+        //if agent is goalie: move another agent that is farthest from goal away
         if (agent.isGoalKeeper()) {
           double bestDist = -1;
           Agent *bestAgent = NULL;
           for (size_t j = 0; j < team->members.size(); j++) {
-            Agent &otherAgent = team->members.at(j);
-            double otherAgentDist = agent.pos.Distance(goalCenter);
-            if (agent.inPenaltyBox and agent.pos.Distance(goalCenter) > bestDist) {
-              bestDist = otherAgentDist;
-              bestAgent = &otherAgent;
+            Agent &nonGoalieAgent = team->members.at(j);
+            if (nonGoalieAgent.isGoalKeeper()) {
+              continue;
+            }
+            double nonGoalieAgentDist = nonGoalieAgent.pos.Distance(goalCenter);
+            if (nonGoalieAgent.inPenaltyBox and nonGoalieAgentDist > bestDist) {
+              bestDist = nonGoalieAgentDist;
+              bestAgent = &nonGoalieAgent;
             }
           }
-          MoveAgentToSide(*bestAgent);
+          if (bestAgent != NULL) {
+            MoveAgentToSide(*bestAgent);
+          }
           agent.inPenaltyBox = true;
         } else {
           MoveAgentToSide(agent);
@@ -474,7 +478,7 @@ void GameState::CheckDoubleTouch()
     return;
   }
 
-  //check and make sure that the first contact after kick off (or third overall contact) is not by the same agent who performed the kick off
+  //check and make sure that the first contact after kick off (or second overall contact) is not by the same agent who performed the kick off
   BallContact *firstContact = ballContactHistory.at(1).get();
   if (touchBallKickoff != NULL
       and currentState->prevState != NULL
@@ -588,7 +592,6 @@ void GameState::MoveBallToCorner()
               SoccerField::BallRadius);
   updateBallPose = true;
 }
-
 
 /////////////////////////////////////////////////
 void GameState::MoveBallInBounds()
@@ -719,7 +722,7 @@ bool GameState::beamAgent(int uNum, std::string teamName, double x, double y, do
     if (teams.at(i)->name == teamName) {
       for (size_t j = 0; j < teams.at(i)->members.size(); j++) {
         if (teams.at(i)->members.at(j).uNum == uNum) {
-          MoveAgent(teams.at(i)->members.at(j), x, y, rot);
+          MoveAgentNoisy(teams.at(i)->members.at(j), x, y, rot);
           return true;
         }
       }

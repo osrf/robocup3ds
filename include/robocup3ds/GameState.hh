@@ -135,12 +135,13 @@ class GameState
         }
 
         /// \brief Constructor for Agent object
-      public: Agent(int _uNum, Team *_team):
+      public: 
+        Agent(int _uNum, Team *_team):
           uNum(_uNum),
           team(_team)
         {
-          pos.Set(0, 0, 0.4);
-          prevPos.Set(0, 0, 0.4);
+          pos.Set(0, 0, GameState::beamHeight);
+          prevPos.Set(0, 0, GameState::beamHeight);
           status = RELEASED;
           updatePose = false;
           inPenaltyBox = false;
@@ -218,6 +219,8 @@ class GameState
     static const double SecondsKickIn;
     static const double SecondsBeforeKickOff;
     static const double SecondsKickOff;
+    /// \brief Radius where not allowed team cannot approach ball
+    static const double dropBallRadius;
     /// \brief Every cycle counts as 20ms of game time (for `fake simulations)
     static const bool useCounterForGameTime;
     /// \brief Max players per team
@@ -307,7 +310,6 @@ class GameState
 /// ball. Team::RIGHT if the right team is allowed or any other number if
 /// none of the teams are allowed to be within the free kick radius.
   public: void DropBallImpl(const Team::Side _teamAllowed);
-
 
     /// \brief Checks whether the double touching rules are violated
   public: void CheckDoubleTouch();
@@ -422,7 +424,7 @@ class GameState
     }
 
 /// \brief Get the elapsed time since last cycle.
-  public: double getElapsedCycleGameTime()
+  private: double getElapsedCycleGameTime()
     {
       return gameTime - prevCycleGameTime;
     }
@@ -455,7 +457,10 @@ class GameState
     {
       cycleCounter = _cycleCounter;
       if (GameState::useCounterForGameTime) {
-        gameTime = 0.02 * cycleCounter;
+        double newGameTime = 0.02 * cycleCounter;
+        double offsetTime = newGameTime - gameTime;
+        prevCycleGameTime += offsetTime;
+        gameTime = newGameTime;
       }
     }
 
