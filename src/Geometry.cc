@@ -14,12 +14,11 @@
  * limitations under the License.
  *
 */
-
 #include "robocup3ds/Geometry.hh"
 
 using namespace ignition;
 
-#define G_SQUARE(a) ( (a) * (a) )
+#define G_SQUARE(a) ((a) * (a))
 #define DBL_EPSILON 2.2204460492503131e-16
 
 bool IntersectionCircunferenceLine(

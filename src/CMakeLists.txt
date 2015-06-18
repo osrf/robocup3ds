@@ -1,4 +1,5 @@
 set (sources
+  Geometry.cc
   states/BeforeKickOffState.cc
   states/CornerKickLeftState.cc
   states/CornerKickRightState.cc
@@ -15,7 +16,6 @@ set (sources
   states/KickOffRightState.cc
   states/PlayState.cc
   states/State.cc
-  Geometry.cc
   GameState.cc
   Robocup3dsPlugin.cc
 )
