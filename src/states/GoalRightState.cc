@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may !use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -24,7 +24,7 @@ using namespace ignition;
 /////////////////////////////////////////////////
 GoalRightState::GoalRightState(const std::string &_name,
                                GameState *_gameState)
-	: State(_name, _gameState)
+  : State(_name, _gameState)
 {
 }
 
@@ -44,17 +44,17 @@ void GoalRightState::Initialize()
       }
     }
   }
-	State::Initialize();
+  State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void GoalRightState::Update()
 {
-	if (not hasInitialized) {
-		Initialize();
-	}
-	// After some time, go to left team kick off mode.
-	if (getElapsedTime() >= GameState::SecondsGoalPause or not validGoal) {
-		gameState->SetCurrent(gameState->kickOffLeftState.get());
-	}
+  if (!hasInitialized) {
+    Initialize();
+  }
+  // After some time, go to left team kick off mode.
+  if (getElapsedTime() >= GameState::SecondsGoalPause or !validGoal) {
+    gameState->SetCurrent(gameState->kickOffLeftState.get());
+  }
 }

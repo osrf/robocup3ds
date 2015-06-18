@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may !use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -50,11 +50,11 @@ void GoalLeftState::Initialize()
 /////////////////////////////////////////////////
 void GoalLeftState::Update()
 {
-  if (not hasInitialized) {
+  if (!hasInitialized) {
     Initialize();
   }
   // Afer some time, go to right team kick off mode.
-  if (getElapsedTime() >= GameState::SecondsGoalPause or not validGoal) {
+  if (getElapsedTime() >= GameState::SecondsGoalPause or !validGoal) {
     gameState->SetCurrent(gameState->kickOffRightState.get());
   }
 }

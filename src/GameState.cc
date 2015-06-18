@@ -2,15 +2,15 @@
  * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may !use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law || agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * WITHOUT WARRANTIES || CONDITIONS OF ANY KIND, either express || implied.
+ * See the License for the specific language governing permissions &&
  * limitations under the License.
  *
 */
@@ -18,9 +18,9 @@
 #include <boost/bind.hpp>
 #include <sdf/sdf.hh>
 
-#include "robocup3ds/Geometry.hh"
-#include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/GameState.hh"
+#include "robocup3ds/SoccerField.hh"
+#include "robocup3ds/Geometry.hh"
 
 using namespace ignition;
 
@@ -322,7 +322,7 @@ void GameState::CheckIllegalDefense_helper(Team *team)
   //do bookkeeping for agents that leave penalty box
   for (size_t i = 0; i < team->members.size(); i++) {
     Agent &agent = team->members.at(i);
-    if (not penaltyBox.Contains(agent.pos) and agent.inPenaltyBox) {
+    if (!penaltyBox.Contains(agent.pos) && agent.inPenaltyBox) {
       agent.inPenaltyBox = false;
       team->numPlayersInPenaltyBox--;
     }
@@ -331,13 +331,13 @@ void GameState::CheckIllegalDefense_helper(Team *team)
   //do bookkeeping for agents that enter penalty box
   for (size_t i = 0; i < team->members.size(); i++) {
     Agent &agent = team->members.at(i);
-    if (not agent.inPenaltyBox) {
-      if (penaltyBox.Contains(agent.pos) and team->numPlayersInPenaltyBox < GameState::penaltyBoxLimit) {
+    if (!agent.inPenaltyBox) {
+      if (penaltyBox.Contains(agent.pos) && team->numPlayersInPenaltyBox < GameState::penaltyBoxLimit) {
         //account for agent if there is still room in penalty box
         team->numPlayersInPenaltyBox++;
         agent.inPenaltyBox = true;
-      } else if (penaltyBox.Contains(agent.pos) and team->numPlayersInPenaltyBox >= GameState::penaltyBoxLimit)  {
-        //if agent is not goalie: move agent away if penalty box is already crowded
+      } else if (penaltyBox.Contains(agent.pos) && team->numPlayersInPenaltyBox >= GameState::penaltyBoxLimit)  {
+        //if agent is !goalie: move agent away if penalty box is already crowded
         //if agent is goalie: move another agent that is farthest from goal away
         if (agent.isGoalKeeper()) {
           double bestDist = -1;
@@ -348,7 +348,7 @@ void GameState::CheckIllegalDefense_helper(Team *team)
               continue;
             }
             double nonGoalieAgentDist = nonGoalieAgent.pos.Distance(goalCenter);
-            if (nonGoalieAgent.inPenaltyBox and nonGoalieAgentDist > bestDist) {
+            if (nonGoalieAgent.inPenaltyBox && nonGoalieAgentDist > bestDist) {
               bestDist = nonGoalieAgentDist;
               bestAgent = &nonGoalieAgent;
             }
@@ -361,7 +361,7 @@ void GameState::CheckIllegalDefense_helper(Team *team)
           MoveAgentToSide(agent);
         }
       } else {
-        //agent is not penalty box nor is accounted for so do nothing
+        //agent is !penalty box nor is accounted for so do nothing
       }
     }
   }
@@ -459,9 +459,9 @@ void GameState::CheckImmobility()
         agent.timeFallen = 0;
       }
 
-      //move agent to side of field if they have remained fallen or timeout too long.
+      //move agent to side of field if they have remained fallen || timeout too long.
       double SCALE = 1.0 + (agent.uNum == 1);
-      if (agent.timeImmoblized >= SCALE * GameState::immobilityTimeLimit or agent.timeFallen >= SCALE * GameState::fallenTimeLimit) {
+      if (agent.timeImmoblized >= SCALE * GameState::immobilityTimeLimit || agent.timeFallen >= SCALE * GameState::fallenTimeLimit) {
         agent.timeImmoblized = 0;
         agent.timeFallen = 0;
         MoveAgentToSide(agent);
@@ -474,17 +474,17 @@ void GameState::CheckImmobility()
 /////////////////////////////////////////////////
 void GameState::CheckDoubleTouch()
 {
-  if (ballContactHistory.size() != 2 or hasCurrentStateChanged) {
+  if (ballContactHistory.size() != 2 || hasCurrentStateChanged) {
     return;
   }
 
-  //check and make sure that the first contact after kick off (or second overall contact) is not by the same agent who performed the kick off
+  //check && make sure that the first contact after kick off (|| second overall contact) is !by the same agent who performed the kick off
   BallContact *firstContact = ballContactHistory.at(1).get();
   if (touchBallKickoff != NULL
-      and currentState->prevState != NULL
-      and (currentState->prevState->name == "KickOff_Left" or currentState->prevState->name == "KickOff_Right")
-      and touchBallKickoff->side == firstContact->side
-      and touchBallKickoff->uNum == firstContact->uNum) {
+      && currentState->prevState != NULL
+      && (currentState->prevState->name == "KickOff_Left" || currentState->prevState->name == "KickOff_Right")
+      && touchBallKickoff->side == firstContact->side
+      && touchBallKickoff->uNum == firstContact->uNum) {
     if (currentState->prevState->name == "KickOff_Left") {
       SetCurrent(kickOffRightState.get());
     } else {
@@ -502,12 +502,12 @@ void GameState::CheckCanScore()
   }
   for (size_t j = 0; j < teams.size(); j++) {
     Team *team = teams.at(j);
-    if ((not team->canScore)
-        and (touchBallKickoff != NULL)
-        and ((ballContact->side != team->side)
-             or (ballContact->side == team->side
-                 and touchBallKickoff->uNum != ballContact->uNum
-                 and ballContact->contactPos.Distance(SoccerField::CenterOfField) > SoccerField::CenterCircleRadius))) {
+    if ((!team->canScore)
+        && (touchBallKickoff != NULL)
+        && ((ballContact->side != team->side)
+             || (ballContact->side == team->side
+                 && touchBallKickoff->uNum != ballContact->uNum
+                 && ballContact->contactPos.Distance(SoccerField::CenterOfField) > SoccerField::CenterCircleRadius))) {
       team->canScore = true;
     }
   }
@@ -634,7 +634,7 @@ void GameState::Initialize()
 bool GameState::addAgent(int uNum, std::string teamName)
 {
   // std::cout << "adding agent: " << uNum << " teamName: " << teamName << std::endl;
-  if (uNum < 0 or uNum > GameState::playerLimit) {
+  if (uNum < 0 || uNum > GameState::playerLimit) {
     std::cout << "uNum " << uNum << " is invalid, cannot add agent to team " << teamName << "!" << std::endl;
     return false;
   }
@@ -647,7 +647,7 @@ bool GameState::addAgent(int uNum, std::string teamName)
   }
   if (teamToAdd == -1) {
     for (size_t i = 0; i < teams.size(); ++i) {
-      if (teams.at(i)->name == "_unnamed_team" and teams.at(i)->members.size() == 0) {
+      if (teams.at(i)->name == "_unnamed_team" && teams.at(i)->members.size() == 0) {
         teamToAdd = i;
         teams.at(i)->name = teamName;
         break;
@@ -671,7 +671,7 @@ bool GameState::addAgent(int uNum, std::string teamName)
   }
   for (size_t i = 0; i < team->members.size(); i++) {
     uNumArray[team->members.at(i).uNum - 1] = false;
-    if (uNum != 0 and team->members.at(i).uNum == uNum) {
+    if (uNum != 0 && team->members.at(i).uNum == uNum) {
       std::cout << "Already have an agent with this unum: " << uNum << ", cannot add agent to team!" << std::endl;
       return false;
     }
@@ -707,14 +707,14 @@ bool GameState::removeAgent(int uNum, std::string teamName)
       }
     }
   }
-  std::cout << "Agent not found, unable to remove agent!" << std::endl;
+  std::cout << "Agent !found, unable to remove agent!" << std::endl;
   return false;
 }
 
 ////////////////////////////////////////////////
 bool GameState::beamAgent(int uNum, std::string teamName, double x, double y, double rot)
 {
-  if (currentState->name != "BeforeKickOff" or currentState->name != "goal_kick_left" or currentState->name != "goal_kick_right") {
+  if (currentState->name != "BeforeKickOff" && currentState->name != "goal_kick_left" && currentState->name != "goal_kick_right") {
     std::cout << "Incorrect play mode, unable to beam agent!" << std::endl;
     return false;
   }
@@ -728,6 +728,6 @@ bool GameState::beamAgent(int uNum, std::string teamName, double x, double y, do
       }
     }
   }
-  std::cout << "Agent not found, unable to beam agent!" << std::endl;
+  std::cout << "Agent !found, unable to beam agent!" << std::endl;
   return false;
 }

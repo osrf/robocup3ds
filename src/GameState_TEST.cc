@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may !use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -63,7 +63,7 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
     }
   }
 
-  //both teams are full so this should not work
+  //both teams are full so this should !work
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 2; j++) {
       ASSERT_FALSE(gameState->addAgent(j + 1, teamNames[i]));
@@ -226,6 +226,15 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
   ASSERT_EQ(rot, agent.rot);
   ASSERT_EQ(pos, gameState->teams.at(0)->members.at(0).pos);
   ASSERT_EQ(rot, gameState->teams.at(0)->members.at(0).rot);
+
+  pos.Set(7, 8, GameState::beamHeight);
+  rot.Euler(0, 0, 1.25);
+  for (int i = 0; i < 100; i++) {
+    bool result = gameState->beamAgent(1, "blue", 7, 8, 1.25);
+    ASSERT_TRUE(result);
+    ASSERT_LE(agent.pos.Distance(pos), 0.15);
+    ASSERT_LE(fabs(agent.rot.Euler().Z() - rot.Euler().Z()), 0.1);
+  }
 }
 
 class GameStateTest_fullTeams : public GameStateTest_basic
@@ -342,7 +351,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
     gameState->Update();
     ASSERT_EQ(gameState->getCurrentState()->name, states.at((i + 1) % 2)->name);
 
-    //test that transition to other kickoff does not happen when double touch does not occur
+    //test that transition to other kickoff does !happen when double touch does !occur
     gameState->SetCurrent(state);
     gameState->Update();
     boost::shared_ptr<GameState::BallContact> ballContact4(new GameState::BallContact(1, gameState->teams.at(i)->side, gameState->getGameTime(), math::Vector3<double>(0, 0, 0)));
@@ -712,7 +721,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
     ASSERT_TRUE(gameState->teams.at(i)->canScore);
 
     //case 2: kickoff agent touches ball, teammate touches ball inside circle
-    //team should not be able to score
+    //team should !be able to score
     gameState->SetCurrent(states.at(i));
     gameState->Update();
     ASSERT_FALSE(gameState->teams.at(i)->canScore);
@@ -725,7 +734,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
     ASSERT_FALSE(gameState->teams.at(i)->canScore);
 
     //case 3: kickoff agent touches ball, and touches it again afterwards
-    //team should not be able to score
+    //team should !be able to score
     gameState->SetCurrent(states.at(i));
     gameState->Update();
     ASSERT_FALSE(gameState->teams.at(i)->canScore);

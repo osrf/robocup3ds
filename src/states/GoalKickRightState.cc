@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may !use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -25,7 +25,7 @@ using namespace ignition;
 /////////////////////////////////////////////////
 GoalKickRightState::GoalKickRightState(const std::string &_name,
                                        GameState *_gameState)
-	: State(_name, _gameState)
+  : State(_name, _gameState)
 {
 }
 
@@ -35,27 +35,27 @@ void GoalKickRightState::Initialize()
   // Move the ball.
   gameState->MoveBall(initBallPos);
   gameState->MoveBallForGoalKick();
-	State::Initialize();
+  State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void GoalKickRightState::Update()
 {
-	if (getElapsedTime() < GameState::SecondsKickInPause) {
-		return;
-	} else if (not hasInitialized) {
-		Initialize();
-	}
+  if (getElapsedTime() < GameState::SecondsKickInPause) {
+    return;
+  } else if (!hasInitialized) {
+    Initialize();
+  }
 
   gameState->DropBallImpl(GameState::Team::LEFT);
-	gameState->CheckGoalKickIllegalDefense(GameState::Team::RIGHT);
-	State::Update();
+  gameState->CheckGoalKickIllegalDefense(GameState::Team::RIGHT);
+  State::Update();
 
-	// After some time, go to play mode.
+  // After some time, go to play mode.
   if (getElapsedTime() >= GameState::SecondsKickIn) {
     gameState->DropBallImpl(GameState::Team::NEITHER);
     gameState->SetCurrent(gameState->playState.get());
-  } else if (not SoccerField::PenaltyBoxRight.Contains(gameState->GetBall())) {
+  } else if (!SoccerField::PenaltyBoxRight.Contains(gameState->GetBall())) {
     gameState->SetCurrent(gameState->playState.get());
   }
 }
