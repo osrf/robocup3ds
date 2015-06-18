@@ -51,6 +51,7 @@ TEST_F(GameStateTest_basic, GameState_construct_delete)
 /// \brief Test for adding teams and agents
 TEST_F(GameStateTest_basic, GameState_add_teams_agents)
 {
+  //make sure that agents with bad unums or teams cannot be added
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 15; j++) {
       bool returnValue = gameState->addAgent(j + 1, teamNames[i]);
@@ -62,12 +63,14 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
     }
   }
 
+  //both teams are full so this should not work
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 2; j++) {
       ASSERT_FALSE(gameState->addAgent(j + 1, teamNames[i]));
     }
   }
 
+  //make sure that their are only two teams and that each team is initialized correctly
   ASSERT_EQ(gameState->teams.size(), 2u);
   for (int i = 0; i < 2; i++) {
     ASSERT_EQ(gameState->teams.at(i)->members.size(), 11u);
@@ -128,7 +131,71 @@ TEST_F(GameStateTest_basic, GameState_add_agent_0)
   ASSERT_EQ(gameState->teams.at(0)->members.size(), 4u);
 }
 
-class GameStateTest_playmode : public GameStateTest_basic
+/// \brief Test for whether the move ball functions are working as intended
+TEST_F(GameStateTest_basic, GameState_move_ball)
+{
+  math::Vector3<double> pos(15, 10, SoccerField::BallRadius);
+  gameState->MoveBall(pos);
+  ASSERT_EQ(pos, gameState->GetBall());
+  
+  gameState->MoveBallToCenter();
+  ASSERT_EQ(SoccerField::BallCenterPosition, gameState->GetBall());
+  
+  pos.Set(-10, 5, SoccerField::BallRadius);
+  gameState->MoveBall(pos);
+  gameState->MoveBallForGoalKick();
+  ASSERT_EQ(math::Vector3<double>(-SoccerField::HalfFieldWidth + 1, 0, SoccerField::BallRadius), gameState->GetBall());
+  
+  pos.Set(10, -5, SoccerField::BallRadius);
+  gameState->MoveBall(pos);
+  gameState->MoveBallForGoalKick();
+  ASSERT_EQ(math::Vector3<double>(SoccerField::HalfFieldWidth - 1, 0, SoccerField::BallRadius), gameState->GetBall());
+
+
+  vector<math::Vector3<double> > nearFourCorners;
+  nearFourCorners.push_back(math::Vector3<double>(-1, -1, SoccerField::BallRadius));
+  nearFourCorners.push_back(math::Vector3<double>(-1, 1, SoccerField::BallRadius));
+  nearFourCorners.push_back(math::Vector3<double>(1, -1, SoccerField::BallRadius));
+  nearFourCorners.push_back(math::Vector3<double>(1, 1, SoccerField::BallRadius));
+
+  vector<math::Vector3<double> > fourCorners;
+  fourCorners.push_back(math::Vector3<double>(-SoccerField::HalfFieldWidth, -SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+  fourCorners.push_back(math::Vector3<double>(-SoccerField::HalfFieldWidth, SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+  fourCorners.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth, -SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+  fourCorners.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth, SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+
+  for (size_t i = 0; i < nearFourCorners.size(); i++) {
+    gameState->MoveBall(nearFourCorners.at(i));
+    gameState->MoveBallToCorner();
+    ASSERT_EQ(fourCorners.at(i), gameState->GetBall());
+  }
+
+  vector<math::Vector3<double> > outOfBounds;
+  outOfBounds.push_back(math::Vector3<double>(-17, -13, -5));
+  outOfBounds.push_back(math::Vector3<double>(17, 13, 5));
+  outOfBounds.push_back(math::Vector3<double>(11, -12, -5));
+  outOfBounds.push_back(math::Vector3<double>(-11, 12, -5));
+
+  vector<math::Vector3<double> > inBounds;
+  inBounds.push_back(math::Vector3<double>(-SoccerField::HalfFieldWidth, -SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+  inBounds.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth, SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+  inBounds.push_back(math::Vector3<double>(11, -SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+  inBounds.push_back(math::Vector3<double>(-11, SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+
+  for (size_t i = 0; i < outOfBounds.size(); i++) {
+    gameState->MoveBall(outOfBounds.at(i));
+    gameState->MoveBallInBounds();
+    ASSERT_EQ(inBounds.at(i), gameState->GetBall());
+  }
+
+}
+
+TEST_F(GameStateTest_basic, GameState_move_agent) {
+
+}
+
+
+class GameStateTest_fullTeams : public GameStateTest_basic
 {
   protected:
     virtual void SetUp()
@@ -143,11 +210,11 @@ class GameStateTest_playmode : public GameStateTest_basic
 };
 
 /// \brief Test for whether beforeKickOff play mode transitions correctly
-TEST_F(GameStateTest_playmode, GameState_transition_beforeKickOff_kickOff)
+TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff)
 {
   //try first half
   ASSERT_EQ(gameState->GetHalf(), GameState::FIRST_HALF);
-  while (gameState->getGameTime() < 6) {
+  while (gameState->getGameTime() < GameState::SecondsBeforeKickOff + 1) {
     gameState->Update();
     if (gameState->getGameTime() < GameState::SecondsBeforeKickOff) {
       ASSERT_EQ(gameState->GetBall(), SoccerField::BallCenterPosition);
@@ -160,7 +227,7 @@ TEST_F(GameStateTest_playmode, GameState_transition_beforeKickOff_kickOff)
   // try second half
   gameState->SetHalf(GameState::SECOND_HALF);
   ASSERT_EQ(gameState->GetHalf(), GameState::SECOND_HALF);
-  while (gameState->getGameTime() < 6) {
+  while (gameState->getGameTime() < GameState::SecondsBeforeKickOff + 1) {
     gameState->Update();
     if (gameState->getGameTime() < GameState::SecondsBeforeKickOff) {
       ASSERT_EQ(gameState->GetBall(), SoccerField::BallCenterPosition);
@@ -172,7 +239,7 @@ TEST_F(GameStateTest_playmode, GameState_transition_beforeKickOff_kickOff)
 }
 
 /// \brief Test for whether KickOff play mode transitions correctly
-TEST_F(GameStateTest_playmode, GameState_transition_kickOff_playOn)
+TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
 {
   vector<State *> states;
   states.push_back(gameState->kickOffLeftState.get());
@@ -187,7 +254,7 @@ TEST_F(GameStateTest_playmode, GameState_transition_kickOff_playOn)
     //test for transition when KickOff times out after 15 secs
     gameState->setCycleCounter(0);
     gameState->SetCurrent(state);
-    while (gameState->getGameTime() < 16) {
+    while (gameState->getGameTime() < GameState::SecondsKickOff + 1) {
       gameState->Update();
       // cout << gameState->getGameTime() << " " << gameState->getCurrentState()->name << " " << gameState->getCurrentState()->getElapsedTime() << endl;
       if (gameState->getGameTime() < GameState::SecondsKickOff) {
@@ -241,15 +308,15 @@ TEST_F(GameStateTest_playmode, GameState_transition_kickOff_playOn)
 }
 
 /// \brief Test for whether PlayOn play mode transitions to kickIn correctly
-TEST_F(GameStateTest_playmode, GameState_transition_playOn_kickIn)
+TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_kickIn)
 {
   vector<State *> states;
   states.push_back(gameState->kickInLeftState.get());
   states.push_back(gameState->kickInRightState.get());
   boost::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
-  ballPositions.push_back(math::Vector3<double>(0, -15, 0.042));
-  ballPositions.push_back(math::Vector3<double>(0, 15, 0.042));
+  ballPositions.push_back(math::Vector3<double>(0, -15, SoccerField::BallRadius));
+  ballPositions.push_back(math::Vector3<double>(0, 15, SoccerField::BallRadius));
 
   ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
   ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
@@ -271,15 +338,15 @@ TEST_F(GameStateTest_playmode, GameState_transition_playOn_kickIn)
 }
 
 /// \brief Test for whether PlayOn play mode transitions to cornerKick correctly
-TEST_F(GameStateTest_playmode, GameState_transition_playOn_cornerKick)
+TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_cornerKick)
 {
   vector<State *> states;
   states.push_back(gameState->cornerKickLeftState.get());
   states.push_back(gameState->cornerKickRightState.get());
   boost::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
-  ballPositions.push_back(math::Vector3<double>(-16, 5, 0.042));
-  ballPositions.push_back(math::Vector3<double>(16, -5, 0.042));
+  ballPositions.push_back(math::Vector3<double>(-(SoccerField::HalfFieldWidth + 1), 5, SoccerField::BallRadius));
+  ballPositions.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth + 1, -5, SoccerField::BallRadius));
 
   ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
   ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
@@ -299,15 +366,15 @@ TEST_F(GameStateTest_playmode, GameState_transition_playOn_cornerKick)
 }
 
 /// \brief Test for whether PlayOn play mode transitions to goal correctly
-TEST_F(GameStateTest_playmode, GameState_transition_playOn_goal)
+TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
 {
   vector<State *> states;
   states.push_back(gameState->goalLeftState.get());
   states.push_back(gameState->goalRightState.get());
   boost::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
-  ballPositions.push_back(math::Vector3<double>(-15.5, 1, 0.042));
-  ballPositions.push_back(math::Vector3<double>(15.5, -1, 0.042));
+  ballPositions.push_back(math::Vector3<double>(-(SoccerField::HalfFieldWidth + 0.5), 1, SoccerField::BallRadius));
+  ballPositions.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth + 0.5, -1, SoccerField::BallRadius));
 
   ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
   ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
@@ -324,15 +391,15 @@ TEST_F(GameStateTest_playmode, GameState_transition_playOn_goal)
 }
 
 /// \brief Test for whether PlayOn play mode transitions to goalKick correctly
-TEST_F(GameStateTest_playmode, GameState_transition_playOn_goalKick)
+TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goalKick)
 {
   vector<State *> states;
   states.push_back(gameState->goalKickLeftState.get());
   states.push_back(gameState->goalKickRightState.get());
   boost::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
-  ballPositions.push_back(math::Vector3<double>(-16, 5, 0.042));
-  ballPositions.push_back(math::Vector3<double>(16, -5, 0.042));
+  ballPositions.push_back(math::Vector3<double>(-(SoccerField::HalfFieldWidth + 1), 5, SoccerField::BallRadius));
+  ballPositions.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth + 1, -5, SoccerField::BallRadius));
 
   ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
   ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
@@ -352,7 +419,7 @@ TEST_F(GameStateTest_playmode, GameState_transition_playOn_goalKick)
 }
 
 /// \brief Test for whether goal play mode transitions to kickOff correctly
-TEST_F(GameStateTest_playmode, GameState_transition_goal_kickOff)
+TEST_F(GameStateTest_fullTeams, GameState_transition_goal_kickOff)
 {
   vector<State *> beforeStates;
   beforeStates.push_back(gameState->goalLeftState.get());
@@ -385,7 +452,7 @@ TEST_F(GameStateTest_playmode, GameState_transition_goal_kickOff)
 }
 
 /// \brief Test for whether kickIn play mode transitions to playOn correctly
-TEST_F(GameStateTest_playmode, GameState_transition_kickIn_playOn)
+TEST_F(GameStateTest_fullTeams, GameState_transition_kickIn_playOn)
 {
   vector<State *> states;
   states.push_back(gameState->kickInLeftState.get());
@@ -420,7 +487,7 @@ TEST_F(GameStateTest_playmode, GameState_transition_kickIn_playOn)
 }
 
 /// \brief Test for whether cornerKick play mode transitions to playOn correctly
-TEST_F(GameStateTest_playmode, GameState_transition_cornerKick_playOn)
+TEST_F(GameStateTest_fullTeams, GameState_transition_cornerKick_playOn)
 {
   vector<State *> states;
   states.push_back(gameState->cornerKickLeftState.get());
@@ -455,7 +522,7 @@ TEST_F(GameStateTest_playmode, GameState_transition_cornerKick_playOn)
 }
 
 /// \brief Test for whether freeKick play mode transitions to playOn correctly
-TEST_F(GameStateTest_playmode, GameState_transition_freeKick_playOn)
+TEST_F(GameStateTest_fullTeams, GameState_transition_freeKick_playOn)
 {
   vector<State *> states;
   states.push_back(gameState->freeKickLeftState.get());
@@ -490,15 +557,15 @@ TEST_F(GameStateTest_playmode, GameState_transition_freeKick_playOn)
 }
 
 /// \brief Test for whether goalKick play mode transitions to playOn correctly
-TEST_F(GameStateTest_playmode, GameState_transition_goalKick_playOn)
+TEST_F(GameStateTest_fullTeams, GameState_transition_goalKick_playOn)
 {
   vector<State *> states;
   states.push_back(gameState->goalKickLeftState.get());
   states.push_back(gameState->goalKickRightState.get());
   boost::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
-  ballPositions.push_back(math::Vector3<double>(-16, 5, 0.042));
-  ballPositions.push_back(math::Vector3<double>(16, -5, 0.042));
+  ballPositions.push_back(math::Vector3<double>(-16, 5, SoccerField::BallRadius));
+  ballPositions.push_back(math::Vector3<double>(16, -5, SoccerField::BallRadius));
 
   ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
   ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
@@ -529,8 +596,8 @@ TEST_F(GameStateTest_playmode, GameState_transition_goalKick_playOn)
   }
 }
 
-/// \brief Test for whether game transitions to kickOffRight at end of first half and to gameOver at the end of the second half
-TEST_F(GameStateTest_playmode, GameState_transition_checkTiming)
+/// \brief Test for whether when running full game, game transitions to kickOffRight at end of first half and to gameOver at the end of the second half
+TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
 {
   double firstHalfTime = GameState::SecondsEachHalf +  GameState::SecondsBeforeKickOff;
   double firstHalfKickOffTime = GameState::SecondsBeforeKickOff + GameState::SecondsKickOff;

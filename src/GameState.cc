@@ -77,7 +77,7 @@ GameState::GameState():
 {
   half = FIRST_HALF;
   cycleCounter = 0;
-  gameTime = prevCycleGameTime = 0;
+  gameTime = prevCycleGameTime = startGameTime = 0.0;
   updateBallPose = false;
   currentState = NULL;
   touchBallKickoff = NULL;
