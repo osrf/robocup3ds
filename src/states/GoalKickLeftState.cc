@@ -32,10 +32,10 @@ GoalKickLeftState::GoalKickLeftState(const std::string &_name,
 /////////////////////////////////////////////////
 void GoalKickLeftState::Initialize()
 {
-	State::Initialize();
-
 	// Move the ball.
-	gameState->MoveBallToCenter();
+  gameState->MoveBall(initBallPos);
+	gameState->MoveBallForGoalKick();
+  State::Initialize();
 }
 
 /////////////////////////////////////////////////
@@ -47,14 +47,15 @@ void GoalKickLeftState::Update()
 		Initialize();
 	}
 
-	gameState->DropBallImpl(GameState::Team::LEFT);
+  gameState->DropBallImpl(GameState::Team::LEFT);
+	gameState->CheckGoalKickIllegalDefense(GameState::Team::LEFT);
 	State::Update();
 	
 	// After some time, go to play mode.
-  if (getElapsedTime() > GameState::SecondsKickIn) {
+  if (getElapsedTime() >= GameState::SecondsKickIn) {
     gameState->DropBallImpl(GameState::Team::NEITHER);
     gameState->SetCurrent(gameState->playState.get());
-  } else if (gameState->getLastTeamTouchedBall() != NULL) {
+  } else if (not SoccerField::PenaltyBoxLeft.Contains(gameState->GetBall())) {
     gameState->SetCurrent(gameState->playState.get());
   }
 }

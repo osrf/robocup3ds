@@ -32,8 +32,8 @@ BeforeKickOffState::BeforeKickOffState(const std::string &_name,
 /////////////////////////////////////////////////
 void BeforeKickOffState::Initialize()
 {
-  State::Initialize();
   gameState->StopPlayers();
+  State::Initialize();
 }
 
 /////////////////////////////////////////////////
@@ -46,10 +46,11 @@ void BeforeKickOffState::Update()
     gameState->MoveBallToCenter();
   }
 
+  //resets getElapsedGameTime() back to zero
   gameState->setStartGameTime(gameState->getGameTime());
 
   // After some time, go to play mode.
-  if (getElapsedTime() > GameState::SecondsBeforeKickOff) {
+  if (getElapsedTime() >= GameState::SecondsBeforeKickOff) {
     if (gameState->GetHalf() == GameState::FIRST_HALF) {
       gameState->SetCurrent(gameState->kickOffLeftState.get());
     } else {

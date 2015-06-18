@@ -31,9 +31,9 @@ FreeKickLeftState::FreeKickLeftState(const std::string &_name,
 /////////////////////////////////////////////////
 void FreeKickLeftState::Initialize()
 {
+  // Move ball in bounds
+  gameState->MoveBallInBounds();
   State::Initialize();
-  // Position the ball.
-  gameState->MoveBall(pos);
 }
 
 /////////////////////////////////////////////////
@@ -50,16 +50,11 @@ void FreeKickLeftState::Update()
   State::Update();
 
   // After some time, go to play mode.
-  if (getElapsedTime() > GameState::SecondsKickIn) {
+  if (getElapsedTime() >= GameState::SecondsKickIn) {
     gameState->DropBallImpl(GameState::Team::NEITHER);
     gameState->SetCurrent(gameState->playState.get());
-  } else if (gameState->getLastTeamTouchedBall() != NULL) {
+  } else if (hasBallContactOccurred()) {
     gameState->SetCurrent(gameState->playState.get());
   }
 }
 
-/////////////////////////////////////////////////
-void FreeKickLeftState::SetPos(const math::Vector3<double> &_pos)
-{
-  pos = _pos;
-}

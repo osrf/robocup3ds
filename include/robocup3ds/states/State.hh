@@ -27,41 +27,55 @@ class GameState;
 // \brief State pattern used for the game mode.
 class State
 {
-  /// \brief Class constructor.
-  /// \param[in] _name Name of the state.
-  /// \param[out] _gameState Reference to the GameState.
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[out] _gameState Reference to the GameState.
   public: State(const std::string &_name, GameState *_gameState);
 
-  /// \brief Initialize the state. Called once when the state is entered.
+    /// \brief Initialize the state. Called once after a pause duration after entering state.
   public: virtual void Initialize();
 
-  /// \brief pre-Initialize the state. Called once when the state is entered.
+    /// \brief pre-Initialize the state. Called once when the state is entered.
   public: virtual void preInitialize();
 
-  /// \brief Update the state.
+    /// \brief unInitialize the state. Called once when leaving current state and switching to another.
+  public: virtual void unInitialize();
+
+    /// \brief Update the state.
   public: virtual void Update();
 
-  /// \brief Get the name of the state.
-  /// \brief Returns the name of the state.
+    /// \brief Returns the name of the state.
   public: std::string GetName();
 
-  /// \brief Name of the state.
+    /// \brief Returns true if an agent contacts ball since Initialize()
+  public: bool hasBallContactOccurred();
+
+    /// \brief Used to determine if ball contact has occurred since Initialize()
+  public: int ballContactHistorySize;
+
+    /// \brief Name of the state.
   public: std::string name;
-  
-  /// \brief Pointer to access full game information.
-  protected: GameState *gameState;
-  
-  /// \brief Time when we entered this game mode.
-  protected: double initTime;
 
-  /// \brief Has initialized
-  protected: bool hasInitialized;
+    /// \brief Pointer to access full game information.
+  public: GameState *gameState;
 
-  // /// \brief Pause before calling initialized
-  // protected: double initPauseTime;
-  
-  /// \brief Time elapsed since we entered this game mode.
-  protected: double getElapsedTime();
+    /// \brief Time when we entered this game mode.
+  public: double initTime;
+
+    /// \brief Has initialized
+  public: bool hasInitialized;
+
+    /// \brief Whether this is the state that gameState->currentState is set to or not
+  public: bool isActive;
+
+    /// \brief Pointer to previous state
+  public: State *prevState;
+
+    /// \brief Position of ball when we enter this state
+  public: ignition::math::Vector3<double> initBallPos;
+
+    /// \brief Time elapsed since we entered this game mode.
+  public: double getElapsedTime();
 };
 
 #endif

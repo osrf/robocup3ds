@@ -21,24 +21,30 @@
 
 /////////////////////////////////////////////////
 PlayState::PlayState(const std::string &_name, GameState *_gameState)
-	: State(_name, _gameState)
+  : State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
 void PlayState::Initialize()
 {
-	State::Initialize();
-	gameState->ReleasePlayers();
+  gameState->ReleasePlayers();
+  State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void PlayState::Update()
 {
-	if (not hasInitialized) {
-		Initialize();
-	}
-	gameState->CheckCanScore();
-	gameState->CheckBall();
-	State::Update();
+  if (not hasInitialized) {
+    Initialize();
+  }
+  gameState->CheckCanScore();
+  
+  gameState->CheckTiming(); //highest priority
+  gameState->CheckDoubleTouch();
+  gameState->CheckBall(); //lowest priority
+
+  gameState->CheckIllegalDefense();
+  gameState->CheckCrowding();
+  gameState->CheckImmobility();
 }

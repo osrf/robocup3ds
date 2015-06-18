@@ -89,6 +89,7 @@ class GameState
         /// \brief Can score goal or not
       public: bool canScore;
 
+        /// \brief Constructor for Team object
       public: Team(std::string _name, Side _side, int _score, int playerLimit):
           name(_name),
           side(_side),
@@ -133,6 +134,7 @@ class GameState
           return uNum == 1;
         }
 
+        /// \brief Constructor for Agent object
       public: Agent(int _uNum, Team *_team):
           uNum(_uNum),
           team(_team)
@@ -147,22 +149,27 @@ class GameState
         }
     };
 
-    /// \brief Container for storing ball contact information
+    /// \brief Class for storing ball contact information
   public: class BallContact
     {
       public:
+        /// \brief Unum of agent who touched ball
         int uNum;
+        /// \brief Side of agent who touched ball
         Team::Side side;
-        double lastContactTime;
+        /// \brief Time when agent stopped contacting the ball (if contact is longer than an instant)
+        double contactTime;
+        /// \brief Position where agent contacted ball
         ignition::math::Vector3<double> contactPos;
-        Agent *agent;
+        /// \brief Pointer to team of agent who touched ball
+        std::string teamName;
 
-        BallContact(int _uNum, Team::Side _side, double _lastContactTime, ignition::math::Vector3<double> _contactPos, Agent *_agent):
+        /// \brief Constructor for Ball Contact object
+        BallContact(int _uNum, Team::Side _side, double _contactTime, ignition::math::Vector3<double> _contactPos):
           uNum(_uNum),
           side(_side),
-          lastContactTime(_lastContactTime),
-          contactPos(_contactPos),
-          agent(_agent)
+          contactTime(_contactTime),
+          contactPos(_contactPos)
         {}
     };
 
@@ -204,6 +211,7 @@ class GameState
     static const std::string FreeKickRight;
 
     // values for various times
+    static const double SecondsFullGame;
     static const double SecondsEachHalf;
     static const double SecondsGoalPause;
     static const double SecondsKickInPause;
@@ -231,9 +239,11 @@ class GameState
 
 /// \brief Enum for which half it is
   public: enum Half {FIRST_HALF, SECOND_HALF};
+/// \brief Whether currentState has changed in the current update cycle or not
+  public: bool hasCurrentStateChanged;
 /// \brief History of ball contacts;
-  public: std::vector<BallContact *> ballContactHistory;
-/// \brief The uNum of the agent who initially touches the ball
+  public: std::vector<boost::shared_ptr<BallContact> > ballContactHistory;
+/// \brief Pointer to the ball contact that causes the game to transition from kick off to play on
   public: BallContact *touchBallKickoff;
 /// \brief All the teams.
   public: std::vector<Team *> teams;
@@ -241,7 +251,7 @@ class GameState
   private: ignition::math::Vector3<double> ballPos;
 /// \brief Angular velocity of soccer ball.
   public: bool updateBallPose;
-/// \brief Flag whether to update ball position in world to match gamestate.
+/// \brief Flag whether to update ball position in world to match game state.
   private: ignition::math::Vector3<double> ballAngVel;
 /// \brief Linear velocity of soccer ball.
   private: ignition::math::Vector3<double> ballVel;
@@ -249,7 +259,7 @@ class GameState
   private: double gameTime;
 /// \brief Game time during previous cycle.
   private: double prevCycleGameTime;
-/// \brief Elapsed game time;
+/// \brief Time when half starts (elapsed game time is essentially gameTime - startGameTime)
   private: double startGameTime;
 /// \brief Pointer to the current game state.
   private: State *currentState;
@@ -274,49 +284,6 @@ class GameState
 /// \param[in] _info Information used in the update event.
   public: void Update();
 
-/// \brief Get the elapsed time since beginning of half.
-  public: double getElapsedGameTime()
-    {
-      return gameTime - startGameTime;
-    }
-
-    /// \brief Get the elapsed time since last cycle.
-  public: double getElapsedCycleGameTime()
-    {
-      return gameTime - prevCycleGameTime;
-    }
-
-/// \brief Get the game time.
-  public: void setGameTime(double _gameTime)
-    {
-      gameTime = _gameTime;
-    }
-
-/// \brief Set the game time.
-  public: double getGameTime()
-    {
-      return gameTime;
-    }
-
-/// \brief Get the game time when play starts
-  public: double getStartGameTime()
-    {
-      return startGameTime;
-    }
-/// \brief Set the game time when play starts
-  public: void setStartGameTime(double _startGameTime)
-    {
-      startGameTime = _startGameTime;
-    }
-
-/// \brief Get the game's half.
-/// \returns if the game is in the first half or if is in the second.
-  public: Half GetHalf();
-
-/// \brief Set the game half.
-/// \param[in] _newHalf 1 for first half or 2 for second half.
-  public: void SetHalf(Half _newHalf);
-
 /// \brief During some of the states of the game the players are not allowed
 /// to move (for example during kickoff). This method releases the players
 /// when it's time to move the robots (for example in play mode).
@@ -328,7 +295,8 @@ class GameState
   public: void StopPlayers();
 
 /// \brief Set the current game state. If the new state is the same than
-/// the current one, the operation does not have any effect.
+/// the current one, the operation does not have any effect. New states have
+/// their ball contact histories cleared.
 /// \param [in] _newState
   public: void SetCurrent(State *_newState);
 
@@ -340,7 +308,11 @@ class GameState
 /// none of the teams are allowed to be within the free kick radius.
   public: void DropBallImpl(const Team::Side _teamAllowed);
 
-    /// \brief Check whether scoring conditions are met.
+
+    /// \brief Checks whether the double touching rules are violated
+  public: void CheckDoubleTouch();
+
+    /// \brief Check whether scoring conditions are met (another agent on same side that is not the kick off agent has touched the ball).
   public: void CheckCanScore();
 
 /// \brief Set the agent's position only
@@ -350,7 +322,7 @@ class GameState
   public: void MoveAgent(Agent &agent, const double x, const double y, const double yaw);
 
 /// \brief Set the agent's position and yaw noisily (beaming the agent)
-  public: void MoveAgentNoise(Agent &agent, const double x, const double y, const double yaw);
+  public: void MoveAgentNoisy(Agent &agent, const double x, const double y, const double yaw);
 
 /// \brief Set the agent's position and orientation
   public: void MoveAgent(Agent &agent, const ignition::math::Vector3<double> &pos, const ignition::math::Quaternion<double> &rot);
@@ -363,6 +335,9 @@ class GameState
 
 /// \brief Check the ball's position looking for goals or out of bounds.
   public: void CheckBall();
+
+/// \brief Checks that during goal kick, no members of opposing team are inside penalty area
+  public: void CheckGoalKickIllegalDefense(Team::Side _teamAllowed);
 
 /// \brief Check that no more than 3 players are in penalty area.
   public: void CheckIllegalDefense();
@@ -422,8 +397,99 @@ class GameState
 /// \brief Beam the agent if the play mode allows it
   public: bool beamAgent(int uNum, std::string teamName, double x, double y, double rot);
 
-/// \brief Checks whether a player has recently double touched ball.
-  public: bool doubleTouchBall();
+    /*
+    Getter and setter methods
+    */
+
+/// \brief Get the game's half.
+/// \returns if the game is in the first half or if is in the second.
+  public: Half GetHalf()
+    {
+      return half;
+    };
+
+/// \brief Set the game half.
+/// \param[in] _newHalf 1 for first half or 2 for second half.
+  public: void SetHalf(Half _newHalf)
+    {
+      half = _newHalf;
+    };
+
+/// \brief Get the elapsed time since beginning of half.
+  public: double getElapsedGameTime()
+    {
+      return gameTime - startGameTime;
+    }
+
+/// \brief Get the elapsed time since last cycle.
+  public: double getElapsedCycleGameTime()
+    {
+      return gameTime - prevCycleGameTime;
+    }
+
+/// \brief Get the game time.
+  public: void setGameTime(double _gameTime)
+    {
+      gameTime = _gameTime;
+    }
+
+/// \brief Set the game time.
+  public: double getGameTime()
+    {
+      return gameTime;
+    }
+
+/// \brief Get the game time when play starts
+  public: double getStartGameTime()
+    {
+      return startGameTime;
+    }
+/// \brief Set the game time when play starts
+  public: void setStartGameTime(double _startGameTime)
+    {
+      startGameTime = _startGameTime;
+    }
+
+/// \brief Set the cycle counter
+  public: void setCycleCounter(int _cycleCounter)
+    {
+      cycleCounter = _cycleCounter;
+      if (GameState::useCounterForGameTime) {
+        gameTime = 0.02 * cycleCounter;
+      }
+    }
+
+/// \brief Get the cycle counter
+  public: int getCycleCounter()
+    {
+      return cycleCounter;
+    }
+
+/// \brief Get the current state
+  public: State *getCurrentState()
+    {
+      return currentState;
+    }
+
+/// \brief Get the team who last touched the ball.
+  public: Team::Side *getLastSideTouchedBall()
+    {
+      if (getLastBallContact() != NULL) {
+        return &(getLastBallContact()->side);
+      } else {
+        return NULL;
+      }
+    }
+
+    /// \brief Get the player who last touched the ball.
+  public: BallContact *getLastBallContact()
+    {
+      if (ballContactHistory.size() > 0) {
+        return ballContactHistory.at(ballContactHistory.size() - 1).get();
+      } else {
+        return NULL;
+      }
+    }
 
 // /// \brief Set the beamHeight
 //   public: void setBeamHeight(double x)
@@ -459,36 +525,6 @@ class GameState
 //     {
 //       return penaltyBoxLimit;
 //     }
-
-/// \brief Get the team who last touched the ball.
-  public: Team *getLastTeamTouchedBall()
-    {
-      if (getLastAgentTouchedBall() != NULL) {
-        return getLastAgentTouchedBall()->team;
-      } else {
-        return NULL;
-      }
-    }
-
-/// \brief Get the player who last touched the ball.
-  public: Agent *getLastAgentTouchedBall()
-    {
-      if (ballContactHistory.size() > 1) {
-        return ballContactHistory.at(ballContactHistory.size() - 1)->agent;
-      } else {
-        return NULL;
-      }
-    }
-
-    /// \brief Get the player who last touched the ball.
-  public: BallContact *getLastBallContact()
-    {
-      if (ballContactHistory.size() > 1) {
-        return ballContactHistory.at(ballContactHistory.size() - 1);
-      } else {
-        return NULL;
-      }
-    }
 
 };
 

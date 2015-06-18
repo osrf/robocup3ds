@@ -28,32 +28,53 @@ State::State(const std::string &_name,
   : name(_name), gameState(_gameState)
 {
   hasInitialized = false;
+  isActive = false;
   initTime = -1;
+  ballContactHistorySize = -1;
+  prevState = NULL;
+  initBallPos.Set(-999,-999,-999);
+}
+
+/////////////////////////////////////////////////
+bool State::hasBallContactOccurred()
+{
+  return gameState->ballContactHistory.size() > 0 and static_cast<int>(gameState->ballContactHistory.size()) > ballContactHistorySize;
 }
 
 /////////////////////////////////////////////////
 void State::Initialize()
 {
-  // std::cout << "New state: " << name << std::endl;
-  gameState->clearBallContactHistory();
-
+  ballContactHistorySize = static_cast<int>(gameState->ballContactHistory.size());
   gameState->setBallVel(math::Vector3<double>(0, 0, 0));
   gameState->setBallAngVel(math::Vector3<double>(0, 0, 0));
-
   hasInitialized = true;
 }
 
 /////////////////////////////////////////////////
 void State::preInitialize()
 {
-  initTime = gameState->getElapsedGameTime();
+  initBallPos = gameState->GetBall();
+  initTime = gameState->getGameTime();
+  isActive = true;
+}
+
+/////////////////////////////////////////////////
+void State::unInitialize()
+{
+  ballContactHistorySize = -1;
+  initTime = -1;
   hasInitialized = false;
+  isActive = false;
+  initBallPos.Set(-999,-999,-999);
 }
 
 /////////////////////////////////////////////////
 void State::Update()
 {
-  gameState->CheckTiming();
+  gameState->CheckTiming(); //highest priority
+  gameState->CheckDoubleTouch(); //lowest priority
+
+  gameState->CheckCanScore();
   gameState->CheckIllegalDefense();
   gameState->CheckCrowding();
   gameState->CheckImmobility();
@@ -62,7 +83,7 @@ void State::Update()
 /////////////////////////////////////////////////
 double State::getElapsedTime()
 {
-  return gameState->getElapsedGameTime() - initTime;
+  return gameState->getGameTime() - initTime;
 }
 
 /////////////////////////////////////////////////

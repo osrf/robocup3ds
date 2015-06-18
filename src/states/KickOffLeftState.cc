@@ -16,6 +16,7 @@
 */
 
 #include <string>
+#include <boost/scoped_ptr.hpp>
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/KickOffLeftState.hh"
@@ -33,43 +34,26 @@ KickOffLeftState::KickOffLeftState(const std::string &_name,
 /////////////////////////////////////////////////
 void KickOffLeftState::Initialize()
 {
-  State::Initialize();
-
   gameState->touchBallKickoff = NULL;
+  gameState->ballContactHistory.clear();
+  // boost::shared_ptr<GameState::BallContact> initContact(new GameState::BallContact(-1, GameState::Team::LEFT, gameState->getGameTime(), SoccerField::CenterOfField));
+  // gameState->ballContactHistory.push_back(initContact);
   for (size_t i = 0; i < gameState->teams.size(); i++) {
     GameState::Team *team = gameState->teams.at(i);
     team->canScore = false;
   }
   gameState->MoveBallToCenter();
   gameState->ReleasePlayers();
-
-  // std::vector<math::Pose3<double> > initPoses;
-  // for (size_t i = 0; i < gameState->teams.size(); ++i)
-  // {
-  //   GameState::Team *currTeam = gameState->teams.at(i);
-  //   // Left team
-  //   if (currTeam->side == GameState::Team::LEFT)
-  //   {
-  //     initPoses = SoccerField::leftKickOffPose;
-  //   }
-  //   // Right team
-  //   else
-  //   {
-  //     initPoses = SoccerField::rightInitPose;
-  //   }
-
-  //   for (size_t j = 0; j < currTeam->members.size(); ++j)
-  //   {
-  //     GameState::Agent& agent = currTeam->members.at(j);
-  //     gameState->MoveAgent(agent, initPoses.at(j).Pos(), agent.rot = initPoses.at(j).Rot());
-  //   }
-
-  // }
+  State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void KickOffLeftState::Update()
 {
+  if (not hasInitialized) {
+    Initialize();
+  }
+
   //check for agents that violate sides
   for (size_t i = 0; i < gameState->teams.size(); ++i) {
     GameState::Team *currTeam = gameState->teams.at(i);
@@ -91,16 +75,35 @@ void KickOffLeftState::Update()
 
   State::Update();
 
-  // Check for double touching, if found, award kickoff to opponents
-  if (gameState->doubleTouchBall()) {
-    gameState->SetCurrent(gameState->kickOffRightState.get());
-  } else
-    // After some time, go to play mode.
-    if (getElapsedTime() > GameState::SecondsKickOff) {
-      gameState->DropBallImpl(GameState::Team::NEITHER);
-      gameState->SetCurrent(gameState->playState.get());
-    } else if (gameState->getLastTeamTouchedBall() != NULL) {
-      gameState->touchBallKickoff = gameState->getLastBallContact();
-      gameState->SetCurrent(gameState->playState.get());
-    }
+  // After some time, go to play mode.
+  if (getElapsedTime() >= GameState::SecondsKickOff) {
+    gameState->DropBallImpl(GameState::Team::NEITHER);
+    gameState->SetCurrent(gameState->playState.get());
+  } else if (hasBallContactOccurred()) {
+    gameState->touchBallKickoff = gameState->getLastBallContact();
+    gameState->SetCurrent(gameState->playState.get());
+  }
 }
+
+// std::vector<math::Pose3<double> > initPoses;
+// for (size_t i = 0; i < gameState->teams.size(); ++i)
+// {
+//   GameState::Team *currTeam = gameState->teams.at(i);
+//   // Left team
+//   if (currTeam->side == GameState::Team::LEFT)
+//   {
+//     initPoses = SoccerField::leftKickOffPose;
+//   }
+//   // Right team
+//   else
+//   {
+//     initPoses = SoccerField::rightInitPose;
+//   }
+
+//   for (size_t j = 0; j < currTeam->members.size(); ++j)
+//   {
+//     GameState::Agent& agent = currTeam->members.at(j);
+//     gameState->MoveAgent(agent, initPoses.at(j).Pos(), agent.rot = initPoses.at(j).Rot());
+//   }
+
+// }

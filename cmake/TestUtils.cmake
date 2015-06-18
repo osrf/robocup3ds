@@ -1,5 +1,7 @@
 #################################################
 macro (robocup3ds_build_tests)
+  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g" )
+
   # Build all the tests
   foreach(GTEST_SOURCE_file ${ARGN})
     string(REGEX REPLACE ".cc" "" BINARY_NAME ${GTEST_SOURCE_file})
@@ -14,6 +16,7 @@ macro (robocup3ds_build_tests)
       gtest gtest_main
       )
 
+    # message(${GAZEBO_LIBRARIES})
     target_link_libraries(${BINARY_NAME}
       libgtest.a
       libgtest_main.a
@@ -29,7 +32,6 @@ macro (robocup3ds_build_tests)
       gazebo_common
       ${PROJECT_NAME_LOWER}Plugin
     )
-
     add_test(${BINARY_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${BINARY_NAME}
 	--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${BINARY_NAME}.xml)
 
