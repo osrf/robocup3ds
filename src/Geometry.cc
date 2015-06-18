@@ -21,7 +21,7 @@ using namespace ignition;
 #define G_SQUARE(a) ((a) * (a))
 #define DBL_EPSILON 2.2204460492503131e-16
 
-bool IntersectionCircunferenceLine(
+bool Geometry::IntersectionCircunferenceLine(
   const math::Vector3<double> &_v, const math::Vector3<double> &p_c, double r,
   math::Vector3<double> &int1, math::Vector3<double> &int2)
 {
