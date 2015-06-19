@@ -19,7 +19,7 @@
 #define _GAZEBO_KICKOFF_RIGHT_STATE_HH_
 
 #include <string>
-#include "robocup3ds/GameState.hh" 
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/State.hh"
 
 /// \class KickOffRightState KickOffRightState.hh
@@ -35,7 +35,6 @@ class KickOffRightState : public State
 
   // Documentation inherited
   public: virtual void Update();
-
 };
 
 #endif

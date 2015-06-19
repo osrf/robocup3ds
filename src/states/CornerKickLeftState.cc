@@ -42,7 +42,9 @@ void CornerKickLeftState::Update()
 {
   if (getElapsedTime() < GameState::SecondsKickInPause) {
     return;
-  } else if (!hasInitialized) {
+  }
+  else if (!hasInitialized)
+  {
     Initialize();
   }
 
@@ -54,7 +56,9 @@ void CornerKickLeftState::Update()
   if (getElapsedTime() >= GameState::SecondsKickIn) {
     gameState->DropBallImpl(GameState::Team::NEITHER);
     gameState->SetCurrent(gameState->playState.get());
-  } else if (hasBallContactOccurred()) {
+  }
+  else if (hasBallContactOccurred())
+  {
     gameState->SetCurrent(gameState->playState.get());
   }
 }

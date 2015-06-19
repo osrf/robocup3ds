@@ -25,54 +25,51 @@ using namespace ignition;
 /////////////////////////////////////////////////
 State::State(const std::string &_name,
              GameState *_gameState)
-  : name(_name), gameState(_gameState)
-{
+  : name(_name), gameState(_gameState) {
   hasInitialized = false;
   isActive = false;
   initTime = -1;
   ballContactHistorySize = -1;
   prevState = NULL;
-  initBallPos.Set(-999,-999,-999);
+  initBallPos.Set(-999, -999, -999);
 }
 
 /////////////////////////////////////////////////
-bool State::hasBallContactOccurred()
-{
-  return gameState->ballContactHistory.size() > 0 and static_cast<int>(gameState->ballContactHistory.size()) > ballContactHistorySize;
+bool State::hasBallContactOccurred() {
+  return gameState->ballContactHistory.size() > 0
+  && static_cast<int>(gameState->ballContactHistory.size())
+  > ballContactHistorySize;
 }
 
 /////////////////////////////////////////////////
-void State::Initialize()
-{
-  ballContactHistorySize = static_cast<int>(gameState->ballContactHistory.size());
+void State::Initialize() {
+  ballContactHistorySize =
+  static_cast<int>(gameState->ballContactHistory.size());
   gameState->setBallVel(math::Vector3<double>(0, 0, 0));
   gameState->setBallAngVel(math::Vector3<double>(0, 0, 0));
   hasInitialized = true;
 }
 
 /////////////////////////////////////////////////
-void State::preInitialize()
-{
+void State::preInitialize() {
   initBallPos = gameState->GetBall();
   initTime = gameState->getGameTime();
   isActive = true;
 }
 
 /////////////////////////////////////////////////
-void State::unInitialize()
-{
+void State::unInitialize() {
   ballContactHistorySize = -1;
   initTime = -1;
   hasInitialized = false;
   isActive = false;
-  initBallPos.Set(-999,-999,-999);
+  initBallPos.Set(-999, -999, -999);
 }
 
 /////////////////////////////////////////////////
-void State::Update()
-{
-  gameState->CheckTiming(); //highest priority
-  gameState->CheckDoubleTouch(); //lowest priority
+void State::Update() {
+  gameState->CheckTiming();  // highest priority
+  gameState->CheckDoubleTouch();  // lowest priority
 
   gameState->CheckCanScore();
   gameState->CheckIllegalDefense();
@@ -81,13 +78,11 @@ void State::Update()
 }
 
 /////////////////////////////////////////////////
-double State::getElapsedTime()
-{
+double State::getElapsedTime() {
   return gameState->getGameTime() - initTime;
 }
 
 /////////////////////////////////////////////////
-std::string State::GetName()
-{
+std::string State::GetName() {
   return name;
 }

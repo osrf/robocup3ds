@@ -24,11 +24,10 @@
 
 /// \class KickInLeftState KickInLeftState.hh
 /// \brief State that handles the left kick in state.
-class KickInLeftState : public State
-{
+class KickInLeftState : public State {
   /// Documentation inherited.
   public: KickInLeftState(const std::string &_name,
-                          GameState *_gameState);
+                  GameState *_gameState);
 
   /// Documentation inherited.
   public: virtual void Initialize();

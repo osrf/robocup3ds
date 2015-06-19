@@ -24,13 +24,12 @@
 
 /// \class GoalLeftState GoalLeftState.hh
 /// \brief State that handles the left goal state.
-class GoalLeftState : public State
-{
-	private: bool validGoal;
+class GoalLeftState : public State {
+  private: bool validGoal;
 
   /// Documentation inherited.
   public: GoalLeftState(const std::string &_name,
-                        GameState *_gameState);
+                GameState *_gameState);
 
   /// Documentation inherited.
   public: virtual void Initialize();

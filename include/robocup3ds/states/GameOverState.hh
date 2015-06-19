@@ -26,15 +26,15 @@
 /// \brief State that handles the gameover.
 class GameOverState : public State
 {
-  /// Documentation inherited.
-public: GameOverState(const std::string &_name,
-                        GameState *_gameState);
+    /// Documentation inherited.
+  public: GameOverState(const std::string &_name,
+                          GameState *_gameState);
 
-  /// Documentation inherited.
-public: virtual void Initialize();
+    /// Documentation inherited.
+  public: virtual void Initialize();
 
-  // Documentation inherited
-public: virtual void Update();
+    // Documentation inherited
+  public: virtual void Update();
 };
 
 #endif

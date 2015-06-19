@@ -37,7 +37,6 @@ class BeforeKickOffState : public State
 
   // Documentation inherited
   public: virtual void Update();
-
 };
 
 #endif

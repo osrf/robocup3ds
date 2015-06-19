@@ -20,8 +20,7 @@
 
 #include <ignition/math.hh>
 
-namespace SoccerField
-{
+namespace SoccerField {
   // Field dimensions.
   static const double CenterCircleRadius = 2;
   static const double FieldWidth = 30.0;
@@ -38,32 +37,46 @@ namespace SoccerField
   static const double PenaltyBoxWidth = 3.9;
   static const double HalfPenaltyBoxWidth = PenaltyBoxWidth * 0.5;
   static const double PenaltyBoxDepth = 1.8;
-  static const ignition::math::Vector3<double> GoalCenterLeft(-HalfFieldWidth, 0, 0);
-  static const ignition::math::Vector3<double> GoalCenterRight(HalfFieldWidth, 0, 0);
-  static const ignition::math::Vector3<double> BallCenterPosition(0, 0, BallRadius);
-  static const ignition::math::Vector3<double> CenterOfField(0, 0, 0);
+  static const ignition::math::Vector3<double>
+  GoalCenterLeft(-HalfFieldWidth, 0, 0);
+  static const ignition::math::Vector3<double>
+  GoalCenterRight(HalfFieldWidth, 0, 0);
+  static const ignition::math::Vector3<double>
+  BallCenterPosition(0, 0, BallRadius);
+  static const ignition::math::Vector3<double>
+  CenterOfField(0, 0, 0);
 
   static const ignition::math::Box GoalBoxLeft(
-    ignition::math::Vector3<double>(-(GoalDepth + HalfFieldWidth), -HalfGoalWidth, -BallRadius),
-    ignition::math::Vector3<double>(-HalfFieldWidth, HalfGoalWidth, GoalHeight));
+    ignition::math::Vector3<double>(-(GoalDepth + HalfFieldWidth),
+                                    -HalfGoalWidth, -BallRadius),
+    ignition::math::Vector3<double>
+    (-HalfFieldWidth, HalfGoalWidth, GoalHeight));
 
   static const ignition::math::Box GoalBoxRight(
-    ignition::math::Vector3<double>(GoalDepth + HalfFieldWidth, -HalfGoalWidth, -BallRadius),
-    ignition::math::Vector3<double>(HalfFieldWidth, HalfGoalWidth, GoalHeight));
+    ignition::math::Vector3<double>(GoalDepth + HalfFieldWidth,
+                                    -HalfGoalWidth, -BallRadius),
+    ignition::math::Vector3<double>
+    (HalfFieldWidth, HalfGoalWidth, GoalHeight));
 
   static const ignition::math::Box PenaltyBoxLeft(
-    ignition::math::Vector3<double>(-HalfFieldWidth, -HalfPenaltyBoxWidth, -10),
-    ignition::math::Vector3<double>(-HalfFieldWidth + PenaltyBoxDepth, HalfPenaltyBoxWidth, 10)
-  );
+    ignition::math::Vector3<double>
+    (-HalfFieldWidth, -HalfPenaltyBoxWidth, -10),
+    ignition::math::Vector3<double>
+    (-HalfFieldWidth + PenaltyBoxDepth, HalfPenaltyBoxWidth, 10));
 
   static const ignition::math::Box PenaltyBoxRight(
-    ignition::math::Vector3<double>(HalfFieldWidth, -HalfPenaltyBoxWidth, -10),
-    ignition::math::Vector3<double>(HalfFieldWidth - PenaltyBoxDepth, HalfPenaltyBoxWidth, 10)
-  );
+    ignition::math::Vector3<double>
+    (HalfFieldWidth, -HalfPenaltyBoxWidth, -10),
+    ignition::math::Vector3<double>
+    (HalfFieldWidth - PenaltyBoxDepth, HalfPenaltyBoxWidth, 10));
 
 
-  static const ignition::math::Box FieldLeft(ignition::math::Vector3<double>(-SoccerField::HalfFieldHeight, -SoccerField::HalfFieldWidth, 0), ignition::math::Vector3<double>(0, SoccerField::HalfFieldWidth, 0));
-  static const ignition::math::Box FieldRight(ignition::math::Vector3<double>(0, -SoccerField::HalfFieldWidth, 0), ignition::math::Vector3<double>(SoccerField::HalfFieldHeight, SoccerField::HalfFieldWidth, 0));
+  static const ignition::math::Box FieldLeft(ignition::math::Vector3<double>
+    (-SoccerField::HalfFieldHeight, -SoccerField::HalfFieldWidth, 0),
+     ignition::math::Vector3<double>(0, SoccerField::HalfFieldWidth, 0));
+  static const ignition::math::Box FieldRight(ignition::math::Vector3<double>
+    (0, -SoccerField::HalfFieldWidth, 0), ignition::math::Vector3<double>
+    (SoccerField::HalfFieldHeight, SoccerField::HalfFieldWidth, 0));
 
   // static std::vector<ignition::math::Pose3<double> > leftKickOffPose{
   //   ignition::math::Pose3<double>(-0.2, -0.3, NaoPoseHeight, 0, 0, 0.5),
@@ -76,7 +89,8 @@ namespace SoccerField
   //   ignition::math::Pose3<double>(-10, 1.5, NaoPoseHeight, 0, 0, 0),
   //   ignition::math::Pose3<double>(-10.0, -1.5, NaoPoseHeight, 0, 0, 0),
   //   ignition::math::Pose3<double>(-10.0, -3.5, NaoPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-SoccerField::HalfFieldHeight + 0.5, 0, NaoPoseHeight, 0, 0, 0)};
+  //   ignition::math::Pose3<double>(-SoccerField::HalfFieldHeight + 0.5, 0,
+  //   NaoPoseHeight, 0, 0, 0)};
 
   // static std::vector<ignition::math::Pose3<double> > rightKickOffPose{
   //   ignition::math::Pose3<double>(0.5, 0, NaoPoseHeight, 0, 0, 3.14),
@@ -89,7 +103,8 @@ namespace SoccerField
   //   ignition::math::Pose3<double>(6.0, -5.5, NaoPoseHeight, 0, 0, 3.14),
   //   ignition::math::Pose3<double>(6.0, 0, NaoPoseHeight, 0, 0, 3.14),
   //   ignition::math::Pose3<double>(6.0, 5.5, NaoPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(SoccerField::HalfFieldHeight - 0.5, 0, NaoPoseHeight, 0, 0, 3.14)};
+  //   ignition::math::Pose3<double>(SoccerField::HalfFieldHeight - 0.5, 0,
+  //   NaoPoseHeight, 0, 0, 3.14)};
 
   // static std::vector<ignition::math::Pose3<double> > leftInitPose{
   //   ignition::math::Pose3<double>(-2.5, 0, NaoPoseHeight, 0, 0, 0),
@@ -102,7 +117,8 @@ namespace SoccerField
   //   ignition::math::Pose3<double>(-7.5, -5.0, NaoPoseHeight, 0, 0, 0),
   //   ignition::math::Pose3<double>(-7.5, 0, NaoPoseHeight, 0, 0, 0),
   //   ignition::math::Pose3<double>(-7.5, 5.0, NaoPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-SoccerField::HalfFieldHeight + 0.5, 0, NaoPoseHeight, 0, 0, 0)};
+  //   ignition::math::Pose3<double>(-SoccerField::HalfFieldHeight + 0.5, 0,
+  //    NaoPoseHeight, 0, 0, 0)};
 
   // static std::vector<ignition::math::Pose3<double> > rightInitPose{
   //   ignition::math::Pose3<double>(2.5, 0, NaoPoseHeight, 0, 0, 3.14),
@@ -115,7 +131,8 @@ namespace SoccerField
   //   ignition::math::Pose3<double>(7.5, -5.0, NaoPoseHeight, 0, 0, 3.14),
   //   ignition::math::Pose3<double>(7.5, 0, NaoPoseHeight, 0, 0, 3.14),
   //   ignition::math::Pose3<double>(7.5, 5.0, NaoPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(SoccerField::HalfFieldHeight - 0.5, 0, NaoPoseHeight, 0, 0, 3.14)};
+  //   ignition::math::Pose3<double>(SoccerField::HalfFieldHeight - 0.5, 0,
+  //   NaoPoseHeight, 0, 0, 3.14)};
 }
 
 #endif

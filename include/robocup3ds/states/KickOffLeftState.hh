@@ -35,7 +35,6 @@ class KickOffLeftState : public State
 
   // Documentation inherited
   public: virtual void Update();
-
 };
 
 #endif

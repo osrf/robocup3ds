@@ -43,7 +43,9 @@ void GoalKickRightState::Update()
 {
   if (getElapsedTime() < GameState::SecondsKickInPause) {
     return;
-  } else if (!hasInitialized) {
+  }
+  else if (!hasInitialized)
+  {
     Initialize();
   }
 
@@ -55,7 +57,9 @@ void GoalKickRightState::Update()
   if (getElapsedTime() >= GameState::SecondsKickIn) {
     gameState->DropBallImpl(GameState::Team::NEITHER);
     gameState->SetCurrent(gameState->playState.get());
-  } else if (!SoccerField::PenaltyBoxRight.Contains(gameState->GetBall())) {
+  }
+  else if (!SoccerField::PenaltyBoxRight.Contains(gameState->GetBall()))
+  {
     gameState->SetCurrent(gameState->playState.get());
   }
 }

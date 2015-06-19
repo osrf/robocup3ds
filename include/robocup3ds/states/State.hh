@@ -32,13 +32,15 @@ class State
     /// \param[out] _gameState Reference to the GameState.
   public: State(const std::string &_name, GameState *_gameState);
 
-    /// \brief Initialize the state. Called once after a pause duration after entering state.
+    /// \brief Initialize the state. Called once after a pause duration after
+    /// entering state.
   public: virtual void Initialize();
 
     /// \brief pre-Initialize the state. Called once when the state is entered.
   public: virtual void preInitialize();
 
-    /// \brief unInitialize the state. Called once when leaving current state and switching to another.
+    /// \brief unInitialize the state. Called once when leaving current state
+    /// and switching to another.
   public: virtual void unInitialize();
 
     /// \brief Update the state.
@@ -65,7 +67,8 @@ class State
     /// \brief Has initialized
   public: bool hasInitialized;
 
-    /// \brief Whether this is the state that gameState->currentState is set to or not
+    /// \brief Whether this is the state that gameState->currentState is
+    /// set to or not
   public: bool isActive;
 
     /// \brief Pointer to previous state

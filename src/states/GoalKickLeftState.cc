@@ -25,13 +25,11 @@ using namespace ignition;
 /////////////////////////////////////////////////
 GoalKickLeftState::GoalKickLeftState(const std::string &_name,
                                      GameState *_gameState)
-  : State(_name, _gameState)
-{
+  : State(_name, _gameState) {
 }
 
 /////////////////////////////////////////////////
-void GoalKickLeftState::Initialize()
-{
+void GoalKickLeftState::Initialize() {
   // Move the ball.
   gameState->MoveBall(initBallPos);
   gameState->MoveBallForGoalKick();
@@ -39,23 +37,26 @@ void GoalKickLeftState::Initialize()
 }
 
 /////////////////////////////////////////////////
-void GoalKickLeftState::Update()
-{
+void GoalKickLeftState::Update() {
   if (getElapsedTime() < GameState::SecondsKickInPause) {
     return;
-  } else if (!hasInitialized) {
+  }
+  else if (!hasInitialized)
+  {
     Initialize();
   }
 
   gameState->DropBallImpl(GameState::Team::LEFT);
   gameState->CheckGoalKickIllegalDefense(GameState::Team::LEFT);
   State::Update();
-  
+
   // After some time, go to play mode.
   if (getElapsedTime() >= GameState::SecondsKickIn) {
     gameState->DropBallImpl(GameState::Team::NEITHER);
     gameState->SetCurrent(gameState->playState.get());
-  } else if (!SoccerField::PenaltyBoxLeft.Contains(gameState->GetBall())) {
+  }
+  else if (!SoccerField::PenaltyBoxLeft.Contains(gameState->GetBall()))
+  {
     gameState->SetCurrent(gameState->playState.get());
   }
 }

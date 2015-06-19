@@ -26,6 +26,7 @@ GoalRightState::GoalRightState(const std::string &_name,
                                GameState *_gameState)
   : State(_name, _gameState)
 {
+  validGoal = false;
 }
 
 /////////////////////////////////////////////////
@@ -39,7 +40,9 @@ void GoalRightState::Initialize()
     if (team->side == GameState::Team::RIGHT) {
       if (team->canScore) {
         team->score++;
-      } else {
+      }
+      else
+      {
         validGoal = false;
       }
     }
@@ -54,7 +57,7 @@ void GoalRightState::Update()
     Initialize();
   }
   // After some time, go to left team kick off mode.
-  if (getElapsedTime() >= GameState::SecondsGoalPause or !validGoal) {
+  if (getElapsedTime() >= GameState::SecondsGoalPause || !validGoal) {
     gameState->SetCurrent(gameState->kickOffLeftState.get());
   }
 }

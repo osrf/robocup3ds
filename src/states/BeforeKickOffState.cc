@@ -46,14 +46,16 @@ void BeforeKickOffState::Update()
     gameState->MoveBallToCenter();
   }
 
-  //resets getElapsedGameTime() back to zero
+  // resets getElapsedGameTime() back to zero
   gameState->setStartGameTime(gameState->getGameTime());
 
   // After some time, go to play mode.
   if (getElapsedTime() >= GameState::SecondsBeforeKickOff) {
     if (gameState->GetHalf() == GameState::FIRST_HALF) {
       gameState->SetCurrent(gameState->kickOffLeftState.get());
-    } else {
+    }
+    else
+    {
       gameState->SetCurrent(gameState->kickOffRightState.get());
     }
   }

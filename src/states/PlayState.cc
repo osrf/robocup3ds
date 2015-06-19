@@ -39,10 +39,10 @@ void PlayState::Update()
     Initialize();
   }
   gameState->CheckCanScore();
-  
-  gameState->CheckTiming(); //highest priority
+
+  gameState->CheckTiming();  // highest priority
   gameState->CheckDoubleTouch();
-  gameState->CheckBall(); //lowest priority
+  gameState->CheckBall();  // lowest priority
 
   gameState->CheckIllegalDefense();
   gameState->CheckCrowding();

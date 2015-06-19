@@ -41,7 +41,9 @@ void FreeKickRightState::Update()
 {
   if (getElapsedTime() < GameState::SecondsKickInPause) {
     return;
-  } else if (!hasInitialized) {
+  }
+  else if (!hasInitialized)
+  {
     Initialize();
   }
   // The left team is !allowed to be close to the ball.
@@ -52,7 +54,9 @@ void FreeKickRightState::Update()
   if (getElapsedTime() >= GameState::SecondsKickIn) {
     gameState->DropBallImpl(GameState::Team::NEITHER);
     gameState->SetCurrent(gameState->playState.get());
-  } else if (hasBallContactOccurred()) {
+  }
+  else if (hasBallContactOccurred())
+  {
     gameState->SetCurrent(gameState->playState.get());
   }
 }

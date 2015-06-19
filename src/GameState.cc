@@ -14,9 +14,12 @@
  * limitations under the License.
  *
 */
-#include <iostream>
 #include <boost/bind.hpp>
 #include <sdf/sdf.hh>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
 
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
@@ -74,8 +77,7 @@ GameState::GameState():
   goalLeftState(new GoalLeftState(GoalLeft, this)),
   goalRightState(new GoalRightState(GoalRight, this)),
   freeKickLeftState(new FreeKickLeftState(FreeKickLeft, this)),
-  freeKickRightState(new FreeKickRightState(FreeKickRight, this))
-{
+  freeKickRightState(new FreeKickRightState(FreeKickRight, this)) {
   half = FIRST_HALF;
   cycleCounter = 0;
   gameTime = prevCycleGameTime = startGameTime = 0.0;
@@ -84,30 +86,29 @@ GameState::GameState():
   touchBallKickoff = NULL;
   hasCurrentStateChanged = false;
   SetCurrent(beforeKickOffState.get());
-  teams.push_back(new Team("_unnamed_team", Team::LEFT, 0, GameState::playerLimit));
-  teams.push_back(new Team("_unnamed_team", Team::RIGHT, 0, GameState::playerLimit));
+  teams.push_back(new Team("_unnamed_team", Team::LEFT, 0,
+                           GameState::playerLimit));
+  teams.push_back(new Team("_unnamed_team", Team::RIGHT, 0,
+                           GameState::playerLimit));
 }
 
 /////////////////////////////////////////////////
-GameState::~GameState()
-{
-  //delete teams when shutting down game
+GameState::~GameState() {
+  // delete teams when shutting down game
   for (size_t i = 0; i < teams.size(); i++) {
     delete teams.at(i);
   }
-  //clear list of ball contacts
+  // clear list of ball contacts
   clearBallContactHistory();
 }
 
 /////////////////////////////////////////////////
-void GameState::clearBallContactHistory()
-{
+void GameState::clearBallContactHistory() {
   ballContactHistory.clear();
 }
 
 /////////////////////////////////////////////////
-void GameState::Update()
-{
+void GameState::Update() {
   cycleCounter++;
   if (GameState::useCounterForGameTime) {
     gameTime = cycleCounter * 0.02;
@@ -122,20 +123,17 @@ void GameState::Update()
 }
 
 /////////////////////////////////////////////////
-void GameState::ReleasePlayers()
-{
+void GameState::ReleasePlayers() {
   for (size_t i = 0; i < teams.size(); ++i) {
     for (size_t j = 0; j < teams.at(i)->members.size(); ++j) {
       Agent &agent = teams.at(i)->members.at(j);
       agent.status = Agent::RELEASED;
-
     }
   }
 }
 
 /////////////////////////////////////////////////
-void GameState::StopPlayers()
-{
+void GameState::StopPlayers() {
   for (size_t i = 0; i < teams.size(); ++i) {
     for (size_t j = 0; j < teams.at(i)->members.size(); ++j) {
       Agent &agent = teams.at(i)->members.at(j);
@@ -145,8 +143,7 @@ void GameState::StopPlayers()
 }
 
 ////////////////////////////////////////////////
-void GameState::SetCurrent(State *_newState)
-{
+void GameState::SetCurrent(State *_newState) {
   // Only update the state if _newState is different than the current state.
   if (currentState != _newState) {
     Initialize();
@@ -161,16 +158,15 @@ void GameState::SetCurrent(State *_newState)
 }
 
 /////////////////////////////////////////////////
-void GameState::DropBallImpl(const Team::Side _teamAllowed)
-{
-  //Check if the player is withing FREE_KICK distance.
+void GameState::DropBallImpl(const Team::Side _teamAllowed) {
+  // Check if the player is withing FREE_KICK distance.
   for (size_t i = 0; i < teams.size(); ++i) {
     Team *team = teams.at(i);
 
     if (team->side != _teamAllowed) {
       for (size_t j = 0; j < team->members.size(); ++j) {
         Agent &agent = team->members.at(j);
-        //Move the player if it's close enough to the ball.
+        // Move the player if it's close enough to the ball.
         if (agent.pos.Distance(ballPos) < GameState::dropBallRadius) {
           // Calculate the general form equation of a line from two points.
           // a = y1 - y2
@@ -184,15 +180,17 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
           newPos.Set(0, 0, beamHeight);
           math::Vector3<double> newPos2;
           newPos2.Set(0, 0, beamHeight);
-          if (Geometry::IntersectionCircunferenceLine(v, ballPos, 1.25 * GameState::dropBallRadius, newPos, newPos2)) {
+          if (Geometry::IntersectionCircunferenceLine(v, ballPos, 1.25 *
+              GameState::dropBallRadius, newPos, newPos2)) {
             if (agent.pos.Distance(newPos) < agent.pos.Distance(newPos2)) {
               MoveAgent(agent, newPos);
-            } else {
+            }
+else
+{
               MoveAgent(agent, newPos2);
             }
           }
         }
-
       }
     }
   }
@@ -200,15 +198,14 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
 
 
 /////////////////////////////////////////////////
-void GameState::CheckTiming()
-{
+void GameState::CheckTiming() {
   if (hasCurrentStateChanged) {
     return;
   }
 
   double elapsedGameTime = getElapsedGameTime();
   if ((half == FIRST_HALF) && (elapsedGameTime >= SecondsEachHalf)) {
-    //swap team sides
+    // swap team sides
     Team::Side temp = teams.at(0)->side;
     teams.at(0)->side = teams.at(1)->side;
     teams.at(1)->side = temp;
@@ -217,25 +214,30 @@ void GameState::CheckTiming()
     startGameTime = gameTime;
     SetHalf(SECOND_HALF);
     SetCurrent(kickOffRightState.get());
-  } else if ((half == SECOND_HALF) && (elapsedGameTime >= SecondsEachHalf)) {
+  }
+  else if ((half == SECOND_HALF) && (elapsedGameTime >= SecondsEachHalf))
+  {
     // End of the game
     SetCurrent(gameOverState.get());
   }
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckBall()
-{
+void GameState::CheckBall() {
   if (hasCurrentStateChanged) {
     return;
   }
   Team::Side lastContactSide;
   if (ballContactHistory.size() > 0) {
     lastContactSide = getLastBallContact()->side;
-  } else {
+  }
+else
+{
     if (half == FIRST_HALF) {
       lastContactSide = Team::LEFT;
-    } else {
+    }
+else
+{
       lastContactSide = Team::RIGHT;
     }
   }
@@ -244,28 +246,33 @@ void GameState::CheckBall()
   if (SoccerField::GoalBoxLeft.Contains(ballPos)) {
     SetCurrent(goalRightState.get());
   }
-  // The ball is inside the right goal.
-  else if (SoccerField::GoalBoxRight.Contains(ballPos)) {
+  else if (SoccerField::GoalBoxRight.Contains(ballPos))
+  {
+    // The ball is inside the right goal.
     SetCurrent(goalLeftState.get());
   }
-  // The ball is outside of the sideline.
-  else if (fabs(ballPos.Y()) > SoccerField::HalfFieldHeight + SoccerField::OutofBoundsTol) {
-
+  else if (fabs(ballPos.Y()) > SoccerField::HalfFieldHeight +
+             SoccerField::OutofBoundsTol) {
+    // The ball is outside of the sideline.
     // Choose team
     if (lastContactSide == Team::LEFT)
       SetCurrent(kickInRightState.get());
     else
       SetCurrent(kickInLeftState.get());
   }
-  // The ball is outside of the field over the defensive team's goal line.
-  else if (fabs(ballPos.X()) > SoccerField::HalfFieldWidth + SoccerField::OutofBoundsTol) {
+  else if (fabs(ballPos.X()) > SoccerField::HalfFieldWidth +
+             SoccerField::OutofBoundsTol)
+  {
+    // The ball is outside of the field over the defensive team's goal line.
     if (ballPos.X() < 0) {
       // Choose team 1
       if (lastContactSide == Team::LEFT)
         SetCurrent(cornerKickRightState.get());
       else
         SetCurrent(goalKickLeftState.get());
-    } else {
+    }
+else
+{
       // Choose team 2
       if (lastContactSide == Team::LEFT)
         SetCurrent(goalKickRightState.get());
@@ -276,12 +283,13 @@ void GameState::CheckBall()
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckGoalKickIllegalDefense(Team::Side _teamAllowed)
-{
+void GameState::CheckGoalKickIllegalDefense(Team::Side _teamAllowed) {
   math::Box penaltyBox;
   if (_teamAllowed == Team::LEFT) {
     penaltyBox = SoccerField::PenaltyBoxLeft;
-  } else {
+  }
+else
+{
     penaltyBox = SoccerField::PenaltyBoxRight;
   }
 
@@ -299,27 +307,27 @@ void GameState::CheckGoalKickIllegalDefense(Team::Side _teamAllowed)
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckIllegalDefense()
-{
+void GameState::CheckIllegalDefense() {
   for (size_t i = 0; i < teams.size(); ++i) {
     CheckIllegalDefense_helper(teams.at(i));
   }
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckIllegalDefense_helper(Team *team)
-{
+void GameState::CheckIllegalDefense_helper(Team *team) {
   math::Box penaltyBox;
   math::Vector3<double> goalCenter;
   if (team->side == Team::LEFT) {
     penaltyBox = SoccerField::PenaltyBoxLeft;
     goalCenter = SoccerField::GoalCenterLeft;
-  } else {
+  }
+else
+{
     penaltyBox = SoccerField::PenaltyBoxRight;
     goalCenter = SoccerField::GoalCenterRight;
   }
 
-  //do bookkeeping for agents that leave penalty box
+  // do bookkeeping for agents that leave penalty box
   for (size_t i = 0; i < team->members.size(); i++) {
     Agent &agent = team->members.at(i);
     if (!penaltyBox.Contains(agent.pos) && agent.inPenaltyBox) {
@@ -328,17 +336,22 @@ void GameState::CheckIllegalDefense_helper(Team *team)
     }
   }
 
-  //do bookkeeping for agents that enter penalty box
+  // do bookkeeping for agents that enter penalty box
   for (size_t i = 0; i < team->members.size(); i++) {
     Agent &agent = team->members.at(i);
     if (!agent.inPenaltyBox) {
-      if (penaltyBox.Contains(agent.pos) && team->numPlayersInPenaltyBox < GameState::penaltyBoxLimit) {
-        //account for agent if there is still room in penalty box
+      if (penaltyBox.Contains(agent.pos) && team->numPlayersInPenaltyBox <
+          GameState::penaltyBoxLimit) {
+        // account for agent if there is still room in penalty box
         team->numPlayersInPenaltyBox++;
         agent.inPenaltyBox = true;
-      } else if (penaltyBox.Contains(agent.pos) && team->numPlayersInPenaltyBox >= GameState::penaltyBoxLimit)  {
-        //if agent is !goalie: move agent away if penalty box is already crowded
-        //if agent is goalie: move another agent that is farthest from goal away
+      }
+      else if (penaltyBox.Contains(agent.pos) && team->
+                 numPlayersInPenaltyBox >= GameState::penaltyBoxLimit)  {
+        // if agent is !goalie: move agent away if penalty box is
+        // already crowded
+        // if agent is goalie: move another agent that is farthest
+        // from goal away
         if (agent.isGoalKeeper()) {
           double bestDist = -1;
           Agent *bestAgent = NULL;
@@ -357,19 +370,22 @@ void GameState::CheckIllegalDefense_helper(Team *team)
             MoveAgentToSide(*bestAgent);
           }
           agent.inPenaltyBox = true;
-        } else {
+        }
+else
+{
           MoveAgentToSide(agent);
         }
-      } else {
-        //agent is !penalty box nor is accounted for so do nothing
+      }
+else
+{
+        // agent is !penalty box nor is accounted for so do nothing
       }
     }
   }
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckCrowding()
-{
+void GameState::CheckCrowding() {
   bool enableCrowding = false;
   for (size_t i = 0; i < teams.size(); ++i) {
     Team *team = teams.at(i);
@@ -390,7 +406,8 @@ exitLoop:
   }
 }
 
-/// \Brief Struct for helping to sort agents by their distances, used by CheckCrowding_helper only
+/// \Brief Struct for helping to sort agents by their distances,
+/// used by CheckCrowding_helper only
 struct AgentDist {
   GameState::Agent *agent;
   double dist;
@@ -399,9 +416,8 @@ struct AgentDist {
 bool sortDist (AgentDist i, AgentDist j) { return (i.dist < j.dist); }
 
 /////////////////////////////////////////////////
-void GameState::CheckCrowding_helper(Team *team)
-{
-  //sort agents by their distances
+void GameState::CheckCrowding_helper(Team *team) {
+  // sort agents by their distances
   std::vector<AgentDist> agentDists;
   for (size_t i = 0; i < team->members.size(); i++) {
     AgentDist agentDist;
@@ -411,7 +427,7 @@ void GameState::CheckCrowding_helper(Team *team)
   }
   std::sort(agentDists.begin(), agentDists.end(), sortDist);
 
-  //only allow one agent to be in inner radius
+  // only allow one agent to be in inner radius
   int reposition_2 = 1;
   for (size_t i = 0; i < agentDists.size(); i++) {
     AgentDist agentDist = agentDists.at(i);
@@ -419,12 +435,14 @@ void GameState::CheckCrowding_helper(Team *team)
     if (agentDist.dist < GameState::crowdingReposDist2) {
       if (reposition_2 > 0) {
         reposition_2--;
-      } else {
+      }
+else
+{
         MoveAgentToSide(*agent);
       }
     }
   }
-  //only allow two agents to be in outer radius
+  // only allow two agents to be in outer radius
   int reposition_3 = 2;
   for (size_t i = 0; i < agentDists.size(); i++) {
     AgentDist agentDist = agentDists.at(i);
@@ -432,7 +450,9 @@ void GameState::CheckCrowding_helper(Team *team)
     if (agentDist.dist < GameState::crowdingReposDist3) {
       if (reposition_3 > 0) {
         reposition_3--;
-      } else {
+      }
+else
+{
         MoveAgentToSide(*agent);
       }
     }
@@ -440,8 +460,7 @@ void GameState::CheckCrowding_helper(Team *team)
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckImmobility()
-{
+void GameState::CheckImmobility() {
   for (size_t i = 0; i < teams.size(); ++i) {
     Team *team = teams.at(i);
     for (size_t j = 0; j < team->members.size(); ++j) {
@@ -449,19 +468,25 @@ void GameState::CheckImmobility()
 
       if (agent.pos == agent.prevPos) {
         agent.timeImmoblized += getElapsedCycleGameTime();
-      } else {
+      }
+else
+{
         agent.timeImmoblized = 0;
       }
 
       if (agent.pos.Z() < SoccerField::NaoPoseHeight * 0.5) {
         agent.timeFallen += getElapsedCycleGameTime();
-      } else {
+      }
+else
+{
         agent.timeFallen = 0;
       }
 
-      //move agent to side of field if they have remained fallen || timeout too long.
+      // move agent to side of field if they have remained fallen
+      // or timeout too long.
       double SCALE = 1.0 + (agent.uNum == 1);
-      if (agent.timeImmoblized >= SCALE * GameState::immobilityTimeLimit || agent.timeFallen >= SCALE * GameState::fallenTimeLimit) {
+      if (agent.timeImmoblized >= SCALE * GameState::immobilityTimeLimit
+          || agent.timeFallen >= SCALE * GameState::fallenTimeLimit) {
         agent.timeImmoblized = 0;
         agent.timeFallen = 0;
         MoveAgentToSide(agent);
@@ -472,30 +497,33 @@ void GameState::CheckImmobility()
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckDoubleTouch()
-{
+void GameState::CheckDoubleTouch() {
   if (ballContactHistory.size() != 2 || hasCurrentStateChanged) {
     return;
   }
 
-  //check && make sure that the first contact after kick off (|| second overall contact) is !by the same agent who performed the kick off
+  // check && make sure that the first contact after kick off
+  // (or second overall contact) is !by the same agent who performed
+  // the kick off
   BallContact *firstContact = ballContactHistory.at(1).get();
   if (touchBallKickoff != NULL
       && currentState->prevState != NULL
-      && (currentState->prevState->name == "KickOff_Left" || currentState->prevState->name == "KickOff_Right")
+      && (currentState->prevState->name == "KickOff_Left"
+          || currentState->prevState->name == "KickOff_Right")
       && touchBallKickoff->side == firstContact->side
       && touchBallKickoff->uNum == firstContact->uNum) {
     if (currentState->prevState->name == "KickOff_Left") {
       SetCurrent(kickOffRightState.get());
-    } else {
+    }
+else
+{
       SetCurrent(kickOffLeftState.get());
     }
   }
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckCanScore()
-{
+void GameState::CheckCanScore() {
   BallContact *ballContact = getLastBallContact();
   if (ballContact == NULL) {
     return;
@@ -505,9 +533,11 @@ void GameState::CheckCanScore()
     if ((!team->canScore)
         && (touchBallKickoff != NULL)
         && ((ballContact->side != team->side)
-             || (ballContact->side == team->side
-                 && touchBallKickoff->uNum != ballContact->uNum
-                 && ballContact->contactPos.Distance(SoccerField::CenterOfField) > SoccerField::CenterCircleRadius))) {
+            || (ballContact->side == team->side
+                && touchBallKickoff->uNum != ballContact->uNum
+                && ballContact->contactPos.Distance(
+                  SoccerField::CenterOfField) >
+                SoccerField::CenterCircleRadius))) {
       team->canScore = true;
     }
   }
@@ -515,66 +545,67 @@ void GameState::CheckCanScore()
 
 
 /////////////////////////////////////////////////
-void GameState::MoveAgent(Agent &agent, const math::Vector3<double> &pos)
-{
+void GameState::MoveAgent(Agent &agent,
+                          const math::Vector3<double> &pos) {
   agent.pos = pos;
   agent.updatePose = true;
 }
 
 /////////////////////////////////////////////////
-void GameState::MoveAgent(Agent &agent, const double x, const double y, const double yaw)
-{
+void GameState::MoveAgent(Agent &agent, const double x, const double y,
+                          const double yaw) {
   agent.pos.Set(x, y, GameState::beamHeight);
   agent.rot.Euler(0, 0, yaw);
   agent.updatePose = true;
 }
 
 /////////////////////////////////////////////////
-void GameState::MoveAgentNoisy(Agent &agent, const double x, const double y, const double yaw)
-{
-  double offsetX = ((double) rand() / (RAND_MAX)) * 0.2 - 0.1;
-  double offsetY = ((double) rand() / (RAND_MAX)) * 0.2 - 0.1;
-  double offsetYaw = ((double) rand() / (RAND_MAX)) * 0.2 - 0.1;
+void GameState::MoveAgentNoisy(Agent &agent, const double x, const double y,
+                               const double yaw) {
+  double offsetX = (static_cast<double>(random()) / (RAND_MAX)) * 0.2 - 0.1;
+  double offsetY = (static_cast<double>(random()) / (RAND_MAX)) *
+                   0.2 - 0.1;
+  double offsetYaw = (static_cast<double>(random()) / (RAND_MAX)) *
+                     0.2 - 0.1;
   agent.pos.Set(x + offsetX, y + offsetY, GameState::beamHeight);
   agent.rot.Euler(0, 0, yaw + offsetYaw);
   agent.updatePose = true;
 }
 
-void GameState::MoveAgent(Agent &agent, const math::Vector3<double> &pos, const math::Quaternion<double> &rot)
-{
+void GameState::MoveAgent(Agent &agent, const math::Vector3<double> &pos,
+                          const math::Quaternion<double> &rot) {
   agent.pos = pos;
   agent.rot = rot;
   agent.updatePose = true;
 }
 
-void GameState::MoveAgentToSide(Agent &agent)
-{
+void GameState::MoveAgentToSide(Agent &agent) {
   double newY;
   if (agent.pos.Y() > 0) {
     newY = -SoccerField::HalfFieldHeight;
-  } else {
+  }
+  else
+  {
     newY = SoccerField::HalfFieldHeight;
   }
-  agent.pos = math::Vector3<double>(agent.pos.X(), newY, GameState::beamHeight);
+  agent.pos = math::Vector3<double>(agent.pos.X(), newY,
+  GameState::beamHeight);
   agent.updatePose = true;
 }
 
 /////////////////////////////////////////////////
-math::Vector3<double> GameState::GetBall()
-{
+math::Vector3<double> GameState::GetBall() {
   return ballPos;
 }
 
 /////////////////////////////////////////////////
-void GameState::MoveBallToCenter()
-{
+void GameState::MoveBallToCenter() {
   ballPos = SoccerField::BallCenterPosition;
   updateBallPose = true;
 }
 
 /////////////////////////////////////////////////
-void GameState::MoveBallForGoalKick()
-{
+void GameState::MoveBallForGoalKick() {
   double newX = SoccerField::HalfFieldWidth - 1.0;
   if (ballPos.X() < 0) {
     newX = -newX;
@@ -584,8 +615,7 @@ void GameState::MoveBallForGoalKick()
 }
 
 /////////////////////////////////////////////////
-void GameState::MoveBallToCorner()
-{
+void GameState::MoveBallToCorner() {
   ballPos = math::Vector3<double>(
               (fabs(ballPos.X()) / ballPos.X()) * SoccerField::HalfFieldWidth,
               (fabs(ballPos.Y()) / ballPos.Y()) * SoccerField::HalfFieldHeight,
@@ -594,48 +624,46 @@ void GameState::MoveBallToCorner()
 }
 
 /////////////////////////////////////////////////
-void GameState::MoveBallInBounds()
-{
-  double newX = std::max(std::min(SoccerField::HalfFieldWidth, ballPos.X()), -SoccerField::HalfFieldWidth);
-  double newY = std::max(std::min(SoccerField::HalfFieldHeight, ballPos.Y()), -SoccerField::HalfFieldHeight);
+void GameState::MoveBallInBounds() {
+  double newX = std::max(std::min(SoccerField::HalfFieldWidth, ballPos.X()),
+                         -SoccerField::HalfFieldWidth);
+  double newY = std::max(std::min(SoccerField::HalfFieldHeight, ballPos.Y()),
+                         -SoccerField::HalfFieldHeight);
   ballPos.Set(newX, newY, SoccerField::BallRadius);
   updateBallPose = true;
 }
 
 /////////////////////////////////////////////////
-void GameState::MoveBall(const math::Vector3<double> &_ballPos)
-{
+void GameState::MoveBall(const math::Vector3<double> &_ballPos) {
   ballPos = _ballPos;
   updateBallPose = true;
 }
 
 /////////////////////////////////////////////////
-void GameState::setBallVel(const math::Vector3<double> &_ballVel)
-{
+void GameState::setBallVel(const math::Vector3<double> &_ballVel) {
   ballVel = _ballVel;
   updateBallPose = true;
 }
 
 /////////////////////////////////////////////////
-void GameState::setBallAngVel(const math::Vector3<double> &_ballAngVel)
-{
+void GameState::setBallAngVel(const math::Vector3<double> &_ballAngVel) {
   ballAngVel = _ballAngVel;
   updateBallPose = true;
 }
 
 ////////////////////////////////////////////////
-void GameState::Initialize()
-{
-  //do something when play mode changes
-  //for now, do nothing
+void GameState::Initialize() {
+  // do something when play mode changes
+  // for now, do nothing
 }
 
 ////////////////////////////////////////////////
-bool GameState::addAgent(int uNum, std::string teamName)
-{
-  // std::cout << "adding agent: " << uNum << " teamName: " << teamName << std::endl;
+bool GameState::addAgent(int uNum, std::string teamName) {
+  // std::cout << "adding agent: " << uNum << " teamName: "
+  // << teamName << std::endl;
   if (uNum < 0 || uNum > GameState::playerLimit) {
-    std::cout << "uNum " << uNum << " is invalid, cannot add agent to team " << teamName << "!" << std::endl;
+    // std::cout << "uNum " << uNum << " is invalid, cannot add agent to team "
+    // << teamName << "!" << std::endl;
     return false;
   }
 
@@ -647,7 +675,8 @@ bool GameState::addAgent(int uNum, std::string teamName)
   }
   if (teamToAdd == -1) {
     for (size_t i = 0; i < teams.size(); ++i) {
-      if (teams.at(i)->name == "_unnamed_team" && teams.at(i)->members.size() == 0) {
+      if (teams.at(i)->name == "_unnamed_team"
+          && teams.at(i)->members.size() == 0) {
         teamToAdd = i;
         teams.at(i)->name = teamName;
         break;
@@ -656,13 +685,15 @@ bool GameState::addAgent(int uNum, std::string teamName)
   }
   if (teamToAdd == -1) {
     // std::cout << uNum << " " << teamName.c_str() << std::endl;
-    std::cout << "There already are two teams, cannot add agent into new team!" << std::endl;
+    // std::cout << "There already are two teams, cannot add agent into
+    // new team!" << std::endl;
     return false;
   }
 
   Team *team = teams.at(teamToAdd);
   if (static_cast<int>(team->members.size()) > GameState::playerLimit) {
-    std::cout << "Team is already full, cannot add agent to team!" << std::endl;
+    // std::cout << "Team is already full, cannot add agent
+    // to team!" << std::endl;
     return false;
   }
   bool *uNumArray = new bool[GameState::playerLimit];
@@ -672,7 +703,9 @@ bool GameState::addAgent(int uNum, std::string teamName)
   for (size_t i = 0; i < team->members.size(); i++) {
     uNumArray[team->members.at(i).uNum - 1] = false;
     if (uNum != 0 && team->members.at(i).uNum == uNum) {
-      std::cout << "Already have an agent with this unum: " << uNum << ", cannot add agent to team!" << std::endl;
+      // std::cout << "Already have an agent with this unum: " << uNum <<
+      // ", cannot add agent to team!" << std::endl;
+      delete[] uNumArray;
       return false;
     }
   }
@@ -685,18 +718,19 @@ bool GameState::addAgent(int uNum, std::string teamName)
     }
   }
   if (uNum == 0) {
-    std::cout << "No free uNums avaliable, cannot add agent to team!" << std::endl;
+    // std::cout << "No free uNums avaliable, cannot add agent to team!"
+    // << std::endl;
+    delete[] uNumArray;
     return false;
   }
-  delete[] uNumArray;
   team->members.push_back(Agent(uNum, team));
+  delete[] uNumArray;
   return true;
 }
 
 
 ///////////////////////////////////////////////
-bool GameState::removeAgent(int uNum, std::string teamName)
-{
+bool GameState::removeAgent(int uNum, std::string teamName) {
   for (size_t i = 0; i < teams.size(); ++i) {
     if (teams.at(i)->name == teamName) {
       for (size_t j = 0; j < teams.at(i)->members.size(); j++) {
@@ -712,10 +746,12 @@ bool GameState::removeAgent(int uNum, std::string teamName)
 }
 
 ////////////////////////////////////////////////
-bool GameState::beamAgent(int uNum, std::string teamName, double x, double y, double rot)
-{
-  if (currentState->name != "BeforeKickOff" && currentState->name != "goal_kick_left" && currentState->name != "goal_kick_right") {
-    std::cout << "Incorrect play mode, unable to beam agent!" << std::endl;
+bool GameState::beamAgent(int uNum, std::string teamName, double x, double y,
+                          double rot) {
+  if (currentState->name != "BeforeKickOff"
+      && currentState->name != "goal_kick_left"
+      && currentState->name != "goal_kick_right") {
+    // std::cout << "Incorrect play mode, unable to beam agent!" << std::endl;
     return false;
   }
   for (size_t i = 0; i < teams.size(); ++i) {

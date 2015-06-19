@@ -24,7 +24,7 @@
 
 /// \class CornerKickLeftState CornerKickLeftState.hh
 /// \brief State that handles the corner kick left state.
-class CornerKickLeftState : public State 
+class CornerKickLeftState : public State
 {
   /// \brief Constructor.
   /// \param[in] _name Name of this state.

@@ -24,20 +24,20 @@ using namespace ignition;
 /////////////////////////////////////////////////
 GameOverState::GameOverState(const std::string &_name,
                              GameState *_gameState)
-	: State(_name, _gameState)
+  : State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
 void GameOverState::Initialize()
 {
-	State::Initialize();
+  State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void GameOverState::Update()
 {
-	if (!hasInitialized) {
-		Initialize();
-	}
+  if (!hasInitialized) {
+    Initialize();
+  }
 }
