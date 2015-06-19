@@ -32,7 +32,7 @@ BeforeKickOffState::BeforeKickOffState(const std::string &_name,
 /////////////////////////////////////////////////
 void BeforeKickOffState::Initialize()
 {
-  gameState->StopPlayers();
+  this->gameState->StopPlayers();
   State::Initialize();
 }
 
@@ -40,23 +40,23 @@ void BeforeKickOffState::Initialize()
 void BeforeKickOffState::Update()
 {
   if (!hasInitialized) {
-    Initialize();
+     this->Initialize();
   }
-  if (gameState->GetBall() != SoccerField::BallCenterPosition) {
-    gameState->MoveBallToCenter();
+  if (this->gameState->GetBall() != SoccerField::BallCenterPosition) {
+    this->gameState->MoveBallToCenter();
   }
 
   // resets getElapsedGameTime() back to zero
-  gameState->setStartGameTime(gameState->getGameTime());
+  this->gameState->setStartGameTime(this->gameState->getGameTime());
 
   // After some time, go to play mode.
-  if (getElapsedTime() >= GameState::SecondsBeforeKickOff) {
-    if (gameState->GetHalf() == GameState::FIRST_HALF) {
-      gameState->SetCurrent(gameState->kickOffLeftState.get());
+  if (this->getElapsedTime() >= GameState::SecondsBeforeKickOff) {
+    if (this->gameState->GetHalf() == GameState::FIRST_HALF) {
+      this->gameState->SetCurrent(this->gameState->kickOffLeftState.get());
     }
     else
     {
-      gameState->SetCurrent(gameState->kickOffRightState.get());
+      this->gameState->SetCurrent(this->gameState->kickOffRightState.get());
     }
   }
 }

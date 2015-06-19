@@ -32,33 +32,33 @@ CornerKickRightState::CornerKickRightState(const std::string &_name,
 /////////////////////////////////////////////////
 void CornerKickRightState::Initialize()
 {
-  gameState->MoveBall(initBallPos);
-  gameState->MoveBallToCorner();
+  this->gameState->MoveBall(initBallPos);
+  this->gameState->MoveBallToCorner();
   State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void CornerKickRightState::Update()
 {
-  if (getElapsedTime() < GameState::SecondsKickInPause) {
+  if (this->getElapsedTime() < GameState::SecondsKickInPause) {
     return;
   }
   else if (!hasInitialized)
   {
-    Initialize();
+    this->Initialize();
   }
 
   // The left team is !allowed to be close to the ball.
-  gameState->DropBallImpl(GameState::Team::RIGHT);
+  this->gameState->DropBallImpl(GameState::Team::RIGHT);
   State::Update();
 
   // After some time, go to play mode.
-  if (getElapsedTime() >= GameState::SecondsKickIn) {
-    gameState->DropBallImpl(GameState::Team::NEITHER);
-    gameState->SetCurrent(gameState->playState.get());
+  if (this->getElapsedTime() >= GameState::SecondsKickIn) {
+    this->gameState->DropBallImpl(GameState::Team::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playState.get());
   }
-  else if (hasBallContactOccurred())
+  else if (this->hasBallContactOccurred())
   {
-    gameState->SetCurrent(gameState->playState.get());
+    this->gameState->SetCurrent(this->gameState->playState.get());
   }
 }

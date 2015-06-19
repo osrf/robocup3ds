@@ -27,6 +27,31 @@ class GameState;
 // \brief State pattern used for the game mode.
 class State
 {
+    /// \brief Used to determine if ball contact has occurred since
+    /// Initialize()
+  public: int ballContactHistorySize;
+
+    /// \brief Name of the state.
+  public: std::string name;
+
+    /// \brief Pointer to access full game information.
+  public: GameState *gameState;
+
+    /// \brief Time when we entered this game mode.
+  public: double initTime;
+
+    /// \brief Has initialized
+  public: bool hasInitialized;
+
+    /// \brief Whether this is the state that gameState->currentState is
+    /// set to or not
+  public: bool isActive;
+
+    /// \brief Pointer to previous state
+  public: State *prevState;
+
+    /// \brief Position of ball when we enter this state
+  public: ignition::math::Vector3<double> initBallPos;
     /// \brief Class constructor.
     /// \param[in] _name Name of the state.
     /// \param[out] _gameState Reference to the GameState.
@@ -51,31 +76,6 @@ class State
 
     /// \brief Returns true if an agent contacts ball since Initialize()
   public: bool hasBallContactOccurred();
-
-    /// \brief Used to determine if ball contact has occurred since Initialize()
-  public: int ballContactHistorySize;
-
-    /// \brief Name of the state.
-  public: std::string name;
-
-    /// \brief Pointer to access full game information.
-  public: GameState *gameState;
-
-    /// \brief Time when we entered this game mode.
-  public: double initTime;
-
-    /// \brief Has initialized
-  public: bool hasInitialized;
-
-    /// \brief Whether this is the state that gameState->currentState is
-    /// set to or not
-  public: bool isActive;
-
-    /// \brief Pointer to previous state
-  public: State *prevState;
-
-    /// \brief Position of ball when we enter this state
-  public: ignition::math::Vector3<double> initBallPos;
 
     /// \brief Time elapsed since we entered this game mode.
   public: double getElapsedTime();

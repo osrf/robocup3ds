@@ -26,24 +26,24 @@ GoalLeftState::GoalLeftState(const std::string &_name,
                              GameState *_gameState)
   : State(_name, _gameState)
 {
-  validGoal = false;
+  this->validGoal = false;
 }
 
 /////////////////////////////////////////////////
 void GoalLeftState::Initialize()
 {
-  validGoal = true;
+  this->validGoal = true;
 
   // Register the left team goal.
-  for (size_t i = 0; i < gameState->teams.size(); ++i) {
-    GameState::Team *team = gameState->teams.at(i);
+  for (size_t i = 0; i < this->gameState->teams.size(); ++i) {
+    GameState::Team *team = this->gameState->teams.at(i);
     if (team->side == GameState::Team::LEFT) {
       if (team->canScore) {
         team->score++;
       }
       else
       {
-        validGoal = false;
+        this->validGoal = false;
       }
     }
   }
@@ -54,10 +54,10 @@ void GoalLeftState::Initialize()
 void GoalLeftState::Update()
 {
   if (!hasInitialized) {
-    Initialize();
+    this->Initialize();
   }
   // Afer some time, go to right team kick off mode.
-  if (getElapsedTime() >= GameState::SecondsGoalPause || !validGoal) {
-    gameState->SetCurrent(gameState->kickOffRightState.get());
+  if (this->getElapsedTime() >= GameState::SecondsGoalPause || !validGoal) {
+    this->gameState->SetCurrent(this->gameState->kickOffRightState.get());
   }
 }

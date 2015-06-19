@@ -265,19 +265,35 @@ class GameStateTest_fullTeams : public GameStateTest_basic {
   virtual void resetPositions() {
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 11; j++) {
-        GameState::Agent &agent = gameState->teams.at(0)->members.at(j);
+        GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
         gameState->MoveAgent(agent, math::Vector3<double>
                              (0, 0, GameState::beamHeight));
       }
     }
   }
 
-  virtual void resetPositions(int team) {
-    if (team != 0 || team != 1) {
+  virtual void resetPositionsForKickOff() {
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 11; j++) {
+        GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
+        if (gameState->teams.at(i)->side == GameState::Team::LEFT) {
+          gameState->MoveAgent(agent, math::Vector3<double>
+                               (-5, 0, GameState::beamHeight));
+        }
+        else
+        {
+          gameState->MoveAgent(agent, math::Vector3<double>
+                               (5, 0, GameState::beamHeight));
+        }
+      }
+    }
+  }
+  virtual void resetPositions(int _team) {
+    if (_team != 0 || _team != 1) {
       return;
     }
     for (int j = 0; j < 11; j++) {
-      GameState::Agent &agent = gameState->teams.at(team)->members.at(j);
+      GameState::Agent &agent = gameState->teams.at(_team)->members.at(j);
       gameState->MoveAgent(agent, math::Vector3<double>
                            (0, 0, GameState::beamHeight));
     }
@@ -745,8 +761,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming) {
     {
       ASSERT_EQ("KickOff_Left", gameState->getCurrentState()->name);
     }
-else
-{
+    else
+    {
       ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
     }
     gameState->Update();
@@ -760,8 +776,8 @@ else
     if (gameState->getGameTime() < secondHalfKickOffTime) {
       ASSERT_EQ("KickOff_Right", gameState->getCurrentState()->name);
     }
-else
-{
+    else
+    {
       ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
     }
     gameState->Update();
@@ -869,8 +885,8 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense) {
       penaltyBox = SoccerField::PenaltyBoxLeft;
       goalCenter = SoccerField::GoalCenterLeft;
     }
-else
-{
+    else
+    {
       penaltyBox = SoccerField::PenaltyBoxRight;
       goalCenter = SoccerField::GoalCenterRight;
     }
@@ -904,8 +920,8 @@ else
         // this agent is farthest away from goal
         gameState->MoveAgent(agent, penaltyPos);
       }
-else
-{
+      else
+      {
         gameState->MoveAgent(agent, goalCenter);
       }
     }
@@ -920,8 +936,8 @@ else
         // this agent is farthest away from goal
         ASSERT_FALSE(penaltyBox.Contains(agent.pos));
       }
-else
-{
+      else
+      {
         ASSERT_TRUE(penaltyBox.Contains(agent.pos));
       }
     }
@@ -1048,6 +1064,8 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen) {
   ASSERT_NE(agent2.pos, fallenPos.at(c % 2));
 }
 
+/// \brief Test to check whether the DropBallImpl function in gameState is
+/// working as intended
 TEST_F(GameStateTest_fullTeams, GameState_DropBall) {
   gameState->MoveBallToCenter();
 
@@ -1062,6 +1080,96 @@ TEST_F(GameStateTest_fullTeams, GameState_DropBall) {
       ASSERT_GE(agent.pos.Distance(gameState->GetBall()),
                 GameState::dropBallRadius);
     }
+  }
+}
+
+/// \brief Test to check whether the CheckOffSidesOnKickOff
+/// function in gameState is working as intended
+TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff) {
+  vector<State *> states;
+  states.push_back(gameState->kickOffLeftState.get());
+  states.push_back(gameState->kickOffRightState.get());
+  ASSERT_EQ(gameState->teams.at(0)->side, GameState::Team::LEFT);
+  ASSERT_EQ(gameState->teams.at(1)->side, GameState::Team::RIGHT);
+  for (size_t i = 0; i < states.size(); i++) {
+    GameState::Agent &ourAgent = gameState->teams.at(i)->members.at(0);
+    GameState::Agent &theirAgent = gameState->teams.at(
+                                     (i + 1) % 2)->members.at(0);
+
+    resetPositionsForKickOff();
+    gameState->SetCurrent(states.at(i));
+    gameState->Update();
+
+    // check that all agent positions are unchanged
+    for (int k = 0; k < 2; k++) {
+      for (int j = 0; j < 11; j++) {
+        GameState::Agent &agent = gameState->teams.at(k)->members.at(j);
+        if (k == 0) {
+          ASSERT_EQ(agent.pos, math::Vector3<double>(-5, 0,
+            GameState::beamHeight));
+        }
+        else
+        {
+          ASSERT_EQ(agent.pos, math::Vector3<double>(5, 0,
+            GameState::beamHeight));
+        }
+      }
+    }
+
+    // Ensure that we can move our agent into circle and nothing happens
+    math::Vector3<double> pos(0, 0, GameState::beamHeight);
+    gameState->MoveAgent(ourAgent, pos);
+    gameState->Update();
+    ASSERT_EQ(ourAgent.pos, pos);
+    if (i == 0)
+      pos.Set(1, 0, GameState::beamHeight);
+    else
+      pos.Set(-1, 0, GameState::beamHeight);
+    gameState->MoveAgent(ourAgent, pos);
+    gameState->Update();
+    ASSERT_EQ(ourAgent.pos, pos);
+
+    // Ensure that our agent is beamed back to its own side
+    // if it violate sides and is not in circle
+    if (i == 0)
+      pos.Set(1, 4, GameState::beamHeight);
+    else
+      pos.Set(-1, 4, GameState::beamHeight);
+    gameState->MoveAgent(ourAgent, pos);
+    gameState->Update();
+    if (i == 0)
+      ASSERT_LT(ourAgent.pos.X(), 0);
+    else
+      ASSERT_GT(ourAgent.pos.X(), 0);
+
+    // Ensure that enemy agent in circle is moved back to its own side
+    pos.Set(0, 0, GameState::beamHeight);
+    gameState->MoveAgent(theirAgent, pos);
+    gameState->Update();
+    ASSERT_NE(theirAgent.pos, pos);
+    ASSERT_GE(theirAgent.pos.Distance(pos), SoccerField::CenterCircleRadius);
+    if (i == 0)
+      pos.Set(1, 0, GameState::beamHeight);
+    else
+      pos.Set(-1, 0, GameState::beamHeight);
+    gameState->MoveAgent(theirAgent, pos);
+    gameState->Update();
+    ASSERT_NE(theirAgent.pos, pos);
+    pos.Set(0, 0, GameState::beamHeight);
+    ASSERT_GE(theirAgent.pos.Distance(pos), SoccerField::CenterCircleRadius);
+
+    // Ensure that enemy agent is beamed back to its own side
+    // if it violate sides
+    if (i == 0)
+      pos.Set(-1, 4, GameState::beamHeight);
+    else
+      pos.Set(1, 4, GameState::beamHeight);
+    gameState->MoveAgent(theirAgent, pos);
+    gameState->Update();
+    if (i == 0)
+      ASSERT_GT(theirAgent.pos.X(), 0);
+    else
+      ASSERT_LT(theirAgent.pos.X(), 0);
   }
 }
 

@@ -26,63 +26,63 @@ using namespace ignition;
 State::State(const std::string &_name,
              GameState *_gameState)
   : name(_name), gameState(_gameState) {
-  hasInitialized = false;
-  isActive = false;
-  initTime = -1;
-  ballContactHistorySize = -1;
-  prevState = NULL;
-  initBallPos.Set(-999, -999, -999);
+  this->hasInitialized = false;
+  this->isActive = false;
+  this->initTime = -1;
+  this->ballContactHistorySize = -1;
+  this->prevState = NULL;
+  this->initBallPos.Set(-999, -999, -999);
 }
 
 /////////////////////////////////////////////////
 bool State::hasBallContactOccurred() {
-  return gameState->ballContactHistory.size() > 0
-  && static_cast<int>(gameState->ballContactHistory.size())
-  > ballContactHistorySize;
+  return this->gameState->ballContactHistory.size() > 0
+         && static_cast<int>(this->gameState->ballContactHistory.size())
+         > this->ballContactHistorySize;
 }
 
 /////////////////////////////////////////////////
 void State::Initialize() {
-  ballContactHistorySize =
-  static_cast<int>(gameState->ballContactHistory.size());
-  gameState->setBallVel(math::Vector3<double>(0, 0, 0));
-  gameState->setBallAngVel(math::Vector3<double>(0, 0, 0));
-  hasInitialized = true;
+  this->ballContactHistorySize =
+    static_cast<int>(this->gameState->ballContactHistory.size());
+  this->gameState->setBallVel(math::Vector3<double>(0, 0, 0));
+  this->gameState->setBallAngVel(math::Vector3<double>(0, 0, 0));
+  this->hasInitialized = true;
 }
 
 /////////////////////////////////////////////////
 void State::preInitialize() {
-  initBallPos = gameState->GetBall();
-  initTime = gameState->getGameTime();
-  isActive = true;
+  this->initBallPos = this->gameState->GetBall();
+  this->initTime = this->gameState->getGameTime();
+  this->isActive = true;
 }
 
 /////////////////////////////////////////////////
 void State::unInitialize() {
-  ballContactHistorySize = -1;
-  initTime = -1;
-  hasInitialized = false;
-  isActive = false;
-  initBallPos.Set(-999, -999, -999);
+  this->ballContactHistorySize = -1;
+  this->initTime = -1;
+  this->hasInitialized = false;
+  this->isActive = false;
+  this->initBallPos.Set(-999, -999, -999);
 }
 
 /////////////////////////////////////////////////
 void State::Update() {
-  gameState->CheckTiming();  // highest priority
-  gameState->CheckDoubleTouch();  // lowest priority
+  this->gameState->CheckTiming();  // highest priority
+  this->gameState->CheckDoubleTouch();  // lowest priority
 
-  gameState->CheckCanScore();
-  gameState->CheckIllegalDefense();
-  gameState->CheckCrowding();
-  gameState->CheckImmobility();
+  this->gameState->CheckCanScore();
+  this->gameState->CheckIllegalDefense();
+  this->gameState->CheckCrowding();
+  this->gameState->CheckImmobility();
 }
 
 /////////////////////////////////////////////////
 double State::getElapsedTime() {
-  return gameState->getGameTime() - initTime;
+  return this->gameState->getGameTime() - initTime;
 }
 
 /////////////////////////////////////////////////
 std::string State::GetName() {
-  return name;
+  return this->name;
 }

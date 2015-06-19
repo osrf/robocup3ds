@@ -28,7 +28,7 @@ PlayState::PlayState(const std::string &_name, GameState *_gameState)
 /////////////////////////////////////////////////
 void PlayState::Initialize()
 {
-  gameState->ReleasePlayers();
+  this->gameState->ReleasePlayers();
   State::Initialize();
 }
 
@@ -36,15 +36,15 @@ void PlayState::Initialize()
 void PlayState::Update()
 {
   if (!hasInitialized) {
-    Initialize();
+    this->Initialize();
   }
-  gameState->CheckCanScore();
+  this->gameState->CheckCanScore();
 
-  gameState->CheckTiming();  // highest priority
-  gameState->CheckDoubleTouch();
-  gameState->CheckBall();  // lowest priority
+  this->gameState->CheckTiming();  // highest priority
+  this->gameState->CheckDoubleTouch();
+  this->gameState->CheckBall();  // lowest priority
 
-  gameState->CheckIllegalDefense();
-  gameState->CheckCrowding();
-  gameState->CheckImmobility();
+  this->gameState->CheckIllegalDefense();
+  this->gameState->CheckCrowding();
+  this->gameState->CheckImmobility();
 }

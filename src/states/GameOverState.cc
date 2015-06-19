@@ -38,6 +38,6 @@ void GameOverState::Initialize()
 void GameOverState::Update()
 {
   if (!hasInitialized) {
-    Initialize();
+    this->Initialize();
   }
 }

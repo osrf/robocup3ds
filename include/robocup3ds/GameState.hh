@@ -58,17 +58,19 @@ class GameState {
       errorLevel(_errorLevel)
     {}
 
-    void log(std::string message, int level) {
-      if (level >= normalLevel) {
-        std::cout << "[" << gameState->cycleCounter << "][lvl:" <<
-                  level << "]\t" << message.c_str();
+    void log(std::string _message, int _level) {
+      if (_level >= normalLevel) {
+        std::cout << "[" << gameState->cycleCounter << "]["
+          << gameState->getGameTime() << "][lvl:" <<
+          _level << "]\t" << _message.c_str();
       }
     }
 
-    void logErr(std::string message, int level) {
-      if (level >= errorLevel) {
-        std::cout << "\033[31m[" << gameState->cycleCounter << "][lvl:" <<
-                  level << "]\t" << message.c_str();
+    void logErr(std::string _message, int _level) {
+      if (_level >= errorLevel) {
+        std::cout << "\033[31m[" << gameState->cycleCounter << "]["
+          << gameState->getGameTime() << "][lvl:" <<
+          _level << "]\t" << _message.c_str();
       }
     }
   };
@@ -96,13 +98,13 @@ class GameState {
     bool canScore;
 
     /// \brief Constructor for Team object
-    Team(std::string _name, Side _side, int _score, int playerLimit):
+    Team(std::string _name, Side _side, int _score, int _playerLimit):
       name(_name),
       side(_side),
       score(_score) {
-      members.reserve(playerLimit);
-      numPlayersInPenaltyBox = 0;
-      canScore = false;
+      this->members.reserve(_playerLimit);
+      this->numPlayersInPenaltyBox = 0;
+      this->canScore = false;
     }
   };
 
@@ -135,20 +137,20 @@ class GameState {
     double timeFallen;
     /// \brief Flag whether player is goalkeeper
     bool isGoalKeeper() {
-      return uNum == 1;
+      return this->uNum == 1;
     }
 
     /// \brief Constructor for Agent object
     Agent(int _uNum, Team *_team):
       uNum(_uNum),
       team(_team) {
-      pos.Set(0, 0, GameState::beamHeight);
-      prevPos.Set(0, 0, GameState::beamHeight);
-      status = RELEASED;
-      updatePose = false;
-      inPenaltyBox = false;
-      timeImmoblized = 0;
-      timeFallen = 0;
+      this->pos.Set(0, 0, GameState::beamHeight);
+      this->prevPos.Set(0, 0, GameState::beamHeight);
+      this->status = RELEASED;
+      this->updatePose = false;
+      this->inPenaltyBox = false;
+      this->timeImmoblized = 0;
+      this->timeFallen = 0;
     }
   };
 
@@ -321,31 +323,38 @@ class GameState {
 /// none of the teams are allowed to be within the free kick radius.
   void DropBallImpl(const Team::Side _teamAllowed);
 
-  /// \brief Checks whether the double touching rules are violated
+/// \brief Checks whether the double touching rules are violated
   void CheckDoubleTouch();
 
-  /// \brief Check whether scoring conditions are met (another agent on
-  /// same side that is not the kick off agent has touched the ball).
+/// \brief Check whether scoring conditions are met (another agent on
+/// same side that is not the kick off agent has touched the ball).
   void CheckCanScore();
 
+/// \brief Check that agents stay on their own side during kick offs
+  void CheckOffSidesOnKickOff(Team::Side _kickingSide);
+
 /// \brief Set the agent's position only
-  void MoveAgent(Agent &agent,
-                 const ignition::math::Vector3<double> &pos);
+  void MoveAgent(Agent &_agent,
+                 const ignition::math::Vector3<double> &_pos);
 
 /// \brief Set the agent's position and yaw (beaming the agent)
-  void MoveAgent(Agent &agent, const double x, const double y,
+  void MoveAgent(Agent &_agent, const double _x, const double _y,
     const double yaw);
 
 /// \brief Set the agent's position and yaw noisily (beaming the agent)
-  void MoveAgentNoisy(Agent &agent, const double x, const double y,
-    const double yaw);
+  void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
+    const double _yaw);
 
 /// \brief Set the agent's position and orientation
-  void MoveAgent(Agent &agent, const ignition::math::Vector3<double> &pos,
-    const ignition::math::Quaternion<double> &rot);
+  void MoveAgent(Agent &_agent, const ignition::math::Vector3<double> &_pos,
+    const ignition::math::Quaternion<double> &_rot);
 
 /// \brief Move agent to side of field, the side depends on the agent's side
-  void MoveAgentToSide(Agent &agent);
+  void MoveAgentToSide(Agent &_agent);
+
+/// \brief Move agent back to their own side if they are offsides during kick
+/// offs
+  void MoveOffSideAgent(Agent &_agent);
 
 /// \brief Check if the first half or the game ends, also update elapsed time.
   void CheckTiming();
@@ -397,26 +406,22 @@ class GameState {
 /// \brief Add agent to game state
 /// \param[in] Agent number
 /// \param[in] Agent name
-  bool addAgent(int uNum, std::string teamName);
+  bool addAgent(int _uNum, std::string _teamName);
 
 /// \brief Remove agent from game state
 /// \param[in] Agent number
 /// \param[in] Agent name
-  bool removeAgent(int uNum, std::string teamName);
+  bool removeAgent(int _uNum, std::string _teamName);
 
 /// \brief Beam the agent if the play mode allows it
-  bool beamAgent(int uNum, std::string teamName, double x, double y,
-  double rot);
+  bool beamAgent(int _uNum, std::string teamName, double _x, double _y,
+  double _rot);
 
 
   private:
 
-/// \brief Helper method for CheckCrowding()
-  void CheckCrowding_helper(Team *team);
 /// \brief Method executed each time the game state changes.
   void Initialize();
-  /// \brief Helper method for CheckIllegalDefense()
-  void CheckIllegalDefense_helper(Team *team);
 
   /*
   Getter and setter methods
@@ -426,69 +431,69 @@ class GameState {
 /// \brief Get the game's half.
 /// \returns if the game is in the first half or if is in the second.
   Half GetHalf() {
-    return half;
+    return this->half;
   }
 
 /// \brief Set the game half.
 /// \param[in] _newHalf 1 for first half or 2 for second half.
   void SetHalf(Half _newHalf) {
-    half = _newHalf;
+    this->half = _newHalf;
   }
 
 /// \brief Get the elapsed time since beginning of half.
   double getElapsedGameTime() {
-    return gameTime - startGameTime;
+    return this->gameTime - this->startGameTime;
   }
 
 /// \brief Get the elapsed time since last cycle.
   double getElapsedCycleGameTime() {
-    return gameTime - prevCycleGameTime;
+    return this->gameTime - this->prevCycleGameTime;
   }
 
 /// \brief Get the game time.
   void setGameTime(double _gameTime) {
-    gameTime = _gameTime;
+    this->gameTime = _gameTime;
   }
 
 /// \brief Set the game time.
   double getGameTime() {
-    return gameTime;
+    return this->gameTime;
   }
 
 /// \brief Get the game time when play starts
   double getStartGameTime() {
-    return startGameTime;
+    return this->startGameTime;
   }
 /// \brief Set the game time when play starts
   void setStartGameTime(double _startGameTime) {
-    startGameTime = _startGameTime;
+    this->startGameTime = _startGameTime;
   }
 
 /// \brief Set the cycle counter
   void setCycleCounter(int _cycleCounter) {
-    cycleCounter = _cycleCounter;
+    this->cycleCounter = _cycleCounter;
     if (GameState::useCounterForGameTime) {
       double newGameTime = 0.02 * cycleCounter;
       double offsetTime = newGameTime - gameTime;
-      prevCycleGameTime += offsetTime;
-      gameTime = newGameTime;
+      this->prevCycleGameTime += offsetTime;
+      this->gameTime = newGameTime;
     }
   }
 
 /// \brief Get the cycle counter
   int getCycleCounter() {
-    return cycleCounter;
+    return this->cycleCounter;
   }
 
 /// \brief Get the current state
   State *getCurrentState() {
-    return currentState;
+    return this->currentState;
   }
 
 /// \brief Get the team who last touched the ball.
   Team::Side *getLastSideTouchedBall() {
-    if (getLastBallContact() != NULL) {
-      return &(getLastBallContact()->side);
+    if (this->getLastBallContact() != NULL) {
+      return &(this->getLastBallContact()->side);
     }
     else
     {
@@ -498,8 +503,9 @@ class GameState {
 
   /// \brief Get the player who last touched the ball.
   BallContact *getLastBallContact() {
-    if (ballContactHistory.size() > 0) {
-      return ballContactHistory.at(ballContactHistory.size() - 1).get();
+    if (this->ballContactHistory.size() > 0) {
+      return this->ballContactHistory.at(
+        this->ballContactHistory.size() - 1).get();
     }
     else
     {

@@ -31,32 +31,32 @@ GoalKickLeftState::GoalKickLeftState(const std::string &_name,
 /////////////////////////////////////////////////
 void GoalKickLeftState::Initialize() {
   // Move the ball.
-  gameState->MoveBall(initBallPos);
-  gameState->MoveBallForGoalKick();
+  this->gameState->MoveBall(initBallPos);
+  this->gameState->MoveBallForGoalKick();
   State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void GoalKickLeftState::Update() {
-  if (getElapsedTime() < GameState::SecondsKickInPause) {
+  if (this->getElapsedTime() < GameState::SecondsKickInPause) {
     return;
   }
   else if (!hasInitialized)
   {
-    Initialize();
+    this->Initialize();
   }
 
-  gameState->DropBallImpl(GameState::Team::LEFT);
-  gameState->CheckGoalKickIllegalDefense(GameState::Team::LEFT);
+  this->gameState->DropBallImpl(GameState::Team::LEFT);
+  this->gameState->CheckGoalKickIllegalDefense(GameState::Team::LEFT);
   State::Update();
 
   // After some time, go to play mode.
-  if (getElapsedTime() >= GameState::SecondsKickIn) {
-    gameState->DropBallImpl(GameState::Team::NEITHER);
-    gameState->SetCurrent(gameState->playState.get());
+  if (this->getElapsedTime() >= GameState::SecondsKickIn) {
+    this->gameState->DropBallImpl(GameState::Team::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playState.get());
   }
-  else if (!SoccerField::PenaltyBoxLeft.Contains(gameState->GetBall()))
+  else if (!SoccerField::PenaltyBoxLeft.Contains(this->gameState->GetBall()))
   {
-    gameState->SetCurrent(gameState->playState.get());
+    this->gameState->SetCurrent(this->gameState->playState.get());
   }
 }

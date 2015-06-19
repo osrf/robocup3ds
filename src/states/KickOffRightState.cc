@@ -33,14 +33,14 @@ KickOffRightState::KickOffRightState(const std::string &_name,
 /////////////////////////////////////////////////
 void KickOffRightState::Initialize()
 {
-  gameState->touchBallKickoff = NULL;
-  gameState->ballContactHistory.clear();
-  for (size_t i = 0; i < gameState->teams.size(); i++) {
-    GameState::Team *team = gameState->teams.at(i);
+  this->gameState->touchBallKickoff = NULL;
+  this->gameState->ballContactHistory.clear();
+  for (size_t i = 0; i < this->gameState->teams.size(); i++) {
+    GameState::Team *team = this->gameState->teams.at(i);
     team->canScore = false;
   }
-  gameState->MoveBallToCenter();
-  gameState->ReleasePlayers();
+  this->gameState->MoveBallToCenter();
+  this->gameState->ReleasePlayers();
   State::Initialize();
 }
 
@@ -48,43 +48,21 @@ void KickOffRightState::Initialize()
 void KickOffRightState::Update()
 {
   if (!hasInitialized) {
-    Initialize();
+    this->Initialize();
   }
 
   // check for agents that violate sides
-  for (size_t i = 0; i < gameState->teams.size(); ++i) {
-    GameState::Team *currTeam = gameState->teams.at(i);
-    for (size_t j = 0; j < currTeam->members.size(); ++j) {
-      GameState::Agent &agent = currTeam->members.at(j);
-      math::Vector3<double> agentPosNoZ(agent.pos.X(), agent.pos.Y(), 0);
-      // if on kicking team, must stay in circle and own side.
-      if (currTeam->side == GameState::Team::RIGHT && (agent.pos.X() > 0 &&
-       agentPosNoZ.Distance(SoccerField::CenterOfField) >
-       SoccerField::CenterCircleRadius)) {
-        // move them to side of field for now
-        gameState->MoveAgentToSide(agent);
-
-        // if on defending team, cannot cross line || go inside circle.
-      }
-      else if (currTeam->side == GameState::Team::LEFT && (agent.pos.X() < 0
-       || agentPosNoZ.Distance(SoccerField::CenterOfField)
-        < SoccerField::CenterCircleRadius)) {
-        // move them to side of field for now
-        gameState->MoveAgentToSide(agent);
-      }
-    }
-  }
-
+  gameState->CheckOffSidesOnKickOff(GameState::Team::RIGHT);
   State::Update();
 
   // After some time, go to play mode.
-  if (getElapsedTime() >= GameState::SecondsKickOff) {
-    gameState->DropBallImpl(GameState::Team::NEITHER);
-    gameState->SetCurrent(gameState->playState.get());
+  if (this->getElapsedTime() >= GameState::SecondsKickOff) {
+    this->gameState->DropBallImpl(GameState::Team::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playState.get());
   }
-  else if (hasBallContactOccurred())
+  else if (this->hasBallContactOccurred())
   {
-    gameState->touchBallKickoff = gameState->getLastBallContact();
-    gameState->SetCurrent(gameState->playState.get());
+    this->gameState->touchBallKickoff = this->gameState->getLastBallContact();
+    this->gameState->SetCurrent(this->gameState->playState.get());
   }
 }

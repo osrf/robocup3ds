@@ -33,32 +33,32 @@ KickInRightState::KickInRightState(const std::string &_name,
 void KickInRightState::Initialize()
 {
   // Move the ball to the sideline.
-  gameState->MoveBall(initBallPos);
-  gameState->MoveBallInBounds();
+  this->gameState->MoveBall(initBallPos);
+  this->gameState->MoveBallInBounds();
   State::Initialize();
 }
 
 /////////////////////////////////////////////////
 void KickInRightState::Update()
 {
-  if (getElapsedTime() < GameState::SecondsKickInPause) {
+  if (this->getElapsedTime() < GameState::SecondsKickInPause) {
     return;
   }
   else if (!hasInitialized)
   {
-    Initialize();
+    this->Initialize();
   }
   // The right team is !allowed to be close to the ball.
-  gameState->DropBallImpl(GameState::Team::RIGHT);
+  this->gameState->DropBallImpl(GameState::Team::RIGHT);
   State::Update();
 
   // After some time, go to play mode.
-  if (getElapsedTime() >= GameState::SecondsKickIn) {
-    gameState->DropBallImpl(GameState::Team::NEITHER);
-    gameState->SetCurrent(gameState->playState.get());
+  if (this->getElapsedTime() >= GameState::SecondsKickIn) {
+    this->gameState->DropBallImpl(GameState::Team::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playState.get());
   }
-  else if (hasBallContactOccurred())
+  else if (this->hasBallContactOccurred())
   {
-    gameState->SetCurrent(gameState->playState.get());
+    this->gameState->SetCurrent(this->gameState->playState.get());
   }
 }
