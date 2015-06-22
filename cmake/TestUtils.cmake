@@ -29,7 +29,6 @@ macro (robocup3ds_build_tests)
       gazebo_sensors
       ${GAZEBO_LIBRARIES}
       ${Boost_LIBRARIES}
-      gazebo_common
       ${PROJECT_NAME_LOWER}Plugin
     )
     add_test(${BINARY_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${BINARY_NAME}
