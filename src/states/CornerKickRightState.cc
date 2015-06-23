@@ -49,7 +49,7 @@ void CornerKickRightState::Update()
     this->Initialize();
   }
 
-  // The left team is !allowed to be close to the ball.
+  // The left team is not allowed to be close to the ball.
   this->gameState->DropBallImpl(GameState::Team::RIGHT);
   State::Update();
 

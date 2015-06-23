@@ -29,7 +29,8 @@ using namespace ignition;
 /// \brief This test fixture sets up a gameState object and two empty teams
 class GameStateTest_basic : public ::testing::Test
 {
-  protected: virtual void SetUp()
+  protected:
+    virtual void SetUp()
     {
       gameState = new GameState();
     }

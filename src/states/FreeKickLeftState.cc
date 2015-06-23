@@ -48,7 +48,7 @@ void FreeKickLeftState::Update()
     this->Initialize();
   }
 
-  // The right team is !allowed to be close to the ball.
+  // The right team is not allowed to be close to the ball.
   this->gameState->DropBallImpl(GameState::Team::LEFT);
   State::Update();
 
