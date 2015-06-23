@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,19 @@
 #include "robocup3ds/states/State.hh"
 
 /// \class FreeKickRightState FreeKickRightState.hh
+/// robocup3ds/states/FreeKickRightState.hh
 /// \brief State that handles the free kick right state.
 class FreeKickRightState : public State
 {
-  /// Documentation inherited.
+  // Documentation inherited
   public: FreeKickRightState(const std::string &_name,
                             GameState *_gameState);
 
-  /// Documentation inherited.
+  // Documentation inherited
   public: virtual void Initialize();
 
   // Documentation inherited
   public: virtual void Update();
-
-  /// \brief Set the position where the ball will be located.
-  /// \param[in] _ballPos Desired ball position.
-  public: void SetPos(const ignition::math::Vector3<double> &_pos);
 
   /// \brief Used to select the position where the ball will be moved.
   private: ignition::math::Vector3<double> pos;

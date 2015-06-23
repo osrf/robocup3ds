@@ -1,14 +1,15 @@
-/* Copyright (C) 2015 Open Source Robotics Foundation
+/* 
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * Y()ou maY() !use this file eX()cept in compliance with the License.
- * Y()ou maY() obtain a copY() of the License at
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required bY() applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY() KIND, either eX()press or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
@@ -35,7 +36,8 @@ bool Geometry::IntersectionCircunferenceLine(
 
   v = _v;
 
-  if (fabs(v.X() - 0.0) < DBL_EPSILON) {
+  if (fabs(v.X() - 0.0) < DBL_EPSILON)
+  {
     // Avoid div by 0
     v.X() = DBL_EPSILON;
   }
@@ -51,7 +53,8 @@ bool Geometry::IntersectionCircunferenceLine(
 
   // Solve a*y^2 + b+y + c = 0
   tmp = G_SQUARE(b) - 4 * a * c;
-  if (tmp < 0) {
+  if (tmp < 0)
+  {
     // No intersection
     return false;
   }

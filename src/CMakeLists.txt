@@ -14,7 +14,7 @@ set (sources
   states/KickInRightState.cc
   states/KickOffLeftState.cc
   states/KickOffRightState.cc
-  states/PlayState.cc
+  states/PlayOnState.cc
   states/State.cc
   GameState.cc
   Robocup3dsPlugin.cc
@@ -37,5 +37,9 @@ link_directories(
 
 robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources})
 robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
+
+target_link_libraries(${PROJECT_NAME_LOWER}Plugin
+  gazebo_common
+)
 
 robocup3ds_build_tests(${gtest_sources})

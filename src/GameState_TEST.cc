@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may !use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 #include "gtest/gtest.h"
@@ -25,22 +25,27 @@
 using namespace std;
 using namespace ignition;
 
+/// \class GameStateTest_basic
+/// \brief This test fixture sets up a gameState object and two empty teams
 class GameStateTest_basic : public ::testing::Test
 {
   protected:
-    GameState *gameState;
-    // green is third team && shouldnt be added
-    string teamNames[3] = {"blue", "red", "green"};
-
     virtual void SetUp()
     {
       gameState = new GameState();
     }
 
+  protected:
     virtual void TearDown()
     {
       delete gameState;
     }
+
+  protected:
+    GameState *gameState;
+    // green is third team && shouldnt be added
+  protected:
+    string teamNames[3] = {"blue", "red", "green"};
 };
 
 /// \brief Test whether GameState constructor && destructor works
@@ -53,11 +58,11 @@ TEST_F(GameStateTest_basic, GameState_construct_delete)
 TEST_F(GameStateTest_basic, GameState_add_teams_agents)
 {
   // make sure that agents with bad unums || teams cannot be added
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; ++i)
   {
-    for (int j = 0; j < 15; j++)
+    for (int j = 0; j < 15; ++j)
     {
-      bool returnValue = gameState->addAgent(j + 1, teamNames[i]);
+      bool returnValue = gameState->AddAgent(j + 1, teamNames[i]);
       if (i >= 2 || j + 1 >= 12)
       {
         ASSERT_FALSE(returnValue);
@@ -69,34 +74,34 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
     }
   }
 
-  // both teams are full so this should !work
-  for (int i = 0; i < 2; i++)
+  // both teams are full so this should not work
+  for (int i = 0; i < 2; ++i)
   {
-    for (int j = 0; j < 2; j++)
+    for (int j = 0; j < 2; ++j)
     {
-      ASSERT_FALSE(gameState->addAgent(j + 1, teamNames[i]));
+      ASSERT_FALSE(gameState->AddAgent(j + 1, teamNames[i]));
     }
   }
 
   // make sure that their are only two teams && that each
   // team is initialized correctly
   ASSERT_EQ(gameState->teams.size(), 2u);
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
-    ASSERT_EQ(gameState->teams.at(i)->members.size(), 11u);
+    ASSERT_EQ(gameState->teams.at(i).get()->members.size(), 11u);
     if (i == 0)
     {
-      ASSERT_EQ(gameState->teams.at(i)->name, "blue");
-      ASSERT_EQ(gameState->teams.at(i)->side, GameState::Team::LEFT);
+      ASSERT_EQ(gameState->teams.at(i).get()->name, "blue");
+      ASSERT_EQ(gameState->teams.at(i).get()->side, GameState::Team::LEFT);
     }
     else
     {
-      ASSERT_EQ(gameState->teams.at(i)->name, "red");
-      ASSERT_EQ(gameState->teams.at(i)->side, GameState::Team::RIGHT);
+      ASSERT_EQ(gameState->teams.at(i).get()->name, "red");
+      ASSERT_EQ(gameState->teams.at(i).get()->side, GameState::Team::RIGHT);
     }
-    for (int j = 0; j < 11; j++)
+    for (int j = 0; j < 11; ++j)
     {
-      GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
+      GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j);
       ASSERT_EQ(agent.uNum, j + 1);
       ASSERT_TRUE(agent.team != NULL);
     }
@@ -106,50 +111,50 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
 /// \brief Test for removing teams && agents
 TEST_F(GameStateTest_basic, GameState_remove_agents)
 {
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
-    for (int j = 0; j < 11; j++)
+    for (int j = 0; j < 11; ++j)
     {
-      gameState->addAgent(j + 1, teamNames[i]);
+      gameState->AddAgent(j + 1, teamNames[i]);
     }
   }
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
-    for (int j = 0; j < 11; j++)
+    for (int j = 0; j < 11; ++j)
     {
-      bool returnValue = gameState->removeAgent(j + 1, teamNames[i]);
+      bool returnValue = gameState->RemoveAgent(j + 1, teamNames[i]);
       ASSERT_TRUE(returnValue);
     }
   }
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
-    for (int j = 0; j < 11; j++)
+    for (int j = 0; j < 11; ++j)
     {
-      bool returnValue = gameState->removeAgent(j + 1, teamNames[i]);
+      bool returnValue = gameState->RemoveAgent(j + 1, teamNames[i]);
       ASSERT_FALSE(returnValue);
     }
   }
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
-    ASSERT_EQ(gameState->teams.at(i)->members.size(), 0u);
+    ASSERT_EQ(gameState->teams.at(i).get()->members.size(), 0u);
   }
 }
 
 /// \brief Test for add agent with uNum 0, which assigns it the next free uNum
 TEST_F(GameStateTest_basic, GameState_add_agent_0)
 {
-  ASSERT_TRUE(gameState->addAgent(0, teamNames[1]));
+  ASSERT_TRUE(gameState->AddAgent(0, teamNames[1]));
   ASSERT_EQ(gameState->teams[0]->members.at(0).uNum, 1);
-  ASSERT_FALSE(gameState->addAgent(1, teamNames[1]));
-  ASSERT_TRUE(gameState->addAgent(2, teamNames[1]));
-  ASSERT_TRUE(gameState->addAgent(0, teamNames[1]));
-  ASSERT_TRUE(gameState->addAgent(0, teamNames[1]));
-  ASSERT_FALSE(gameState->addAgent(3, teamNames[1]));
-  ASSERT_FALSE(gameState->addAgent(4, teamNames[1]));
-  ASSERT_EQ(gameState->teams.at(0)->members.size(), 4u);
+  ASSERT_FALSE(gameState->AddAgent(1, teamNames[1]));
+  ASSERT_TRUE(gameState->AddAgent(2, teamNames[1]));
+  ASSERT_TRUE(gameState->AddAgent(0, teamNames[1]));
+  ASSERT_TRUE(gameState->AddAgent(0, teamNames[1]));
+  ASSERT_FALSE(gameState->AddAgent(3, teamNames[1]));
+  ASSERT_FALSE(gameState->AddAgent(4, teamNames[1]));
+  ASSERT_EQ(gameState->teams.at(0).get()->members.size(), 4u);
 }
 
 /// \brief Test for whether the move ball functions are working as intended
@@ -199,7 +204,7 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
   fourCorners.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth,
                         SoccerField::HalfFieldHeight, SoccerField::BallRadius));
 
-  for (size_t i = 0; i < nearFourCorners.size(); i++)
+  for (size_t i = 0; i < nearFourCorners.size(); ++i)
   {
     gameState->MoveBall(nearFourCorners.at(i));
     gameState->MoveBallToCorner();
@@ -222,7 +227,7 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
   inBounds.push_back(math::Vector3<double>(-11, SoccerField::HalfFieldHeight,
                      SoccerField::BallRadius));
 
-  for (size_t i = 0; i < outOfBounds.size(); i++)
+  for (size_t i = 0; i < outOfBounds.size(); ++i)
   {
     gameState->MoveBall(outOfBounds.at(i));
     gameState->MoveBallInBounds();
@@ -230,22 +235,23 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
   }
 }
 
+/// \brief Test for whether the move agent functions are working as intended
 TEST_F(GameStateTest_basic, GameState_move_agent)
 {
-  gameState->addAgent(1, "blue");
-  GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
+  gameState->AddAgent(1, "blue");
+  GameState::Agent &agent = gameState->teams.at(0).get()->members.at(0);
   math::Vector3<double> pos(15, 10, GameState::beamHeight);
   gameState->MoveAgent(agent, pos);
   ASSERT_EQ(pos, agent.pos);
-  ASSERT_EQ(pos, gameState->teams.at(0)->members.at(0).pos);
+  ASSERT_EQ(pos, gameState->teams.at(0).get()->members.at(0).pos);
 
   pos.Set(5, 6, GameState::beamHeight);
   math::Quaternion<double>rot(0, 0, 1.0);
   gameState->MoveAgent(agent, 5, 6, 1.0);
   ASSERT_EQ(agent.pos, pos);
   ASSERT_EQ(rot, agent.rot);
-  ASSERT_EQ(pos, gameState->teams.at(0)->members.at(0).pos);
-  ASSERT_EQ(rot, gameState->teams.at(0)->members.at(0).rot);
+  ASSERT_EQ(pos, gameState->teams.at(0).get()->members.at(0).pos);
+  ASSERT_EQ(rot, gameState->teams.at(0).get()->members.at(0).rot);
 
   pos.Set(0, 9, 0);
   gameState->MoveAgent(agent, pos);
@@ -264,56 +270,60 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
   gameState->MoveAgent(agent, pos, rot);
   ASSERT_EQ(agent.pos, pos);
   ASSERT_EQ(rot, agent.rot);
-  ASSERT_EQ(pos, gameState->teams.at(0)->members.at(0).pos);
-  ASSERT_EQ(rot, gameState->teams.at(0)->members.at(0).rot);
+  ASSERT_EQ(pos, gameState->teams.at(0).get()->members.at(0).pos);
+  ASSERT_EQ(rot, gameState->teams.at(0).get()->members.at(0).rot);
 
   pos.Set(7, 8, GameState::beamHeight);
   rot.Euler(0, 0, 1.25);
-  for (int i = 0; i < 100; i++)
+  for (int i = 0; i < 100; ++i)
   {
-    bool result = gameState->beamAgent(1, "blue", 7, 8, 1.25);
+    bool result = gameState->BeamAgent(1, "blue", 7, 8, 1.25);
     ASSERT_TRUE(result);
     ASSERT_LE(agent.pos.Distance(pos), 0.15);
     ASSERT_LE(fabs(agent.rot.Euler().Z() - rot.Euler().Z()), 0.1);
   }
 }
 
+/// \class GameStateTest_fullTeams
+/// \brief This test fixture sets up a gameState object and two full teams
 class GameStateTest_fullTeams : public GameStateTest_basic
 {
   protected:
     virtual void SetUp()
     {
       GameStateTest_basic::SetUp();
-      for (int i = 0; i < 2; i++)
+      for (int i = 0; i < 2; ++i)
       {
-        for (int j = 0; j < 11; j++)
+        for (int j = 0; j < 11; ++j)
         {
-          gameState->addAgent(j + 1, teamNames[i]);
+          gameState->AddAgent(j + 1, teamNames[i]);
         }
       }
     }
 
+  protected:
     virtual void resetPositions()
     {
-      for (int i = 0; i < 2; i++)
+      for (int i = 0; i < 2; ++i)
       {
-        for (int j = 0; j < 11; j++)
+        for (int j = 0; j < 11; ++j)
         {
-          GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
+          GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j);
           gameState->MoveAgent(agent, math::Vector3<double>
                                (0, 0, GameState::beamHeight));
         }
       }
     }
 
+  protected:
     virtual void resetPositionsForKickOff()
     {
-      for (int i = 0; i < 2; i++)
+      for (int i = 0; i < 2; ++i)
       {
-        for (int j = 0; j < 11; j++)
+        for (int j = 0; j < 11; ++j)
         {
-          GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
-          if (gameState->teams.at(i)->side == GameState::Team::LEFT)
+          GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j);
+          if (gameState->teams.at(i).get()->side == GameState::Team::LEFT)
           {
             gameState->MoveAgent(agent, math::Vector3<double>
                                  (-5, 0, GameState::beamHeight));
@@ -326,13 +336,15 @@ class GameStateTest_fullTeams : public GameStateTest_basic
         }
       }
     }
+
+  protected:
     virtual void resetPositions(int _team)
     {
       if (_team != 0 || _team != 1)
       {
         return;
       }
-      for (int j = 0; j < 11; j++)
+      for (int j = 0; j < 11; ++j)
       {
         GameState::Agent &agent = gameState->teams.at(_team)->members.at(j);
         gameState->MoveAgent(agent, math::Vector3<double>
@@ -346,34 +358,34 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff)
 {
   // try first half
   ASSERT_EQ(gameState->GetHalf(), GameState::FIRST_HALF);
-  while (gameState->getGameTime() < GameState::SecondsBeforeKickOff + 1)
+  while (gameState->GetGameTime() < GameState::SecondsBeforeKickOff + 1)
   {
     gameState->Update();
-    if (gameState->getGameTime() < GameState::SecondsBeforeKickOff)
+    if (gameState->GetGameTime() < GameState::SecondsBeforeKickOff)
     {
       ASSERT_EQ(gameState->GetBall(), SoccerField::BallCenterPosition);
-      ASSERT_EQ(gameState->getCurrentState()->name, "BeforeKickOff");
+      ASSERT_EQ(gameState->GetCurrentState()->name, "BeforeKickOff");
     }
     else
     {
-      ASSERT_EQ(gameState->getCurrentState()->name, "KickOff_Left");
+      ASSERT_EQ(gameState->GetCurrentState()->name, "KickOffLeft");
     }
   }
 
   // try second half
   gameState->SetHalf(GameState::SECOND_HALF);
   ASSERT_EQ(gameState->GetHalf(), GameState::SECOND_HALF);
-  while (gameState->getGameTime() < GameState::SecondsBeforeKickOff + 1)
+  while (gameState->GetGameTime() < GameState::SecondsBeforeKickOff + 1)
   {
     gameState->Update();
-    if (gameState->getGameTime() < GameState::SecondsBeforeKickOff)
+    if (gameState->GetGameTime() < GameState::SecondsBeforeKickOff)
     {
       ASSERT_EQ(gameState->GetBall(), SoccerField::BallCenterPosition);
-      ASSERT_EQ(gameState->getCurrentState()->name, "BeforeKickOff");
+      ASSERT_EQ(gameState->GetCurrentState()->name, "BeforeKickOff");
     }
     else
     {
-      ASSERT_EQ(gameState->getCurrentState()->name, "KickOff_Right");
+      ASSERT_EQ(gameState->GetCurrentState()->name, "KickOffRight");
     }
   }
 }
@@ -385,95 +397,95 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
   states.push_back(gameState->kickOffLeftState.get());
   states.push_back(gameState->kickOffRightState.get());
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
   // Test for both left && right kick offs
-  for (size_t i = 0; i < states.size(); i++)
+  for (size_t i = 0; i < states.size(); ++i)
   {
     State *state = states.at(i);
 
     // test for transition when KickOff times out after 15 secs
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(state);
-    while (gameState->getGameTime() < GameState::SecondsKickOff + 1)
+    while (gameState->GetGameTime() < GameState::SecondsKickOff + 1)
     {
       gameState->Update();
-      // cout << gameState->getGameTime() << " " << gameState->
-      // getCurrentState()->name << " " << gameState->getCurrentState()->
+      // cout << gameState->GetGameTime() << " " << gameState->
+      // GetCurrentState()->name << " " << gameState->GetCurrentState()->
       // getElapsedTime() << endl;
-      if (gameState->getGameTime() < GameState::SecondsKickOff)
+      if (gameState->GetGameTime() < GameState::SecondsKickOff)
       {
-        ASSERT_EQ(gameState->getCurrentState()->name, state->name);
+        ASSERT_EQ(gameState->GetCurrentState()->name, state->name);
       }
       else
       {
-        ASSERT_EQ(gameState->getCurrentState()->name, "PlayOn");
+        ASSERT_EQ(gameState->GetCurrentState()->name, "PlayOn");
       }
     }
 
     // test for transition when ball is touched
     gameState->SetCurrent(state);
     gameState->Update();
-    boost::shared_ptr<GameState::BallContact> ballContact(
-      new GameState::BallContact(1, gameState->teams.at(i)->side,
-                                 gameState->getGameTime(),
+    std::shared_ptr<GameState::BallContact> ballContact(
+      new GameState::BallContact(1, gameState->teams.at(i).get()->side,
+                                 gameState->GetGameTime(),
                                  math::Vector3<double>(0, 0, 0)));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
     ASSERT_TRUE(gameState->touchBallKickoff != NULL);
     ASSERT_EQ(gameState->touchBallKickoff, ballContact.get());
-    ASSERT_EQ(gameState->getCurrentState()->name, "PlayOn");
+    ASSERT_EQ(gameState->GetCurrentState()->name, "PlayOn");
 
     // test for transition when double touching occurs
     gameState->SetCurrent(state);
     gameState->Update();
-    boost::shared_ptr<GameState::BallContact> ballContact2(
-      new GameState::BallContact(1, gameState->teams.at(i)->side,
-                                 gameState->getGameTime(),
+    std::shared_ptr<GameState::BallContact> ballContact2(
+      new GameState::BallContact(1, gameState->teams.at(i).get()->side,
+                                 gameState->GetGameTime(),
                                  math::Vector3<double>(0, 0, 0)));
     gameState->ballContactHistory.push_back(ballContact2);
-    for (int j = 0; j < 10; j++)
+    for (int j = 0; j < 10; ++j)
     {
       gameState->Update();
-      ASSERT_EQ(gameState->getCurrentState()->name, "PlayOn");
+      ASSERT_EQ(gameState->GetCurrentState()->name, "PlayOn");
     }
-    boost::shared_ptr<GameState::BallContact> ballContact3(
-      new GameState::BallContact(1, gameState->teams.at(i)->side,
-                                 gameState->getGameTime(),
+    std::shared_ptr<GameState::BallContact> ballContact3(
+      new GameState::BallContact(1, gameState->teams.at(i).get()->side,
+                                 gameState->GetGameTime(),
                                  math::Vector3<double>(0, 0, 0)));
     gameState->ballContactHistory.push_back(ballContact3);
     gameState->Update();
-    ASSERT_EQ(gameState->getCurrentState()->name, states.at((i + 1) % 2)->name);
+    ASSERT_EQ(gameState->GetCurrentState()->name, states.at((i + 1) % 2)->name);
 
-    // test that transition to other kickoff does !happen when
-    // double touch does !occur
+    // test that transition to other kickoff does not happen when
+    // double touch does not occur
     gameState->SetCurrent(state);
     gameState->Update();
-    boost::shared_ptr<GameState::BallContact> ballContact4(
-      new GameState::BallContact(1, gameState->teams.at(i)->side,
-                                 gameState->getGameTime(),
+    std::shared_ptr<GameState::BallContact> ballContact4(
+      new GameState::BallContact(1, gameState->teams.at(i).get()->side,
+                                 gameState->GetGameTime(),
                                  math::Vector3<double>(0, 0, 0)));
     gameState->ballContactHistory.push_back(ballContact4);
-    for (int j = 0; j < 10; j++)
+    for (int j = 0; j < 10; ++j)
     {
       gameState->Update();
       if (j == 5)
       {
-        boost::shared_ptr<GameState::BallContact> ballContact5(
-          new GameState::BallContact(5,
-                                     gameState->teams.at((i + 1) % 2)->side,
-                                     gameState->getGameTime(),
-                                     math::Vector3<double>(0, 0, 0)));
+        std::shared_ptr<GameState::BallContact> ballContact5(
+          new GameState::BallContact(
+            5, gameState->teams.at((i + 1) % 2).get()->side,
+            gameState->GetGameTime(),
+            math::Vector3<double>(0, 0, 0)));
         gameState->ballContactHistory.push_back(ballContact5);
       }
     }
-    boost::shared_ptr<GameState::BallContact> ballContact6(
-      new GameState::BallContact(1, gameState->teams.at(i)->side,
-                                 gameState->getGameTime(),
+    std::shared_ptr<GameState::BallContact> ballContact6(
+      new GameState::BallContact(1, gameState->teams.at(i).get()->side,
+                                 gameState->GetGameTime(),
                                  math::Vector3<double>(0, 0, 0)));
     gameState->ballContactHistory.push_back(ballContact6);
     gameState->Update();
-    ASSERT_EQ(gameState->getCurrentState()->name, "PlayOn");
+    ASSERT_EQ(gameState->GetCurrentState()->name, "PlayOn");
   }
 }
 
@@ -483,35 +495,35 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_kickIn)
   vector<State *> states;
   states.push_back(gameState->kickInLeftState.get());
   states.push_back(gameState->kickInRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
   ballPositions.push_back(math::Vector3<double>(0, -15,
                           SoccerField::BallRadius));
   ballPositions.push_back(math::Vector3<double>(0, 15,
                           SoccerField::BallRadius));
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
+  for (size_t i = 0; i < states.size(); ++i)
   {
-    for (size_t j = 0; j < ballPositions.size(); j++)
+    for (size_t j = 0; j < ballPositions.size(); ++j)
     {
       gameState->MoveBall(math::Vector3<double>(0, 0, 0));
-      gameState->SetCurrent(gameState->playState.get());
+      gameState->SetCurrent(gameState->playOnState.get());
       gameState->Update();
-      ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+      ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
 
-      ballContact = boost::shared_ptr<GameState::BallContact>(
+      ballContact = std::shared_ptr<GameState::BallContact>(
                       new GameState::BallContact(1,
-                          gameState->teams.at(i)->side,
-                          gameState->getGameTime(),
+                          gameState->teams.at(i).get()->side,
+                          gameState->GetGameTime(),
                           math::Vector3<double>(0, 0, 0)));
       gameState->ballContactHistory.push_back(ballContact);
 
       gameState->MoveBall(ballPositions.at(j));
       gameState->Update();
       ASSERT_EQ(states.at((i + 1) % 2)->name,
-                gameState->getCurrentState()->name);
+                gameState->GetCurrentState()->name);
     }
   }
 }
@@ -522,7 +534,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_cornerKick)
   vector<State *> states;
   states.push_back(gameState->cornerKickLeftState.get());
   states.push_back(gameState->cornerKickRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
   ballPositions.push_back(math::Vector3<double>(
                             -(SoccerField::HalfFieldWidth + 1),
@@ -531,25 +543,27 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_cornerKick)
                             SoccerField::HalfFieldWidth + 1,
                             -5, SoccerField::BallRadius));
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
+  for (size_t i = 0; i < states.size(); ++i)
   {
     gameState->MoveBall(math::Vector3<double>(0, 0, 0));
-    gameState->SetCurrent(gameState->playState.get());
+    gameState->SetCurrent(gameState->playOnState.get());
     gameState->Update();
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
 
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        math::Vector3<double>(0, 0, 0)));
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      math::Vector3<double>(0, 0, 0)));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->MoveBall(ballPositions.at(i));
     // cout << gameState->getLastBallContact()->side << " " <<
-    // gameState->GetBall() << " " << gameState->teams.at(i)->side << endl;
+    // gameState->GetBall() << " " <<
+    // gameState->teams.at(i).get()->side << endl;
     gameState->Update();
-    ASSERT_EQ(states.at((i + 1) % 2)->name, gameState->getCurrentState()->name);
+    ASSERT_EQ(states.at((i + 1) % 2)->name, gameState->GetCurrentState()->name);
   }
 }
 
@@ -559,7 +573,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
   vector<State *> states;
   states.push_back(gameState->goalLeftState.get());
   states.push_back(gameState->goalRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
   ballPositions.push_back(math::Vector3<double>(
                             -(SoccerField::HalfFieldWidth + 0.5),
@@ -568,18 +582,18 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
                             SoccerField::HalfFieldWidth + 0.5,
                             -1, SoccerField::BallRadius));
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
+  for (size_t i = 0; i < states.size(); ++i)
   {
     gameState->MoveBall(math::Vector3<double>(0, 0, 0));
-    gameState->SetCurrent(gameState->playState.get());
+    gameState->SetCurrent(gameState->playOnState.get());
     gameState->Update();
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
 
     gameState->MoveBall(ballPositions.at(i));
     gameState->Update();
-    ASSERT_EQ(states.at((i + 1) % 2)->name, gameState->getCurrentState()->name);
+    ASSERT_EQ(states.at((i + 1) % 2)->name, gameState->GetCurrentState()->name);
   }
 }
 
@@ -589,7 +603,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goalKick)
   vector<State *> states;
   states.push_back(gameState->goalKickLeftState.get());
   states.push_back(gameState->goalKickRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
   ballPositions.push_back(math::Vector3<double>(
                             -(SoccerField::HalfFieldWidth + 1),
@@ -598,24 +612,24 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goalKick)
                             SoccerField::HalfFieldWidth + 1,
                             -5, SoccerField::BallRadius));
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
+  for (size_t i = 0; i < states.size(); ++i)
   {
     gameState->MoveBall(math::Vector3<double>(0, 0, 0));
-    gameState->SetCurrent(gameState->playState.get());
+    gameState->SetCurrent(gameState->playOnState.get());
     gameState->Update();
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
 
-    ballContact = boost::shared_ptr<GameState::BallContact>(
+    ballContact = std::shared_ptr<GameState::BallContact>(
                     new GameState::BallContact(1,
-                        gameState->teams.at((i + 1) % 2)->side,
-                        gameState->getGameTime(),
+                        gameState->teams.at((i + 1) % 2).get()->side,
+                        gameState->GetGameTime(),
                         math::Vector3<double>(0, 0, 0)));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->MoveBall(ballPositions.at(i));
     gameState->Update();
-    ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+    ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
   }
 }
 
@@ -630,27 +644,27 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_goal_kickOff)
   afterStates.push_back(gameState->kickOffRightState.get());
   afterStates.push_back(gameState->kickOffLeftState.get());
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
 
-  for (size_t i = 0; i < beforeStates.size(); i++)
+  for (size_t i = 0; i < beforeStates.size(); ++i)
   {
     // check that valid goal transitions correctly
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(beforeStates.at(i));
-    gameState->teams.at(i)->canScore = true;
+    gameState->teams.at(i).get()->canScore = true;
 
-    while (gameState->getGameTime() < GameState::SecondsGoalPause)
+    while (gameState->GetGameTime() < GameState::SecondsGoalPause)
     {
-      ASSERT_EQ(beforeStates.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(beforeStates.at(i)->name, gameState->GetCurrentState()->name);
       gameState->Update();
     }
-    ASSERT_EQ(afterStates.at(i)->name, gameState->getCurrentState()->name);
+    ASSERT_EQ(afterStates.at(i)->name, gameState->GetCurrentState()->name);
 
     gameState->SetCurrent(beforeStates.at(i));
-    gameState->teams.at(i)->canScore = false;
+    gameState->teams.at(i).get()->canScore = false;
     gameState->Update();
-    ASSERT_EQ(afterStates.at(i)->name, gameState->getCurrentState()->name);
+    ASSERT_EQ(afterStates.at(i)->name, gameState->GetCurrentState()->name);
   }
 }
 
@@ -660,37 +674,38 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickIn_playOn)
   vector<State *> states;
   states.push_back(gameState->kickInLeftState.get());
   states.push_back(gameState->kickInRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
+  for (size_t i = 0; i < states.size(); ++i)
   {
     // transition from timing out
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(states.at(i));
-    while (gameState->getGameTime() < GameState::SecondsKickIn)
+    while (gameState->GetGameTime() < GameState::SecondsKickIn)
     {
-      ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
       gameState->Update();
     }
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
 
     // transition to play on from touching the ball
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(states.at(i));
-    while (gameState->getGameTime() < GameState::SecondsKickInPause)
+    while (gameState->GetGameTime() < GameState::SecondsKickInPause)
     {
       gameState->Update();
-      ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
     }
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
   }
 }
 
@@ -700,37 +715,38 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_cornerKick_playOn)
   vector<State *> states;
   states.push_back(gameState->cornerKickLeftState.get());
   states.push_back(gameState->cornerKickRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
+  for (size_t i = 0; i < states.size(); ++i)
   {
     // transition from timing out
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(states.at(i));
-    while (gameState->getGameTime() < GameState::SecondsKickIn)
+    while (gameState->GetGameTime() < GameState::SecondsKickIn)
     {
-      ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
       gameState->Update();
     }
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
 
     // transition to play on from touching the ball
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(states.at(i));
-    while (gameState->getGameTime() < GameState::SecondsKickInPause)
+    while (gameState->GetGameTime() < GameState::SecondsKickInPause)
     {
       gameState->Update();
-      ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
     }
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
   }
 }
 
@@ -740,37 +756,38 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_freeKick_playOn)
   vector<State *> states;
   states.push_back(gameState->freeKickLeftState.get());
   states.push_back(gameState->freeKickRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
+  for (size_t i = 0; i < states.size(); ++i)
   {
     // transition from timing out
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(states.at(i));
-    while (gameState->getGameTime() < GameState::SecondsKickIn)
+    while (gameState->GetGameTime() < GameState::SecondsKickIn)
     {
-      ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
       gameState->Update();
     }
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
 
     // transition to play on from touching the ball
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(states.at(i));
-    while (gameState->getGameTime() < GameState::SecondsKickInPause)
+    while (gameState->GetGameTime() < GameState::SecondsKickInPause)
     {
       gameState->Update();
-      ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
     }
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
   }
 }
 
@@ -780,41 +797,41 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_goalKick_playOn)
   vector<State *> states;
   states.push_back(gameState->goalKickLeftState.get());
   states.push_back(gameState->goalKickRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
   vector<math::Vector3<double> > ballPositions;
   ballPositions.push_back(math::Vector3<double>(-16, 5,
                           SoccerField::BallRadius));
   ballPositions.push_back(math::Vector3<double>(16, -5,
                           SoccerField::BallRadius));
 
-  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0)->side);
-  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1)->side);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(GameState::Team::LEFT, gameState->teams.at(0).get()->side);
+  ASSERT_EQ(GameState::Team::RIGHT, gameState->teams.at(1).get()->side);
+  for (size_t i = 0; i < states.size(); ++i)
   {
     // transition from timing out
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->MoveBall(ballPositions.at(i));
     gameState->SetCurrent(states.at(i));
 
-    while (gameState->getGameTime() < GameState::SecondsKickIn)
+    while (gameState->GetGameTime() < GameState::SecondsKickIn)
     {
-      ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
       gameState->Update();
     }
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
 
     // transition to play on from touching the ball
-    gameState->setCycleCounter(0);
+    gameState->SetCycleCounter(0);
     gameState->SetCurrent(states.at(i));
-    while (gameState->getGameTime() < GameState::SecondsKickInPause)
+    while (gameState->GetGameTime() < GameState::SecondsKickInPause)
     {
       gameState->Update();
-      ASSERT_EQ(states.at(i)->name, gameState->getCurrentState()->name);
+      ASSERT_EQ(states.at(i)->name, gameState->GetCurrentState()->name);
     }
     // move ball out of penalty area
     gameState->MoveBallToCenter();
     gameState->Update();
-    ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+    ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
   }
 }
 
@@ -831,44 +848,45 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
                           GameState::SecondsFullGame;
   double secondHalfKickOffTime = GameState::SecondsKickOff + firstHalfTime;
 
-  while (gameState->getGameTime() < firstHalfTime)
+  while (gameState->GetGameTime() < firstHalfTime)
   {
-    ASSERT_TRUE(gameState->getElapsedGameTime() < GameState::SecondsEachHalf);
+    ASSERT_TRUE(gameState->GetElapsedGameTime() < GameState::SecondsEachHalf);
     ASSERT_TRUE(gameState->GetHalf() == GameState::FIRST_HALF);
-    ASSERT_TRUE(gameState->teams.at(0)->side == GameState::Team::LEFT
-                && gameState->teams.at(1)->side == GameState::Team::RIGHT);
-    if (gameState->getGameTime() < GameState::SecondsBeforeKickOff)
+    ASSERT_TRUE(gameState->teams.at(0).get()->side == GameState::Team::LEFT
+                && gameState->teams.at(1).get()->side ==
+                GameState::Team::RIGHT);
+    if (gameState->GetGameTime() < GameState::SecondsBeforeKickOff)
     {
-      ASSERT_EQ("BeforeKickOff", gameState->getCurrentState()->name);
+      ASSERT_EQ("BeforeKickOff", gameState->GetCurrentState()->name);
     }
-    else if (gameState->getGameTime() < firstHalfKickOffTime)
+    else if (gameState->GetGameTime() < firstHalfKickOffTime)
     {
-      ASSERT_EQ("KickOff_Left", gameState->getCurrentState()->name);
+      ASSERT_EQ("KickOffLeft", gameState->GetCurrentState()->name);
     }
     else
     {
-      ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+      ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
     }
     gameState->Update();
   }
-  ASSERT_EQ("KickOff_Right", gameState->getCurrentState()->name);
-  while (gameState->getGameTime() < secondHalfTime)
+  ASSERT_EQ("KickOffRight", gameState->GetCurrentState()->name);
+  while (gameState->GetGameTime() < secondHalfTime)
   {
     ASSERT_TRUE(gameState->GetHalf() == GameState::SECOND_HALF);
-    ASSERT_TRUE(gameState->teams.at(0)->side == GameState::Team::RIGHT
-                && gameState->teams.at(1)->side == GameState::Team::LEFT);
-    ASSERT_TRUE(gameState->getElapsedGameTime() < GameState::SecondsEachHalf);
-    if (gameState->getGameTime() < secondHalfKickOffTime)
+    ASSERT_TRUE(gameState->teams.at(0).get()->side == GameState::Team::RIGHT
+                && gameState->teams.at(1).get()->side == GameState::Team::LEFT);
+    ASSERT_TRUE(gameState->GetElapsedGameTime() < GameState::SecondsEachHalf);
+    if (gameState->GetGameTime() < secondHalfKickOffTime)
     {
-      ASSERT_EQ("KickOff_Right", gameState->getCurrentState()->name);
+      ASSERT_EQ("KickOffRight", gameState->GetCurrentState()->name);
     }
     else
     {
-      ASSERT_EQ("PlayOn", gameState->getCurrentState()->name);
+      ASSERT_EQ("PlayOn", gameState->GetCurrentState()->name);
     }
     gameState->Update();
   }
-  ASSERT_EQ("GameOver", gameState->getCurrentState()->name);
+  ASSERT_EQ("GameOver", gameState->GetCurrentState()->name);
 }
 
 /// \brief Test to check whether the GameState CheckCanScore function
@@ -878,88 +896,94 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
   vector<State *> states;
   states.push_back(gameState->kickOffLeftState.get());
   states.push_back(gameState->kickOffRightState.get());
-  boost::shared_ptr<GameState::BallContact> ballContact;
+  std::shared_ptr<GameState::BallContact> ballContact;
   math::Vector3<double> pos;
 
-  for (size_t i = 0; i < states.size(); i++)
+  for (size_t i = 0; i < states.size(); ++i)
   {
     // case 1: kickoff agent touches ball, teammate touches ball outside circle
     // team should be able to score
     gameState->SetCurrent(states.at(i));
     gameState->Update();
-    ASSERT_FALSE(gameState->teams.at(i)->canScore);
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ASSERT_FALSE(gameState->teams.at(i).get()->canScore);
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
     pos.Set(5, 5, SoccerField::BallRadius);
-    ballContact = boost::shared_ptr<GameState::BallContact>(new
-                  GameState::BallContact(2, gameState->teams.at(i)->side,
-                                         gameState->getGameTime(), pos));
+    ballContact = std::shared_ptr<GameState::BallContact>(new
+                  GameState::BallContact(2, gameState->teams.at(i).get()->side,
+                                         gameState->GetGameTime(), pos));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ASSERT_TRUE(gameState->teams.at(i)->canScore);
+    ASSERT_TRUE(gameState->teams.at(i).get()->canScore);
 
     // case 2: kickoff agent touches ball, teammate touches ball inside circle
-    // team should !be able to score
+    // team should not be able to score
     gameState->SetCurrent(states.at(i));
     gameState->Update();
-    ASSERT_FALSE(gameState->teams.at(i)->canScore);
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ASSERT_FALSE(gameState->teams.at(i).get()->canScore);
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(2, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      2, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ASSERT_FALSE(gameState->teams.at(i)->canScore);
+    ASSERT_FALSE(gameState->teams.at(i).get()->canScore);
 
     // case 3: kickoff agent touches ball, && touches it again afterwards
-    // team should !be able to score
+    // team should not be able to score
     gameState->SetCurrent(states.at(i));
     gameState->Update();
-    ASSERT_FALSE(gameState->teams.at(i)->canScore);
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ASSERT_FALSE(gameState->teams.at(i).get()->canScore);
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ASSERT_FALSE(gameState->teams.at(i)->canScore);
+    ASSERT_FALSE(gameState->teams.at(i).get()->canScore);
 
     // case 4: kickoff agent touches ball, &&
     // someone on opposing team touches it
     // team should be able to score
     gameState->SetCurrent(states.at(i));
     gameState->Update();
-    ASSERT_FALSE(gameState->teams.at(i)->canScore);
-    ballContact = boost::shared_ptr<GameState::BallContact>(
-                    new GameState::BallContact(1, gameState->teams.at(i)->side,
-                        gameState->getGameTime(),
-                        gameState->GetBall()));
+    ASSERT_FALSE(gameState->teams.at(i).get()->canScore);
+    ballContact = std::shared_ptr<GameState::BallContact>(
+                    new GameState::BallContact(
+                      1, gameState->teams.at(i).get()->side,
+                      gameState->GetGameTime(),
+                      gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ballContact = boost::shared_ptr<GameState::BallContact>(
+    ballContact = std::shared_ptr<GameState::BallContact>(
                     new GameState::BallContact(1,
-                        gameState->teams.at((i + 1) % 2)->side,
-                        gameState->getGameTime(),
+                        gameState->teams.at((i + 1) % 2).get()->side,
+                        gameState->GetGameTime(),
                         gameState->GetBall()));
     gameState->ballContactHistory.push_back(ballContact);
     gameState->Update();
-    ASSERT_TRUE(gameState->teams.at(i)->canScore);
+    ASSERT_TRUE(gameState->teams.at(i).get()->canScore);
   }
 }
 
@@ -967,7 +991,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
 /// function works as intended
 TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
 {
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
     math::Box penaltyBox;
     math::Vector3<double> goalCenter;
@@ -982,23 +1006,23 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
       goalCenter = SoccerField::GoalCenterRight;
     }
     math::Vector3<double> penaltyPos = penaltyBox.Center();
-    gameState->SetCurrent(gameState->playState.get());
+    gameState->SetCurrent(gameState->playOnState.get());
 
     // test whether fourth agent in penalty box gets beamed out
     resetPositions();
     gameState->Update();
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; ++j)
     {
-      GameState::Agent &agent = gameState->teams.at(i)->members.at(j + 1);
+      GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j + 1);
       gameState->MoveAgent(agent, penaltyPos);
     }
     gameState->Update();
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; ++j)
     {
-      GameState::Agent &agent = gameState->teams.at(i)->members.at(j + 1);
+      GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j + 1);
       ASSERT_TRUE(penaltyBox.Contains(agent.pos));
     }
-    GameState::Agent &agent2 = gameState->teams.at(i)->members.at(4);
+    GameState::Agent &agent2 = gameState->teams.at(i).get()->members.at(4);
     gameState->MoveAgent(agent2, penaltyPos);
     gameState->Update();
     ASSERT_FALSE(penaltyBox.Contains(agent2.pos));
@@ -1007,9 +1031,9 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
     // agent gets beamed out
     resetPositions();
     gameState->Update();
-    for (int j = 1; j < 4; j++)
+    for (int j = 1; j < 4; ++j)
     {
-      GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
+      GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j);
       if (j == 3)
       {
         // this agent is farthest away from goal
@@ -1021,13 +1045,13 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
       }
     }
     gameState->Update();
-    GameState::Agent &agent3 = gameState->teams.at(i)->members.at(0);
+    GameState::Agent &agent3 = gameState->teams.at(i).get()->members.at(0);
     gameState->MoveAgent(agent3, penaltyPos);
     gameState->Update();
     ASSERT_TRUE(penaltyBox.Contains(agent3.pos));
-    for (int j = 1; j < 4; j++)
+    for (int j = 1; j < 4; ++j)
     {
-      GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
+      GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j);
       if (j == 3)
       {
         // this agent is farthest away from goal
@@ -1042,18 +1066,19 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
     // test that nothing happens if opponent also goes into goal box
     resetPositions();
     gameState->Update();
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; ++j)
     {
-      GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
+      GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j);
       gameState->MoveAgent(agent, penaltyPos);
     }
     gameState->Update();
-    GameState::Agent &agent4 = gameState->teams.at((i + 1) % 2)->members.at(1);
+    GameState::Agent &agent4 =
+      gameState->teams.at((i + 1) % 2).get()->members.at(1);
     gameState->MoveAgent(agent4, penaltyPos);
     gameState->Update();
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; ++j)
     {
-      GameState::Agent &agent = gameState->teams.at(i)->members.at(j);
+      GameState::Agent &agent = gameState->teams.at(i).get()->members.at(j);
       ASSERT_TRUE(penaltyBox.Contains(agent.pos));
     }
   }
@@ -1078,37 +1103,38 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCrowding)
                                      GameState::outerCrowdingRadius, 0,
                                      SoccerField::BallRadius);
 
-  gameState->SetCurrent(gameState->playState.get());
+  gameState->SetCurrent(gameState->playOnState.get());
   gameState->MoveBall(testBallPos);
   // move enemy agent close to ball to enable crowding
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
     resetPositions();
     // put agent on other team within crowding radius to ensure that crowding
     // rules are enabled
-    GameState::Agent &agent = gameState->teams.at((i + 1) % 2)->members.at(1);
+    GameState::Agent &agent =
+      gameState->teams.at((i + 1) % 2).get()->members.at(1);
     gameState->MoveAgent(agent, crowdingEnablePos);
     gameState->Update();
     ASSERT_EQ(agent.pos, crowdingEnablePos);
 
     // test for whether inner radius crowding check works
-    GameState::Agent &agent2 = gameState->teams.at(i)->members.at(1);
+    GameState::Agent &agent2 = gameState->teams.at(i).get()->members.at(1);
     gameState->MoveAgent(agent2, innerRadius);
     gameState->Update();
     ASSERT_EQ(agent2.pos, innerRadius);
-    GameState::Agent &agent3 = gameState->teams.at(i)->members.at(2);
+    GameState::Agent &agent3 = gameState->teams.at(i).get()->members.at(2);
     gameState->MoveAgent(agent3, innerRadius2);
     gameState->Update();
     ASSERT_GE(agent3.pos.Distance(gameState->GetBall()),
               GameState::innerCrowdingRadius);
 
     // test for whether the outer radius crowding check works
-    GameState::Agent &agent4 = gameState->teams.at(i)->members.at(3);
+    GameState::Agent &agent4 = gameState->teams.at(i).get()->members.at(3);
     gameState->MoveAgent(agent4, outerRadius);
     gameState->Update();
     ASSERT_EQ(agent4.pos, outerRadius);
-    GameState::Agent &agent5 = gameState->teams.at(i)->members.at(4);
+    GameState::Agent &agent5 = gameState->teams.at(i).get()->members.at(4);
     gameState->MoveAgent(agent5, outerRadius2);
     gameState->Update();
     ASSERT_GE(agent5.pos.Distance(gameState->GetBall()),
@@ -1124,21 +1150,21 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
   vector<math::Vector3<double> >fallenPos;
   fallenPos.push_back(math::Vector3<double>(0.0, 0.0, 0.1));
   fallenPos.push_back(math::Vector3<double>(0.1, 0.1, 0.1));
-  gameState->addAgent(1, "blue");
-  gameState->SetCurrent(gameState->playState.get());
+  gameState->AddAgent(1, "blue");
+  gameState->SetCurrent(gameState->playOnState.get());
 
   // check immobility && fallen for goalie
-  GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
-  while (gameState->getGameTime() < 2 * GameState::immobilityTimeLimit)
+  GameState::Agent &agent = gameState->teams.at(0).get()->members.at(0);
+  while (gameState->GetGameTime() < 2 * GameState::immobilityTimeLimit)
   {
     ASSERT_EQ(agent.pos, pos);
     gameState->Update();
   }
   ASSERT_NE(agent.pos, pos);
 
-  gameState->setCycleCounter(0);
+  gameState->SetCycleCounter(0);
   int c = -1;
-  while (gameState->getGameTime() < 2 * GameState::fallenTimeLimit)
+  while (gameState->GetGameTime() < 2 * GameState::fallenTimeLimit)
   {
     c++;
     gameState->MoveAgent(agent, fallenPos.at(c % 2));
@@ -1148,19 +1174,19 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
   ASSERT_NE(agent.pos, fallenPos.at(c % 2));
 
   // check immobility && fallen for non-goalie
-  gameState->setCycleCounter(0);
-  gameState->addAgent(2, "blue");
-  GameState::Agent &agent2 = gameState->teams.at(0)->members.at(1);
-  while (gameState->getGameTime() < GameState::immobilityTimeLimit)
+  gameState->SetCycleCounter(0);
+  gameState->AddAgent(2, "blue");
+  GameState::Agent &agent2 = gameState->teams.at(0).get()->members.at(1);
+  while (gameState->GetGameTime() < GameState::immobilityTimeLimit)
   {
     ASSERT_EQ(agent2.pos, pos);
     gameState->Update();
   }
   ASSERT_NE(agent2.pos, pos);
 
-  gameState->setCycleCounter(0);
+  gameState->SetCycleCounter(0);
   c = -1;
-  while (gameState->getGameTime() < GameState::fallenTimeLimit)
+  while (gameState->GetGameTime() < GameState::fallenTimeLimit)
   {
     c++;
     gameState->MoveAgent(agent2, fallenPos.at(c % 2));
@@ -1176,14 +1202,14 @@ TEST_F(GameStateTest_fullTeams, GameState_DropBall)
 {
   gameState->MoveBallToCenter();
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; ++i)
   {
     resetPositions();
-    GameState::Team *allowedTeam = gameState->teams.at(i);
-    GameState::Team *notAllowedTeam = gameState->teams.at((i + 1) % 2);
+    GameState::Team *allowedTeam = gameState->teams.at(i).get();
+    GameState::Team *notAllowedTeam = gameState->teams.at((i + 1) % 2).get();
     gameState->DropBallImpl(allowedTeam->side);
 
-    for (int j = 0; j < 11; j++)
+    for (int j = 0; j < 11; ++j)
     {
       GameState::Agent &agent = notAllowedTeam->members.at(j);
       ASSERT_GE(agent.pos.Distance(gameState->GetBall()),
@@ -1199,11 +1225,11 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
   vector<State *> states;
   states.push_back(gameState->kickOffLeftState.get());
   states.push_back(gameState->kickOffRightState.get());
-  ASSERT_EQ(gameState->teams.at(0)->side, GameState::Team::LEFT);
-  ASSERT_EQ(gameState->teams.at(1)->side, GameState::Team::RIGHT);
-  for (size_t i = 0; i < states.size(); i++)
+  ASSERT_EQ(gameState->teams.at(0).get()->side, GameState::Team::LEFT);
+  ASSERT_EQ(gameState->teams.at(1).get()->side, GameState::Team::RIGHT);
+  for (size_t i = 0; i < states.size(); ++i)
   {
-    GameState::Agent &ourAgent = gameState->teams.at(i)->members.at(0);
+    GameState::Agent &ourAgent = gameState->teams.at(i).get()->members.at(0);
     GameState::Agent &theirAgent = gameState->teams.at(
                                      (i + 1) % 2)->members.at(0);
 
@@ -1212,9 +1238,9 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     gameState->Update();
 
     // check that all agent positions are unchanged
-    for (int k = 0; k < 2; k++)
+    for (int k = 0; k < 2; ++k)
     {
-      for (int j = 0; j < 11; j++)
+      for (int j = 0; j < 11; ++j)
       {
         GameState::Agent &agent = gameState->teams.at(k)->members.at(j);
         if (k == 0)

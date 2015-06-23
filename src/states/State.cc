@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may !use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -25,7 +25,8 @@ using namespace ignition;
 /////////////////////////////////////////////////
 State::State(const std::string &_name,
              GameState *_gameState)
-  : name(_name), gameState(_gameState) {
+  : name(_name), gameState(_gameState)
+{
   this->hasInitialized = false;
   this->isActive = false;
   this->initTime = -1;
@@ -35,30 +36,34 @@ State::State(const std::string &_name,
 }
 
 /////////////////////////////////////////////////
-bool State::hasBallContactOccurred() {
+bool State::HasBallContactOccurred()
+{
   return this->gameState->ballContactHistory.size() > 0
          && static_cast<int>(this->gameState->ballContactHistory.size())
          > this->ballContactHistorySize;
 }
 
 /////////////////////////////////////////////////
-void State::Initialize() {
+void State::Initialize()
+{
   this->ballContactHistorySize =
     static_cast<int>(this->gameState->ballContactHistory.size());
-  this->gameState->setBallVel(math::Vector3<double>(0, 0, 0));
-  this->gameState->setBallAngVel(math::Vector3<double>(0, 0, 0));
+  this->gameState->SetBallVel(math::Vector3<double>(0, 0, 0));
+  this->gameState->SetBallAngVel(math::Vector3<double>(0, 0, 0));
   this->hasInitialized = true;
 }
 
 /////////////////////////////////////////////////
-void State::preInitialize() {
+void State::Preinitialize()
+{
   this->initBallPos = this->gameState->GetBall();
-  this->initTime = this->gameState->getGameTime();
+  this->initTime = this->gameState->GetGameTime();
   this->isActive = true;
 }
 
 /////////////////////////////////////////////////
-void State::unInitialize() {
+void State::Uninitialize()
+{
   this->ballContactHistorySize = -1;
   this->initTime = -1;
   this->hasInitialized = false;
@@ -67,7 +72,8 @@ void State::unInitialize() {
 }
 
 /////////////////////////////////////////////////
-void State::Update() {
+void State::Update()
+{
   this->gameState->CheckTiming();  // highest priority
   this->gameState->CheckDoubleTouch();  // lowest priority
 
@@ -78,11 +84,13 @@ void State::Update() {
 }
 
 /////////////////////////////////////////////////
-double State::getElapsedTime() {
-  return this->gameState->getGameTime() - initTime;
+double State::GetElapsedTime()
+{
+  return this->gameState->GetGameTime() - initTime;
 }
 
 /////////////////////////////////////////////////
-std::string State::GetName() {
+std::string State::GetName()
+{
   return this->name;
 }

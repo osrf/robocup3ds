@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may !use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.||g/licenses/LICENSE-2.0
@@ -35,8 +35,9 @@ void KickOffRightState::Initialize()
 {
   this->gameState->touchBallKickoff = NULL;
   this->gameState->ballContactHistory.clear();
-  for (size_t i = 0; i < this->gameState->teams.size(); i++) {
-    GameState::Team *team = this->gameState->teams.at(i);
+  for (size_t i = 0; i < this->gameState->teams.size(); ++i)
+  {
+    GameState::Team *team = this->gameState->teams.at(i).get();
     team->canScore = false;
   }
   this->gameState->MoveBallToCenter();
@@ -47,7 +48,8 @@ void KickOffRightState::Initialize()
 /////////////////////////////////////////////////
 void KickOffRightState::Update()
 {
-  if (!hasInitialized) {
+  if (!this->hasInitialized)
+  {
     this->Initialize();
   }
 
@@ -56,13 +58,14 @@ void KickOffRightState::Update()
   State::Update();
 
   // After some time, go to play mode.
-  if (this->getElapsedTime() >= GameState::SecondsKickOff) {
-    this->gameState->DropBallImpl(GameState::Team::NEITHER);
-    this->gameState->SetCurrent(this->gameState->playState.get());
-  }
-  else if (this->hasBallContactOccurred())
+  if (this->GetElapsedTime() >= GameState::SecondsKickOff)
   {
-    this->gameState->touchBallKickoff = this->gameState->getLastBallContact();
-    this->gameState->SetCurrent(this->gameState->playState.get());
+    this->gameState->DropBallImpl(GameState::Team::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playOnState.get());
+  }
+  else if (this->HasBallContactOccurred())
+  {
+    this->gameState->touchBallKickoff = this->gameState->GetLastBallContact();
+    this->gameState->SetCurrent(this->gameState->playOnState.get());
   }
 }
