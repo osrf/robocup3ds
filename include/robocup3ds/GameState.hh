@@ -165,8 +165,6 @@ class GameState
 
     /// \brief Agent unique id
     public: int uNum;
-    //   /// \brief Agent name
-    // public: std::string name;
     /// \brief Pointer to team that agent belongs to
     public: std::shared_ptr<Team> team;
     /// \brief Agent status
