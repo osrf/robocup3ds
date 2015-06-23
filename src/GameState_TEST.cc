@@ -74,7 +74,7 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
     }
   }
 
-  // both teams are full so this should !work
+  // both teams are full so this should not work
   for (int i = 0; i < 2; ++i)
   {
     for (int j = 0; j < 2; ++j)
@@ -457,8 +457,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
     gameState->Update();
     ASSERT_EQ(gameState->GetCurrentState()->name, states.at((i + 1) % 2)->name);
 
-    // test that transition to other kickoff does !happen when
-    // double touch does !occur
+    // test that transition to other kickoff does not happen when
+    // double touch does not occur
     gameState->SetCurrent(state);
     gameState->Update();
     std::shared_ptr<GameState::BallContact> ballContact4(
@@ -922,7 +922,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
     ASSERT_TRUE(gameState->teams.at(i).get()->canScore);
 
     // case 2: kickoff agent touches ball, teammate touches ball inside circle
-    // team should !be able to score
+    // team should not be able to score
     gameState->SetCurrent(states.at(i));
     gameState->Update();
     ASSERT_FALSE(gameState->teams.at(i).get()->canScore);
@@ -943,7 +943,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
     ASSERT_FALSE(gameState->teams.at(i).get()->canScore);
 
     // case 3: kickoff agent touches ball, && touches it again afterwards
-    // team should !be able to score
+    // team should not be able to score
     gameState->SetCurrent(states.at(i));
     gameState->Update();
     ASSERT_FALSE(gameState->teams.at(i).get()->canScore);

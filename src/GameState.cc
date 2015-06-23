@@ -388,7 +388,7 @@ void GameState::CheckIllegalDefense()
         else if (penaltyBox.Contains(agent.pos) && team->
                  numPlayersInPenaltyBox >= GameState::penaltyBoxLimit)
         {
-          // if agent is !goalie: move agent away if penalty box is
+          // if agent is not goalie: move agent away if penalty box is
           // already crowded
           // if agent is goalie: move another agent that is farthest
           // from goal away
@@ -425,7 +425,7 @@ void GameState::CheckIllegalDefense()
         }
         else
         {
-          // agent is !penalty box nor is accounted for so do nothing
+          // agent is not penalty box nor is accounted for so do nothing
         }
       }
     }
@@ -559,7 +559,7 @@ void GameState::CheckDoubleTouch()
   }
 
   // check && make sure that the first contact after kick off
-  // (or second overall contact) is !by the same agent who performed
+  // (or second overall contact) is not by the same agent who performed
   // the kick off
   BallContact *firstContact = this->ballContactHistory.at(1).get();
   if (this->touchBallKickoff != NULL
@@ -898,7 +898,7 @@ bool GameState::RemoveAgent(int _uNum, std::string _teamName)
       }
     }
   }
-  // std::cout << "Agent !found, unable to remove agent!" << std::endl;
+  // std::cout << "Agent not found, unable to remove agent!" << std::endl;
   return false;
 }
 
@@ -928,6 +928,6 @@ bool GameState::BeamAgent(int _uNum, std::string _teamName,
       }
     }
   }
-  // std::cout << "Agent !found, unable to beam agent!" << std::endl;
+  // std::cout << "Agent not found, unable to beam agent!" << std::endl;
   return false;
 }
