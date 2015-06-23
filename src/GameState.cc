@@ -21,6 +21,7 @@
 #include <memory>
 #include <algorithm>
 #include <string>
+#include <map>
 
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
@@ -61,6 +62,8 @@ double GameState::outerCrowdingRadius = 1.0;
 double GameState::immobilityTimeLimit = 15;
 double GameState::fallenTimeLimit = 30;
 double GameState::dropBallRadius = 2;
+
+std::map<const std::string, std::string> *GameState::config;
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -158,7 +161,7 @@ bool GameState::LoadConfigParameter(const std::string &_key,
 {
   try
   {
-    _value = std::stod((*config)[_key]);
+    _value = std::stod((*GameState::config)[_key]);
   }
   catch (...)
   {
@@ -173,7 +176,7 @@ bool GameState::LoadConfigParameterBool(const std::string &_key,
 {
   try
   {
-    _boolValue = (*config)[_key] != "false";
+    _boolValue = (*GameState::config)[_key] != "false";
   }
   catch (...)
   {

@@ -207,6 +207,7 @@ class GameState
       contactTime(_contactTime),
       contactPos(_contactPos)
     {}
+
     /// \brief Unum of agent who touched ball
     public: int uNum;
     /// \brief Side of agent who touched ball
@@ -608,7 +609,7 @@ class GameState
   public: static double fallenTimeLimit;
 
   /// \brief Pointer to configuration variables
-  public: std::map<const std::string, std::string> *config;
+  public: static std::map<const std::string, std::string> *config;
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;
   /// \brief History of ball contacts;
