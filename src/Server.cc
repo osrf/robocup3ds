@@ -49,7 +49,7 @@ void Server::Start()
   if (sockfd < 0)
     Error("ERROR opening socket");
 
-  bzero((char *) &address, sizeof(address));
+  bzero(reinterpret_cast<char *>(&address), sizeof(address));
 
   portno = Port_Number;
   address.sin_family = AF_INET;
@@ -75,7 +75,7 @@ void Server::Start()
     {
       std::thread th(&Server::MessagePassing, this, connection.sock);
       th.detach();
-      clientCounter ++;
+      clientCounter++;
     }
   }
 
