@@ -1,16 +1,10 @@
 set (sources
   Robocup3dsPlugin.cc
-)
-
-set (sources
   Server.cc
 )
 
 set (gtest_sources
   Robocup3dsPlugin_TEST.cc
-)
-
-set (gtest_sources
   Server_TEST.cc
 )
 

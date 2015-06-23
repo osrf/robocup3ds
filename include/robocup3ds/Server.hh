@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef INCLUDE_ROBOCUP3DS_SERVER_HH_
-#define INCLUDE_ROBOCUP3DS_SERVER_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_SERVER_HH_
+#define _GAZEBO_ROBOCUP3DS_SERVER_HH_
 
 #include <stdio.h>
 #include <unistd.h>
@@ -29,41 +29,41 @@
 #include <sstream>
 #include <thread>
 
-using namespace std;
-
 typedef struct {
-    int sock;
-    struct sockaddr address;
-    socklen_t addr_len;
+  int sock;
+  struct sockaddr address;
+  socklen_t addr_len;
 } connection_t;
 
 class Server {
-    static Server* uniqueInstance;
-    int clientCounter, agentNo;
-    stringstream sendingMessage;
-    std::string receivingMessage;
+  private: static Server *uniqueInstance;
 
-public:
+  private: int clientCounter, agentNo;
 
-    Server();
+  private: std::stringstream sendingMessage;
 
-    static Server* getUniqueInstance();
+  private: std::string receivingMessage;
 
-    std::string getSendingMessage();
+  private: Server();
 
-    std::string getRecievingMessage();
+  public: static Server *GetUniqueInstance();
 
-    int getAgentNo();
+  public: std::string GetSendingMessage();
 
-    void messagePassing(int sock);
+  public: std::string GetRecievingMessage();
 
-    void start();
+  public:int GetAgentNo();
 
-    virtual ~Server();
+  public: void MessagePassing(int _sock);
 
-    void error(const char *msg) {
-        perror(msg);
-        exit(1);
-    }
+  public: void Start();
+
+  public: virtual ~Server();
+
+  public: void Error(const char *msg)
+  {
+    perror(msg);
+    exit(1);
+  }
 };
 #endif /* INCLUDE_ROBOCUP3DS_SERVER_HH_ */
