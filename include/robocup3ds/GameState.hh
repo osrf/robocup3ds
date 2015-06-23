@@ -56,7 +56,7 @@ class GameState
   /// used by CheckCrowding_helper only
   private: struct AgentDist
   {
-    GameState::Agent *agent;
+    Agent *agent;
     double dist;
   };
 
