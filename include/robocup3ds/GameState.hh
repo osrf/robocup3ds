@@ -50,11 +50,11 @@ class GameState
   public: class Team;
   public: class BallContact;
   /// \brief Enum for which half it is
-  public: enum Half {FIRST_HALF, SECOND_HALF };
+  public: enum Half {FIRST_HALF, SECOND_HALF};
 
   /// \Brief Struct for helping to sort agents by their distances,
   /// used by CheckCrowding_helper only
-  struct AgentDist
+  private: struct AgentDist
   {
     GameState::Agent *agent;
     double dist;
