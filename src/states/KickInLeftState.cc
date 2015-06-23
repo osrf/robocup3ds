@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may !use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -41,10 +41,11 @@ void KickInLeftState::Initialize()
 /////////////////////////////////////////////////
 void KickInLeftState::Update()
 {
-  if (this->getElapsedTime() < GameState::SecondsKickInPause) {
+  if (this->GetElapsedTime() < GameState::SecondsKickInPause)
+  {
     return;
   }
-  else if (!hasInitialized)
+  else if (!this->hasInitialized)
   {
     this->Initialize();
   }
@@ -53,12 +54,13 @@ void KickInLeftState::Update()
   State::Update();
 
   // After some time, go to play mode.
-  if (this->getElapsedTime() >= GameState::SecondsKickIn) {
-    this->gameState->DropBallImpl(GameState::Team::NEITHER);
-    this->gameState->SetCurrent(this->gameState->playState.get());
-  }
-  else if (this->hasBallContactOccurred())
+  if (this->GetElapsedTime() >= GameState::SecondsKickIn)
   {
-    this->gameState->SetCurrent(this->gameState->playState.get());
+    this->gameState->DropBallImpl(GameState::Team::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playOnState.get());
+  }
+  else if (this->HasBallContactOccurred())
+  {
+    this->gameState->SetCurrent(this->gameState->playOnState.get());
   }
 }

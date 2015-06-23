@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may !use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -35,10 +35,13 @@ void GoalLeftState::Initialize()
   this->validGoal = true;
 
   // Register the left team goal.
-  for (size_t i = 0; i < this->gameState->teams.size(); ++i) {
-    GameState::Team *team = this->gameState->teams.at(i);
-    if (team->side == GameState::Team::LEFT) {
-      if (team->canScore) {
+  for (size_t i = 0; i < this->gameState->teams.size(); ++i)
+  {
+    GameState::Team *team = this->gameState->teams.at(i).get();
+    if (team->side == GameState::Team::LEFT)
+    {
+      if (team->canScore)
+      {
         team->score++;
       }
       else
@@ -53,11 +56,13 @@ void GoalLeftState::Initialize()
 /////////////////////////////////////////////////
 void GoalLeftState::Update()
 {
-  if (!hasInitialized) {
+  if (!this->hasInitialized)
+  {
     this->Initialize();
   }
   // Afer some time, go to right team kick off mode.
-  if (this->getElapsedTime() >= GameState::SecondsGoalPause || !validGoal) {
+  if (this->GetElapsedTime() >= GameState::SecondsGoalPause || !validGoal)
+  {
     this->gameState->SetCurrent(this->gameState->kickOffRightState.get());
   }
 }

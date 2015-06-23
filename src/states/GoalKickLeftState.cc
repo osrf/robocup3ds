@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may !use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -25,11 +25,13 @@ using namespace ignition;
 /////////////////////////////////////////////////
 GoalKickLeftState::GoalKickLeftState(const std::string &_name,
                                      GameState *_gameState)
-  : State(_name, _gameState) {
+  : State(_name, _gameState)
+{
 }
 
 /////////////////////////////////////////////////
-void GoalKickLeftState::Initialize() {
+void GoalKickLeftState::Initialize()
+{
   // Move the ball.
   this->gameState->MoveBall(initBallPos);
   this->gameState->MoveBallForGoalKick();
@@ -37,11 +39,13 @@ void GoalKickLeftState::Initialize() {
 }
 
 /////////////////////////////////////////////////
-void GoalKickLeftState::Update() {
-  if (this->getElapsedTime() < GameState::SecondsKickInPause) {
+void GoalKickLeftState::Update()
+{
+  if (this->GetElapsedTime() < GameState::SecondsKickInPause)
+  {
     return;
   }
-  else if (!hasInitialized)
+  else if (!this->hasInitialized)
   {
     this->Initialize();
   }
@@ -51,12 +55,13 @@ void GoalKickLeftState::Update() {
   State::Update();
 
   // After some time, go to play mode.
-  if (this->getElapsedTime() >= GameState::SecondsKickIn) {
+  if (this->GetElapsedTime() >= GameState::SecondsKickIn)
+  {
     this->gameState->DropBallImpl(GameState::Team::NEITHER);
-    this->gameState->SetCurrent(this->gameState->playState.get());
+    this->gameState->SetCurrent(this->gameState->playOnState.get());
   }
   else if (!SoccerField::PenaltyBoxLeft.Contains(this->gameState->GetBall()))
   {
-    this->gameState->SetCurrent(this->gameState->playState.get());
+    this->gameState->SetCurrent(this->gameState->playOnState.get());
   }
 }

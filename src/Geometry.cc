@@ -35,7 +35,8 @@ bool Geometry::IntersectionCircunferenceLine(
 
   v = _v;
 
-  if (fabs(v.X() - 0.0) < DBL_EPSILON) {
+  if (fabs(v.X() - 0.0) < DBL_EPSILON)
+  {
     // Avoid div by 0
     v.X() = DBL_EPSILON;
   }
@@ -51,7 +52,8 @@ bool Geometry::IntersectionCircunferenceLine(
 
   // Solve a*y^2 + b+y + c = 0
   tmp = G_SQUARE(b) - 4 * a * c;
-  if (tmp < 0) {
+  if (tmp < 0)
+  {
     // No intersection
     return false;
   }

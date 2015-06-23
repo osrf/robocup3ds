@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may !use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -39,19 +39,23 @@ void BeforeKickOffState::Initialize()
 /////////////////////////////////////////////////
 void BeforeKickOffState::Update()
 {
-  if (!hasInitialized) {
-     this->Initialize();
+  if (!this->hasInitialized)
+  {
+    this->Initialize();
   }
-  if (this->gameState->GetBall() != SoccerField::BallCenterPosition) {
+  if (this->gameState->GetBall() != SoccerField::BallCenterPosition)
+  {
     this->gameState->MoveBallToCenter();
   }
 
   // resets getElapsedGameTime() back to zero
-  this->gameState->setStartGameTime(this->gameState->getGameTime());
+  this->gameState->SetStartGameTime(this->gameState->GetGameTime());
 
   // After some time, go to play mode.
-  if (this->getElapsedTime() >= GameState::SecondsBeforeKickOff) {
-    if (this->gameState->GetHalf() == GameState::FIRST_HALF) {
+  if (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff)
+  {
+    if (this->gameState->GetHalf() == GameState::FIRST_HALF)
+    {
       this->gameState->SetCurrent(this->gameState->kickOffLeftState.get());
     }
     else

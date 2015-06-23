@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,15 @@
 #include "robocup3ds/states/State.hh"
 
 /// \class CornerKickRightState CornerKickRightState.hh
+/// robocup3ds/states/CornerKickRightState.hh
 /// \brief State that handles the corner kick right state.
 class CornerKickRightState : public State
 {
-  /// Documentation inherited.
+  // Documentation inherited
   public: CornerKickRightState(const std::string &_name,
                                GameState *_gameState);
 
-  /// Documentation inherited.
+  // Documentation inherited
   public: virtual void Initialize();
 
   // Documentation inherited

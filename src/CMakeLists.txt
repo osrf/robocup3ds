@@ -14,7 +14,7 @@ set (sources
   states/KickInRightState.cc
   states/KickOffLeftState.cc
   states/KickOffRightState.cc
-  states/PlayState.cc
+  states/PlayOnState.cc
   states/State.cc
   GameState.cc
   Robocup3dsPlugin.cc

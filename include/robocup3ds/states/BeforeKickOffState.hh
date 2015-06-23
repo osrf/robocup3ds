@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,15 @@
 #include "robocup3ds/states/State.hh"
 
 /// \class BeforeKickOffState BeforeKickOffState.hh
+/// robocup3ds/states/BeforeKickOffState.hh
 /// \brief State that handles the initial state.
 class BeforeKickOffState : public State
 {
-  /// \brief Constructor.
-  /// \param[in] _name Name of this state.
-  /// \param[in] _gameState GameState to be used inside the state.
+  // Documentation inherited
   public: BeforeKickOffState(const std::string &_name,
                              GameState *_gameState);
 
-  /// Documentation inherited.
+  // Documentation inherited.
   public: virtual void Initialize();
 
   // Documentation inherited

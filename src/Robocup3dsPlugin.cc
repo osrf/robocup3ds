@@ -2,7 +2,7 @@
  * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may !use this file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -39,7 +39,7 @@ void Robocup3dsPlugin::Load(physics::WorldPtr /*_world*/,
   sdf::ElementPtr /*_sdf*/)
 {
   // Connect to the update event.
-  updateConnection = event::Events::ConnectWorldUpdateBegin(
+  this->updateConnection = event::Events::ConnectWorldUpdateBegin(
       boost::bind(&Robocup3dsPlugin::Update, this, _1));
 }
 
