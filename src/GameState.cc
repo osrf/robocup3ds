@@ -93,10 +93,10 @@ GameState::GameState():
   this->SetCurrent(beforeKickOffState.get());
   this->teams.push_back(
     std::shared_ptr<Team>(
-      new Team("_unnamed_team", Team::LEFT, 0, GameState::playerLimit)));
+      new Team("_empty_team", Team::LEFT, 0, GameState::playerLimit)));
   this->teams.push_back(
     std::shared_ptr<Team>(
-      new Team("_unnamed_team", Team::RIGHT, 0, GameState::playerLimit)));
+      new Team("_empty_team", Team::RIGHT, 0, GameState::playerLimit)));
 }
 
 /////////////////////////////////////////////////
@@ -899,7 +899,7 @@ bool GameState::AddAgent(int _uNum, std::string _teamName)
   {
     for (size_t i = 0; i < this->teams.size(); ++i)
     {
-      if (this->teams.at(i).get()->name == "_unnamed_team"
+      if (this->teams.at(i).get()->name == "_empty_team"
           && this->teams.at(i).get()->members.size() == 0)
       {
         teamToAdd = i;
@@ -991,8 +991,8 @@ bool GameState::BeamAgent(int _uNum, std::string _teamName,
                           double _x, double _y, double _rot)
 {
   if (this->currentState->name != "BeforeKickOff"
-      && this->currentState->name != "goal_kick_left"
-      && this->currentState->name != "goal_kick_right")
+      && this->currentState->name != "GoalKickLeft"
+      && this->currentState->name != "GoalKickRight")
   {
     // std::cout << "Incorrect play mode, unable to beam agent!" << std::endl;
     return false;
