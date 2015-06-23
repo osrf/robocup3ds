@@ -39,31 +39,49 @@ typedef struct {
 class Server {
   private: static Server *uniqueInstance;
 
-  private: int clientCounter, agentNo;
+  /// \brief Counting the clients connected to server.
+  private: int clientCounter;
 
+  /// \brief A unique number assigned to each client.
+  private: int agentNo;
+
+  /// \brief Message sent.
   private: std::stringstream sendingMessage;
 
+  /// \brief Message received.
   private: std::string receivingMessage;
 
+  /// \brief Initialize
   private: Server();
 
   public: static Server *GetUniqueInstance();
 
+  /// \brief Get the Message that send to the client.
   public: std::string GetSendingMessage();
 
+  /// \brief Get the Message that received from the client.
   public: std::string GetRecievingMessage();
 
+  /// \brief Get the unique number assigned to each client.
   public:int GetAgentNo();
 
+  /// \brief Start the communication between agent and a client
+      /// Using TCP protocol.
+      /// \param[in] _sock TCP Socket.
   public: void MessagePassing(int _sock);
 
+  /// \brief Start and run the Server. Multithread architecture
+      /// is used to handle the connection to multiple running clients.
   public: void Start();
 
+  /// \brief Destructor
   public: virtual ~Server();
 
-  public: void Error(const char *msg)
+  /// \brief Printing Error message and Exit the program
+    /// \param[in] _msg Error Message
+  public: void Error(const char *_msg)
   {
-    perror(msg);
+    perror(_msg);
     exit(1);
   }
 };
