@@ -15,21 +15,18 @@
  *
  */
 
-#include <iostream>
-#include <mutex>
+#include <netinet/in.h>
 #include <poll.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <cstring>
+#include <iostream>
+#include <mutex>
 #include "robocup3ds/Server.hh"
 
-#define Port_Number 4101
-#define MBUFFERSIZE 8192
-
-//////////////////////////////////////////////////
-Server* Server::GetUniqueInstance()
-{
-  static Server server;
-  return &server;
-}
+using namespace gazebo;
 
 //////////////////////////////////////////////////
 Server::Server()
@@ -40,11 +37,8 @@ Server::Server()
 Server::~Server()
 {
   this->enabled = false;
-  std::cout << "About to leave" << std::endl;
   if (this->threadReception.joinable())
     this->threadReception.join();
-
-  std::cout << "Leaving" << std::endl;
 }
 
 void Server::Start()
@@ -120,7 +114,7 @@ void Server::RunReceptionTask()
   struct sockaddr_in mySocketAddr;
   memset(&mySocketAddr, 0, sizeof(mySocketAddr));
   mySocketAddr.sin_family = AF_INET;
-  mySocketAddr.sin_port = htons(Port_Number);
+  mySocketAddr.sin_port = htons(this->kPortNumber);
   mySocketAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   if (bind(sockfd, (struct sockaddr *)&mySocketAddr,
     sizeof(struct sockaddr)) < 0)
@@ -136,7 +130,6 @@ void Server::RunReceptionTask()
   std::vector<pollfd> pollSockets;
 
   // Master file descriptor.
-  //memset(pollSockets, 0, sizeof(pollSockets));
   struct pollfd masterFd;
   masterFd.fd = sockfd;
   masterFd.events = POLLIN;
@@ -144,7 +137,6 @@ void Server::RunReceptionTask()
 
   while (this->enabled)
   {
-    //int pollReturnCode = poll(&pollSockets[0], pollSockets.size(), 50000);
     int pollReturnCode = poll(&pollSockets[0], pollSockets.size(), 500);
     if (pollReturnCode == -1)
     {
@@ -184,8 +176,6 @@ void Server::RunReceptionTask()
       continue;
     }
 
-    std::cout << "Socket activity" << std::endl;
-
     // Data received on any of the client sockets.
     for (size_t i = 1; i < pollSockets.size(); ++i)
     {
@@ -213,7 +203,7 @@ void Server::RunReceptionTask()
         std::cout << "New data received on socket [" << i << "]" << std::endl;
 
         // Read data from the socket.
-        char buffer[MBUFFERSIZE];
+        char buffer[this->kBufferSize];
         bzero(buffer, sizeof(buffer));
         ssize_t bytes_Read =
           recv(pollSockets.at(i).fd, buffer, sizeof(buffer), 0);
@@ -235,11 +225,5 @@ void Server::RunReceptionTask()
 
   // Close pending sockets.
   for (auto client : this->clients)
-  {
-    std::cout << "Deallocating client" << std::endl;
     close(client.second->socket);
-  }
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
-  std::cout << "Leaving RunReceptionTask()" << std::endl;
 }

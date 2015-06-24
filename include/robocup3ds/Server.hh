@@ -18,65 +18,78 @@
 #ifndef _GAZEBO_ROBOCUP3DS_SERVER_HH_
 #define _GAZEBO_ROBOCUP3DS_SERVER_HH_
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <netinet/in.h>
-#include <string.h>
-#include <time.h>
 #include <string>
-#include <sstream>
 #include <thread>
 #include <vector>
 
-typedef struct {
-  int sock;
-  struct sockaddr address;
-  socklen_t addr_len;
-} connection_t;
-
- class Server
- {
-  public: static Server *GetUniqueInstance();
-
-  public: bool Push(const int _id, const std::string &_data);
-  public: bool Pop(const int _id, std::string &_data);
-
-  /// \brief Start and run the Server. Multithread architecture
-  /// is used to handle the connection to multiple running clients.
-  public: void RunReceptionTask();
-
-   public: void Start();
-
-  /// \brief Destructor
-  public: virtual ~Server();
-
-   /// \brief Initialize
-  private: Server();
-
-  private: static Server *uniqueInstance;
-
-  class Client
+namespace gazebo
+{
+  /// \brief
+  class Server
   {
-    public: Client(int _socket)
+    /// \brief
+    class Client
     {
-      this->socket = _socket;
-    }
-    public: int socket;
-    public: std::vector<std::string> incoming;
+      /// \brief
+      public: Client(int _socket)
+      {
+        this->socket = _socket;
+      }
+
+      /// \brief
+      public: int socket;
+
+      /// \brief
+      public: std::vector<std::string> incoming;
+    };
+
+    /// \brief Constructor
+    public: Server();
+
+    /// \brief Destructor
+    public: virtual ~Server();
+
+    /// \brief Push some data to be sent by the server.
+    /// \param[in] _id Client ID.
+    /// \param[in] _data Data to send.
+    /// \return True when data was succesfully send or false otherwise.
+    public: bool Push(const int _id, const std::string &_data);
+
+    /// \brief Get some data received from the server.
+    /// \param[in] _id Client ID.
+    /// \param[out] _data Data received.
+    /// \return True when there was data available for client ID
+    /// or false otherwise.
+    public: bool Pop(const int _id, std::string &_data);
+
+    /// \brief Enable the server.
+    public: void Start();
+
+    /// \brief Task running in a different thread in charge of dispatching the
+    /// new connections.
+    private: void RunReceptionTask();
+
+    /// \brief
+    public: std::map<int, std::shared_ptr<Client>> clients;
+
+    /// \brief
+    private: static const int kPortNumber = 4101;
+
+    /// \brief
+    private: static const int kBufferSize = 8192;
+
+    /// \brief
+    private: std::atomic<bool> enabled;
+
+    /// \brief
+    private: std::mutex mutex;
+
+    /// \brief Thread in charge of receiving and handling incoming messages.
+    private: std::thread threadReception;
   };
-
-  /// \brief Thread in charge of receiving and handling incoming messages.
-  private: std::thread threadReception;
-  public: std::map<int, std::shared_ptr<Client>> clients;
-  private: std::atomic<bool> enabled;
-  private: std::mutex mutex;
-
-};
+}
 #endif /* INCLUDE_ROBOCUP3DS_SERVER_HH_ */

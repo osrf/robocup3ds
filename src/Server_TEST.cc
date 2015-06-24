@@ -16,36 +16,20 @@
  */
 
 #include <netdb.h>
+#include <chrono>
+#include <thread>
 #include "gtest/gtest.h"
-#include "Server.cc"
+#include "robocup3ds/Server.hh"
 
 //////////////////////////////////////////////////
-//std::string msgFromServer;
-//void TestEQ();
-//void ServerProcess();
-//void AgentProcess();
-
-//////////////////////////////////////////////////
-/*TEST(Server, Simple)
-{
-  std::thread serverThread(&ServerProcess);
-  serverThread.detach();
-  sleep(1);
-  std::thread agentThread(&AgentProcess);
-  agentThread.detach();
-//  sleep(2);
-  std::thread testThread(&TestEQ);
-  testThread.detach();
-}*/
-
-void clientTask(Server *_server)
+void clientTask(gazebo::Server *_server)
 {
   // Wait some time to make sure that the server is alive.
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
   // Create a client.
   struct sockaddr_in servaddr;
-  auto sockfd = socket(AF_INET,SOCK_STREAM, 0);
+  auto sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
@@ -71,97 +55,18 @@ void clientTask(Server *_server)
     EXPECT_EQ(recvData, content);
   }
 
-  std::cout << "Client task leaving" << std::endl;
+  close(sockfd);
 }
 
 //////////////////////////////////////////////////
 TEST(Server, Carlos)
 {
-  Server *testServer = Server::GetUniqueInstance();
+  gazebo::Server testServer;
 
-  std::thread clientThread(&clientTask, testServer);
-  testServer->Start();
+  std::thread clientThread(&clientTask, &testServer);
+  testServer.Start();
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  std::cout << "Deleting server" << std::endl;
-  delete testServer;
+
+  if (clientThread.joinable())
+    clientThread.join();
 }
-
-//////////////////////////////////////////////////
-/*void TestEQ()
-{
-  // test case for singleton class
-  Server* server= Server::GetUniqueInstance();
-  // test the message send to server
-  EXPECT_EQ("(he1 3.20802)(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)(lae4 0)(rae4 0)",
-      server->GetRecievingMessage());
-  // test the message send to agent
-  EXPECT_EQ(server->GetSendingMessage(), msgFromServer);
-}
-
-//////////////////////////////////////////////////
-void ServerProcess()
-{
-  Server* server= Server::GetUniqueInstance();
-  server->Start();
-}
-
-//////////////////////////////////////////////////
-void AgentProcess()
-{
-  int sockfd, portno;
-  struct sockaddr_in serv_addr;
-  struct hostent *serverAdd;
-
-  char buffer[MBUFFERSIZE];
-
-  portno = Port_Number;
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0) {
-    perror("ERROR opening socket");
-    exit(0);
-  }
-  serverAdd = gethostbyname("localhost");
-
-  if (serverAdd == NULL) {
-    perror("ERROR, no such host");
-    exit(0);
-  }
-
-  bzero(reinterpret_cast<char*> ( &serv_addr), sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  bcopy(reinterpret_cast<char*> (serverAdd->h_addr),
-      reinterpret_cast<char*>(&serv_addr.sin_addr.s_addr),
-      serverAdd->h_length);
-
-  serv_addr.sin_port = htons(portno);
-
-  if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr))< 0) {
-    perror("ERROR connecting");
-    exit(0);
-  }
-
-  while (1) {
-    int msgLength;
-    bzero(buffer, sizeof(buffer));
-
-    snprintf(buffer, sizeof(buffer),
-      "(he1 3.20802)(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)(lae4 0)(rae4 0)");
-
-    msgLength = send(sockfd, buffer, strlen(buffer), 0);
-
-    if (msgLength < 0) {
-      perror("ERROR writing to socket");
-      exit(0);
-    }
-    bzero(buffer, sizeof(buffer));
-    usleep(2000000);
-    msgLength = read(sockfd, buffer, sizeof(buffer));
-    if (msgLength < 0) {
-      perror("ERROR reading from socket");
-      exit(0);
-    }
-    msgFromServer = std::string(buffer);
-  }
-  close(sockfd);
-  return;
-}*/
