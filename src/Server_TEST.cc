@@ -20,10 +20,10 @@
 #include "Server.cc"
 
 //////////////////////////////////////////////////
-std::string msgFromServer;
-void TestEQ();
-void ServerProcess();
-void AgentProcess();
+//std::string msgFromServer;
+//void TestEQ();
+//void ServerProcess();
+//void AgentProcess();
 
 //////////////////////////////////////////////////
 /*TEST(Server, Simple)
@@ -38,9 +38,7 @@ void AgentProcess();
   testThread.detach();
 }*/
 
-Server *testServer = Server::GetUniqueInstance();
-
-void clientTask()
+void clientTask(Server *_server)
 {
   // Wait some time to make sure that the server is alive.
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
@@ -64,29 +62,32 @@ void clientTask()
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Check that the data arrived.
-  EXPECT_EQ(testServer->clients.size(), 1u);
-  for (auto client : testServer->clients)
+  EXPECT_EQ(_server->clients.size(), 1u);
+  for (auto client : _server->clients)
   {
     std::string recvData;
-    EXPECT_TRUE(testServer->Pop(client.second->socket, recvData));
+    EXPECT_TRUE(_server->Pop(client.second->socket, recvData));
     std::cout << "Data received: " << recvData << std::endl;
     EXPECT_EQ(recvData, content);
   }
 
-
+  std::cout << "Client task leaving" << std::endl;
 }
 
 //////////////////////////////////////////////////
 TEST(Server, Carlos)
 {
-  // test case for singleton class
+  Server *testServer = Server::GetUniqueInstance();
 
-  std::thread clientThread(&clientTask);
-  testServer->Start2();
+  std::thread clientThread(&clientTask, testServer);
+  testServer->Start();
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  std::cout << "Deleting server" << std::endl;
+  delete testServer;
 }
 
 //////////////////////////////////////////////////
-void TestEQ()
+/*void TestEQ()
 {
   // test case for singleton class
   Server* server= Server::GetUniqueInstance();
@@ -163,4 +164,4 @@ void AgentProcess()
   }
   close(sockfd);
   return;
-}
+}*/

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <atomic>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -40,59 +41,26 @@ typedef struct {
   socklen_t addr_len;
 } connection_t;
 
- class Server {
+ class Server
+ {
   public: static Server *GetUniqueInstance();
 
   public: bool Push(const int _id, const std::string &_data);
   public: bool Pop(const int _id, std::string &_data);
 
-  /// \brief Get the Message that send to the client.
-  public: std::string GetSendingMessage();
-
-  /// \brief Get the Message that received from the client.
-  public: std::string GetRecievingMessage();
-
-  /// \brief Get the unique number assigned to each client.
-  public:int GetAgentNo();
-
-  /// \brief Start the communication between agent and a client
-  /// Using TCP protocol.
-  /// \param[in] _sock TCP Socket.
-  public: void DispatchRequest(int _sock);
-
   /// \brief Start and run the Server. Multithread architecture
   /// is used to handle the connection to multiple running clients.
-  public: void Start();
+  public: void RunReceptionTask();
 
-  public: void Start2();
+   public: void Start();
 
   /// \brief Destructor
   public: virtual ~Server();
 
-  /// \brief Printing Error message and Exit the program
-  /// \param[in] _msg Error Message
-  public: void Error(const char *_msg)
-  {
-    perror(_msg);
-    exit(1);
-  }
-
-  /// \brief Initialize
+   /// \brief Initialize
   private: Server();
 
   private: static Server *uniqueInstance;
-
-  /// \brief Counting the clients connected to server.
-  private: int clientCounter;
-
-  /// \brief A unique number assigned to each client.
-  private: int agentNo;
-
-  /// \brief Message sent.
-  private: std::stringstream sendingMessage;
-
-  /// \brief Message received.
-  private: std::string receivingMessage;
 
   class Client
   {
@@ -104,7 +72,10 @@ typedef struct {
     public: std::vector<std::string> incoming;
   };
 
+  /// \brief Thread in charge of receiving and handling incoming messages.
+  private: std::thread threadReception;
   public: std::map<int, std::shared_ptr<Client>> clients;
+  private: std::atomic<bool> enabled;
   private: std::mutex mutex;
 
 };
