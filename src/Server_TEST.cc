@@ -25,7 +25,7 @@
 void clientTask(gazebo::Server *_server)
 {
   // Wait some time to make sure that the server is alive.
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Create a client.
   struct sockaddr_in servaddr;
@@ -34,7 +34,7 @@ void clientTask(gazebo::Server *_server)
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(4101);
+  servaddr.sin_port = htons(3100);
 
   connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
@@ -43,9 +43,10 @@ void clientTask(gazebo::Server *_server)
   auto sent = write(sockfd, content.c_str(), content.size() + 1);
   EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
 
+  /// Wait some time until the server processes the request.
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-  // Check that the data arrived.
+  // Check that the data is available in the server.
   EXPECT_EQ(_server->clients.size(), 1u);
   for (auto client : _server->clients)
   {
@@ -61,11 +62,10 @@ void clientTask(gazebo::Server *_server)
 //////////////////////////////////////////////////
 TEST(Server, Carlos)
 {
-  gazebo::Server testServer;
+  gazebo::Server testServer(3100);
 
-  std::thread clientThread(&clientTask, &testServer);
   testServer.Start();
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  std::thread clientThread(&clientTask, &testServer);
 
   if (clientThread.joinable())
     clientThread.join();

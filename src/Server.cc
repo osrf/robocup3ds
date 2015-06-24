@@ -29,9 +29,10 @@
 using namespace gazebo;
 
 //////////////////////////////////////////////////
-Server::Server()
+Server::Server(int _port)
+  : port(_port),
+    enabled(false)
 {
-  this->enabled = false;
 }
 
 Server::~Server()
@@ -114,7 +115,7 @@ void Server::RunReceptionTask()
   struct sockaddr_in mySocketAddr;
   memset(&mySocketAddr, 0, sizeof(mySocketAddr));
   mySocketAddr.sin_family = AF_INET;
-  mySocketAddr.sin_port = htons(this->kPortNumber);
+  mySocketAddr.sin_port = htons(this->port);
   mySocketAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   if (bind(sockfd, (struct sockaddr *)&mySocketAddr,
     sizeof(struct sockaddr)) < 0)

@@ -47,8 +47,9 @@ namespace gazebo
       public: std::vector<std::string> incoming;
     };
 
-    /// \brief Constructor
-    public: Server();
+    /// \brief Constructor.
+    /// \param[in] _port TCP port for incoming connections.
+    public: Server(int _port);
 
     /// \brief Destructor
     public: virtual ~Server();
@@ -77,10 +78,10 @@ namespace gazebo
     public: std::map<int, std::shared_ptr<Client>> clients;
 
     /// \brief
-    private: static const int kPortNumber = 4101;
+    private: static const int kBufferSize = 8192;
 
     /// \brief
-    private: static const int kBufferSize = 8192;
+    private: int port;
 
     /// \brief
     private: std::atomic<bool> enabled;
