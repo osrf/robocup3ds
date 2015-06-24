@@ -26,7 +26,7 @@ void ServerProcess();
 void AgentProcess();
 
 //////////////////////////////////////////////////
-TEST(Server, Simple)
+/*TEST(Server, Simple)
 {
   std::thread serverThread(&ServerProcess);
   serverThread.detach();
@@ -36,6 +36,53 @@ TEST(Server, Simple)
 //  sleep(2);
   std::thread testThread(&TestEQ);
   testThread.detach();
+}*/
+
+Server *testServer = Server::GetUniqueInstance();
+
+void clientTask()
+{
+  // Wait some time to make sure that the server is alive.
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+  // Create a client.
+  struct sockaddr_in servaddr;
+  auto sockfd = socket(AF_INET,SOCK_STREAM, 0);
+
+  bzero(&servaddr, sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(4101);
+
+  connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
+
+  // Send some data.
+  std::string content = "hello";
+  auto sent = write(sockfd, content.c_str(), content.size() + 1);
+  EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+  // Check that the data arrived.
+  EXPECT_EQ(testServer->clients.size(), 1u);
+  for (auto client : testServer->clients)
+  {
+    std::string recvData;
+    EXPECT_TRUE(testServer->Pop(client.second->socket, recvData));
+    std::cout << "Data received: " << recvData << std::endl;
+    EXPECT_EQ(recvData, content);
+  }
+
+
+}
+
+//////////////////////////////////////////////////
+TEST(Server, Carlos)
+{
+  // test case for singleton class
+
+  std::thread clientThread(&clientTask);
+  testServer->Start2();
 }
 
 //////////////////////////////////////////////////

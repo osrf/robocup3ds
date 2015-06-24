@@ -23,12 +23,16 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <map>
+#include <memory>
+#include <mutex>
 #include <netinet/in.h>
 #include <string.h>
 #include <time.h>
 #include <string>
 #include <sstream>
 #include <thread>
+#include <vector>
 
 typedef struct {
   int sock;
@@ -36,7 +40,46 @@ typedef struct {
   socklen_t addr_len;
 } connection_t;
 
-class Server {
+ class Server {
+  public: static Server *GetUniqueInstance();
+
+  public: bool Push(const int _id, const std::string &_data);
+  public: bool Pop(const int _id, std::string &_data);
+
+  /// \brief Get the Message that send to the client.
+  public: std::string GetSendingMessage();
+
+  /// \brief Get the Message that received from the client.
+  public: std::string GetRecievingMessage();
+
+  /// \brief Get the unique number assigned to each client.
+  public:int GetAgentNo();
+
+  /// \brief Start the communication between agent and a client
+  /// Using TCP protocol.
+  /// \param[in] _sock TCP Socket.
+  public: void DispatchRequest(int _sock);
+
+  /// \brief Start and run the Server. Multithread architecture
+  /// is used to handle the connection to multiple running clients.
+  public: void Start();
+
+  public: void Start2();
+
+  /// \brief Destructor
+  public: virtual ~Server();
+
+  /// \brief Printing Error message and Exit the program
+  /// \param[in] _msg Error Message
+  public: void Error(const char *_msg)
+  {
+    perror(_msg);
+    exit(1);
+  }
+
+  /// \brief Initialize
+  private: Server();
+
   private: static Server *uniqueInstance;
 
   /// \brief Counting the clients connected to server.
@@ -51,38 +94,18 @@ class Server {
   /// \brief Message received.
   private: std::string receivingMessage;
 
-  /// \brief Initialize
-  private: Server();
-
-  public: static Server *GetUniqueInstance();
-
-  /// \brief Get the Message that send to the client.
-  public: std::string GetSendingMessage();
-
-  /// \brief Get the Message that received from the client.
-  public: std::string GetRecievingMessage();
-
-  /// \brief Get the unique number assigned to each client.
-  public:int GetAgentNo();
-
-  /// \brief Start the communication between agent and a client
-      /// Using TCP protocol.
-      /// \param[in] _sock TCP Socket.
-  public: void MessagePassing(int _sock);
-
-  /// \brief Start and run the Server. Multithread architecture
-      /// is used to handle the connection to multiple running clients.
-  public: void Start();
-
-  /// \brief Destructor
-  public: virtual ~Server();
-
-  /// \brief Printing Error message and Exit the program
-    /// \param[in] _msg Error Message
-  public: void Error(const char *_msg)
+  class Client
   {
-    perror(_msg);
-    exit(1);
-  }
+    public: Client(int _socket)
+    {
+      this->socket = _socket;
+    }
+    public: int socket;
+    public: std::vector<std::string> incoming;
+  };
+
+  public: std::map<int, std::shared_ptr<Client>> clients;
+  private: std::mutex mutex;
+
 };
 #endif /* INCLUDE_ROBOCUP3DS_SERVER_HH_ */
