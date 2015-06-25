@@ -16,6 +16,7 @@
 */
 #include <cmath>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -23,11 +24,11 @@
 #include "robocup3ds/Perceptors.hh"
 #include "robocup3ds/SoccerField.hh"
 
-using namespace ignition;
-
 #define RAD(X) X * 180.0 / M_PI
 #define DEG(X) X * M_PI / 180.0
 #define CALC_NORMAL(P_A, P_B, P_C) ((P_C - P_A).Cross(P_B - P_A)).Normalize()
+
+using namespace ignition;
 
 /////////////////////////////////////////////////
 Perceptor::Perceptor(GameState *_gameState, double _HFov, double _VFov):
@@ -36,27 +37,31 @@ Perceptor::Perceptor(GameState *_gameState, double _HFov, double _VFov):
   VFov(_VFov)
 {
   math::Vector3<double> origin;
-  math::Vector3<double> upperRight(1.0, -tan(HFov / 2), tan(VFov / 2));
-  math::Vector3<double> upperLeft(1.0, tan(HFov / 2), tan(VFov / 2));
-  math::Vector3<double> lowerRight(1.0, -tan(HFov / 2), -tan(VFov / 2));
-  math::Vector3<double> lowerLeft(1.0, tan(HFov / 2), -tan(VFov / 2));
+  math::Vector3<double> upperRight(1.0, -tan(this->HFov / 2),
+                                   tan(this->VFov / 2));
+  math::Vector3<double> upperLeft(1.0, tan(this->HFov / 2),
+                                  tan(this->VFov / 2));
+  math::Vector3<double> lowerRight(1.0, -tan(this->HFov / 2),
+                                   -tan(this->VFov / 2));
+  math::Vector3<double> lowerLeft(1.0, tan(this->HFov / 2),
+                                  -tan(this->VFov / 2));
 
-  viewFrustrum.push_back(
+  this->viewFrustrum.push_back(
     math::Plane<double>(CALC_NORMAL(origin, lowerRight, upperRight)));
-  viewFrustrum.push_back(
+  this->viewFrustrum.push_back(
     math::Plane<double>(CALC_NORMAL(origin, upperRight, upperLeft)));
-  viewFrustrum.push_back(
+  this->viewFrustrum.push_back(
     math::Plane<double>(CALC_NORMAL(origin, upperLeft, lowerLeft)));
-  viewFrustrum.push_back(
+  this->viewFrustrum.push_back(
     math::Plane<double>(CALC_NORMAL(origin, lowerLeft, lowerRight)));
 }
 
 /////////////////////////////////////////////////
 void Perceptor::Update()
 {
-  for (size_t i = 0; i < gameState->teams.size(); ++i)
+  for (size_t i = 0; i < this->gameState->teams.size(); ++i)
   {
-    GameState::Team *team = gameState->teams.at(i).get();
+    std::shared_ptr<GameState::Team> team = this->gameState->teams.at(i);
     for (size_t j = 0; j < team->members.size(); ++j)
     {
       GameState::Agent &agent = team->members.at(j);
@@ -77,7 +82,7 @@ void Perceptor::Update()
       }
 
       // update ball info
-      this->UpdateLandmark(agent, "B", gameState->GetBall());
+      this->UpdateLandmark(agent, "B", this->gameState->GetBall());
     }
   }
 }
@@ -97,11 +102,9 @@ void Perceptor::UpdateLine(GameState::Agent &_agent,
   bool validLine = true;
   for (size_t i = 0; i < this->viewFrustrum.size(); ++i)
   {
-    if (!Geometry::ClipPlaneLine(agentLine, this->viewFrustrum.at(i)))
-    {
-      validLine = false;
-      break;
-    }
+    validLine = Geometry::ClipPlaneLine(agentLine, this->viewFrustrum.at(i));
+    if (!validLine)
+    { break; }
   }
 
   if (validLine)
@@ -122,11 +125,10 @@ void Perceptor::UpdateLandmark(GameState::Agent &_agent,
   bool validLandMark = true;
   for (size_t i = 0; i < this->viewFrustrum.size(); ++i)
   {
-    if (!Geometry::PointAbovePlane(_agentLandMark, this->viewFrustrum.at(i)))
-    {
-      validLandMark = false;
-      break;
-    }
+    validLandMark = Geometry::PointAbovePlane(_agentLandMark,
+                    this->viewFrustrum.at(i));
+    if (!validLandMark)
+    { break; }
   }
 
   if (validLandMark)
