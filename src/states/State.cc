@@ -26,15 +26,16 @@ using namespace states;
 
 /////////////////////////////////////////////////
 State::State(const std::string &_name,
-             GameState *const _gameState)
-  : name(_name), gameState(_gameState)
+             GameState *const _gameState):
+  name(_name),
+  gameState(_gameState),
+  prevState(std::shared_ptr<State>(NULL)),
+  initBallPos(math::Vector3<double>(-999, -999, -999))
 {
   this->hasInitialized = false;
   this->isActive = false;
   this->initTime = -1;
   this->ballContactHistorySize = -1;
-  this->prevState = std::shared_ptr<State>(NULL);
-  this->initBallPos.Set(-999, -999, -999);
 }
 
 /////////////////////////////////////////////////

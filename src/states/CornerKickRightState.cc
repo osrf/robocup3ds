@@ -14,7 +14,6 @@
  * limitations under the License.
  *
 */
-
 #include <string>
 
 #include "robocup3ds/GameState.hh"
@@ -26,8 +25,8 @@ using namespace states;
 
 /////////////////////////////////////////////////
 CornerKickRightState::CornerKickRightState(const std::string &_name,
-    GameState *const _gameState)
-  : State(_name, _gameState)
+    GameState *const _gameState):
+  State(_name, _gameState)
 {
 }
 

@@ -57,6 +57,7 @@ class GameStateTest_basic : public ::testing::Test
   protected:
     virtual void TearDown()
     {
+      delete gameState;
     }
 
   protected:
@@ -689,7 +690,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_goal_kickOff)
 /// \brief Test for whether kickIn play mode transitions to playOn correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_kickIn_playOn)
 {
-  vector<std::shared_ptr<State> > states; 
+  vector<std::shared_ptr<State> > states;
   states.push_back(gameState->kickInLeftState);
   states.push_back(gameState->kickInRightState);
   std::shared_ptr<GameState::BallContact> ballContact;

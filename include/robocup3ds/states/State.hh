@@ -19,6 +19,7 @@
 #define _GAZEBO_STATE_PLUGIN_HH_
 
 #include <ignition/math.hh>
+#include <memory>
 #include <string>
 
 class GameState;
@@ -32,7 +33,8 @@ namespace states
     /// \brief Class constructor.
     /// \param[in] _name Name of the state.
     /// \param[out] _gameState Reference to the GameState.
-    public: State(const std::string &_name, GameState *const _gameState);
+    public: State(const std::string &_name,
+        GameState *const _gameState);
 
     /// \brief Initialize the state. Called once after a pause duration after
     /// entering state.
@@ -65,7 +67,7 @@ namespace states
     public: const std::string name;
 
     /// \brief Pointer to access full game information.
-    public: std::shared_ptr<GameState> gameState;
+    public: GameState *gameState;
 
     /// \brief Time when we entered this game mode.
     public: double initTime;

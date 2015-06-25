@@ -48,7 +48,7 @@ namespace states {
 /// \class GameState GameState.hh robocup3ds/GameState.hh
 /// \brief Class for controlling play mode transitions and checking rule
 /// violations in a 3d simulation Robocup game
-class GameState
+class GameState : public std::enable_shared_from_this<GameState>
 {
   // forward declarations
   public: class AgentPerceptions;
@@ -78,7 +78,8 @@ class GameState
     /// \param[in] _gameState Pointer to GameState object
     /// \param[in] _normalLevel Normal message logging level
     /// \param[in] _errorLevel Error messages above this level will be printed
-    public: Logger(GameState *_gameState, const int _normalLevel,
+    public: Logger(GameState *const _gameState,
+      const int _normalLevel,
                     const int _errorLevel):
         gameState(_gameState),
         normalLevel(_normalLevel),
@@ -112,7 +113,7 @@ class GameState
     }
 
     /// \brief Pointer to parent gamestate object
-    private: std::shared_ptr<GameState> gameState;
+    private: GameState *gameState;
 
     /// \brief Level for logging normal messages
     public: int normalLevel;
@@ -132,7 +133,7 @@ class GameState
     /// \param[in] _side Side of team
     /// \param[in] _score Starting score of team
     /// \param[in] _playerLimit Maximum players on team
-    public: Team(const std::string _name, const Side _side,
+    public: Team(const std::string &_name, const Side _side,
       const int _score, const int _playerLimit):
       name(_name),
       side(_side),

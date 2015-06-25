@@ -26,8 +26,8 @@ using namespace states;
 
 /////////////////////////////////////////////////
 CornerKickLeftState::CornerKickLeftState(const std::string &_name,
-    GameState *const _gameState)
-  : State(_name, _gameState)
+    GameState *const _gameState):
+  State(_name, _gameState)
 {
 }
 

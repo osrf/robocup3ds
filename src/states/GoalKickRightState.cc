@@ -14,7 +14,6 @@
  * limitations under the License.
  *
 */
-
 #include <string>
 
 #include "robocup3ds/GameState.hh"
