@@ -156,26 +156,6 @@ class GameState
     public: bool canScore;
   };
 
-  /// \class AgentPerceptions Perceptor.hh robocup3ds/Perceptor.hh
-  /// \brief This class serves as an container for the information sent to
-  /// the agent
-  public: class AgentPerceptions
-  {
-    /// \brief AgentPerception constructor
-    public: AgentPerceptions()
-    {
-      this->fieldLines.reserve(21);
-    }
-
-    /// \Brief vector of landmarks that have been transformed to agent's cood
-    /// frame
-    public: std::map<std::string, ignition::math::Vector3<double> > landMarks;
-
-    /// \Brief vector of lines that have been transformed to agent's cood
-    /// frame
-    public: std::vector <Geometry::Line> fieldLines;
-  };
-
   /// \class Agent GameState.hh robocup3ds/GameState.hh
   /// \brief Agent class for GameState
   public: class Agent
@@ -222,8 +202,6 @@ class GameState
     public: double timeImmoblized;
     /// \brief Stores time the agent has fallen
     public: double timeFallen;
-    /// \brief Container for an agent's perceptions
-    public: AgentPerceptions percept;
     /// \brief Flag whether player is goalkeeper
     public: bool IsGoalKeeper() {
       return this->uNum == 1;
