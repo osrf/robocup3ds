@@ -21,6 +21,8 @@
 #include "robocup3ds/states/FreeKickLeftState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
+using namespace states;
+
 /////////////////////////////////////////////////
 FreeKickLeftState::FreeKickLeftState(const std::string &_name,
                                      GameState *const _gameState)

@@ -24,20 +24,23 @@
 
 class GameState;
 
-/// \class KickInLeftState KickInLeftState.hh
-/// robocup3ds/states/KickInLeftState.hh
-/// \brief State that handles the left kick in state.
-class KickInLeftState : public State
+namespace states
 {
-  // Documentation inherited
-  public: KickInLeftState(const std::string &_name,
-                            GameState *const _gameState);
+  /// \class KickInLeftState KickInLeftState.hh
+  /// robocup3ds/states/KickInLeftState.hh
+  /// \brief State that handles the left kick in state.
+  class KickInLeftState : public State
+  {
+    // Documentation inherited
+    public: KickInLeftState(const std::string &_name,
+                              GameState *const _gameState);
 
-  // Documentation inherited
-  public: virtual void Initialize();
+    // Documentation inherited
+    public: virtual void Initialize();
 
-  // Documentation inherited
-  public: virtual void Update(); \
-};
+    // Documentation inherited
+    public: virtual void Update(); \
+  };
+}
 
 #endif

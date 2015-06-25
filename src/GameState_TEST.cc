@@ -40,8 +40,9 @@
 #include "robocup3ds/states/PlayOnState.hh"
 #include "robocup3ds/states/State.hh"
 
-using namespace std;
 using namespace ignition;
+using namespace states;
+using namespace std;
 
 /// \class GameStateTest_basic
 /// \brief This test fixture sets up a gameState object and two empty teams

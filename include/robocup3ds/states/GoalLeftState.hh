@@ -24,23 +24,26 @@
 
 class GameState;
 
-/// \class GoalLeftState GoalLeftState.hh
-/// robocup3ds/states/GoalLeftState.hh
-/// \brief State that handles the left goal state.
-class GoalLeftState : public State
+namespace states
 {
-  // Documentation inherited
-  public: GoalLeftState(const std::string &_name,
-                GameState *const _gameState);
+  /// \class GoalLeftState GoalLeftState.hh
+  /// robocup3ds/states/GoalLeftState.hh
+  /// \brief State that handles the left goal state.
+  class GoalLeftState : public State
+  {
+    // Documentation inherited
+    public: GoalLeftState(const std::string &_name,
+                  GameState *const _gameState);
 
-  // Documentation inherited
-  public: virtual void Initialize();
+    // Documentation inherited
+    public: virtual void Initialize();
 
-  // Documentation inherited
-  public: virtual void Update();
+    // Documentation inherited
+    public: virtual void Update();
 
-  /// \brief Flag to determine whether goal scored is valid
-  private: bool validGoal;
-};
+    /// \brief Flag to determine whether goal scored is valid
+    private: bool validGoal;
+  };
+}
 
 #endif

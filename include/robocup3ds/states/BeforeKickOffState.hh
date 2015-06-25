@@ -24,20 +24,23 @@
 
 class GameState;
 
-/// \class BeforeKickOffState BeforeKickOffState.hh
-/// robocup3ds/states/BeforeKickOffState.hh
-/// \brief State that handles the initial state.
-class BeforeKickOffState : public State
+namespace states
 {
-  // Documentation inherited
-  public: BeforeKickOffState(const std::string &_name,
-                             GameState *const _gameState);
+  /// \class BeforeKickOffState BeforeKickOffState.hh
+  /// robocup3ds/states/BeforeKickOffState.hh
+  /// \brief State that handles the initial state.
+  class BeforeKickOffState : public State
+  {
+    // Documentation inherited
+    public: BeforeKickOffState(const std::string &_name,
+                               GameState *const _gameState);
 
-  // Documentation inherited.
-  public: virtual void Initialize();
+    // Documentation inherited.
+    public: virtual void Initialize();
 
-  // Documentation inherited
-  public: virtual void Update();
-};
+    // Documentation inherited
+    public: virtual void Update();
+  };
+}
 
 #endif

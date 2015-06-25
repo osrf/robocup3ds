@@ -41,6 +41,7 @@
 #include "robocup3ds/states/PlayOnState.hh"
 
 using namespace ignition;
+using namespace states;
 
 const std::string GameState::BeforeKickOff   = "BeforeKickOff";
 const std::string GameState::KickOffLeft     = "KickOffLeft";

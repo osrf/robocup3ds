@@ -22,6 +22,8 @@
 #include "robocup3ds/states/KickOffRightState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
+using namespace states;
+
 /////////////////////////////////////////////////
 KickOffRightState::KickOffRightState(const std::string &_name,
                                      GameState *const _gameState)

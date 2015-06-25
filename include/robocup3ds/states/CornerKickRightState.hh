@@ -24,20 +24,23 @@
 
 class GameState;
 
-/// \class CornerKickRightState CornerKickRightState.hh
-/// robocup3ds/states/CornerKickRightState.hh
-/// \brief State that handles the corner kick right state.
-class CornerKickRightState : public State
+namespace states
 {
-  // Documentation inherited
-  public: CornerKickRightState(const std::string &_name,
-                               GameState *const _gameState);
+  /// \class CornerKickRightState CornerKickRightState.hh
+  /// robocup3ds/states/CornerKickRightState.hh
+  /// \brief State that handles the corner kick right state.
+  class CornerKickRightState : public State
+  {
+    // Documentation inherited
+    public: CornerKickRightState(const std::string &_name,
+                                 GameState *const _gameState);
 
-  // Documentation inherited
-  public: virtual void Initialize();
+    // Documentation inherited
+    public: virtual void Initialize();
 
-  // Documentation inherited
-  public: virtual void Update();
-};
+    // Documentation inherited
+    public: virtual void Update();
+  };
+}
 
 #endif

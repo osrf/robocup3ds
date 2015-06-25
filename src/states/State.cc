@@ -22,6 +22,7 @@
 #include "robocup3ds/states/State.hh"
 
 using namespace ignition;
+using namespace states;
 
 /////////////////////////////////////////////////
 State::State(const std::string &_name,

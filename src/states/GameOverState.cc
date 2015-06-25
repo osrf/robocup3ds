@@ -20,6 +20,8 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/GameOverState.hh"
 
+using namespace states;
+
 /////////////////////////////////////////////////
 GameOverState::GameOverState(const std::string &_name,
                              GameState *const _gameState)

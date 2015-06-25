@@ -24,20 +24,23 @@
 
 class GameState;
 
-/// \class PlayOnState PlayOnState.hh
-/// robocup3ds/states/PlayOnState.hh
-/// \brief State that handles regular gameplay.
-class PlayOnState : public State
+namespace states
 {
-  // Documentation inherited
-  public: PlayOnState(const std::string &_name,
-                    GameState *const _gameState);
+  /// \class PlayOnState PlayOnState.hh
+  /// robocup3ds/states/PlayOnState.hh
+  /// \brief State that handles regular gameplay.
+  class PlayOnState : public State
+  {
+    // Documentation inherited
+    public: PlayOnState(const std::string &_name,
+                      GameState *const _gameState);
 
-  // Documentation inherited
-  public: virtual void Initialize();
+    // Documentation inherited
+    public: virtual void Initialize();
 
-  // Documentation inherited
-  public: virtual void Update();
-};
+    // Documentation inherited
+    public: virtual void Update();
+  };
+}
 
 #endif

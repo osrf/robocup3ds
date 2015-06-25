@@ -23,6 +23,8 @@
 #include "robocup3ds/states/KickOffLeftState.hh"
 #include "robocup3ds/states/KickOffRightState.hh"
 
+using namespace states;
+
 /////////////////////////////////////////////////
 BeforeKickOffState::BeforeKickOffState(const std::string &_name,
                                        GameState *const _gameState)
