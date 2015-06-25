@@ -78,7 +78,7 @@ double GameState::fallenTimeLimit = 30;
 double GameState::dropBallRadius = 2;
 
 std::shared_ptr<std::map<const std::string, const std::string> >
-  GameState::config;
+GameState::config;
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -96,14 +96,14 @@ GameState::GameState():
   goalLeftState(new GoalLeftState(GoalLeft, this)),
   goalRightState(new GoalRightState(GoalRight, this)),
   freeKickLeftState(new FreeKickLeftState(FreeKickLeft, this)),
-  freeKickRightState(new FreeKickRightState(FreeKickRight, this))
+  freeKickRightState(new FreeKickRightState(FreeKickRight, this)),
+  touchBallKickoff(std::shared_ptr<BallContact>(NULL)),
+  currentState(std::shared_ptr<State>(NULL))
 {
   this->half = Half::FIRST_HALF;
   this->cycleCounter = 0;
   this->gameTime = this->prevCycleGameTime = this->startGameTime = 0.0;
   this->updateBallPose = false;
-  this->currentState = std::shared_ptr<State>(NULL);
-  this->touchBallKickoff = std::shared_ptr<BallContact>(NULL);
   this->hasCurrentStateChanged = false;
   this->SetCurrent(beforeKickOffState);
   this->teams.push_back(
@@ -337,7 +337,7 @@ void GameState::CheckTiming()
     this->SetCurrent(kickOffRightState);
   }
   else if ((this->half == Half::SECOND_HALF)
-    && (elapsedGameTime >= SecondsEachHalf))
+           && (elapsedGameTime >= SecondsEachHalf))
   {
     // End of the game
     this->SetCurrent(gameOverState);
