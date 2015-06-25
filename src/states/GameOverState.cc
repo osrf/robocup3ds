@@ -16,14 +16,13 @@
 */
 
 #include <string>
+
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/GameOverState.hh"
 
-using namespace ignition;
-
 /////////////////////////////////////////////////
 GameOverState::GameOverState(const std::string &_name,
-                             GameState *_gameState)
+                             GameState *const _gameState)
   : State(_name, _gameState)
 {
 }

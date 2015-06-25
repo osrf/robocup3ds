@@ -18,9 +18,8 @@
 #ifndef _GAZEBO_STATE_PLUGIN_HH_
 #define _GAZEBO_STATE_PLUGIN_HH_
 
-#include <string>
 #include <ignition/math.hh>
-#include "robocup3ds/GameState.hh"
+#include <string>
 
 class GameState;
 
@@ -31,16 +30,16 @@ class State
   /// \brief Class constructor.
   /// \param[in] _name Name of the state.
   /// \param[out] _gameState Reference to the GameState.
-  public: State(const std::string &_name, GameState *_gameState);
+  public: State(const std::string &_name, GameState *const _gameState);
 
   /// \brief Initialize the state. Called once after a pause duration after
   /// entering state.
   public: virtual void Initialize();
 
-  /// \brief pre-Initialize the state. Called once when the state is entered.
+  /// \brief Preinitialize the state. Called once when the state is entered.
   public: virtual void Preinitialize();
 
-  /// \brief unInitialize the state. Called once when leaving current state
+  /// \brief Uninitialize the state. Called once when leaving current state
   /// and switching to another.
   public: virtual void Uninitialize();
 
@@ -55,15 +54,16 @@ class State
 
   /// \brief Time elapsed since we entered this game mode.
   public: double GetElapsedTime();
-  /// \brief Used to determine if ball contact has occurred since
+
+  // \brief Used to determine if ball contact has occurred since
   /// Initialize()
   public: int ballContactHistorySize;
 
   /// \brief Name of the state.
-  public: std::string name;
+  public: const std::string name;
 
   /// \brief Pointer to access full game information.
-  public: GameState *gameState;
+  public: std::shared_ptr<GameState> gameState;
 
   /// \brief Time when we entered this game mode.
   public: double initTime;
@@ -76,7 +76,7 @@ class State
   public: bool isActive;
 
   /// \brief Pointer to previous state
-  public: State *prevState;
+  public: std::shared_ptr<State> prevState;
 
   /// \brief Position of ball when we enter this state
   public: ignition::math::Vector3<double> initBallPos;

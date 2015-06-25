@@ -16,14 +16,14 @@
 */
 
 #include <string>
+
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/GoalLeftState.hh"
-
-using namespace ignition;
+#include "robocup3ds/states/KickOffRightState.hh"
 
 /////////////////////////////////////////////////
 GoalLeftState::GoalLeftState(const std::string &_name,
-                             GameState *_gameState)
+                             GameState *const _gameState)
   : State(_name, _gameState)
 {
   this->validGoal = false;
@@ -38,7 +38,7 @@ void GoalLeftState::Initialize()
   for (size_t i = 0; i < this->gameState->teams.size(); ++i)
   {
     GameState::Team *team = this->gameState->teams.at(i).get();
-    if (team->side == GameState::Team::LEFT)
+    if (team->side == GameState::Team::Side::LEFT)
     {
       if (team->canScore)
       {
@@ -63,6 +63,6 @@ void GoalLeftState::Update()
   // Afer some time, go to right team kick off mode.
   if (this->GetElapsedTime() >= GameState::SecondsGoalPause || !validGoal)
   {
-    this->gameState->SetCurrent(this->gameState->kickOffRightState.get());
+    this->gameState->SetCurrent(this->gameState->kickOffRightState);
   }
 }

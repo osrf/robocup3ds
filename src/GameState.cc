@@ -14,18 +14,31 @@
  * limitations under the License.
  *
 */
-#include <boost/bind.hpp>
-#include <sdf/sdf.hh>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <algorithm>
-#include <string>
+#include <iostream>
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "robocup3ds/GameState.hh"
-#include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/Geometry.hh"
+#include "robocup3ds/SoccerField.hh"
+#include "robocup3ds/states/BeforeKickOffState.hh"
+#include "robocup3ds/states/CornerKickLeftState.hh"
+#include "robocup3ds/states/CornerKickRightState.hh"
+#include "robocup3ds/states/FreeKickLeftState.hh"
+#include "robocup3ds/states/FreeKickRightState.hh"
+#include "robocup3ds/states/GameOverState.hh"
+#include "robocup3ds/states/GoalKickLeftState.hh"
+#include "robocup3ds/states/GoalKickRightState.hh"
+#include "robocup3ds/states/GoalLeftState.hh"
+#include "robocup3ds/states/GoalRightState.hh"
+#include "robocup3ds/states/KickInLeftState.hh"
+#include "robocup3ds/states/KickInRightState.hh"
+#include "robocup3ds/states/KickOffLeftState.hh"
+#include "robocup3ds/states/KickOffRightState.hh"
+#include "robocup3ds/states/PlayOnState.hh"
 
 using namespace ignition;
 
@@ -52,9 +65,9 @@ double GameState::SecondsKickInPause = 1;
 double GameState::SecondsKickIn = 15;
 double GameState::SecondsBeforeKickOff = 5;
 double GameState::SecondsKickOff = 15;
-bool GameState::useCounterForGameTime = true;
-int GameState::playerLimit = 11;
-int GameState::penaltyBoxLimit = 3;
+bool   GameState::useCounterForGameTime = true;
+int    GameState::playerLimit = 11;
+int    GameState::penaltyBoxLimit = 3;
 double GameState::beamHeight = SoccerField::RobotPoseHeight + 0.05;
 double GameState::crowdingEnableRadius = 0.8;
 double GameState::innerCrowdingRadius = 0.4;
@@ -63,7 +76,8 @@ double GameState::immobilityTimeLimit = 15;
 double GameState::fallenTimeLimit = 30;
 double GameState::dropBallRadius = 2;
 
-std::map<const std::string, std::string> *GameState::config;
+std::shared_ptr<std::map<const std::string, const std::string> >
+  GameState::config;
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -83,20 +97,20 @@ GameState::GameState():
   freeKickLeftState(new FreeKickLeftState(FreeKickLeft, this)),
   freeKickRightState(new FreeKickRightState(FreeKickRight, this))
 {
-  this->half = FIRST_HALF;
+  this->half = Half::FIRST_HALF;
   this->cycleCounter = 0;
   this->gameTime = this->prevCycleGameTime = this->startGameTime = 0.0;
   this->updateBallPose = false;
-  this->currentState = NULL;
-  this->touchBallKickoff = NULL;
+  this->currentState = std::shared_ptr<State>(NULL);
+  this->touchBallKickoff = std::shared_ptr<BallContact>(NULL);
   this->hasCurrentStateChanged = false;
-  this->SetCurrent(beforeKickOffState.get());
+  this->SetCurrent(beforeKickOffState);
   this->teams.push_back(
     std::shared_ptr<Team>(
-      new Team("_empty_team", Team::LEFT, 0, GameState::playerLimit)));
+      new Team("_empty_team", Team::Side::LEFT, 0, GameState::playerLimit)));
   this->teams.push_back(
     std::shared_ptr<Team>(
-      new Team("_empty_team", Team::RIGHT, 0, GameState::playerLimit)));
+      new Team("_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit)));
 }
 
 /////////////////////////////////////////////////
@@ -124,40 +138,40 @@ void GameState::LoadConfiguration()
     GameState::SecondsFullGame = 2.0 * GameState::SecondsEachHalf;
   }
   if (LoadConfigParameter("gamestate_secondsgoalpause", value))
-    GameState::SecondsGoalPause = value;
+  { GameState::SecondsGoalPause = value; }
   if (LoadConfigParameter("gamestate_secondskickinpause", value))
-    GameState::SecondsKickInPause = value;
+  { GameState::SecondsKickInPause = value; }
   if (LoadConfigParameter("gamestate_secondskickin", value))
-    GameState::SecondsKickIn = value;
+  { GameState::SecondsKickIn = value; }
   if (LoadConfigParameter("gamestate_secondsbeforekickoff", value))
-    GameState::SecondsBeforeKickOff = value;
+  { GameState::SecondsBeforeKickOff = value; }
   if (LoadConfigParameter("gamestate_secondskickoff", value))
-    GameState::SecondsKickOff = value;
+  { GameState::SecondsKickOff = value; }
   if (LoadConfigParameter("gamestate_dropballradius", value))
-    GameState::dropBallRadius = value;
+  { GameState::dropBallRadius = value; }
   if (LoadConfigParameterBool("gamestate_usecounterforgametime", boolValue))
-    GameState::useCounterForGameTime = boolValue;
+  { GameState::useCounterForGameTime = boolValue; }
   if (LoadConfigParameter("gamestate_playerlimit", value))
-    GameState::playerLimit = static_cast<int>(value);
+  { GameState::playerLimit = static_cast<int>(value); }
   if (LoadConfigParameter("gamestate_penaltyboxlimit", value))
-    GameState::penaltyBoxLimit = static_cast<int>(value);
+  { GameState::penaltyBoxLimit = static_cast<int>(value); }
   if (LoadConfigParameter("gamestate_beamheight", value))
-    GameState::beamHeight = value;
+  { GameState::beamHeight = value; }
   if (LoadConfigParameter("gamestate_crowdingenableradius", value))
-    GameState::crowdingEnableRadius = value;
+  { GameState::crowdingEnableRadius = value; }
   if (LoadConfigParameter("gamestate_innercrowdingradius", value))
-    GameState::innerCrowdingRadius = value;
+  { GameState::innerCrowdingRadius = value; }
   if (LoadConfigParameter("gamestate_outercrowdingradius", value))
-    GameState::outerCrowdingRadius = value;
+  { GameState::outerCrowdingRadius = value; }
   if (LoadConfigParameter("gamestate_immobilitytimelimit", value))
-    GameState::immobilityTimeLimit = value;
+  { GameState::immobilityTimeLimit = value; }
   if (LoadConfigParameter("gamestate_fallentimelimit", value))
-    GameState::fallenTimeLimit = value;
+  { GameState::fallenTimeLimit = value; }
 }
 
 /////////////////////////////////////////////////
 bool GameState::LoadConfigParameter(const std::string &_key,
-                                    double &_value)
+                                    double &_value) const
 {
   try
   {
@@ -172,7 +186,7 @@ bool GameState::LoadConfigParameter(const std::string &_key,
 
 /////////////////////////////////////////////////
 bool GameState::LoadConfigParameterBool(const std::string &_key,
-                                    bool &_boolValue)
+                                        bool &_boolValue) const
 {
   try
   {
@@ -214,10 +228,10 @@ void GameState::ReleasePlayers()
 {
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    for (size_t j = 0; j < this->teams.at(i).get()->members.size(); ++j)
+    for (size_t j = 0; j < this->teams.at(i)->members.size(); ++j)
     {
-      Agent &agent = this->teams.at(i).get()->members.at(j);
-      agent.status = Agent::RELEASED;
+      Agent &agent = this->teams.at(i)->members.at(j);
+      agent.status = Agent::Status::RELEASED;
     }
   }
 }
@@ -227,16 +241,16 @@ void GameState::StopPlayers()
 {
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    for (size_t j = 0; j < this->teams.at(i).get()->members.size(); ++j)
+    for (size_t j = 0; j < this->teams.at(i)->members.size(); ++j)
     {
-      Agent &agent = this->teams.at(i).get()->members.at(j);
-      agent.status = Agent::STOPPED;
+      Agent &agent = this->teams.at(i)->members.at(j);
+      agent.status = Agent::Status::STOPPED;
     }
   }
 }
 
 ////////////////////////////////////////////////
-void GameState::SetCurrent(State *_newState)
+void GameState::SetCurrent(const std::shared_ptr<State> &_newState)
 {
   // Only update the state if _newState is different than the current state.
   if (this->currentState != _newState)
@@ -259,7 +273,7 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
   // Check if the player is withing FREE_KICK distance.
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    Team *team = this->teams.at(i).get();
+    std::shared_ptr<Team> team = this->teams.at(i);
 
     if (team->side != _teamAllowed)
     {
@@ -309,22 +323,23 @@ void GameState::CheckTiming()
   }
 
   double elapsedGameTime = this->GetElapsedGameTime();
-  if ((this->half == FIRST_HALF) && (elapsedGameTime >= SecondsEachHalf))
+  if ((this->half == Half::FIRST_HALF) && (elapsedGameTime >= SecondsEachHalf))
   {
     // swap team sides
-    Team::Side temp = this->teams.at(0).get()->side;
-    this->teams.at(0).get()->side = this->teams.at(1).get()->side;
-    this->teams.at(1).get()->side = temp;
+    Team::Side temp = this->teams.at(0)->side;
+    this->teams.at(0)->side = this->teams.at(1)->side;
+    this->teams.at(1)->side = temp;
 
     // End of the first half
     this->startGameTime = this->gameTime;
-    this->SetHalf(SECOND_HALF);
-    this->SetCurrent(kickOffRightState.get());
+    this->SetHalf(Half::SECOND_HALF);
+    this->SetCurrent(kickOffRightState);
   }
-  else if ((this->half == SECOND_HALF) && (elapsedGameTime >= SecondsEachHalf))
+  else if ((this->half == Half::SECOND_HALF)
+    && (elapsedGameTime >= SecondsEachHalf))
   {
     // End of the game
-    this->SetCurrent(gameOverState.get());
+    this->SetCurrent(gameOverState);
   }
 }
 
@@ -342,35 +357,35 @@ void GameState::CheckBall()
   }
   else
   {
-    if (this->half == FIRST_HALF)
+    if (this->half == Half::FIRST_HALF)
     {
-      lastContactSide = Team::LEFT;
+      lastContactSide = Team::Side::LEFT;
     }
     else
     {
-      lastContactSide = Team::RIGHT;
+      lastContactSide = Team::Side::RIGHT;
     }
   }
 
   // The ball is inside the left goal.
   if (SoccerField::GoalBoxLeft.Contains(this->ballPos))
   {
-    this->SetCurrent(goalRightState.get());
+    this->SetCurrent(goalRightState);
   }
   else if (SoccerField::GoalBoxRight.Contains(this->ballPos))
   {
     // The ball is inside the right goal.
-    this->SetCurrent(goalLeftState.get());
+    this->SetCurrent(goalLeftState);
   }
   else if (fabs(this->ballPos.Y()) > SoccerField::HalfFieldHeight +
            SoccerField::OutofBoundsTol)
   {
     // The ball is outside of the sideline.
     // Choose team
-    if (lastContactSide == Team::LEFT)
-    { this->SetCurrent(kickInRightState.get()); }
+    if (lastContactSide == Team::Side::LEFT)
+    { this->SetCurrent(kickInRightState); }
     else
-    { this->SetCurrent(kickInLeftState.get()); }
+    { this->SetCurrent(kickInLeftState); }
   }
   else if (fabs(this->ballPos.X()) > SoccerField::HalfFieldWidth +
            SoccerField::OutofBoundsTol)
@@ -380,27 +395,27 @@ void GameState::CheckBall()
     if (this->ballPos.X() < 0)
     {
       // Choose team 1
-      if (lastContactSide == Team::LEFT)
-      { this->SetCurrent(cornerKickRightState.get()); }
+      if (lastContactSide == Team::Side::LEFT)
+      { this->SetCurrent(cornerKickRightState); }
       else
-      { this->SetCurrent(goalKickLeftState.get()); }
+      { this->SetCurrent(goalKickLeftState); }
     }
     else
     {
       // Choose team 2
-      if (lastContactSide == Team::LEFT)
-      { this->SetCurrent(goalKickRightState.get()); }
+      if (lastContactSide == Team::Side::LEFT)
+      { this->SetCurrent(goalKickRightState); }
       else
-      { this->SetCurrent(cornerKickLeftState.get()); }
+      { this->SetCurrent(cornerKickLeftState); }
     }
   }
 }
 
 /////////////////////////////////////////////////
-void GameState::CheckGoalKickIllegalDefense(Team::Side _teamAllowed)
+void GameState::CheckGoalKickIllegalDefense(const Team::Side _teamAllowed)
 {
   math::Box penaltyBox;
-  if (_teamAllowed == Team::LEFT)
+  if (_teamAllowed == Team::Side::LEFT)
   {
     penaltyBox = SoccerField::PenaltyBoxLeft;
   }
@@ -411,7 +426,7 @@ void GameState::CheckGoalKickIllegalDefense(Team::Side _teamAllowed)
 
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    Team *team = this->teams.at(i).get();
+    std::shared_ptr<Team> team = this->teams.at(i);
     if (team->side != _teamAllowed)
     {
       for (size_t j = 0; j < team->members.size(); ++j)
@@ -433,8 +448,8 @@ void GameState::CheckIllegalDefense()
   math::Vector3<double> goalCenter;
   for (size_t k = 0; k < this->teams.size(); ++k)
   {
-    Team *team = this->teams.at(k).get();
-    if (team->side == Team::LEFT)
+    std::shared_ptr<Team> team = this->teams.at(k);
+    if (team->side == Team::Side::LEFT)
     {
       penaltyBox = SoccerField::PenaltyBoxLeft;
       goalCenter = SoccerField::GoalCenterLeft;
@@ -517,12 +532,18 @@ void GameState::CheckIllegalDefense()
 }
 
 /////////////////////////////////////////////////
+bool GameState::SortDist(const AgentDist &_i, const AgentDist &_j)
+{
+  return (_i.dist < _j.dist);
+}
+
+/////////////////////////////////////////////////
 void GameState::CheckCrowding()
 {
   bool enableCrowding = false;
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    Team *team = this->teams.at(i).get();
+    std::shared_ptr<Team> team = this->teams.at(i);
     for (size_t j = 0; j < team->members.size(); ++j)
     {
       Agent &agent = team->members.at(j);
@@ -539,7 +560,7 @@ exitLoop:
   {
     for (size_t k = 0; k < this->teams.size(); ++k)
     {
-      Team *team = this->teams.at(k).get();
+      std::shared_ptr<Team> team = this->teams.at(k);
       std::vector<AgentDist> agentDists;
       for (size_t i = 0; i < team->members.size(); ++i)
       {
@@ -595,7 +616,7 @@ void GameState::CheckImmobility()
 {
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    Team *team = this->teams.at(i).get();
+    std::shared_ptr<Team> team = this->teams.at(i);
     for (size_t j = 0; j < team->members.size(); ++j)
     {
       Agent &agent = team->members.at(j);
@@ -645,7 +666,7 @@ void GameState::CheckDoubleTouch()
   // check && make sure that the first contact after kick off
   // (or second overall contact) is not by the same agent who performed
   // the kick off
-  BallContact *firstContact = this->ballContactHistory.at(1).get();
+  std::shared_ptr<BallContact> firstContact = this->ballContactHistory.at(1);
   if (this->touchBallKickoff != NULL
       && this->currentState->prevState != NULL
       && (this->currentState->prevState->name == "KickOffRight"
@@ -655,11 +676,11 @@ void GameState::CheckDoubleTouch()
   {
     if (this->currentState->prevState->name == "KickOffLeft")
     {
-      this->SetCurrent(kickOffRightState.get());
+      this->SetCurrent(kickOffRightState);
     }
     else
     {
-      this->SetCurrent(kickOffLeftState.get());
+      this->SetCurrent(kickOffLeftState);
     }
   }
 }
@@ -667,14 +688,14 @@ void GameState::CheckDoubleTouch()
 /////////////////////////////////////////////////
 void GameState::CheckCanScore()
 {
-  BallContact *ballContact = this->GetLastBallContact();
+  std::shared_ptr<BallContact> ballContact = this->GetLastBallContact();
   if (ballContact == NULL)
   {
     return;
   }
   for (size_t j = 0; j < this->teams.size(); ++j)
   {
-    Team *team = this->teams.at(j).get();
+    std::shared_ptr<Team> team = this->teams.at(j);
     if ((!team->canScore)
         && (this->touchBallKickoff != NULL)
         && ((ballContact->side != team->side)
@@ -689,19 +710,19 @@ void GameState::CheckCanScore()
   }
 }
 
-void GameState::CheckOffSidesOnKickOff(Team::Side _kickingSide)
+void GameState::CheckOffSidesOnKickOff(const Team::Side _kickingSide)
 {
   // check for agents that violate sides
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    Team *team = this->teams.at(i).get();
+    std::shared_ptr<Team> team = this->teams.at(i);
     for (size_t j = 0; j < team->members.size(); ++j)
     {
       Agent &agent = team->members.at(j);
       math::Vector3<double> agentPosNoZ(agent.pos.X(), agent.pos.Y(), 0);
 
       bool isOffSide;
-      if (team->side == Team::LEFT)
+      if (team->side == Team::Side::LEFT)
       { isOffSide = agent.pos.X() > 0; }
       else
       { isOffSide = agent.pos.X() < 0; }
@@ -731,7 +752,7 @@ void GameState::CheckOffSidesOnKickOff(Team::Side _kickingSide)
 
 /////////////////////////////////////////////////
 void GameState::MoveAgent(Agent &_agent,
-                          const math::Vector3<double> &_pos)
+                          const math::Vector3<double> &_pos) const
 {
   _agent.pos = _pos;
   _agent.updatePose = true;
@@ -739,7 +760,7 @@ void GameState::MoveAgent(Agent &_agent,
 
 /////////////////////////////////////////////////
 void GameState::MoveAgent(Agent &_agent, const double _x, const double _y,
-                          const double _yaw)
+                          const double _yaw) const
 {
   _agent.pos.Set(_x, _y, GameState::beamHeight);
   _agent.rot.Euler(0, 0, _yaw);
@@ -748,7 +769,7 @@ void GameState::MoveAgent(Agent &_agent, const double _x, const double _y,
 
 /////////////////////////////////////////////////
 void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
-                               const double _yaw)
+                               const double _yaw) const
 {
   double offsetX = (static_cast<double>(random()) / (RAND_MAX)) * 0.2 - 0.1;
   double offsetY = (static_cast<double>(random()) / (RAND_MAX)) *
@@ -761,14 +782,14 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
 }
 
 void GameState::MoveAgent(Agent &_agent, const math::Vector3<double> &_pos,
-                          const math::Quaternion<double> &_rot)
+                          const math::Quaternion<double> &_rot) const
 {
   _agent.pos = _pos;
   _agent.rot = _rot;
   _agent.updatePose = true;
 }
 
-void GameState::MoveAgentToSide(Agent &_agent)
+void GameState::MoveAgentToSide(Agent &_agent) const
 {
   double newY;
   if (_agent.pos.Y() > 0)
@@ -784,14 +805,14 @@ void GameState::MoveAgentToSide(Agent &_agent)
   _agent.updatePose = true;
 }
 
-void GameState::MoveOffSideAgent(Agent &_agent)
+void GameState::MoveOffSideAgent(Agent &_agent) const
 {
-  if (_agent.team->side == Team::LEFT)
+  if (_agent.team->side == Team::Side::LEFT)
   {
     _agent.pos.Set(-(SoccerField::CenterCircleRadius + 0.5), _agent.pos.Y(),
                    GameState::beamHeight);
   }
-  else if (_agent.team->side == Team::RIGHT)
+  else if (_agent.team->side == Team::Side::RIGHT)
   {
     _agent.pos.Set(SoccerField::CenterCircleRadius + 0.5, _agent.pos.Y(),
                    GameState::beamHeight);
@@ -876,7 +897,7 @@ void GameState::Initialize()
 }
 
 ////////////////////////////////////////////////
-bool GameState::AddAgent(int _uNum, std::string _teamName)
+bool GameState::AddAgent(int _uNum, const std::string &_teamName)
 {
   // std::cout << "adding agent: " << uNum << " teamName: "
   // << teamName << std::endl;
@@ -890,7 +911,7 @@ bool GameState::AddAgent(int _uNum, std::string _teamName)
   int teamToAdd = -1;
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    if (this->teams.at(i).get()->name == _teamName)
+    if (this->teams.at(i)->name == _teamName)
     {
       teamToAdd = i;
     }
@@ -899,11 +920,11 @@ bool GameState::AddAgent(int _uNum, std::string _teamName)
   {
     for (size_t i = 0; i < this->teams.size(); ++i)
     {
-      if (this->teams.at(i).get()->name == "_empty_team"
-          && this->teams.at(i).get()->members.size() == 0)
+      if (this->teams.at(i)->name == "_empty_team"
+          && this->teams.at(i)->members.size() == 0)
       {
         teamToAdd = i;
-        this->teams.at(i).get()->name = _teamName;
+        this->teams.at(i)->name = _teamName;
         break;
       }
     }
@@ -916,8 +937,7 @@ bool GameState::AddAgent(int _uNum, std::string _teamName)
     return false;
   }
 
-  std::shared_ptr<Team> _team = this->teams.at(teamToAdd);
-  Team *team = _team.get();
+  std::shared_ptr<Team> team = this->teams.at(teamToAdd);
   if (static_cast<int>(team->members.size()) > GameState::playerLimit)
   {
     // std::cout << "Team is already full, cannot add agent
@@ -958,25 +978,25 @@ bool GameState::AddAgent(int _uNum, std::string _teamName)
     delete[] uNumArray;
     return false;
   }
-  team->members.push_back(Agent(_uNum, _team));
+  team->members.push_back(Agent(_uNum, team));
   delete[] uNumArray;
   return true;
 }
 
 
 ///////////////////////////////////////////////
-bool GameState::RemoveAgent(int _uNum, std::string _teamName)
+bool GameState::RemoveAgent(const int _uNum, const std::string &_teamName)
 {
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    if (this->teams.at(i).get()->name == _teamName)
+    if (this->teams.at(i)->name == _teamName)
     {
-      for (size_t j = 0; j < this->teams.at(i).get()->members.size(); ++j)
+      for (size_t j = 0; j < this->teams.at(i)->members.size(); ++j)
       {
-        if (this->teams.at(i).get()->members.at(j).uNum == _uNum)
+        if (this->teams.at(i)->members.at(j).uNum == _uNum)
         {
-          this->teams.at(i).get()->members.erase(
-            this->teams.at(i).get()->members.begin() + j);
+          this->teams.at(i)->members.erase(
+            this->teams.at(i)->members.begin() + j);
           return true;
         }
       }
@@ -987,8 +1007,8 @@ bool GameState::RemoveAgent(int _uNum, std::string _teamName)
 }
 
 ////////////////////////////////////////////////
-bool GameState::BeamAgent(int _uNum, std::string _teamName,
-                          double _x, double _y, double _rot)
+bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
+                          const double _x, const double _y, const double _rot)
 {
   if (this->currentState->name != "BeforeKickOff"
       && this->currentState->name != "GoalKickLeft"
@@ -999,13 +1019,13 @@ bool GameState::BeamAgent(int _uNum, std::string _teamName,
   }
   for (size_t i = 0; i < this->teams.size(); ++i)
   {
-    if (this->teams.at(i).get()->name == _teamName)
+    if (this->teams.at(i)->name == _teamName)
     {
-      for (size_t j = 0; j < this->teams.at(i).get()->members.size(); ++j)
+      for (size_t j = 0; j < this->teams.at(i)->members.size(); ++j)
       {
-        if (this->teams.at(i).get()->members.at(j).uNum == _uNum)
+        if (this->teams.at(i)->members.at(j).uNum == _uNum)
         {
-          this->MoveAgentNoisy(this->teams.at(i).get()->members.at(j),
+          this->MoveAgentNoisy(this->teams.at(i)->members.at(j),
                                _x, _y, _rot);
           return true;
         }
@@ -1014,4 +1034,105 @@ bool GameState::BeamAgent(int _uNum, std::string _teamName,
   }
   // std::cout << "Agent not found, unable to beam agent!" << std::endl;
   return false;
+}
+
+////////////////////////////////////////////////
+GameState::Half GameState::GetHalf()
+{
+  return this->half;
+}
+
+////////////////////////////////////////////////
+void GameState::SetHalf(const Half _newHalf)
+{
+  this->half = _newHalf;
+}
+
+////////////////////////////////////////////////
+double GameState::GetElapsedGameTime()
+{
+  return this->gameTime - this->startGameTime;
+}
+
+////////////////////////////////////////////////
+double GameState::GetElapsedCycleGameTime()
+{
+  return this->gameTime - this->prevCycleGameTime;
+}
+
+////////////////////////////////////////////////
+void GameState::SetGameTime(const double _gameTime)
+{
+  this->gameTime = _gameTime;
+}
+
+////////////////////////////////////////////////
+double GameState::GetGameTime()
+{
+  return this->gameTime;
+}
+
+////////////////////////////////////////////////
+double GameState::GetStartGameTime()
+{
+  return this->startGameTime;
+}
+
+////////////////////////////////////////////////
+void GameState::SetStartGameTime(const double _startGameTime)
+{
+  this->startGameTime = _startGameTime;
+}
+
+////////////////////////////////////////////////
+void GameState::SetCycleCounter(const int _cycleCounter)
+{
+  this->cycleCounter = _cycleCounter;
+
+  if (GameState::useCounterForGameTime)
+  {
+    double newGameTime = 0.02 * cycleCounter;
+    double offsetTime = newGameTime - gameTime;
+    this->prevCycleGameTime += offsetTime;
+    this->gameTime = newGameTime;
+  }
+}
+
+////////////////////////////////////////////////
+int GameState::GetCycleCounter()
+{
+  return this->cycleCounter;
+}
+
+////////////////////////////////////////////////
+std::shared_ptr<State> GameState::GetCurrentState()
+{
+  return this->currentState;
+}
+
+////////////////////////////////////////////////
+GameState::Team::Side GameState::GetLastSideTouchedBall()
+{
+  if (this->GetLastBallContact() != NULL)
+  {
+    return this->GetLastBallContact()->side;
+  }
+  else
+  {
+    return Team::Side::NEITHER;
+  }
+}
+
+////////////////////////////////////////////////
+std::shared_ptr<GameState::BallContact> GameState::GetLastBallContact()
+{
+  if (this->ballContactHistory.size() > 0)
+  {
+    return this->ballContactHistory.at(
+             this->ballContactHistory.size() - 1);
+  }
+  else
+  {
+    return std::shared_ptr<BallContact>(NULL);
+  }
 }

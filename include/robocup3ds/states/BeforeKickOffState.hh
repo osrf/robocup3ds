@@ -19,8 +19,10 @@
 #define _GAZEBO_BEFORE_KICKOFF_STATE_PLUGIN_HH_
 
 #include <string>
-#include "robocup3ds/GameState.hh"
+
 #include "robocup3ds/states/State.hh"
+
+class GameState;
 
 /// \class BeforeKickOffState BeforeKickOffState.hh
 /// robocup3ds/states/BeforeKickOffState.hh
@@ -29,7 +31,7 @@ class BeforeKickOffState : public State
 {
   // Documentation inherited
   public: BeforeKickOffState(const std::string &_name,
-                             GameState *_gameState);
+                             GameState *const _gameState);
 
   // Documentation inherited.
   public: virtual void Initialize();

@@ -16,14 +16,14 @@
 */
 
 #include <string>
-#include "robocup3ds/GameState.hh"
-#include "robocup3ds/states/FreeKickLeftState.hh"
 
-using namespace ignition;
+#include "robocup3ds/GameState.hh"
+#include "robocup3ds/states/FreeKickRightState.hh"
+#include "robocup3ds/states/PlayOnState.hh"
 
 /////////////////////////////////////////////////
 FreeKickRightState::FreeKickRightState(const std::string &_name,
-                                       GameState *_gameState)
+                                       GameState *const _gameState)
   : State(_name, _gameState)
 {
 }
@@ -48,17 +48,17 @@ void FreeKickRightState::Update()
     this->Initialize();
   }
   // The left team is not allowed to be close to the ball.
-  this->gameState->DropBallImpl(GameState::Team::RIGHT);
+  this->gameState->DropBallImpl(GameState::Team::Side::RIGHT);
   State::Update();
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickIn)
   {
-    this->gameState->DropBallImpl(GameState::Team::NEITHER);
-    this->gameState->SetCurrent(this->gameState->playOnState.get());
+    this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playOnState);
   }
   else if (this->HasBallContactOccurred())
   {
-    this->gameState->SetCurrent(this->gameState->playOnState.get());
+    this->gameState->SetCurrent(this->gameState->playOnState);
   }
 }

@@ -19,8 +19,10 @@
 #define _GAZEBO_FREE_KICK_RIGTH_STATE_HH_
 
 #include <string>
-#include "robocup3ds/GameState.hh"
+
 #include "robocup3ds/states/State.hh"
+
+class GameState;
 
 /// \class FreeKickRightState FreeKickRightState.hh
 /// robocup3ds/states/FreeKickRightState.hh
@@ -29,15 +31,12 @@ class FreeKickRightState : public State
 {
   // Documentation inherited
   public: FreeKickRightState(const std::string &_name,
-                            GameState *_gameState);
+                            GameState *const _gameState);
 
   // Documentation inherited
   public: virtual void Initialize();
 
   // Documentation inherited
   public: virtual void Update();
-
-  /// \brief Used to select the position where the ball will be moved.
-  private: ignition::math::Vector3<double> pos;
 };
 #endif

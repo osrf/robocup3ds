@@ -19,8 +19,10 @@
 #define _GAZEBO_KICKOFF_LEFT_STATE_HH_
 
 #include <string>
-#include "robocup3ds/GameState.hh"
+
 #include "robocup3ds/states/State.hh"
+
+class GameState;
 
 /// \class KickOffLeftState KickOffLeftState.hh
 /// robocup3ds/states/KickOffLeftState.hh
@@ -29,7 +31,7 @@ class KickOffLeftState : public State
 {
   // Documentation inherited
   public: KickOffLeftState(const std::string &_name,
-                           GameState *_gameState);
+                           GameState *const _gameState);
 
   // Documentation inherited
   public: virtual void Initialize();

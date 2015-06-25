@@ -16,15 +16,15 @@
 */
 
 #include <string>
+
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/GoalKickRightState.hh"
-
-using namespace ignition;
+#include "robocup3ds/states/PlayOnState.hh"
 
 /////////////////////////////////////////////////
 GoalKickRightState::GoalKickRightState(const std::string &_name,
-                                       GameState *_gameState)
+                                       GameState *const _gameState)
   : State(_name, _gameState)
 {
 }
@@ -50,18 +50,18 @@ void GoalKickRightState::Update()
     this->Initialize();
   }
 
-  this->gameState->DropBallImpl(GameState::Team::LEFT);
-  this->gameState->CheckGoalKickIllegalDefense(GameState::Team::RIGHT);
+  this->gameState->DropBallImpl(GameState::Team::Side::LEFT);
+  this->gameState->CheckGoalKickIllegalDefense(GameState::Team::Side::RIGHT);
   State::Update();
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickIn)
   {
-    this->gameState->DropBallImpl(GameState::Team::NEITHER);
-    this->gameState->SetCurrent(this->gameState->playOnState.get());
+    this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playOnState);
   }
   else if (!SoccerField::PenaltyBoxRight.Contains(this->gameState->GetBall()))
   {
-    this->gameState->SetCurrent(this->gameState->playOnState.get());
+    this->gameState->SetCurrent(this->gameState->playOnState);
   }
 }

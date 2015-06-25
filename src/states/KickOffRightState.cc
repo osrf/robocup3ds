@@ -15,17 +15,16 @@
  *
 */
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
+
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/KickOffRightState.hh"
-
-using namespace ignition;
+#include "robocup3ds/states/PlayOnState.hh"
 
 /////////////////////////////////////////////////
 KickOffRightState::KickOffRightState(const std::string &_name,
-                                     GameState *_gameState)
+                                     GameState *const _gameState)
   : State(_name, _gameState)
 {
 }
@@ -37,7 +36,7 @@ void KickOffRightState::Initialize()
   this->gameState->ballContactHistory.clear();
   for (size_t i = 0; i < this->gameState->teams.size(); ++i)
   {
-    GameState::Team *team = this->gameState->teams.at(i).get();
+    std::shared_ptr<GameState::Team> team = this->gameState->teams.at(i);
     team->canScore = false;
   }
   this->gameState->MoveBallToCenter();
@@ -54,18 +53,18 @@ void KickOffRightState::Update()
   }
 
   // check for agents that violate sides
-  gameState->CheckOffSidesOnKickOff(GameState::Team::RIGHT);
+  gameState->CheckOffSidesOnKickOff(GameState::Team::Side::RIGHT);
   State::Update();
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickOff)
   {
-    this->gameState->DropBallImpl(GameState::Team::NEITHER);
-    this->gameState->SetCurrent(this->gameState->playOnState.get());
+    this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
+    this->gameState->SetCurrent(this->gameState->playOnState);
   }
   else if (this->HasBallContactOccurred())
   {
     this->gameState->touchBallKickoff = this->gameState->GetLastBallContact();
-    this->gameState->SetCurrent(this->gameState->playOnState.get());
+    this->gameState->SetCurrent(this->gameState->playOnState);
   }
 }

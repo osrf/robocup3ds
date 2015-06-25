@@ -16,11 +16,13 @@
 */
 
 #include <string>
+
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
 /////////////////////////////////////////////////
-PlayOnState::PlayOnState(const std::string &_name, GameState *_gameState)
+PlayOnState::PlayOnState(const std::string &_name,
+                         GameState *const _gameState)
   : State(_name, _gameState)
 {
 }

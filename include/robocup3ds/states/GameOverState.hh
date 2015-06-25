@@ -19,8 +19,10 @@
 #define _GAZEBO_GAME_OVER_STATE_HH_
 
 #include <string>
-#include "robocup3ds/GameState.hh"
+
 #include "robocup3ds/states/State.hh"
+
+class GameState;
 
 /// \class GameOverState GameOverState.hh
 /// robocup3ds/states/GameOverState.hh
@@ -29,7 +31,7 @@ class GameOverState : public State
 {
   // Documentation inherited
   public: GameOverState(const std::string &_name,
-                          GameState *_gameState);
+                          GameState *const _gameState);
 
   // Documentation inherited
   public: virtual void Initialize();

@@ -19,8 +19,14 @@
 #define _GAZEBO_SOCCER_FIELD_PLUGIN_HH_
 
 #include <ignition/math.hh>
+#include <map>
+#include <string>
+#include <vector>
 
-namespace SoccerField {
+#include "Geometry.hh"
+
+namespace SoccerField
+{
   // Field dimensions.
   static const double CenterCircleRadius = 2;
   static const double FieldWidth = 30.0;
@@ -37,12 +43,16 @@ namespace SoccerField {
   static const double PenaltyBoxWidth = 3.9;
   static const double HalfPenaltyBoxWidth = PenaltyBoxWidth * 0.5;
   static const double PenaltyBoxDepth = 1.8;
+
   static const ignition::math::Vector3<double>
   GoalCenterLeft(-HalfFieldWidth, 0, 0);
+
   static const ignition::math::Vector3<double>
   GoalCenterRight(HalfFieldWidth, 0, 0);
+
   static const ignition::math::Vector3<double>
   BallCenterPosition(0, 0, BallRadius);
+
   static const ignition::math::Vector3<double>
   CenterOfField(0, 0, 0);
 
@@ -70,69 +80,56 @@ namespace SoccerField {
     ignition::math::Vector3<double>
     (HalfFieldWidth - PenaltyBoxDepth, HalfPenaltyBoxWidth, 10));
 
-
   static const ignition::math::Box FieldLeft(ignition::math::Vector3<double>
-    (-SoccerField::HalfFieldHeight, -SoccerField::HalfFieldWidth, 0),
-     ignition::math::Vector3<double>(0, SoccerField::HalfFieldWidth, 0));
+      (-SoccerField::HalfFieldHeight, -SoccerField::HalfFieldWidth, 0),
+      ignition::math::Vector3<double>(0, SoccerField::HalfFieldWidth, 0));
+
   static const ignition::math::Box FieldRight(ignition::math::Vector3<double>
-    (0, -SoccerField::HalfFieldWidth, 0), ignition::math::Vector3<double>
-    (SoccerField::HalfFieldHeight, SoccerField::HalfFieldWidth, 0));
+      (0, -SoccerField::HalfFieldWidth, 0), ignition::math::Vector3<double>
+      (SoccerField::HalfFieldHeight, SoccerField::HalfFieldWidth, 0));
 
-  // static std::vector<ignition::math::Pose3<double> > leftKickOffPose{
-  //   ignition::math::Pose3<double>(-0.2, -0.3, RobotPoseHeight, 0, 0, 0.5),
-  //   ignition::math::Pose3<double>(-0.2, 0.3, RobotPoseHeight, 0, 0, -0.5),
-  //   ignition::math::Pose3<double>(-2.0, -0.5, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-5.0, 2.5, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-5.0, -2.5, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-5.0, 0.5, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-10.0, 3.5, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-10, 1.5, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-10.0, -1.5, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-10.0, -3.5, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-SoccerField::HalfFieldHeight + 0.5, 0,
-  //   RobotPoseHeight, 0, 0, 0)};
+  static const std::vector<Geometry::Line> FieldLines =
+  {
+    // middle lines
+    Geometry::Line(0, -10, 0, 10),
+    // ground lines
+    Geometry::Line(15, -10, 15, 10),
+    Geometry::Line(-15, -10, -15, 10),
+    // side lines
+    Geometry::Line(15, 10, -15, 10),
+    Geometry::Line(15, -10, -15, -10),
+    // penalty lines
+    Geometry::Line(13.2, 3, 13.2, -3),
+    Geometry::Line(13.2, 3, 15, 3),
+    Geometry::Line(13.2, -3, 15, -3),
+    Geometry::Line(-13.2, 3, -13.2, -3),
+    Geometry::Line(-13.2, 3, -15, 3),
+    Geometry::Line(-13.2, -3, -15, -3),
+    // center circle ring
+    Geometry::Line(2, 0, 1.618033989, 1.175570505),
+    Geometry::Line(1.618033989, 1.175570505, 0.618033989, 1.902113033),
+    Geometry::Line(0.618033989, 1.902113033, -0.618033989, 1.902113033),
+    Geometry::Line(-0.618033989, 1.902113033, -1.618033989, 1.175570505),
+    Geometry::Line(-1.618033989, 1.175570505, -2, 0),
+    Geometry::Line(-2, 0, -1.618033989, -1.175570505),
+    Geometry::Line(-1.618033989, -1.175570505, -0.618033989, -1.902113033),
+    Geometry::Line(-0.618033989, -1.902113033, 0.618033989, -1.902113033),
+    Geometry::Line(0.618033989, -1.902113033, 1.618033989, -1.175570505),
+    Geometry::Line(1.618033989, -1.175570505, 2, 0)
+  };
 
-  // static std::vector<ignition::math::Pose3<double> > rightKickOffPose{
-  //   ignition::math::Pose3<double>(0.5, 0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(2.0, -3.5, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(2.0, 0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(2.0, 3.5, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(4.0, -4.5, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(4.0, 0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(4.0, 4.5, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(6.0, -5.5, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(6.0, 0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(6.0, 5.5, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(SoccerField::HalfFieldHeight - 0.5, 0,
-  //   RobotPoseHeight, 0, 0, 3.14)};
-
-  // static std::vector<ignition::math::Pose3<double> > leftInitPose{
-  //   ignition::math::Pose3<double>(-2.5, 0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-3.5, -2.0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-3.5, 0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-3.5, 2.0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-5.5, -4.0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-5.5, 0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-5.5, 4.0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-7.5, -5.0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-7.5, 0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-7.5, 5.0, RobotPoseHeight, 0, 0, 0),
-  //   ignition::math::Pose3<double>(-SoccerField::HalfFieldHeight + 0.5, 0,
-  //    RobotPoseHeight, 0, 0, 0)};
-
-  // static std::vector<ignition::math::Pose3<double> > rightInitPose{
-  //   ignition::math::Pose3<double>(2.5, 0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(3.5, -2.0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(3.5, 0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(3.5, 2.0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(5.5, -4.0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(5.5, 0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(5.5, 4.0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(7.5, -5.0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(7.5, 0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(7.5, 5.0, RobotPoseHeight, 0, 0, 3.14),
-  //   ignition::math::Pose3<double>(SoccerField::HalfFieldHeight - 0.5, 0,
-  //   RobotPoseHeight, 0, 0, 3.14)};
+  static const std::map<std::string, ignition::math::Vector3<double> >
+  LandMarks =
+  {
+    {"F1L", ignition::math::Vector3<double>(-15, 10, 0)},
+    {"F1R", ignition::math::Vector3<double>(15, 10, 0)},
+    {"F2R", ignition::math::Vector3<double>(15, -10, 0)},
+    {"F2L", ignition::math::Vector3<double>(-15, -10, 0)},
+    {"G1L", ignition::math::Vector3<double>(-15, 1.05, 0.8)},
+    {"G1R", ignition::math::Vector3<double>(15, 1.05, 0.8)},
+    {"G2L", ignition::math::Vector3<double>(-15, -1.05, 0.8)},
+    {"G2R", ignition::math::Vector3<double>(15, -1.05, 0.8)}
+  };
 }
 
 #endif

@@ -16,15 +16,16 @@
 */
 
 #include <string>
+
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
-
-using namespace ignition;
+#include "robocup3ds/states/KickOffLeftState.hh"
+#include "robocup3ds/states/KickOffRightState.hh"
 
 /////////////////////////////////////////////////
 BeforeKickOffState::BeforeKickOffState(const std::string &_name,
-                                       GameState *_gameState)
+                                       GameState *const _gameState)
   : State(_name, _gameState)
 {
 }
@@ -54,13 +55,13 @@ void BeforeKickOffState::Update()
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff)
   {
-    if (this->gameState->GetHalf() == GameState::FIRST_HALF)
+    if (this->gameState->GetHalf() == GameState::Half::FIRST_HALF)
     {
-      this->gameState->SetCurrent(this->gameState->kickOffLeftState.get());
+      this->gameState->SetCurrent(this->gameState->kickOffLeftState);
     }
     else
     {
-      this->gameState->SetCurrent(this->gameState->kickOffRightState.get());
+      this->gameState->SetCurrent(this->gameState->kickOffRightState);
     }
   }
 }

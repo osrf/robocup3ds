@@ -19,8 +19,10 @@
 #define _GAZEBO_CORNER_KICK_RIGHT_STATE_HH_
 
 #include <string>
-#include "robocup3ds/GameState.hh"
+
 #include "robocup3ds/states/State.hh"
+
+class GameState;
 
 /// \class CornerKickRightState CornerKickRightState.hh
 /// robocup3ds/states/CornerKickRightState.hh
@@ -29,7 +31,7 @@ class CornerKickRightState : public State
 {
   // Documentation inherited
   public: CornerKickRightState(const std::string &_name,
-                               GameState *_gameState);
+                               GameState *const _gameState);
 
   // Documentation inherited
   public: virtual void Initialize();
