@@ -88,34 +88,40 @@ namespace SoccerField
       (0, -SoccerField::HalfFieldWidth, 0), ignition::math::Vector3<double>
       (SoccerField::HalfFieldHeight, SoccerField::HalfFieldWidth, 0));
 
-  static const std::vector<Geometry::Line> FieldLines =
+  static const std::vector<ignition::math::Line3<double> > FieldLines =
   {
     // middle lines
-    Geometry::Line(0, -10, 0, 10),
+    ignition::math::Line3<double>(0, -10, 0, 10),
     // ground lines
-    Geometry::Line(15, -10, 15, 10),
-    Geometry::Line(-15, -10, -15, 10),
+    ignition::math::Line3<double>(15, -10, 15, 10),
+    ignition::math::Line3<double>(-15, -10, -15, 10),
     // side lines
-    Geometry::Line(15, 10, -15, 10),
-    Geometry::Line(15, -10, -15, -10),
+    ignition::math::Line3<double>(15, 10, -15, 10),
+    ignition::math::Line3<double>(15, -10, -15, -10),
     // penalty lines
-    Geometry::Line(13.2, 3, 13.2, -3),
-    Geometry::Line(13.2, 3, 15, 3),
-    Geometry::Line(13.2, -3, 15, -3),
-    Geometry::Line(-13.2, 3, -13.2, -3),
-    Geometry::Line(-13.2, 3, -15, 3),
-    Geometry::Line(-13.2, -3, -15, -3),
+    ignition::math::Line3<double>(13.2, 3, 13.2, -3),
+    ignition::math::Line3<double>(13.2, 3, 15, 3),
+    ignition::math::Line3<double>(13.2, -3, 15, -3),
+    ignition::math::Line3<double>(-13.2, 3, -13.2, -3),
+    ignition::math::Line3<double>(-13.2, 3, -15, 3),
+    ignition::math::Line3<double>(-13.2, -3, -15, -3),
     // center circle ring
-    Geometry::Line(2, 0, 1.618033989, 1.175570505),
-    Geometry::Line(1.618033989, 1.175570505, 0.618033989, 1.902113033),
-    Geometry::Line(0.618033989, 1.902113033, -0.618033989, 1.902113033),
-    Geometry::Line(-0.618033989, 1.902113033, -1.618033989, 1.175570505),
-    Geometry::Line(-1.618033989, 1.175570505, -2, 0),
-    Geometry::Line(-2, 0, -1.618033989, -1.175570505),
-    Geometry::Line(-1.618033989, -1.175570505, -0.618033989, -1.902113033),
-    Geometry::Line(-0.618033989, -1.902113033, 0.618033989, -1.902113033),
-    Geometry::Line(0.618033989, -1.902113033, 1.618033989, -1.175570505),
-    Geometry::Line(1.618033989, -1.175570505, 2, 0)
+    ignition::math::Line3<double>(2, 0, 1.618033989, 1.175570505),
+    ignition::math::Line3<double>(1.618033989, 1.175570505,
+    0.618033989, 1.902113033),
+    ignition::math::Line3<double>(0.618033989, 1.902113033,
+    -0.618033989, 1.902113033),
+    ignition::math::Line3<double>(-0.618033989, 1.902113033,
+    -1.618033989, 1.175570505),
+    ignition::math::Line3<double>(-1.618033989, 1.175570505, -2, 0),
+    ignition::math::Line3<double>(-2, 0, -1.618033989, -1.175570505),
+    ignition::math::Line3<double>(-1.618033989, -1.175570505,
+    -0.618033989, -1.902113033),
+    ignition::math::Line3<double>(-0.618033989, -1.902113033,
+    0.618033989, -1.902113033),
+    ignition::math::Line3<double>(0.618033989, -1.902113033,
+    1.618033989, -1.175570505),
+    ignition::math::Line3<double>(1.618033989, -1.175570505, 2, 0)
   };
 
   static const std::map<std::string, ignition::math::Vector3<double> >

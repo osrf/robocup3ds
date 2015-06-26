@@ -73,18 +73,19 @@ bool Geometry::IntersectionCircunferenceLine(
 
 /////////////////////////////////////////////////
 bool Geometry::PointAbovePlane(const math::Vector3<double> &_pt,
-                const math::Plane<double> &_plane)
+                               const math::Plane<double> &_plane)
 {
   return (_plane.Normal().Dot(_pt) + _plane.Offset()) > DBL_EPSILON;
 }
 
 /////////////////////////////////////////////////
-bool Geometry::IntersectionPlaneLine(const Line &_line,
-                                     const math::Plane<double> &_plane,
-                                     double &_t,
-                                     math::Vector3<double> &_pt)
+bool Geometry::IntersectionPlaneLine(
+  const math::Line3<double> &_line,
+  const math::Plane<double> &_plane,
+  double &_t,
+  math::Vector3<double> &_pt)
 {
-  math::Vector3<double> origin = _line.pts.at(0);
+  math::Vector3<double> origin = _line[0];
   math::Vector3<double> dir = _line.Dir();
   math::Vector3<double> normal = _plane.Normal();
   double D = _plane.Offset();
@@ -103,13 +104,14 @@ bool Geometry::IntersectionPlaneLine(const Line &_line,
 }
 
 /////////////////////////////////////////////////
-bool Geometry::ClipPlaneLine(Line &_line, const math::Plane<double> &_plane)
+bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
+                             const math::Plane<double> &_plane)
 {
   double t;
   math::Vector3<double> pt;
 
-  bool isPt1AbovePlane = PointAbovePlane(_line.pts.at(0), _plane);
-  bool isPt2AbovePlane = PointAbovePlane(_line.pts.at(1), _plane);
+  bool isPt1AbovePlane = PointAbovePlane(_line[0], _plane);
+  bool isPt2AbovePlane = PointAbovePlane(_line[1], _plane);
 
   if (isPt1AbovePlane && isPt2AbovePlane)
   {
@@ -118,14 +120,14 @@ bool Geometry::ClipPlaneLine(Line &_line, const math::Plane<double> &_plane)
   else if (!isPt1AbovePlane && isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
-    { _line.Set(pt, _line.pts.at(0)); }
+    { _line.Set(pt, _line[0]); }
     else
     { return false; }
   }
   else if (isPt1AbovePlane && !isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
-    { _line.Set(pt, _line.pts.at(1)); }
+    { _line.Set(pt, _line[1]); }
     else
     { return false; }
   }

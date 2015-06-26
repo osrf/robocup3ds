@@ -40,7 +40,7 @@ class Perceptor
 
   /// \Brief Helper function to update line info
   private: void UpdateLine(GameState::Agent &_agent,
-    const Geometry::Line &_line);
+    const ignition::math::Line3<double> &_line);
 
   /// \Brief Function to update landmark info
   private: void UpdateLandmark(GameState::Agent &_agent,
@@ -48,7 +48,7 @@ class Perceptor
                 const ignition::math::Vector3<double> &_landmark);
 
   /// \Brief Pointer to GameState object
-  private: std::shared_ptr<GameState> gameState;
+  private: GameState *gameState;
 
   /// \Brief Agent horizontal field of view in degrees
   private: double HFov;
