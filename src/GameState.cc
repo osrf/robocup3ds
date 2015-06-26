@@ -76,6 +76,9 @@ double GameState::outerCrowdingRadius = 1.0;
 double GameState::immobilityTimeLimit = 15;
 double GameState::fallenTimeLimit = 30;
 double GameState::dropBallRadius = 2;
+double GameState::HFov = 120;
+double GameState::VFov = 120;
+bool   GameState::restrictVision = true;
 
 std::shared_ptr<std::map<const std::string, const std::string> >
 GameState::config;
@@ -168,6 +171,12 @@ void GameState::LoadConfiguration()
   { GameState::immobilityTimeLimit = value; }
   if (LoadConfigParameter("gamestate_fallentimelimit", value))
   { GameState::fallenTimeLimit = value; }
+  if (LoadConfigParameter("percept_hfov", value))
+  { GameState::HFov = value; }
+  if (LoadConfigParameter("percept_vfov", value))
+  { GameState::VFov = value; }
+  if (LoadConfigParameterBool("percept_restrictvision", boolValue))
+  { GameState::restrictVision = boolValue; }
 }
 
 /////////////////////////////////////////////////

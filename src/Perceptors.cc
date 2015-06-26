@@ -14,6 +14,7 @@
  * limitations under the License.
  *
 */
+#include <algorithm>
 #include <cmath>
 #include <map>
 #include <memory>
@@ -30,30 +31,44 @@
 
 using namespace ignition;
 
-/////////////////////////////////////////////////
-Perceptor::Perceptor(GameState *_gameState, double _HFov, double _VFov):
-  gameState(_gameState),
-  HFov(_HFov),
-  VFov(_VFov)
-{
-  math::Vector3<double> origin;
-  math::Vector3<double> upperRight(1.0, -tan(this->HFov / 2),
-                                   tan(this->VFov / 2));
-  math::Vector3<double> upperLeft(1.0, tan(this->HFov / 2),
-                                  tan(this->VFov / 2));
-  math::Vector3<double> lowerRight(1.0, -tan(this->HFov / 2),
-                                   -tan(this->VFov / 2));
-  math::Vector3<double> lowerLeft(1.0, tan(this->HFov / 2),
-                                  -tan(this->VFov / 2));
+math::Vector3<double> Perceptor::fixedNoise(
+  math::Rand::DblUniform(-0.005, 0.005),
+  math::Rand::DblUniform(-0.005, 0.005),
+  math::Rand::DblUniform(-0.005, 0.005));
 
-  this->viewFrustrum.push_back(
-    math::Plane<double>(CALC_NORMAL(origin, lowerRight, upperRight)));
-  this->viewFrustrum.push_back(
-    math::Plane<double>(CALC_NORMAL(origin, upperRight, upperLeft)));
-  this->viewFrustrum.push_back(
-    math::Plane<double>(CALC_NORMAL(origin, upperLeft, lowerLeft)));
-  this->viewFrustrum.push_back(
-    math::Plane<double>(CALC_NORMAL(origin, lowerLeft, lowerRight)));
+math::Vector3<double> Perceptor::dNoiseSigma(0.0965, 0.1225, 0.1480);
+
+/////////////////////////////////////////////////
+Perceptor::Perceptor(GameState *_gameState):
+  gameState(_gameState)
+{
+  double HFov = RAD(std::min(180.0, std::max(0.0, GameState::HFov)));
+  double VFov = RAD(std::min(180.0, std::max(0.0, GameState::VFov)));
+
+  math::Vector3<double> origin;
+  math::Vector3<double> leftOrigin(0.0, 1.0, 0.0);
+  math::Vector3<double> aboveOrigin(0.0, 1.0, 1.0);
+  math::Vector3<double> upperRight(1.0, -tan(HFov / 2),
+                                   tan(VFov / 2));
+  math::Vector3<double> upperLeft(1.0, tan(HFov / 2),
+                                  tan(VFov / 2));
+  math::Vector3<double> lowerRight(1.0, -tan(HFov / 2),
+                                   -tan(VFov / 2));
+  math::Vector3<double> lowerLeft(1.0, tan(HFov / 2),
+                                  -tan(VFov / 2));
+  if (GameState::restrictVision)
+  {
+    this->viewFrustrum.push_back(
+      math::Plane<double>(CALC_NORMAL(origin, aboveOrigin, leftOrigin)));
+    this->viewFrustrum.push_back(
+      math::Plane<double>(CALC_NORMAL(origin, lowerRight, upperRight)));
+    this->viewFrustrum.push_back(
+      math::Plane<double>(CALC_NORMAL(origin, upperRight, upperLeft)));
+    this->viewFrustrum.push_back(
+      math::Plane<double>(CALC_NORMAL(origin, upperLeft, lowerLeft)));
+    this->viewFrustrum.push_back(
+      math::Plane<double>(CALC_NORMAL(origin, lowerLeft, lowerRight)));
+  }
 }
 
 /////////////////////////////////////////////////
@@ -89,7 +104,7 @@ void Perceptor::Update()
 
 /////////////////////////////////////////////////
 void Perceptor::UpdateLine(GameState::Agent &_agent,
-                           const math::Line3<double> &_line)
+                           const math::Line3<double> &_line) const
 {
   math::Line3<double> agentLine(
     _agent.cameraRot.Inverse() * (_line[0] - _agent.pos),
@@ -105,6 +120,8 @@ void Perceptor::UpdateLine(GameState::Agent &_agent,
 
   if (validLine)
   {
+    agentLine.Set(addNoise(Geometry::CartToPolar(agentLine[0])),
+                  addNoise(Geometry::CartToPolar(agentLine[1])));
     _agent.percept.fieldLines.push_back(agentLine);
   }
 }
@@ -113,7 +130,7 @@ void Perceptor::UpdateLine(GameState::Agent &_agent,
 void Perceptor::UpdateLandmark(GameState::Agent &_agent,
                                const std::string &_landmarkname,
                                const math::Vector3<double>
-                               &_landmark)
+                               &_landmark) const
 {
   math::Vector3<double> _agentLandMark = _agent.cameraRot.Inverse() *
                                          (_landmark - _agent.pos);
@@ -129,6 +146,25 @@ void Perceptor::UpdateLandmark(GameState::Agent &_agent,
 
   if (validLandMark)
   {
-    _agent.percept.landMarks[_landmarkname] = _agentLandMark;
+    _agent.percept.landMarks[_landmarkname] =
+      addNoise(Geometry::CartToPolar(_agentLandMark));
   }
+}
+
+ignition::math::Vector3<double>
+Perceptor::addNoise(const ignition::math::Vector3<double> &_pt) const
+{
+  math::Vector3<double> newPt(
+    _pt.X() + Perceptor::fixedNoise.X() +
+    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.X()) * _pt.X() * 0.01,
+    _pt.Y() + Perceptor::fixedNoise.Y() +
+    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.Y()),
+    _pt.Z() + Perceptor::fixedNoise.Z() +
+    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.Z()));
+
+  // newPt.Set(round(newPt.X() * 100.0) / 100.0,
+  //           round(newPt.Y() * 100.0) / 100.0,
+  //           round(newPt.Z() * 100.0) / 100.0));
+
+  return newPt;
 }

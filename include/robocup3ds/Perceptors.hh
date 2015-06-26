@@ -33,28 +33,39 @@
 class Perceptor
 {
   /// \Brief Constructor for Perceptor object
-  public: Perceptor(GameState *_gameState, double _HFov, double _VFov);
+  /// \Param[in] Pointer to GameState object
+  public: Perceptor(GameState *_gameState);
 
   /// \Brief Function to update all relevant agents perception info
   public: void Update();
 
   /// \Brief Helper function to update line info
+  /// \Param[in] _line Line object
+  /// \Param[out] _agent Agent object whose perception is updated
   private: void UpdateLine(GameState::Agent &_agent,
-    const ignition::math::Line3<double> &_line);
+    const ignition::math::Line3<double> &_line) const;
 
   /// \Brief Function to update landmark info
+  /// \Param[in] _landmarkname Name of landmark
+  /// \Param[in] _landmark Position of landmark
+  /// \Param[out] _agent Agent object whose perception is updated
   private: void UpdateLandmark(GameState::Agent &_agent,
                 const std::string &_landmarkname,
-                const ignition::math::Vector3<double> &_landmark);
+                const ignition::math::Vector3<double> &_landmark) const;
+
+  /// \Brief Noise added to all observations
+  /// \Param[in] _pt Point object
+  private: ignition::math::Vector3<double>
+    addNoise(const ignition::math::Vector3<double> &_pt) const;
+
+  /// \Brief A constant noise that is added to all observations
+  private: static ignition::math::Vector3<double> fixedNoise;
+
+  /// \Brief Sigma for dynamic noise that is added to all observations
+  private: static ignition::math::Vector3<double> dNoiseSigma;
 
   /// \Brief Pointer to GameState object
   private: GameState *gameState;
-
-  /// \Brief Agent horizontal field of view in degrees
-  private: double HFov;
-
-  /// \Brief Agent vertical field of view in degrees
-  private: double VFov;
 
   /// \Brief View frustrum
   /// We model view frustrum as a vector of four planes

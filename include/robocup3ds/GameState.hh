@@ -592,6 +592,12 @@ class GameState
   public: static double immobilityTimeLimit;
   /// \brief Timeout when player remains fallen too long
   public: static double fallenTimeLimit;
+  /// \brief Horizontal field of view in degrees
+  public: static double HFov;
+  /// \brief Vertical field of view in degrees
+  public: static double VFov;
+  /// \brief Flag whether to restrict field of view
+  public: static bool restrictVision;
 
   /// \brief Pointer to configuration variables
   public: static std::shared_ptr<std::map<const std::string,

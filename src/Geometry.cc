@@ -14,6 +14,7 @@
  * limitations under the License.
  *
 */
+#include <cmath>
 
 #include "robocup3ds/Geometry.hh"
 
@@ -93,6 +94,7 @@ bool Geometry::IntersectionPlaneLine(
   double dp = normal.Dot(dir);
   if (fabs(dp) < DBL_EPSILON)
   {
+    // line does not intersect plane
     return false;
   }
   //       (A*origin.x + B*origin.y + C*origin.z + D)
@@ -121,15 +123,11 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
     { _line.Set(pt, _line[0]); }
-    else
-    { return false; }
   }
   else if (isPt1AbovePlane && !isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
     { _line.Set(pt, _line[1]); }
-    else
-    { return false; }
   }
   else if (!isPt1AbovePlane && !isPt2AbovePlane)
   {
@@ -137,4 +135,19 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
   }
 
   return true;
+}
+
+/////////////////////////////////////////////////
+math::Vector3<double> Geometry::CartToPolar(const math::Vector3<double> &_pt)
+{
+  double r = _pt.Length();
+  return math::Vector3<double>(r, atan2(_pt.Y(), _pt.X()), acos(_pt.Z() / r));
+}
+
+/////////////////////////////////////////////////
+math::Vector3<double> Geometry::PolarToCart(const math::Vector3<double> &_pt)
+{
+  return math::Vector3<double>(_pt.X() * sin(_pt.Z()) * cos(_pt.Y()),
+                                _pt.X() * sin(_pt.Z()) * sin(_pt.Y()),
+                                _pt.X() * cos(_pt.Z()));
 }

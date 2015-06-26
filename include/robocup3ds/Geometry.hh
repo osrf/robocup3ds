@@ -76,28 +76,29 @@ namespace Geometry
   // };
 
   /// \brief Calculates the intersection between a line and a plane
-  /// \param[in] Line object
-  /// \param[in] Plane object
-  /// \param[out] T value where intersection occurs
-  /// \param[out] Intersection point
-  /// \return Whether line is not parallel with plane
+  /// \param[in] _line Line object
+  /// \param[in] _plane Plane object
+  /// \param[out] _t T value where intersection occurs
+  /// \param[out] _pt Intersection point
+  /// \return True when line intersects with plane
   bool IntersectionPlaneLine(const ignition::math::Line3<double> &_line,
-    const ignition::math::Plane<double> &_plane, double &_t,
-    ignition::math::Vector3<double> & _pt);
+                             const ignition::math::Plane<double> &_plane,
+                             double &_t,
+                             ignition::math::Vector3<double> &_pt);
 
   /// \brief Clips a line to a plane if necessary
-  /// \param[in] Line object
-  /// \param[in] Plane object
-  /// \return Whether line is still valid after clipping
+  /// \param[in] _line Line object
+  /// \param[in] _plane Plane object
+  /// \return True when line still exists after clipping
   bool ClipPlaneLine(ignition::math::Line3<double> &_line,
-    const ignition::math::Plane<double> &_plane);
+                     const ignition::math::Plane<double> &_plane);
 
   /// \brief Whether a point is above plane or below it
-  /// \param[in] Point object
-  /// \param[in] Plane object
+  /// \param[in] _pt Point object
+  /// \param[in] _plane Plane object
   /// \return True if point is above plane
   bool PointAbovePlane(const ignition::math::Vector3<double> &_pt,
-    const ignition::math::Plane<double> &_plane);
+                       const ignition::math::Plane<double> &_plane);
 
   /// \brief Calculates the intersection between a circumference and a line
   /// passing through its center.
@@ -113,6 +114,17 @@ namespace Geometry
                                      double r,
                                      ignition::math::Vector3<double> &int1,
                                      ignition::math::Vector3<double> &int2);
+
+
+  /// \brief Transform from polar to cartesian coordinates
+  /// \param[in] _pt Point object
+  ignition::math::Vector3<double> PolarToCart(
+    const ignition::math::Vector3<double> &_pt);
+
+  /// \brief Transform from cartesian to polar coordinates
+  /// \param[in] _pt Point object
+  ignition::math::Vector3<double> CartToPolar(
+    const ignition::math::Vector3<double> &_pt);
 }
 
 #endif
