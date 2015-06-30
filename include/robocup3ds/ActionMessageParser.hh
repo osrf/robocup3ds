@@ -61,8 +61,8 @@ class ActionMessageParser
     public: SceneMsg(int _agentId, int _robotType, std::string _rsgAddress)
     {
       this->id = _agentId;
-      this->robotType=_robotType;
-      this->rsgAddress=_rsgAddress;
+      this->robotType = _robotType;
+      this->rsgAddress = _rsgAddress;
     }
 
     public: int id;
@@ -72,17 +72,39 @@ class ActionMessageParser
     public: int robotType;
   };
 
+  class InitMsg
+  {
+    public: InitMsg(int _agentId, int _playerNum, std::string _teamName)
+    {
+      this->id = _agentId;
+      this->playerNum = _playerNum;
+      this->teamName = _teamName;
+    }
+
+    public: int id;
+
+    public: int playerNum;
+
+    public: std::string teamName;
+  };
+
   public: static ActionMessageParser *GetUniqueInstance();
 
   public: virtual ~ActionMessageParser();
 
   public: void parseMessage(const std::string &_msg, int _agentID);
 
-  public: bool getParsedScene(const int _id, std::string &_msg, int &_robotType);
+  public: bool getSceneInformation(const int _id, std::string &_msg,
+      int &_robotType);
+
+  public: bool getInitInformation(const int _id, std::string &_teamName,
+      int &_playerNumber);
 
   public: std::map<int, double*> jointParserMap;
 
   public: std::map<int, SceneMsg> sceneParserMap;
+
+  public: std::map<int, InitMsg> initParserMap;
 
   private: ActionMessageParser();
 
@@ -93,6 +115,8 @@ class ActionMessageParser
   private: void parseSexp(sexp_t *exp);
 
   private: void parseScene(sexp_t *_exp);
+
+  private: void parseInit(sexp_t *_exp);
 
   private: void parseHingeJoint(int jointID, sexp_t *exp);
 };

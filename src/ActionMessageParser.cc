@@ -34,7 +34,7 @@ void ActionMessageParser::parseMessage(const std::string &_msg, int _agentID)
   char linebuf[BUFSIZ+16000];
   sexp_t *exp;
 
-  this->agentID=_agentID;
+  this->agentID = _agentID;
 
   std::stringstream ss;
 
@@ -84,6 +84,10 @@ void ActionMessageParser::parseSexp(sexp_t *_exp)
   if (!strcmp(v, "scene"))
   {
     parseScene(_exp);
+  }
+  else if (!strcmp(v, "init"))
+  {
+    parseInit(_exp);
   }
   else if (!strcmp(v, "he1"))
   {
@@ -181,7 +185,7 @@ void ActionMessageParser::parseSexp(sexp_t *_exp)
 
 void ActionMessageParser::parseHingeJoint(int _jointID, sexp_t *_exp)
 {
-  std::string name = "";
+  std::string name;
   double effector;
   name =_exp->list->val;
   effector = atof(_exp->list->next->val);
@@ -192,24 +196,67 @@ void ActionMessageParser::parseScene(sexp_t *_exp)
 {
   int type = 0;
 
-  std::string address= "";
+  std::string address;
 
   address =_exp->list->next->val;
 
   type = atof(_exp->list->next->next->val);
 
-  this->sceneParserMap.insert(std::map<int, SceneMsg >::value_type(this->agentID, SceneMsg(this->agentID,type,address)));
+  this->sceneParserMap.insert(std::map<int, SceneMsg >::value_type(this->agentID
+      , SceneMsg(this->agentID, type, address)));
 }
 
-bool ActionMessageParser::getParsedScene(const int _id, std::string &_msg, int &_robotType){
+void ActionMessageParser::parseInit(sexp_t *_exp)
+{
+  int playerNum = 0;
 
-  for(auto ob = this->sceneParserMap.begin(); ob != this->sceneParserMap.end(); ++ob)
+  std::string teamName= "";
+
+  sexp_t* ptr = _exp->list->next;
+
+  while (ptr != NULL) {
+    if (ptr->ty == SEXP_LIST) {
+      if (!strcmp(ptr->list->val, "unum"))
+      {
+        playerNum = atof(ptr->list->next->val);
+      }
+      if (!strcmp(ptr->list->val, "teamname"))
+      {
+        teamName= ptr->list->next->val;
+      }
+    }
+    ptr = ptr->next;
+  }
+
+  this->initParserMap.insert(std::map<int, InitMsg >::value_type(this->agentID
+      , InitMsg(this->agentID, playerNum, teamName)));
+}
+
+bool ActionMessageParser::getSceneInformation(const int _id, std::string &_msg, int &_robotType)
+{
+  for (auto ob = this->sceneParserMap.begin(); ob != this->sceneParserMap.end(); ++ob)
   {
-     if( ob->first == _id){
-       _msg= ob->second.rsgAddress ;
-       _robotType= ob->second.robotType;
-       return true;
-     }
+    if (ob->first == _id)
+    {
+      _msg= ob->second.rsgAddress;
+      _robotType= ob->second.robotType;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ActionMessageParser::getInitInformation(const int _id, std::string &_teamName,
+    int &_playerNumber)
+{
+  for (auto ob = this->initParserMap.begin(); ob != this->initParserMap.end(); ++ob)
+  {
+    if (ob->first == _id)
+    {
+      _teamName= ob->second.teamName;
+      _playerNumber= ob->second.playerNum;
+      return true;
+    }
   }
 
   return false;
