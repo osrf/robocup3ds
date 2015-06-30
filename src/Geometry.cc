@@ -14,14 +14,11 @@
  * limitations under the License.
  *
 */
+#include <cfloat>
 #include <cmath>
-
 #include "robocup3ds/Geometry.hh"
 
 using namespace ignition;
-
-#define G_SQUARE(a) ((a) * (a))
-#define DBL_EPSILON 2.2204460492503131e-16
 
 /////////////////////////////////////////////////
 bool Geometry::IntersectionCircunferenceLine(
@@ -87,7 +84,7 @@ bool Geometry::IntersectionPlaneLine(
   math::Vector3<double> &_pt)
 {
   math::Vector3<double> origin = _line[0];
-  math::Vector3<double> dir = _line.Dir();
+  math::Vector3<double> dir = _line.Direction() * _line.Length();
   math::Vector3<double> normal = _plane.Normal();
   double D = _plane.Offset();
 
@@ -114,6 +111,7 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
 
   bool isPt1AbovePlane = PointAbovePlane(_line[0], _plane);
   bool isPt2AbovePlane = PointAbovePlane(_line[1], _plane);
+  // std::cout << isPt1AbovePlane << " " << isPt2AbovePlane << std::endl;
 
   if (isPt1AbovePlane && isPt2AbovePlane)
   {
@@ -122,12 +120,12 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
   else if (!isPt1AbovePlane && isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
-    { _line.Set(pt, _line[0]); }
+    { _line.SetA(pt); }
   }
   else if (isPt1AbovePlane && !isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
-    { _line.Set(pt, _line[1]); }
+    { _line.SetB(pt); }
   }
   else if (!isPt1AbovePlane && !isPt2AbovePlane)
   {
@@ -140,7 +138,7 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
 /////////////////////////////////////////////////
 math::Vector3<double> Geometry::CartToPolar(const math::Vector3<double> &_pt)
 {
-  double r = _pt.Length();
+  double r = _pt.Length() + DBL_EPSILON;
   return math::Vector3<double>(r, atan2(_pt.Y(), _pt.X()), acos(_pt.Z() / r));
 }
 
@@ -148,6 +146,6 @@ math::Vector3<double> Geometry::CartToPolar(const math::Vector3<double> &_pt)
 math::Vector3<double> Geometry::PolarToCart(const math::Vector3<double> &_pt)
 {
   return math::Vector3<double>(_pt.X() * sin(_pt.Z()) * cos(_pt.Y()),
-                                _pt.X() * sin(_pt.Z()) * sin(_pt.Y()),
-                                _pt.X() * cos(_pt.Z()));
+                               _pt.X() * sin(_pt.Z()) * sin(_pt.Y()),
+                               _pt.X() * cos(_pt.Z()));
 }

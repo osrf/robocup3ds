@@ -23,6 +23,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <utility>
 
 #include "robocup3ds/Geometry.hh"
 
@@ -143,6 +144,7 @@ class GameState
       this->numPlayersInPenaltyBox = 0;
       this->canScore = false;
     }
+
     /// \brief Name of the team.
     public: std::string name;
     /// \brief All the members in the team.
@@ -157,7 +159,60 @@ class GameState
     public: bool canScore;
   };
 
-  /// \class AgentPerceptions Perceptor.hh robocup3ds/Perceptor.hh
+  /// \brief Typedef for map of agent's body parts and positions
+  public: typedef std::map<std::string, ignition::math::Vector3<double> >
+    AgentBodyMap;
+
+  /// \brief Typedef for string, int pairs for identifying agents
+  public: typedef std::pair<std::string, int> AgentId;
+
+  /// \class AgentSay GameState.hh robocup3ds/GameState.hh
+  /// \brief Container that contains info for say effector
+  public: class AgentSay
+  {
+    /// \brief AgentSay constructor
+    public: AgentSay()
+    {
+      this->uNum = -1;
+      this->isValid = false;
+    }
+
+    /// \brief UNum of agent who said message
+    public: int uNum;
+    /// \brief Where the agent said the message
+    public: ignition::math::Vector3<double> pos;
+    /// \brief Message string
+    public: std::string msg;
+    /// \brief Whether message is valid
+    public: bool isValid;
+  };
+
+  /// \class AgentHear GameState.hh robocup3ds/GameState.hh
+  /// \brief Container that contains info for hear perceptor
+  public: class AgentHear
+  {
+    /// \brief AgentHear constructor
+    public: AgentHear()
+    {
+      this->yaw = -1;
+      this->self = false;
+      this->isValid = false;
+      this->gameTime = -1;
+    }
+
+    /// \brief Time when the message was sent
+    public: double gameTime;
+    /// \brief Relative angle of message
+    public: double yaw;
+    /// \brief Whether message is broadcast by self
+    public: bool self;
+    /// \brief Message string
+    public: std::string msg;
+    /// \brief Whether message is valid and we should send
+    public: bool isValid;
+  };
+
+  /// \class AgentPerceptions GameState.hh robocup3ds/GameState.hh
   /// \brief This class serves as an container for the information sent to
   /// the agent
   public: class AgentPerceptions
@@ -168,13 +223,17 @@ class GameState
       this->fieldLines.reserve(21);
     }
 
-    /// \Brief vector of landmarks that have been transformed to agent's cood
+    /// \Brief Map of landmarks that have been transformed to agent's cood
     /// frame
     public: std::map<std::string, ignition::math::Vector3<double> > landMarks;
-
-    /// \Brief vector of lines that have been transformed to agent's cood
+    /// \Brief Vector of lines that have been transformed to agent's cood
     /// frame
-    public: std::vector <ignition::math::Line3<double> > fieldLines;
+    public: std::vector<ignition::math::Line3<double> > fieldLines;
+    /// \Brief Map of agent's perceptions of other agent's body parts
+    /// Implemented as a nested map
+    public: std::map<AgentId, AgentBodyMap> otherAgentBodyMap;
+    /// \Brief Hear perceptor
+    public: AgentHear hear;
   };
 
   /// \class Agent GameState.hh robocup3ds/GameState.hh
@@ -208,7 +267,8 @@ class GameState
     public: Status status;
     /// \brief Agent position
     public: ignition::math::Vector3<double> pos;
-    /// \brief Agent position in previous cycle
+    /// \brief Agent position in previous cycle, used for detecting agent
+    /// movement
     public: ignition::math::Vector3<double> prevPos;
     /// \brief Agent camera orientation
     public: ignition::math::Quaternion<double> cameraRot;
@@ -217,14 +277,16 @@ class GameState
     /// \brief Flag whether to update agent pose in world to match
     /// gamestate.
     public: bool updatePose;
+    /// \brief Map of agent body parts in world coordinates
+    public: AgentBodyMap selfBodyMap;
+    /// \brief Container for an agent's perceptions
+    public: AgentPerceptions percept;
     /// \brief Flag whether agent is in penalty box
     public: bool inPenaltyBox;
     /// \brief Stores time the agent has not moved
     public: double timeImmoblized;
     /// \brief Stores time the agent has fallen
     public: double timeFallen;
-    /// \brief Container for an agent's perceptions
-    public: AgentPerceptions percept;
     /// \brief Flag whether player is goalkeeper
     public: bool IsGoalKeeper() {
       return this->uNum == 1;
@@ -615,6 +677,10 @@ class GameState
   public: bool updateBallPose;
   /// \brief Flag whether to update ball position in world to match game state.
 
+  /// \brief Message that will be broadcast to all players within
+  /// certain range
+  public: AgentSay say;
+  /// \brief Position of ball
   private: ignition::math::Vector3<double> ballPos;
   /// \brief Angular velocity of soccer ball.
   private: ignition::math::Vector3<double> ballAngVel;

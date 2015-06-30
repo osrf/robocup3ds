@@ -36,27 +36,58 @@ class Perceptor
   /// \Param[in] Pointer to GameState object
   public: Perceptor(GameState *_gameState);
 
+  /// \Brief Destructor for Perceptor object
+  public: ~Perceptor();
+
+  /// \Brief Method used to set view frustrum based on HFov, VFov
+  public: void SetViewFrustrum();
+
+  /// \Brief Method used to get view frustrum
+  public: std::vector <ignition::math::Plane<double> > &GetViewFrustrum();
+
   /// \Brief Function to update all relevant agents perception info
   public: void Update();
 
   /// \Brief Helper function to update line info
   /// \Param[in] _line Line object
   /// \Param[out] _agent Agent object whose perception is updated
-  private: void UpdateLine(GameState::Agent &_agent,
+  public: void UpdateLine(GameState::Agent &_agent,
     const ignition::math::Line3<double> &_line) const;
 
   /// \Brief Function to update landmark info
   /// \Param[in] _landmarkname Name of landmark
   /// \Param[in] _landmark Position of landmark
   /// \Param[out] _agent Agent object whose perception is updated
-  private: void UpdateLandmark(GameState::Agent &_agent,
+  public: void UpdateLandmark(GameState::Agent &_agent,
                 const std::string &_landmarkname,
                 const ignition::math::Vector3<double> &_landmark) const;
 
-  /// \Brief Noise added to all observations
+  /// \Brief Function to update positions of other agents
+  /// \Param[in] _agent Agent whose perception we are updating
+  /// \Param[in] _otherAgent Other agent whose position is updated
+  public: void UpdateOtherAgent(GameState::Agent &_agent,
+    const GameState::Agent &_otherAgent) const;
+
+  /// \Brief Function to update message that agent hears
+  /// \Param[in] _agent Agent whose perception we are updating
+  public: void UpdateAgentHear(GameState::Agent &_agent) const;
+
+  /// \Brief Function to add noise to all observations
   /// \Param[in] _pt Point object
+  /// \return A modified point object with noise
   private: ignition::math::Vector3<double>
     addNoise(const ignition::math::Vector3<double> &_pt) const;
+
+  /// \Brief Set the transformation matrix from global to local
+  /// coordinates for an agent
+  /// \Param[in] _agent Agent object
+  public: void SetG2LMat(const GameState::Agent &_agent);
+
+  /// \Brief Flag whether to add noise to observations or not
+  public: static bool useNoise;
+
+  /// \Brief Distance of message where it still can be heard
+  public: static double hearDist;
 
   /// \Brief A constant noise that is added to all observations
   private: static ignition::math::Vector3<double> fixedNoise;
@@ -67,9 +98,12 @@ class Perceptor
   /// \Brief Pointer to GameState object
   private: GameState *gameState;
 
+  /// \Brief 4x4 transformation to go from global to local coordinates
+  private: ignition::math::Matrix4<double> G2LMat;
+
   /// \Brief View frustrum
   /// We model view frustrum as a vector of four planes
-  private: std::vector <ignition::math::Plane<double> > viewFrustrum;
+  private: std::vector <ignition::math::Plane<double> > viewFrustum;
 };
 
 #endif

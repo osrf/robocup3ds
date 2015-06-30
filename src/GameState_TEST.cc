@@ -51,19 +51,19 @@ class GameStateTest_basic : public ::testing::Test
   protected:
     virtual void SetUp()
     {
-      gameState = new GameState();
+      this->gameState = new GameState();
     }
 
   protected:
     virtual void TearDown()
     {
-      delete gameState;
+      delete this->gameState;
     }
 
   protected:
     GameState *gameState;
-    // green is third team && shouldnt be added
   protected:
+    // green is third team && shouldnt be added
     string teamNames[3] = {"blue", "red", "green"};
 };
 

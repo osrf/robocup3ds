@@ -21,60 +21,13 @@
 #include <ignition/math.hh>
 #include <vector>
 
+#define G_SQUARE(a) ((a) * (a))
+#define DEG(X) X * (180.0 / M_PI)
+#define RAD(X) X * (M_PI / 180.0)
+#define CALC_NORMAL(P_A, P_B, P_C) ((P_C - P_A).Cross(P_B - P_A)).Normalize()
+
 namespace Geometry
 {
-  // /// \class Line Geometry.hh robocup3ds/Geometry.hh
-  // /// \brief 3D Line object
-  // class Line
-  // {
-  //   /// \brief Constructor with two default points
-  //   public: Line()
-  //   {
-  //     this->pts.push_back(ignition::math::Vector3<double>());
-  //     this->pts.push_back(ignition::math::Vector3<double>());
-  //   }
-
-  //   /// \brief Constructor of line from two points
-  //   public: Line(ignition::math::Vector3<double> _a,
-  //        ignition::math::Vector3<double> _b)
-  //   {
-  //     this->pts.push_back(_a);
-  //     this->pts.push_back(_b);
-  //   }
-
-  //   /// \brief Constructor of a line from only xy coordinates
-  //   public: Line(double _x1, double _y1, double _x2, double _y2)
-  //   {
-  //     this->pts.push_back(ignition::math::Vector3<double>(_x1, _y1, 0));
-  //     this->pts.push_back(ignition::math::Vector3<double>(_x2, _y2, 0));
-  //   }
-
-  //   /// \brief Get direction vector, used to get parameterized line equation
-  //   /// \return Direction vector
-  //   public: ignition::math::Vector3<double> Dir() const
-  //   {
-  //     return this->pts.at(1) - this->pts.at(0);
-  //   }
-
-  //   /// \brief Get the length of line
-  //   /// \return Length of line
-  //   public: double Length() const
-  //   {
-  //     return this->Dir().Length();
-  //   }
-
-  //   /// \brief Set the line
-  //   public: void Set(const ignition::math::Vector3<double> _a,
-  //        const ignition::math::Vector3<double> _b)
-  //   {
-  //     this->pts.at(0) = _a;
-  //     this->pts.at(1) = _b;
-  //   }
-
-  //   /// \brief Starting and ending points of line
-  //   public: std::vector<ignition::math::Vector3<double> > pts;
-  // };
-
   /// \brief Calculates the intersection between a line and a plane
   /// \param[in] _line Line object
   /// \param[in] _plane Plane object
