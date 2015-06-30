@@ -907,11 +907,12 @@ void GameState::Initialize()
 }
 
 ////////////////////////////////////////////////
-bool GameState::AddAgent(int _uNum, const std::string &_teamName)
+bool GameState::AddAgent(const int _uNum, const std::string &_teamName)
 {
+  int uNum = _uNum;
   // std::cout << "adding agent: " << uNum << " teamName: "
   // << teamName << std::endl;
-  if (_uNum < 0 || _uNum > GameState::playerLimit)
+  if (uNum < 0 || uNum > GameState::playerLimit)
   {
     // std::cout << "uNum " << uNum << " is invalid, cannot add agent to team "
     // << teamName << "!" << std::endl;
@@ -962,7 +963,7 @@ bool GameState::AddAgent(int _uNum, const std::string &_teamName)
   for (size_t i = 0; i < team->members.size(); ++i)
   {
     uNumArray[team->members.at(i).uNum - 1] = false;
-    if (_uNum != 0 && team->members.at(i).uNum == _uNum)
+    if (uNum != 0 && team->members.at(i).uNum == uNum)
     {
       // std::cout << "Already have an agent with this unum: " << uNum <<
       // ", cannot add agent to team!" << std::endl;
@@ -970,25 +971,25 @@ bool GameState::AddAgent(int _uNum, const std::string &_teamName)
       return false;
     }
   }
-  if (_uNum == 0)
+  if (uNum == 0)
   {
     for (int i = 0; i < GameState::playerLimit; ++i)
     {
       if (uNumArray[i])
       {
-        _uNum = i + 1;
+        uNum = i + 1;
         break;
       }
     }
   }
-  if (_uNum == 0)
+  if (uNum == 0)
   {
     // std::cout << "No free uNums avaliable, cannot add agent to team!"
     // << std::endl;
     delete[] uNumArray;
     return false;
   }
-  team->members.push_back(Agent(_uNum, team));
+  team->members.push_back(Agent(uNum, team));
   delete[] uNumArray;
   return true;
 }
@@ -1047,7 +1048,7 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
 }
 
 ////////////////////////////////////////////////
-GameState::Half GameState::GetHalf()
+GameState::Half GameState::GetHalf() const
 {
   return this->half;
 }
@@ -1059,13 +1060,13 @@ void GameState::SetHalf(const Half _newHalf)
 }
 
 ////////////////////////////////////////////////
-double GameState::GetElapsedGameTime()
+double GameState::GetElapsedGameTime() const
 {
   return this->gameTime - this->startGameTime;
 }
 
 ////////////////////////////////////////////////
-double GameState::GetElapsedCycleGameTime()
+double GameState::GetElapsedCycleGameTime() const
 {
   return this->gameTime - this->prevCycleGameTime;
 }
@@ -1077,13 +1078,13 @@ void GameState::SetGameTime(const double _gameTime)
 }
 
 ////////////////////////////////////////////////
-double GameState::GetGameTime()
+double GameState::GetGameTime() const
 {
   return this->gameTime;
 }
 
 ////////////////////////////////////////////////
-double GameState::GetStartGameTime()
+double GameState::GetStartGameTime() const
 {
   return this->startGameTime;
 }
@@ -1109,19 +1110,19 @@ void GameState::SetCycleCounter(const int _cycleCounter)
 }
 
 ////////////////////////////////////////////////
-int GameState::GetCycleCounter()
+int GameState::GetCycleCounter() const
 {
   return this->cycleCounter;
 }
 
 ////////////////////////////////////////////////
-std::shared_ptr<State> GameState::GetCurrentState()
+std::shared_ptr<State> GameState::GetCurrentState() const
 {
   return this->currentState;
 }
 
 ////////////////////////////////////////////////
-GameState::Team::Side GameState::GetLastSideTouchedBall()
+GameState::Team::Side GameState::GetLastSideTouchedBall() const
 {
   if (this->GetLastBallContact() != NULL)
   {
@@ -1134,7 +1135,7 @@ GameState::Team::Side GameState::GetLastSideTouchedBall()
 }
 
 ////////////////////////////////////////////////
-std::shared_ptr<GameState::BallContact> GameState::GetLastBallContact()
+std::shared_ptr<GameState::BallContact> GameState::GetLastBallContact() const
 {
   if (this->ballContactHistory.size() > 0)
   {

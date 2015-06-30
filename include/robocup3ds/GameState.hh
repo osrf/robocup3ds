@@ -27,7 +27,8 @@
 
 #include "robocup3ds/Geometry.hh"
 
-namespace states {
+namespace states
+{
   class BeforeKickOffState;
   class CornerKickLeftState;
   class CornerKickRightState;
@@ -58,15 +59,22 @@ class GameState
   public: class BallContact;
 
   /// \brief Enum for which half it is
-  public: enum class Half {FIRST_HALF, SECOND_HALF};
+  public: enum class Half
+  {
+    /// \brief First half of game
+    FIRST_HALF,
+    /// \brief Second half of game
+    SECOND_HALF
+  };
 
   /// \class AgentDist GameState.hh robocup3ds/GameState.hh
-  /// \Brief Struct for helping to sort agents by their distances,
+  /// \brief Struct for helping to sort agents by their distances,
   /// used by CheckCrowding_helper only
   private: class AgentDist
   {
     /// \brief Pointer to agent object
     public: Agent *agent;
+
     /// \brief Distance agent from a target
     public: double dist;
   };
@@ -79,7 +87,7 @@ class GameState
     /// \param[in] _gameState Pointer to GameState object
     /// \param[in] _normalLevel Normal message logging level
     /// \param[in] _errorLevel Error messages above this level will be printed
-    public: Logger(GameState *const _gameState,
+    public: Logger(const GameState *const _gameState,
       const int _normalLevel,
                     const int _errorLevel):
         gameState(_gameState),
@@ -92,10 +100,10 @@ class GameState
     /// \param[in] _level Normal messages above this level will be printed
     public: void Log(const std::string &_message, const int _level) const
     {
-      if (_level >= normalLevel)
+      if (_level >= this->normalLevel)
       {
-        std::cout << "[" << gameState->cycleCounter << "]["
-                  << gameState->GetGameTime() << "][lvl:" <<
+        std::cout << "[" << this->gameState->cycleCounter << "]["
+                  << this->gameState->GetGameTime() << "][lvl:" <<
                   _level << "]\t" << _message.c_str();
       }
     }
@@ -105,21 +113,22 @@ class GameState
     /// \param[in] _level Error messages above this level will be printed
     public: void LogErr(const std::string &_message, const int _level) const
     {
-      if (_level >= errorLevel)
+      if (_level >= this->errorLevel)
       {
-        std::cout << "\033[31m[" << gameState->cycleCounter << "]["
-                  << gameState->GetGameTime() << "][lvl:" <<
+        std::cout << "\033[31m[" << this->gameState->cycleCounter << "]["
+                  << this->gameState->GetGameTime() << "][lvl:" <<
                   _level << "]\t" << _message.c_str();
       }
     }
 
     /// \brief Pointer to parent gamestate object
-    private: GameState *gameState;
+    private: const GameState *gameState;
 
     /// \brief Level for logging normal messages
-    public: int normalLevel;
+    public: const int normalLevel;
+
     /// \brief Level for logging error messages
-    public: int errorLevel;
+    public: const int errorLevel;
   };
 
   /// \class Team GameState.hh robocup3ds/GameState.hh
@@ -127,7 +136,15 @@ class GameState
   public: class Team
   {
     /// \brief Enum for the team side
-    public: enum class Side {NEITHER = -1, LEFT, RIGHT };
+    public: enum class Side
+    {
+      /// \brief Neither team/side of field
+      NEITHER = -1,
+      /// \brief Team on left side of field
+      LEFT,
+      /// \brief Team on right side of field
+      RIGHT
+    };
 
     /// \brief Constructor for Team object
     /// \param[in] _name Name of team
@@ -138,23 +155,28 @@ class GameState
       const int _score, const int _playerLimit):
       name(_name),
       side(_side),
-      score(_score)
+      score(_score),
+      numPlayersInPenaltyBox(0),
+      canScore(false)
     {
       this->members.reserve(_playerLimit);
-      this->numPlayersInPenaltyBox = 0;
-      this->canScore = false;
     }
 
     /// \brief Name of the team.
     public: std::string name;
+
     /// \brief All the members in the team.
     public: std::vector<Agent> members;
+
     /// \brief Side of the team
     public: Side side;
+
     /// \brief Team score
     public: int score;
+
     /// \brief Number players in penalty area
     public: int numPlayersInPenaltyBox;
+
     /// \brief Can score goal or not
     public: bool canScore;
   };
@@ -241,7 +263,13 @@ class GameState
   public: class Agent
   {
     /// \brief Enum for the agent status
-    public: enum class Status {RELEASED, STOPPED};
+    public: enum class Status
+    {
+      /// \brief Agent is not allowed to move
+      RELEASED,
+      /// \brief Agent is allowed to move
+      STOPPED
+    };
 
     /// \brief Constructor for Agent object
     /// \param[in] _uNum unique identifier for agent
@@ -261,32 +289,44 @@ class GameState
 
     /// \brief Agent unique id
     public: int uNum;
+
     /// \brief Pointer to team that agent belongs to
     public: std::shared_ptr<Team> team;
+
     /// \brief Agent status
     public: Status status;
+
     /// \brief Agent position
     public: ignition::math::Vector3<double> pos;
     /// \brief Agent position in previous cycle, used for detecting agent
     /// movement
     public: ignition::math::Vector3<double> prevPos;
+
     /// \brief Agent camera orientation
     public: ignition::math::Quaternion<double> cameraRot;
+
     /// \brief Agent orientation
     public: ignition::math::Quaternion<double> rot;
+
     /// \brief Flag whether to update agent pose in world to match
     /// gamestate.
     public: bool updatePose;
+
     /// \brief Map of agent body parts in world coordinates
     public: AgentBodyMap selfBodyMap;
+
     /// \brief Container for an agent's perceptions
     public: AgentPerceptions percept;
+
     /// \brief Flag whether agent is in penalty box
     public: bool inPenaltyBox;
+
     /// \brief Stores time the agent has not moved
     public: double timeImmoblized;
+
     /// \brief Stores time the agent has fallen
     public: double timeFallen;
+
     /// \brief Flag whether player is goalkeeper
     public: bool IsGoalKeeper() {
       return this->uNum == 1;
@@ -313,13 +353,17 @@ class GameState
 
     /// \brief Unum of agent who touched ball
     public: int uNum;
+
     /// \brief Side of agent who touched ball
     public: Team::Side side;
+
     /// \brief Time when agent stopped contacting the ball
     /// (if contact is longer than an instant)
     public: double contactTime;
+
     /// \brief Position where agent contacted ball
     public: ignition::math::Vector3<double> contactPos;
+
     /// \brief Pointer to team of agent who touched ball
     public: std::string teamName;
   };
@@ -425,7 +469,7 @@ class GameState
 
   /// \brief Checks that during goal kick, no members of opposing team
   /// are inside penalty area
-  /// \param[out] _teamAllowed Side of the team that is allowed in penalty area
+  /// \param[in] _teamAllowed Side of the team that is allowed in penalty area
   public: void CheckGoalKickIllegalDefense(const Team::Side _teamAllowed);
 
   /// \brief Check that no more than 3 players are in penalty area.
@@ -470,7 +514,7 @@ class GameState
   /// \param[in] _uNum Agent number
   /// \param[in] _teamName Agent name
   /// \return True when adding agent is successful
-  public: bool AddAgent(int _uNum, const std::string &_teamName);
+  public: bool AddAgent(const int _uNum, const std::string &_teamName);
 
   /// \brief Remove agent from game state
   /// \param[in] _uNum Agent number
@@ -492,7 +536,7 @@ class GameState
 
   /// \brief Get the game's half.
   /// \return if the game is in the first half or if is in the second.
-  public: Half GetHalf();
+  public: Half GetHalf() const;
 
   /// \brief Set the game half.
   /// \param[in] _newHalf Set the current half
@@ -500,21 +544,21 @@ class GameState
 
   /// \brief Get the elapsed time since beginning of half.
   /// \return The elapsed game time
-  public: double GetElapsedGameTime();
+  public: double GetElapsedGameTime() const;
 
   /// \brief Get the elapsed time since last cycle.
   /// \return The elapsed game time since last cycle
-  public: double GetElapsedCycleGameTime();
+  public: double GetElapsedCycleGameTime() const;
 
   /// \brief Set the game time.
   /// \param[in] _gameTime New game time
   public: void SetGameTime(const double _gameTime);
 
   /// \brief Get the game time.
-  public: double GetGameTime();
+  public: double GetGameTime() const;
 
   /// \brief Get the game time when play starts
-  public: double GetStartGameTime();
+  public: double GetStartGameTime() const;
 
   /// \brief Set the game time when play starts
   /// \param[in] _startGameTime New start game time
@@ -525,18 +569,18 @@ class GameState
   public: void SetCycleCounter(const int _cycleCounter);
 
   /// \brief Get the cycle counter
-  public: int GetCycleCounter();
+  public: int GetCycleCounter() const;
 
   /// \brief Get the current state
-  public: std::shared_ptr<states::State> GetCurrentState();
+  public: std::shared_ptr<states::State> GetCurrentState() const;
 
   /// \brief Get the side of the team who last touched the ball.
   /// \return Pointer to the side of the team
-  public: Team::Side GetLastSideTouchedBall();
+  public: Team::Side GetLastSideTouchedBall() const;
 
   /// \brief Get the last ball contact
   /// \return Pointer to the last ball contact
-  public: std::shared_ptr<GameState::BallContact> GetLastBallContact();
+  public: std::shared_ptr<GameState::BallContact> GetLastBallContact() const;
 
   /// \brief Method executed each time the game state changes.
   private: void Initialize();
@@ -561,142 +605,202 @@ class GameState
 
   /// \brief beforeKickOffState playmode
   public: std::shared_ptr<states::BeforeKickOffState> beforeKickOffState;
+
   /// \brief kickOffLeftState playmode
   public: std::shared_ptr<states::KickOffLeftState> kickOffLeftState;
+
   /// \brief kickOffRightState playmode
   public: std::shared_ptr<states::KickOffRightState> kickOffRightState;
+
   /// \brief playState playmode
   public: std::shared_ptr<states::PlayOnState> playOnState;
+
   /// \brief kickInLeftState playmode
   public: std::shared_ptr<states::KickInLeftState> kickInLeftState;
+
   /// \brief kickInRightState playmode
   public: std::shared_ptr<states::KickInRightState> kickInRightState;
+
   /// \brief cornerKickLeftState playmode
   public: std::shared_ptr<states::CornerKickLeftState> cornerKickLeftState;
+
   /// \brief cornerKickRightState playmode
   public: std::shared_ptr<states::CornerKickRightState> cornerKickRightState;
+
   /// \brief goalKickLeftState playmode
   public: std::shared_ptr<states::GoalKickLeftState> goalKickLeftState;
+
   /// \brief goalKickRightState playmode
   public: std::shared_ptr<states::GoalKickRightState> goalKickRightState;
+
   /// \brief gameOverState playmode
   public: std::shared_ptr<states::GameOverState> gameOverState;
+
   /// \brief goalLeftState playmode
   public: std::shared_ptr<states::GoalLeftState> goalLeftState;
+
   /// \brief goalRightState playmode
   public: std::shared_ptr<states::GoalRightState> goalRightState;
+
   /// \brief freeKickLeftState playmode
   public: std::shared_ptr<states::FreeKickLeftState> freeKickLeftState;
+
   /// \brief freeKickRightState playmode
   public: std::shared_ptr<states::FreeKickRightState> freeKickRightState;
+
   /// \brief Name of BeforeKickOff playmode
   public: static const std::string BeforeKickOff;
+
   /// \brief Name of KickOffLeft playmode
   public: static const std::string KickOffLeft;
+
   /// \brief Name of KickOffRight playmode
   public: static const std::string KickOffRight;
+
   /// \brief Name of PlayOn playmode
   public: static const std::string PlayOn;
+
   /// \brief Name of KickInLeft playmode
   public: static const std::string KickInLeft;
+
   /// \brief Name of KickInRight playmode
   public: static const std::string KickInRight;
+
   /// \brief Name of CornerKickLeft playmode
   public: static const std::string CornerKickLeft;
+
   /// \brief Name of CornerKickRight playmode
   public: static const std::string CornerKickRight;
+
   /// \brief Name of GoalKickLeft playmode
   public: static const std::string GoalKickLeft;
+
   /// \brief Name of GoalKickRight playmode
   public: static const std::string GoalKickRight;
+
   /// \brief Name of GameOver playmode
   public: static const std::string GameOver;
+
   /// \brief Name of GoalLeft playmode
   public: static const std::string GoalLeft;
+
   /// \brief Name of GoalRight playmode
   public: static const std::string GoalRight;
+
   /// \brief Name of FreeKickLeft playmode
   public: static const std::string FreeKickLeft;
+
   /// \brief Name of FreeKickRight playmode
   public: static const std::string FreeKickRight;
 
   /// \brief Duration of a complete game
   public: static double SecondsFullGame;
+
   /// \brief Duration of a half
   public: static double SecondsEachHalf;
+
   /// \brief Duration of pause after goal
   public: static double SecondsGoalPause;
+
   /// \brief Duration of pause after transition to kickIn
   public: static double SecondsKickInPause;
+
   /// \brief Duration of kickIn mode
   public: static double SecondsKickIn;
+
   /// \brief Duration of beforeKickOff mode
   public: static double SecondsBeforeKickOff;
+
   /// \brief Duration of kickOff mode
   public: static double SecondsKickOff;
+
   /// \brief Radius where not allowed team cannot approach ball
   public: static double dropBallRadius;
+
   /// \brief Every cycle counts as 20ms of game time (for `fake simulations)
   public: static bool useCounterForGameTime;
+
   /// \brief Max players per team
   public: static int playerLimit;
+
   /// \brief Max players in penalty box
   public: static int penaltyBoxLimit;
+
   /// \brief Beam height
   public: static double beamHeight;
+
   /// \brief Distance when to enable crowding rules
   public: static double crowdingEnableRadius;
+
   /// \brief Distance when to reposition one of two players
   public: static double innerCrowdingRadius;
+
   /// \brief Distance when to reposition one of three players
   public: static double outerCrowdingRadius;
+
   /// \brief Timeout when player remains immobile too long
   public: static double immobilityTimeLimit;
+
   /// \brief Timeout when player remains fallen too long
   public: static double fallenTimeLimit;
   /// \brief Horizontal field of view in degrees
   public: static double HFov;
+
   /// \brief Vertical field of view in degrees
   public: static double VFov;
+
   /// \brief Flag whether to restrict field of view
   public: static bool restrictVision;
 
   /// \brief Pointer to configuration variables
   public: static std::shared_ptr<std::map<const std::string,
     const std::string> > config;
+
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;
+
   /// \brief History of ball contacts;
   public: std::vector<std::shared_ptr<BallContact> > ballContactHistory;
+
   /// \brief Pointer to the ball contact that causes the game to
   /// transition from kick off to play on
   public: std::shared_ptr<BallContact> touchBallKickoff;
+
   /// \brief All the teams.
   public: std::vector <std::shared_ptr<Team> > teams;
-  /// \brief Position of soccer ball.
-  public: bool updateBallPose;
+
   /// \brief Flag whether to update ball position in world to match game state.
+  public: bool updateBallPose;
 
   /// \brief Message that will be broadcast to all players within
   /// certain range
   public: AgentSay say;
+
   /// \brief Position of ball
   private: ignition::math::Vector3<double> ballPos;
+
   /// \brief Angular velocity of soccer ball.
   private: ignition::math::Vector3<double> ballAngVel;
+
   /// \brief Linear velocity of soccer ball.
   private: ignition::math::Vector3<double> ballVel;
+
   /// \brief Game time.
   private: double gameTime;
+
   /// \brief Game time during previous cycle.
   private: double prevCycleGameTime;
+
   /// \brief Time when half starts (elapsed game time is essentially
   /// gameTime - startGameTime)
   private: double startGameTime;
+
   /// \brief Pointer to the current game state.
   private: std::shared_ptr<states::State> currentState;
+
   /// \brief Game half (1st half or 2nd half).
   private: Half half;
+
   /// \brief Number of cycles of updates elapsed
   private: int cycleCounter;
 };
