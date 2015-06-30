@@ -193,18 +193,20 @@ class GameState
   public: class AgentSay
   {
     /// \brief AgentSay constructor
-    public: AgentSay()
-    {
-      this->uNum = -1;
-      this->isValid = false;
-    }
+    public: AgentSay():
+      uNum(-1),
+      isValid(-1)
+    {}
 
     /// \brief UNum of agent who said message
     public: int uNum;
+
     /// \brief Where the agent said the message
     public: ignition::math::Vector3<double> pos;
+
     /// \brief Message string
     public: std::string msg;
+
     /// \brief Whether message is valid
     public: bool isValid;
   };
@@ -214,22 +216,25 @@ class GameState
   public: class AgentHear
   {
     /// \brief AgentHear constructor
-    public: AgentHear()
-    {
-      this->yaw = -1;
-      this->self = false;
-      this->isValid = false;
-      this->gameTime = -1;
-    }
+    public: AgentHear():
+      gameTime(-1),
+      yaw(-1),
+      self(false),
+      isValid(false)
+    {}
 
     /// \brief Time when the message was sent
     public: double gameTime;
+
     /// \brief Relative angle of message
     public: double yaw;
+
     /// \brief Whether message is broadcast by self
     public: bool self;
+
     /// \brief Message string
     public: std::string msg;
+
     /// \brief Whether message is valid and we should send
     public: bool isValid;
   };
@@ -248,12 +253,15 @@ class GameState
     /// \Brief Map of landmarks that have been transformed to agent's cood
     /// frame
     public: std::map<std::string, ignition::math::Vector3<double> > landMarks;
+
     /// \Brief Vector of lines that have been transformed to agent's cood
     /// frame
     public: std::vector<ignition::math::Line3<double> > fieldLines;
+
     /// \Brief Map of agent's perceptions of other agent's body parts
     /// Implemented as a nested map
     public: std::map<AgentId, AgentBodyMap> otherAgentBodyMap;
+
     /// \Brief Hear perceptor
     public: AgentHear hear;
   };
