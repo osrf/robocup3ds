@@ -161,6 +161,14 @@ class GameState : public std::enable_shared_from_this<GameState>
       this->members.reserve(_playerLimit);
     }
 
+    /// \brief Equality operator for teams
+    /// \param[in] _team Tean compared against
+    /// \return True if they are equal
+    public: bool operator==(const Team &_team)
+    {
+      return this == &_team;
+    }
+
     /// \brief Name of the team.
     public: std::string name;
 
@@ -207,6 +215,14 @@ class GameState : public std::enable_shared_from_this<GameState>
       this->inPenaltyBox = false;
       this->timeImmoblized = 0;
       this->timeFallen = 0;
+    }
+
+    /// \brief Equality operator for agents
+    /// \param[in] _agent Agent compared against
+    /// \return True if they are equal
+    public: bool operator==(const Agent &_agent)
+    {
+      return this == &_agent;
     }
 
     /// \brief Agent unique id
@@ -662,7 +678,7 @@ class GameState : public std::enable_shared_from_this<GameState>
 
   /// \brief Pointer to configuration variables
   public: static std::shared_ptr<std::map<const std::string,
-    const std::string> > config;
+    const std::string>> config;
 
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;

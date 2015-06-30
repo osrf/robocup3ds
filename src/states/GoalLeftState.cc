@@ -36,9 +36,8 @@ void GoalLeftState::Initialize()
   this->validGoal = true;
 
   // Register the left team goal.
-  for (size_t i = 0; i < this->gameState->teams.size(); ++i)
+  for (auto &team : this->gameState->teams)
   {
-    GameState::Team *team = this->gameState->teams.at(i).get();
     if (team->side == GameState::Team::Side::LEFT)
     {
       if (team->canScore)
