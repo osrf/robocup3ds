@@ -46,7 +46,7 @@ namespace Geometry
   bool ClipPlaneLine(ignition::math::Line3<double> &_line,
                      const ignition::math::Plane<double> &_plane);
 
-  /// \brief Whether a point is above plane or below it
+  /// \brief Whether a point is above plane (same side as normal) or below it
   /// \param[in] _pt Point object
   /// \param[in] _plane Plane object
   /// \return True if point is above plane

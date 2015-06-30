@@ -142,53 +142,53 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis_Transform)
 }
 
 /// \brief Test that the view frustum is set correctly based on HFov and VFov
-TEST_F(PerceptorTest, Perceptor_SetViewFrustrum)
+TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
 {
   GameState::restrictVision = true;
   GameState::HFov = 0;
   GameState::VFov = 90;
-  perceptor->SetViewFrustrum();
-  std::vector <ignition::math::Plane<double> > &viewFrustrum =
-    perceptor->GetViewFrustrum();
+  perceptor->SetViewFrustum();
+  std::vector <ignition::math::Plane<double> > &viewFrustum =
+    perceptor->GetViewFrustum();
 
-  ASSERT_EQ(viewFrustrum.at(0).Normal(),
+  ASSERT_EQ(viewFrustum.at(0).Normal(),
             math::Vector3<double>(1, 0, 0));
-  ASSERT_EQ(viewFrustrum.at(1).Normal(),
+  ASSERT_EQ(viewFrustum.at(1).Normal(),
             math::Vector3<double>(0, 1, 0));
-  ASSERT_EQ(viewFrustrum.at(3).Normal(),
+  ASSERT_EQ(viewFrustum.at(3).Normal(),
             math::Vector3<double>(0, -1, 0));
 
   GameState::HFov = 90;
   GameState::VFov = 0;
-  perceptor->SetViewFrustrum();
-  ASSERT_EQ(viewFrustrum.at(0).Normal(),
+  perceptor->SetViewFrustum();
+  ASSERT_EQ(viewFrustum.at(0).Normal(),
             math::Vector3<double>(1, 0, 0));
-  ASSERT_EQ(viewFrustrum.at(2).Normal(),
+  ASSERT_EQ(viewFrustum.at(2).Normal(),
             math::Vector3<double>(0, 0, -1));
-  ASSERT_EQ(viewFrustrum.at(4).Normal(),
+  ASSERT_EQ(viewFrustum.at(4).Normal(),
             math::Vector3<double>(0, 0, 1));
 
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustrum();
-  ASSERT_EQ(viewFrustrum.at(0).Normal(),
+  perceptor->SetViewFrustum();
+  ASSERT_EQ(viewFrustum.at(0).Normal(),
             math::Vector3<double>(1, 0, 0));
 
-  ASSERT_GT(viewFrustrum.at(1).Normal().Y(), 0.0);
-  ASSERT_DOUBLE_EQ(viewFrustrum.at(1).Normal().Z(), 0.0);
-  ASSERT_GT(viewFrustrum.at(1).Normal().X(), 0.0);
+  ASSERT_GT(viewFrustum.at(1).Normal().Y(), 0.0);
+  ASSERT_DOUBLE_EQ(viewFrustum.at(1).Normal().Z(), 0.0);
+  ASSERT_GT(viewFrustum.at(1).Normal().X(), 0.0);
 
-  ASSERT_LT(viewFrustrum.at(2).Normal().Z(), 0.0);
-  ASSERT_DOUBLE_EQ(viewFrustrum.at(2).Normal().Y(), 0.0);
-  ASSERT_GT(viewFrustrum.at(2).Normal().X(), 0.0);
+  ASSERT_LT(viewFrustum.at(2).Normal().Z(), 0.0);
+  ASSERT_DOUBLE_EQ(viewFrustum.at(2).Normal().Y(), 0.0);
+  ASSERT_GT(viewFrustum.at(2).Normal().X(), 0.0);
 
-  ASSERT_LT(viewFrustrum.at(3).Normal().Y(), 0.0);
-  ASSERT_DOUBLE_EQ(viewFrustrum.at(3).Normal().Z(), 0.0);
-  ASSERT_GT(viewFrustrum.at(3).Normal().X(), 0.0);
+  ASSERT_LT(viewFrustum.at(3).Normal().Y(), 0.0);
+  ASSERT_DOUBLE_EQ(viewFrustum.at(3).Normal().Z(), 0.0);
+  ASSERT_GT(viewFrustum.at(3).Normal().X(), 0.0);
 
-  ASSERT_GT(viewFrustrum.at(4).Normal().Z(), 0.0);
-  ASSERT_DOUBLE_EQ(viewFrustrum.at(4).Normal().Y(), 0.0);
-  ASSERT_GT(viewFrustrum.at(4).Normal().X(), 0.0);
+  ASSERT_GT(viewFrustum.at(4).Normal().Z(), 0.0);
+  ASSERT_DOUBLE_EQ(viewFrustum.at(4).Normal().Y(), 0.0);
+  ASSERT_GT(viewFrustum.at(4).Normal().X(), 0.0);
 }
 
 /// \brief Test that line clipping works correctly
@@ -198,7 +198,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Restrictvis)
   GameState::restrictVision = true;
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustrum();
+  perceptor->SetViewFrustum();
   perceptor->useNoise = false;
   gameState->AddAgent(1, "blue");
   GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
@@ -290,7 +290,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
   GameState::restrictVision = true;
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustrum();
+  perceptor->SetViewFrustum();
   perceptor->useNoise = false;
   gameState->AddAgent(1, "blue");
   GameState::Agent &agent = gameState->teams.at(0)->members.at(0);

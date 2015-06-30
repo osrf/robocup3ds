@@ -14,6 +14,7 @@
  * limitations under the License.
  *
 */
+
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -42,14 +43,14 @@ math::Vector3<double> Perceptor::dNoiseSigma(0.0965, 0.1225, 0.1480);
 Perceptor::Perceptor(GameState *_gameState):
   gameState(_gameState)
 {
-  this->SetviewFrustum();
+  this->SetViewFrustum();
 }
 
 /////////////////////////////////////////////////
 Perceptor::~Perceptor() {}
 
 /////////////////////////////////////////////////
-void Perceptor::SetviewFrustum()
+void Perceptor::SetViewFrustum()
 {
   double HFov = RAD(std::min(180.0, std::max(0.0, GameState::HFov)));
   double VFov = RAD(std::min(180.0, std::max(0.0, GameState::VFov)));
@@ -83,7 +84,7 @@ void Perceptor::SetviewFrustum()
 }
 
 /////////////////////////////////////////////////
-std::vector <ignition::math::Plane<double> > &Perceptor::GetviewFrustum()
+std::vector <ignition::math::Plane<double> > &Perceptor::GetViewFrustum()
 {
   return this->viewFrustum;
 }
@@ -126,10 +127,9 @@ void Perceptor::Update()
         for (size_t l = 0; l < otherTeam->members.size(); ++l)
         {
           GameState::Agent &otherAgent = otherTeam->members.at(l);
-          if (otherAgent.uNum == agent.uNum &&
-              otherAgent.team->name == agent.team->name)
-          { continue; }
-          this->UpdateOtherAgent(agent, otherAgent);
+          if (otherAgent.uNum != agent.uNum ||
+              otherAgent.team->name != agent.team->name)
+          { this->UpdateOtherAgent(agent, otherAgent); }
         }
       }
 

@@ -90,7 +90,7 @@ namespace SoccerField
 
   static const std::vector<ignition::math::Line3<double> > FieldLines =
   {
-    // middle lines
+    // middle line
     ignition::math::Line3<double>(0, -10, 0, 10),
     // ground lines
     ignition::math::Line3<double>(15, -10, 15, 10),

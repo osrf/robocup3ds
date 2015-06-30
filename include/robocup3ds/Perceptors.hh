@@ -33,17 +33,17 @@
 class Perceptor
 {
   /// \Brief Constructor for Perceptor object
-  /// \Param[in] Pointer to GameState object
+  /// \Param[in] _gameState Pointer to GameState object
   public: Perceptor(GameState *_gameState);
 
   /// \Brief Destructor for Perceptor object
   public: ~Perceptor();
 
   /// \Brief Method used to set view frustrum based on HFov, VFov
-  public: void SetViewFrustrum();
+  public: void SetViewFrustum();
 
   /// \Brief Method used to get view frustrum
-  public: std::vector <ignition::math::Plane<double> > &GetViewFrustrum();
+  public: std::vector <ignition::math::Plane<double> > &GetViewFrustum();
 
   /// \Brief Function to update all relevant agents perception info
   public: void Update();
