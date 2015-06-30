@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 #include "../../src/sexpLibrary/sexp.h"
 #include "../../src/sexpLibrary/sexp_ops.h"
 
@@ -55,19 +56,43 @@ class ActionMessageParser
     NJOINTS,
   };
 
+  class SceneMsg
+  {
+    public: SceneMsg(int _agentId, int _robotType, std::string _rsgAddress)
+    {
+      this->id = _agentId;
+      this->robotType=_robotType;
+      this->rsgAddress=_rsgAddress;
+    }
+
+    public: int id;
+
+    public: std::string rsgAddress;
+
+    public: int robotType;
+  };
+
   public: static ActionMessageParser *GetUniqueInstance();
 
   public: virtual ~ActionMessageParser();
 
   public: void parseMessage(const std::string &_msg, int _agentID);
 
-  public: std::map<int, double*> parserMap;
+  public: bool getParsedScene(const int _id, std::string &_msg, int &_robotType);
+
+  public: std::map<int, double*> jointParserMap;
+
+  public: std::map<int, SceneMsg> sceneParserMap;
 
   private: ActionMessageParser();
+
+  private: int agentID;
 
   private: double jointsActions[NJOINTS];
 
   private: void parseSexp(sexp_t *exp);
+
+  private: void parseScene(sexp_t *_exp);
 
   private: void parseHingeJoint(int jointID, sexp_t *exp);
 };

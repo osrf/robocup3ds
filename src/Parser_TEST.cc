@@ -40,7 +40,7 @@ void clientTask(gazebo::Server *_server)
   connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
   // Send S_expresion.
-  std::string content = "(he1 3.20802)(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)(lae4 0)(rae4 0)";
+  std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)(he1 3.20802)(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)(lae4 0)(rae4 0)";
 
   auto sent = write(sockfd, content.c_str(), content.size() + 1);
   EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
@@ -61,18 +61,31 @@ void clientTask(gazebo::Server *_server)
     ActionMessageParser *parser = ActionMessageParser::GetUniqueInstance();
     parser->parseMessage(recvData, client.first);
 
-    std::cout << "Data Parsed, he1"<< ": "
-        << parser->parserMap[client.first][ActionMessageParser::he1]
+    std::cout << "Joints Msg Parsed, he1"<< ": "
+        << parser->jointParserMap[client.first][ActionMessageParser::he1]
                                            << std::endl;
+    // Test joint message Parser
+    EXPECT_DOUBLE_EQ(
+        parser->jointParserMap[client.first][ActionMessageParser::he1], 3.20802);
+    EXPECT_DOUBLE_EQ(
+        parser->jointParserMap[client.first][ActionMessageParser::he2], -1.80708);
+    EXPECT_DOUBLE_EQ(
+        parser->jointParserMap[client.first][ActionMessageParser::lle1], 0);
+    EXPECT_DOUBLE_EQ(
+        parser->jointParserMap[client.first][ActionMessageParser::lae1], -0.259697);
 
-    EXPECT_DOUBLE_EQ(
-        parser->parserMap[client.first][ActionMessageParser::he1], 3.20802);
-    EXPECT_DOUBLE_EQ(
-        parser->parserMap[client.first][ActionMessageParser::he2], -1.80708);
-    EXPECT_DOUBLE_EQ(
-        parser->parserMap[client.first][ActionMessageParser::lle1], 0);
-    EXPECT_DOUBLE_EQ(
-        parser->parserMap[client.first][ActionMessageParser::lae1], -0.259697);
+    std::string sceneAddress;
+    int rType;
+
+    // Test Scene message Parser
+    if(parser->getParsedScene(client.first,sceneAddress,rType))
+    {
+       std::cout << "Scene Msg Parsed: "<< sceneAddress << ", " << rType<< std::endl ;
+       EXPECT_EQ(sceneAddress, "rsg/agent/nao/nao_hetero.rsg");
+       EXPECT_EQ(rType, 0);
+    }
+
+
   }
   close(sockfd);
 }

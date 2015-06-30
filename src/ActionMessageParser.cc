@@ -34,6 +34,8 @@ void ActionMessageParser::parseMessage(const std::string &_msg, int _agentID)
   char linebuf[BUFSIZ+16000];
   sexp_t *exp;
 
+  this->agentID=_agentID;
+
   std::stringstream ss;
 
   ss << "(msg " << _msg << ")";
@@ -61,7 +63,7 @@ void ActionMessageParser::parseMessage(const std::string &_msg, int _agentID)
 
   destroy_sexp(exp);
 
-  this->parserMap.insert(std::pair<int, double*> (_agentID,
+  this->jointParserMap.insert(std::pair<int, double*> (_agentID,
       this->jointsActions));
 }
 
@@ -79,7 +81,11 @@ void ActionMessageParser::parseSexp(sexp_t *_exp)
   else
     return;
 
-  if (!strcmp(v, "he1"))
+  if (!strcmp(v, "scene"))
+  {
+    parseScene(_exp);
+  }
+  else if (!strcmp(v, "he1"))
   {
     parseHingeJoint(0, _exp);
   }
@@ -180,6 +186,33 @@ void ActionMessageParser::parseHingeJoint(int _jointID, sexp_t *_exp)
   name =_exp->list->val;
   effector = atof(_exp->list->next->val);
   this->jointsActions[_jointID]=effector;
+}
+
+void ActionMessageParser::parseScene(sexp_t *_exp)
+{
+  int type = 0;
+
+  std::string address= "";
+
+  address =_exp->list->next->val;
+
+  type = atof(_exp->list->next->next->val);
+
+  this->sceneParserMap.insert(std::map<int, SceneMsg >::value_type(this->agentID, SceneMsg(this->agentID,type,address)));
+}
+
+bool ActionMessageParser::getParsedScene(const int _id, std::string &_msg, int &_robotType){
+
+  for(auto ob = this->sceneParserMap.begin(); ob != this->sceneParserMap.end(); ++ob)
+  {
+     if( ob->first == _id){
+       _msg= ob->second.rsgAddress ;
+       _robotType= ob->second.robotType;
+       return true;
+     }
+  }
+
+  return false;
 }
 
 ActionMessageParser::~ActionMessageParser()
