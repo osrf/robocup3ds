@@ -26,8 +26,6 @@ class GameState;
 
 namespace states
 {
-  /// \class PlayOnState PlayOnState.hh
-  /// robocup3ds/states/PlayOnState.hh
   /// \brief State that handles regular gameplay.
   class PlayOnState : public State
   {

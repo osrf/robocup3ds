@@ -29,7 +29,7 @@ State::State(const std::string &_name,
              GameState *const _gameState):
   name(_name),
   gameState(_gameState),
-  prevState(std::shared_ptr<State>(NULL)),
+  prevState(std::shared_ptr<State>(nullptr)),
   initBallPos(math::Vector3<double>(-999, -999, -999))
 {
   this->hasInitialized = false;
@@ -39,7 +39,7 @@ State::State(const std::string &_name,
 }
 
 /////////////////////////////////////////////////
-bool State::HasBallContactOccurred()
+bool State::HasBallContactOccurred() const
 {
   return this->gameState->ballContactHistory.size() > 0
          && static_cast<int>(this->gameState->ballContactHistory.size())
@@ -77,8 +77,10 @@ void State::Uninitialize()
 /////////////////////////////////////////////////
 void State::Update()
 {
-  this->gameState->CheckTiming();  // highest priority
-  this->gameState->CheckDoubleTouch();  // lowest priority
+  // highest priority
+  this->gameState->CheckTiming();
+  // lowest priority
+  this->gameState->CheckDoubleTouch();
 
   this->gameState->CheckCanScore();
   this->gameState->CheckIllegalDefense();
@@ -87,13 +89,13 @@ void State::Update()
 }
 
 /////////////////////////////////////////////////
-double State::GetElapsedTime()
+double State::GetElapsedTime() const
 {
-  return this->gameState->GetGameTime() - initTime;
+  return this->gameState->GetGameTime() - this->initTime;
 }
 
 /////////////////////////////////////////////////
-std::string State::GetName()
+std::string State::GetName() const
 {
   return this->name;
 }

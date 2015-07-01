@@ -26,8 +26,6 @@ class GameState;
 
 namespace states
 {
-  /// \class KickInRightState KickInRightState.hh
-  /// robocup3ds/states/KickInRightState.hh
   /// \brief State that handles the right kick in state.
   class KickInRightState : public State
   {

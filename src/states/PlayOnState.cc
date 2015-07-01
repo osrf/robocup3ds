@@ -45,9 +45,11 @@ void PlayOnState::Update()
   }
   this->gameState->CheckCanScore();
 
-  this->gameState->CheckTiming();  // highest priority
+  // highest priority
+  this->gameState->CheckTiming();
   this->gameState->CheckDoubleTouch();
-  this->gameState->CheckBall();  // lowest priority
+  // lowest priority
+  this->gameState->CheckBall();
 
   this->gameState->CheckIllegalDefense();
   this->gameState->CheckCrowding();

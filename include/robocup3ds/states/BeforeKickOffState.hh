@@ -26,8 +26,6 @@ class GameState;
 
 namespace states
 {
-  /// \class BeforeKickOffState BeforeKickOffState.hh
-  /// robocup3ds/states/BeforeKickOffState.hh
   /// \brief State that handles the initial state.
   class BeforeKickOffState : public State
   {
