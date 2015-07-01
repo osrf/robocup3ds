@@ -29,12 +29,15 @@
 using namespace gazebo;
 
 //////////////////////////////////////////////////
-Server::Server(int _port)
+Server::Server(const int _port, const std::shared_ptr<SocketParser> &_parser)
   : port(_port),
+    masterSocket(-1),
+    parser(_parser),
     enabled(false)
 {
 }
 
+//////////////////////////////////////////////////
 Server::~Server()
 {
   this->enabled = false;
@@ -42,6 +45,7 @@ Server::~Server()
     this->threadReception.join();
 }
 
+//////////////////////////////////////////////////
 void Server::Start()
 {
   // The service is already running.
@@ -55,8 +59,15 @@ void Server::Start()
     std::thread(&Server::RunReceptionTask, this);
 }
 
+//////////////////////////////////////////////////
 bool Server::Push(const int _id, const std::string &_data)
 {
+  if (!this->enabled)
+  {
+    std::cerr << "Server::Push() error: Service not enabled yet" << std::endl;
+    return false;
+  }
+
   std::lock_guard<std::mutex> lock(this->mutex);
 
   // Sanity check: Make sure that the client ID exists.
@@ -77,8 +88,15 @@ bool Server::Push(const int _id, const std::string &_data)
   return true;
 }
 
+//////////////////////////////////////////////////
 bool Server::Pop(const int _id, std::string &_data)
 {
+  if (!this->enabled)
+  {
+    std::cerr << "Server::Push() error: Service not enabled yet" << std::endl;
+    return false;
+  }
+
   std::lock_guard<std::mutex> lock(this->mutex);
 
   // Sanity check: Make sure that the client ID exists.
@@ -88,28 +106,55 @@ bool Server::Pop(const int _id, std::string &_data)
     return false;
   }
 
+  // Sanity check: Make sure that the mailbox is not empty.
   if (this->clients[_id]->incoming.empty())
     return false;
 
-  _data = this->clients[_id]->incoming.at(0);
-  this->clients[_id]->incoming.erase(this->clients[_id]->incoming.begin());
+  // Pop the oldest message and return it.
+  _data = this->clients[_id]->incoming.front();
+  this->clients[_id]->incoming.pop();
   return true;
 }
 
-void Server::RunReceptionTask()
+//////////////////////////////////////////////////
+std::vector<int> Server::GetClientIds() const
+{
+  std::vector<int> clientIds;
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+  clientIds.reserve(this->clients.size());
+  for (const auto client : this->clients)
+    clientIds.push_back(client.first);
+
+  return clientIds;
+}
+
+//////////////////////////////////////////////////
+bool Server::InitializeSockets()
 {
   // Create the master socket.
-  int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  this->masterSocket = socket(AF_INET, SOCK_STREAM, 0);
 
   // Socket option: SO_REUSEADDR.
   int value = 1;
-  if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR,
+  if (setsockopt(this->masterSocket, SOL_SOCKET, SO_REUSEADDR,
     reinterpret_cast<const char *>(&value), sizeof(value)) != 0)
   {
     std::cerr << "Error setting socket option (SO_REUSEADDR)." << std::endl;
-    close(sockfd);
-    return;
+    close(this->masterSocket);
+    return false;
   }
+
+#ifdef SO_REUSEPORT
+  // Socket option: SO_REUSEPORT.
+  int reusePort = 1;
+  if (setsockopt(this->masterSocket, SOL_SOCKET, SO_REUSEPORT,
+        reinterpret_cast<const char *>(&reusePort), sizeof(reusePort)) != 0)
+  {
+    std::cerr << "Error setting socket option (SO_REUSEPORT)." << std::endl;
+    return false;
+  }
+#endif
 
   // Bind the socket.
   struct sockaddr_in mySocketAddr;
@@ -117,31 +162,43 @@ void Server::RunReceptionTask()
   mySocketAddr.sin_family = AF_INET;
   mySocketAddr.sin_port = htons(this->port);
   mySocketAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  if (bind(sockfd, (struct sockaddr *)&mySocketAddr,
+  if (bind(this->masterSocket, (struct sockaddr *)&mySocketAddr,
     sizeof(struct sockaddr)) < 0)
   {
     std::cerr << "Binding to a local port failed." << std::endl;
-    return;
+    return false;
   }
 
-  listen(sockfd, 5);
+  if (listen(this->masterSocket, 5) != 0)
+  {
+    std::cerr << "Server::InitializeSockets() Error on listen()" << std::endl;
+    return false;
+  }
 
-  // Block until we receive a datagram from the network (from anyone
-  // including ourselves)
-  std::vector<pollfd> pollSockets;
+  return true;
+}
 
-  // Master file descriptor.
+//////////////////////////////////////////////////
+void Server::RunReceptionTask()
+{
+  if (!this->InitializeSockets())
+    return;
+
+  // Add the master socket to the list of sockets.
   struct pollfd masterFd;
-  masterFd.fd = sockfd;
+  masterFd.fd = this->masterSocket;
   masterFd.events = POLLIN;
-  pollSockets.push_back(masterFd);
+  this->pollSockets.push_back(masterFd);
 
   while (this->enabled)
   {
-    int pollReturnCode = poll(&pollSockets[0], pollSockets.size(), 500);
+    // Block until we receive a datagram from the network
+    // (from anyone including ourselves).
+    int pollReturnCode =
+      poll(&this->pollSockets[0], this->pollSockets.size(), 500);
     if (pollReturnCode == -1)
     {
-      std::cerr << "Server::Start2::Polling error!" << std::endl;
+      std::cerr << "Server::RunReceptionTask(): Polling error!" << std::endl;
       return;
     }
     else if (pollReturnCode == 0)
@@ -151,80 +208,92 @@ void Server::RunReceptionTask()
     }
 
     // Data received on master socket.
-    if (pollSockets.at(0).revents && POLLIN)
+    if (this->pollSockets.at(0).revents && POLLIN)
     {
-      std::cout << "New data received on master socket." << std::endl;
-
-      // Add a new socket for this client.
-      struct sockaddr_in cliAddr;
-      socklen_t clilen = sizeof(cliAddr);
-      int newSocketFd = accept(sockfd, (struct sockaddr *) &cliAddr, &clilen);
-      if (newSocketFd < 0)
-        std::cerr << "ERROR on accept" << std::endl;
-
-      pollfd newSocketPollItem;
-      newSocketPollItem.fd = newSocketFd;
-      newSocketPollItem.events = POLLIN;
-
-      {
-        std::lock_guard<std::mutex> lock(this->mutex);
-        pollSockets.push_back(newSocketPollItem);
-
-        // Register the new client.
-        clients[newSocketFd] = std::make_shared<Client>(newSocketFd);
-      }
-
+      this->DispatchRequestOnMasterSocket();
       continue;
     }
 
     // Data received on any of the client sockets.
-    for (size_t i = 1; i < pollSockets.size(); ++i)
-    {
-      if (pollSockets.at(i).revents && POLLIN)
-      {
-        int nread;
-        ioctl(pollSockets.at(i).fd, FIONREAD, &nread);
-        if (nread == 0)
-        {
-          int socket = pollSockets.at(i).fd;
-          // Remove the client from the list used by poll.
-          std::cout << "Client " << i << " closed" << std::endl;
-          close(socket);
-          pollSockets.at(i).events = 0;
-          pollSockets.erase(pollSockets.begin() + i);
-
-          // Remove the client from the server list.
-          {
-            std::lock_guard<std::mutex> lock(this->mutex);
-            this->clients.erase(socket);
-          }
-          break;
-        }
-
-        std::cout << "New data received on socket [" << i << "]" << std::endl;
-
-        // Read data from the socket.
-        char buffer[this->kBufferSize];
-        bzero(buffer, sizeof(buffer));
-        ssize_t bytes_Read =
-          recv(pollSockets.at(i).fd, buffer, sizeof(buffer), 0);
-        if (bytes_Read < 0)
-          std::cerr << "ERROR reading from socket" << std::endl;
-
-        std::cout << "Incoming data: " << std::string(buffer) << std::endl;
-
-        // Register new incoming data.
-        {
-          std::lock_guard<std::mutex> lock(this->mutex);
-          this->clients[pollSockets.at(i).fd]->incoming.push_back(
-            std::string(buffer));
-        }
-        continue;
-      }
-    }
+    this->DispatchRequestOnClientSocket();
   }
 
-  // Close pending sockets.
+  // About to leave, close pending sockets.
   for (auto client : this->clients)
     close(client.second->socket);
+}
+
+//////////////////////////////////////////////////
+void Server::DispatchRequestOnMasterSocket()
+{
+  // Add a new socket for this client.
+  struct sockaddr_in cliAddr;
+  socklen_t clilen = sizeof(cliAddr);
+  int newSocketFd =
+    accept(this->masterSocket, (struct sockaddr *) &cliAddr, &clilen);
+  if (newSocketFd < 0)
+  {
+    std::cerr << "Server::DispatchRequestOnMasterSocket() error on accept()"
+              << std::endl;
+  }
+
+  pollfd newSocketPollItem;
+  newSocketPollItem.fd = newSocketFd;
+  newSocketPollItem.events = POLLIN;
+
+  // Add the new socket to the list of sockets to poll.
+  this->pollSockets.push_back(newSocketPollItem);
+
+  {
+    std::lock_guard<std::mutex> lock(this->mutex);
+
+    // Register the new client.
+    this->clients[newSocketFd] = std::make_shared<Client>(newSocketFd);
+  }
+}
+
+//////////////////////////////////////////////////
+void Server::DispatchRequestOnClientSocket()
+{
+  for (size_t i = 1; i < this->pollSockets.size(); ++i)
+  {
+    if (this->pollSockets.at(i).revents && POLLIN)
+    {
+      int nread;
+      ioctl(this->pollSockets.at(i).fd, FIONREAD, &nread);
+      // The client has disconnected.
+      if (nread == 0)
+      {
+        int socket = this->pollSockets.at(i).fd;
+        // Remove the client from the list used by poll.
+        close(socket);
+        this->pollSockets.at(i).events = 0;
+        this->pollSockets.erase(this->pollSockets.begin() + i);
+
+        // Remove the client from the server list.
+        {
+          std::lock_guard<std::mutex> lock(this->mutex);
+          this->clients.erase(socket);
+        }
+        break;
+      }
+
+      // The client has send some data.
+      // Read data from the socket using the parser.
+      std::string data;
+      if (!this->parser->Parse(this->pollSockets.at(i).fd, data))
+      {
+        std::cerr << "Server::DispatchRequestOnClientSocket() error: "
+                  << "Problem parsing incoming data" << std::endl;
+        break;
+      }
+
+      // Register new incoming data.
+      {
+        std::lock_guard<std::mutex> lock(this->mutex);
+        this->clients[this->pollSockets.at(i).fd]->incoming.push(data);
+      }
+      continue;
+    }
+  }
 }
