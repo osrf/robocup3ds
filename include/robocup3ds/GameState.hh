@@ -47,8 +47,20 @@ namespace states
 }
 
 /// \brief Class for controlling play mode transitions and checking rule
-/// violations in a 3d simulation Robocup game
-class GameState : public std::enable_shared_from_this<GameState>
+/// violations in a 3D simulation Robocup game.
+///
+/// To use GameState object, you need perform the following three actions
+/// repeatedly until the game is over:
+/// 1) Use the simulation world model to update the pose of all
+/// the players and ball. Also, check for collisions in simulation world model
+/// and update ballContactHistory member variable if necessary
+/// 2) Call the Effector object's Update() method
+/// 3) Call the Update() method
+/// 4) Call the Perceptor object's Update() method
+/// 5) If the GameState object modifies the pose of any of the players and or
+/// ball (by checking the updatePose flag), update the simulation world model
+/// to match poses stored in the GameState object
+class GameState
 {
   // forward declarations
   public: class AgentPerceptions;
