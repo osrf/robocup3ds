@@ -46,6 +46,7 @@ class PerceptorTest : public ::testing::Test
                                  const math::Line3<double> &_line,
                                  math::Line3<double> &_testLine) const
     {
+      perceptor->SetG2LMat(_agent);
       _agent.percept.fieldLines.clear();
       this->perceptor->UpdateLine(_agent, _line);
       if (_agent.percept.fieldLines.size() == 0)
@@ -62,6 +63,7 @@ class PerceptorTest : public ::testing::Test
                                      const math::Vector3<double> &_landmark,
                                      math::Vector3<double> &_testLandmark) const
     {
+      perceptor->SetG2LMat(_agent);
       _agent.percept.landMarks.clear();
       this->perceptor->UpdateLandmark(_agent, "test", _landmark);
       if (_agent.percept.landMarks.size() == 0)
@@ -105,7 +107,6 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis_Transform)
   /// agent's camera is at origin, facing straight down the positive y-axis
   agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, M_PI / 2);
-  perceptor->SetG2LMat(agent);
 
   // we have line on positive y-axis in global coordinates
   origLine.Set(0, 1, 0, 0, 2, 0);
@@ -115,7 +116,6 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis_Transform)
 
   // agent's camera is facing down negative x-axis
   agent.cameraRot.Euler(0, 0, M_PI);
-  perceptor->SetG2LMat(agent);
   UpdateLine_Test(agent, origLine, testLine);
   gdLine.Set(0, -1, 0, 0, -2, 0);
   ASSERT_EQ(testLine, gdLine);
@@ -134,7 +134,6 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis_Transform)
 
   // offset agent by 1 in every axis, same with line
   agent.pos.Set(1, 1, 1);
-  perceptor->SetG2LMat(agent);
   origLine.Set(0, 1, 1, 0, 2, 1);
   UpdateLine_Test(agent, origLine, testLine);
   gdLine.Set(1, 0, 0, 1, -1, 0);
@@ -206,7 +205,6 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Restrictvis)
   /// agent's camera is at origin, facing straight down the positive x-axis
   agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
-  perceptor->SetG2LMat(agent);
 
   // we have line spanning Y-axis, must be clipped
   origLine.Set(1, -999, 0, 1, 999, 0);
@@ -256,7 +254,6 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
   /// agent's camera is at origin, facing straight down the positive y-axis
   agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, M_PI / 2);
-  perceptor->SetG2LMat(agent);
 
   origLandmark.Set(1, 0, 0);
   UpdateLandmark_Test(agent, origLandmark, testLandmark);
@@ -269,14 +266,12 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
   ASSERT_EQ(gdLandmark, testLandmark);
 
   agent.cameraRot.Euler(0, 0, M_PI / 4);
-  perceptor->SetG2LMat(agent);
   origLandmark.Set(1, 0, 0);
   UpdateLandmark_Test(agent, origLandmark, testLandmark);
   gdLandmark.Set(1 / sqrt(2), -1 / sqrt(2), 0);
   ASSERT_EQ(gdLandmark, testLandmark);
 
   agent.pos.Set(1, 2, 3);
-  perceptor->SetG2LMat(agent);
   origLandmark.Set(1, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
   UpdateLandmark_Test(agent, origLandmark, testLandmark);
@@ -297,7 +292,6 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
 
   agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
-  perceptor->SetG2LMat(agent);
 
   origLandmark.Set(-999, 0, 0);
   ASSERT_FALSE(UpdateLandmark_Test(agent, origLandmark, testLandmark));
