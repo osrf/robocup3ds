@@ -78,9 +78,6 @@ double GameState::immobilityTimeLimit = 15;
 double GameState::fallenTimeLimit = 30;
 double GameState::dropBallRadius = 2;
 
-std::shared_ptr<std::map<const std::string, const std::string> >
-GameState::config;
-
 /////////////////////////////////////////////////
 GameState::GameState():
   beforeKickOffState(std::make_shared<BeforeKickOffState>(BeforeKickOff, this)),
@@ -123,63 +120,63 @@ GameState::~GameState()
 }
 
 /////////////////////////////////////////////////
-void GameState::LoadConfiguration()
+void GameState::LoadConfiguration(
+  const std::map<std::string, std::string> &_config) const
 {
-  if (!config)
-  {
-    return;
-  }
   double value;
   bool boolValue;
-  if (LoadConfigParameter("gamestate_secondsfullgame", value))
+  if (LoadConfigParameter(_config, "gamestate_secondsfullgame", value))
   {
     GameState::SecondsFullGame = value;
     GameState::SecondsEachHalf = 0.5 * GameState::SecondsFullGame;
   }
-  else if (LoadConfigParameter("gamestate_secondseachhalf", value))
+  else if (LoadConfigParameter(_config, "gamestate_secondseachhalf", value))
   {
     GameState::SecondsEachHalf = value;
     GameState::SecondsFullGame = 2.0 * GameState::SecondsEachHalf;
   }
-  if (LoadConfigParameter("gamestate_secondsgoalpause", value))
+  if (LoadConfigParameter(_config, "gamestate_secondsgoalpause", value))
   { GameState::SecondsGoalPause = value; }
-  if (LoadConfigParameter("gamestate_secondskickinpause", value))
+  if (LoadConfigParameter(_config, "gamestate_secondskickinpause", value))
   { GameState::SecondsKickInPause = value; }
-  if (LoadConfigParameter("gamestate_secondskickin", value))
+  if (LoadConfigParameter(_config, "gamestate_secondskickin", value))
   { GameState::SecondsKickIn = value; }
-  if (LoadConfigParameter("gamestate_secondsbeforekickoff", value))
+  if (LoadConfigParameter(_config, "gamestate_secondsbeforekickoff", value))
   { GameState::SecondsBeforeKickOff = value; }
-  if (LoadConfigParameter("gamestate_secondskickoff", value))
+  if (LoadConfigParameter(_config, "gamestate_secondskickoff", value))
   { GameState::SecondsKickOff = value; }
-  if (LoadConfigParameter("gamestate_dropballradius", value))
+  if (LoadConfigParameter(_config, "gamestate_dropballradius", value))
   { GameState::dropBallRadius = value; }
-  if (LoadConfigParameterBool("gamestate_usecounterforgametime", boolValue))
+  if (LoadConfigParameterBool(
+    _config, "gamestate_usecounterforgametime", boolValue))
   { GameState::useCounterForGameTime = boolValue; }
-  if (LoadConfigParameter("gamestate_playerlimit", value))
+  if (LoadConfigParameter(_config, "gamestate_playerlimit", value))
   { GameState::playerLimit = static_cast<int>(value); }
-  if (LoadConfigParameter("gamestate_penaltyboxlimit", value))
+  if (LoadConfigParameter(_config, "gamestate_penaltyboxlimit", value))
   { GameState::penaltyBoxLimit = static_cast<int>(value); }
-  if (LoadConfigParameter("gamestate_beamheight", value))
+  if (LoadConfigParameter(_config, "gamestate_beamheight", value))
   { GameState::beamHeight = value; }
-  if (LoadConfigParameter("gamestate_crowdingenableradius", value))
+  if (LoadConfigParameter(_config, "gamestate_crowdingenableradius", value))
   { GameState::crowdingEnableRadius = value; }
-  if (LoadConfigParameter("gamestate_innercrowdingradius", value))
+  if (LoadConfigParameter(_config, "gamestate_innercrowdingradius", value))
   { GameState::innerCrowdingRadius = value; }
-  if (LoadConfigParameter("gamestate_outercrowdingradius", value))
+  if (LoadConfigParameter(_config, "gamestate_outercrowdingradius", value))
   { GameState::outerCrowdingRadius = value; }
-  if (LoadConfigParameter("gamestate_immobilitytimelimit", value))
+  if (LoadConfigParameter(_config, "gamestate_immobilitytimelimit", value))
   { GameState::immobilityTimeLimit = value; }
-  if (LoadConfigParameter("gamestate_fallentimelimit", value))
+  if (LoadConfigParameter(_config, "gamestate_fallentimelimit", value))
   { GameState::fallenTimeLimit = value; }
 }
 
 /////////////////////////////////////////////////
-bool GameState::LoadConfigParameter(const std::string &_key,
-                                    double &_value) const
+bool GameState::LoadConfigParameter(
+  const std::map<std::string, std::string> &_config,
+  const std::string &_key,
+  double &_value) const
 {
   try
   {
-    _value = std::stod((*GameState::config)[_key]);
+    _value = std::stod(_config.at(_key));
   }
   catch (const std::exception &exc)
   {
@@ -190,12 +187,14 @@ bool GameState::LoadConfigParameter(const std::string &_key,
 }
 
 /////////////////////////////////////////////////
-bool GameState::LoadConfigParameterBool(const std::string &_key,
-                                        bool &_boolValue) const
+bool GameState::LoadConfigParameterBool(
+  const std::map<std::string, std::string> &_config,
+  const std::string &_key,
+  bool &_boolValue) const
 {
   try
   {
-    _boolValue = (*GameState::config)[_key] != "false";
+    _boolValue = _config.at(_key) != "false";
   }
   catch (const std::exception &exc)
   {
@@ -254,10 +253,11 @@ void GameState::StopPlayers()
 }
 
 ////////////////////////////////////////////////
-void GameState::SetCurrent(const std::shared_ptr<State> &_newState)
+void GameState::SetCurrent(const std::shared_ptr<State> &_newState,
+                           const bool _resetState)
 {
   // Only update the state if _newState is different than the current state.
-  if (this->currentState != _newState)
+  if (this->currentState != _newState || _resetState)
   {
     this->Initialize();
     if (this->currentState != NULL)
@@ -654,12 +654,12 @@ void GameState::CheckDoubleTouch()
   std::shared_ptr<BallContact> firstContact = this->ballContactHistory.at(1);
   if (this->touchBallKickoff != NULL
       && this->currentState->prevState != NULL
-      && (this->currentState->prevState->name == "KickOffRight"
-          || this->currentState->prevState->name == "KickOffLeft")
+      && (this->currentState->prevState->GetName() == "KickOffRight"
+          || this->currentState->prevState->GetName() == "KickOffLeft")
       && this->touchBallKickoff->side == firstContact->side
       && this->touchBallKickoff->uNum == firstContact->uNum)
   {
-    if (this->currentState->prevState->name == "KickOffLeft")
+    if (this->currentState->prevState->GetName() == "KickOffLeft")
     {
       this->SetCurrent(kickOffRightState);
     }
@@ -918,12 +918,12 @@ bool GameState::AddAgent(const int _uNum, const std::string &_teamName)
     return false;
   }
 
-  if (static_cast<int>(teamToAdd->members.size()) > GameState::playerLimit)
-  {
-    // std::cout << "Team is already full, cannot add agent
-    // to team!" << std::endl;
-    return false;
-  }
+  // code below never reached
+  // if (static_cast<int>(teamToAdd->members.size()) > GameState::playerLimit)
+  // {
+  //   return false;
+  // }
+
   std::vector<bool> uNumArray;
   for (int i = 0; i < GameState::playerLimit; ++i)
   {
@@ -988,9 +988,9 @@ bool GameState::RemoveAgent(const int _uNum, const std::string &_teamName)
 bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
                           const double _x, const double _y, const double _rot)
 {
-  if (this->currentState->name != "BeforeKickOff"
-      && this->currentState->name != "GoalKickLeft"
-      && this->currentState->name != "GoalKickRight")
+  if (this->currentState->GetName() != "BeforeKickOff"
+      && this->currentState->GetName() != "GoalKickLeft"
+      && this->currentState->GetName() != "GoalKickRight")
   {
     // std::cout << "Incorrect play mode, unable to beam agent!" << std::endl;
     return false;

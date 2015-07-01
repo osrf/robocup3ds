@@ -306,7 +306,9 @@ class GameState : public std::enable_shared_from_this<GameState>
   public: GameState();
 
   /// \brief Function for loading gameState configuration variables
-  void LoadConfiguration();
+  /// \param[in] _config Map of configuration variables
+  public: void LoadConfiguration(
+    const std::map<std::string, std::string> &_config) const;
 
   /// \brief Destructor.
   public: virtual ~GameState();
@@ -329,8 +331,11 @@ class GameState : public std::enable_shared_from_this<GameState>
 
   /// \brief Set the current game state. If the new state is the same than
   /// the current one, the operation does not have any effect.
-  /// \param[in] _newState new state to replace current state
-  public: void SetCurrent(const std::shared_ptr<states::State> &_newState);
+  /// \param[in] _newState New state to replace current state
+  /// \param[in] _resetStage When new state is the same as current state,
+  /// setting this flag to true will reset the state
+  public: void SetCurrent(const std::shared_ptr<states::State> &_newState,
+    const bool _resetStage = false);
 
   /// \brief Drops the ball at its current position and move all players away
   /// by the free kick radius. If the ball is off the field, it is brought
@@ -524,14 +529,22 @@ class GameState : public std::enable_shared_from_this<GameState>
   private: static bool SortDist(const AgentDist &_i, const AgentDist &_j);
 
   /// \brief Helper function for loading gameState configuration variables
+  /// \param[in] _config Map of configuration variables
+  /// \param[in] _key Key to look for in map
+  /// \param[out] _value Value to return
   /// \return True if loading of parameter is successful
-  private: bool LoadConfigParameter(const std::string &_key, double
-    &_value) const;
+  private: bool LoadConfigParameter(
+    const std::map<std::string, std::string> &_config,
+    const std::string &_key, double &_value) const;
 
   /// \brief Helper function for loading gameState configuration variables
+  /// \param[in] _config Map of configuration variables
+  /// \param[in] _key Key to look for in map
+  /// \param[out] _boolValue Value to return
   /// \return True if loading of parameter is successful
-  private: bool LoadConfigParameterBool(const std::string &_key,
-    bool &_boolValue) const;
+  private: bool LoadConfigParameterBool(
+    const std::map<std::string, std::string> &_config,
+    const std::string &_key, bool &_boolValue) const;
 
   // member and class variables
 

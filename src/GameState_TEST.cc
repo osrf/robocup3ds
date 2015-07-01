@@ -16,6 +16,7 @@
 */
 
 #include <ignition/math.hh>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -69,6 +70,54 @@ class GameStateTest_basic : public ::testing::Test
 TEST_F(GameStateTest_basic, GameState_construct_delete)
 {
   SUCCEED();
+}
+
+/// \brief Test if configurations are loaded correctly
+TEST_F(GameStateTest_basic, GameState_LoadConfiguration)
+{
+  std::map<std::string, std::string> config;
+
+  config["gamestate_secondsfullgame"] = "400";
+  config["gamestate_secondseachhalf"] = "500";
+  gameState.LoadConfiguration(config);
+  ASSERT_DOUBLE_EQ(GameState::SecondsFullGame, 400.0);
+  ASSERT_DOUBLE_EQ(GameState::SecondsEachHalf, 200.0);
+
+  config.clear();
+  config["gamestate_secondseachhalf"] = "500";
+  gameState.LoadConfiguration(config);
+  ASSERT_DOUBLE_EQ(GameState::SecondsFullGame, 1000.0);
+  ASSERT_DOUBLE_EQ(GameState::SecondsEachHalf, 500.0);
+
+  config["gamestate_secondsgoalpause"] = "999";
+  gameState.LoadConfiguration(config);
+  ASSERT_DOUBLE_EQ(GameState::SecondsGoalPause, 999.0);
+  config["gamestate_secondsgoalpause"] = "52gvs";
+  ASSERT_DOUBLE_EQ(GameState::SecondsGoalPause, 999.0);
+
+  config["gamestate_usecounterforgametime"] = "false";
+  gameState.LoadConfiguration(config);
+  ASSERT_FALSE(GameState::useCounterForGameTime);
+  config["gamestate_usecounterforgametime"] = "true";
+  gameState.LoadConfiguration(config);
+  ASSERT_TRUE(GameState::useCounterForGameTime);
+  config["gamestate_usecounterforgametime"] = "tru5245e";
+  gameState.LoadConfiguration(config);
+  ASSERT_TRUE(GameState::useCounterForGameTime);
+
+  config["gamestate_playerlimit"] = "50";
+  gameState.LoadConfiguration(config);
+  ASSERT_EQ(GameState::playerLimit, 50);
+  config["gamestate_playerlimit"] = "50.5";
+  gameState.LoadConfiguration(config);
+  ASSERT_EQ(GameState::playerLimit, 50);
+
+  config.clear();
+  config["gamestate_playerlimit"] = "11";
+  config["gamestate_usecounterforgametime"] = "true";
+  config["gamestate_secondsgoalpause"] = "3";
+  config["gamestate_secondsfullgame"] = "600";
+  gameState.LoadConfiguration(config);
 }
 
 /// \brief Test for adding teams && agents
@@ -146,7 +195,7 @@ TEST_F(GameStateTest_basic, GameState_remove_agents)
                 11u - static_cast<size_t>(j + 1));
       for (auto &agent : gameState.teams.at(i)->members)
       {
-        ASSERT_NE(agent.uNum, j+1);
+        ASSERT_NE(agent.uNum, j + 1);
       }
     }
   }
@@ -165,15 +214,33 @@ TEST_F(GameStateTest_basic, GameState_remove_agents)
 /// \brief Test for add agent with uNum 0, which assigns it the next free uNum
 TEST_F(GameStateTest_basic, GameState_add_agent_0)
 {
-  ASSERT_TRUE(gameState.AddAgent(0, teamNames[1]));
-  ASSERT_EQ(gameState.teams[0]->members.at(0).uNum, 1);
-  ASSERT_FALSE(gameState.AddAgent(1, teamNames[1]));
-  ASSERT_TRUE(gameState.AddAgent(2, teamNames[1]));
-  ASSERT_TRUE(gameState.AddAgent(0, teamNames[1]));
-  ASSERT_TRUE(gameState.AddAgent(0, teamNames[1]));
-  ASSERT_FALSE(gameState.AddAgent(3, teamNames[1]));
-  ASSERT_FALSE(gameState.AddAgent(4, teamNames[1]));
-  ASSERT_EQ(gameState.teams.at(0)->members.size(), 4u);
+  for (int i = 0; i < 2; i++)
+  {
+    ASSERT_TRUE(gameState.AddAgent(0, teamNames[i]));
+    ASSERT_EQ(gameState.teams[i]->members.at(0).uNum, 1);
+    ASSERT_FALSE(gameState.AddAgent(1, teamNames[i]));
+
+    ASSERT_TRUE(gameState.AddAgent(2, teamNames[i]));
+    ASSERT_EQ(gameState.teams[i]->members.at(1).uNum, 2);
+
+    ASSERT_TRUE(gameState.AddAgent(0, teamNames[i]));
+    ASSERT_EQ(gameState.teams[i]->members.at(2).uNum, 3);
+    ASSERT_FALSE(gameState.AddAgent(3, teamNames[i]));
+
+    ASSERT_TRUE(gameState.AddAgent(0, teamNames[i]));
+    ASSERT_EQ(gameState.teams[i]->members.at(3).uNum, 4);
+    ASSERT_FALSE(gameState.AddAgent(4, teamNames[i]));
+
+    ASSERT_EQ(gameState.teams.at(i)->members.size(), 4u);
+
+    for (int j = 0; j < 7; j++)
+    {
+      ASSERT_TRUE(gameState.AddAgent(0, teamNames[i]));
+    }
+
+    ASSERT_FALSE(gameState.AddAgent(0, teamNames[i]));
+    ASSERT_EQ(gameState.teams.at(i)->members.size(), 11u);
+  }
 }
 
 /// \brief Test for whether the move ball functions are working as intended
@@ -301,6 +368,10 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
     ASSERT_LE(agent.pos.Distance(pos), 0.15);
     ASSERT_LE(fabs(agent.rot.Euler().Z() - rot.Euler().Z()), 0.1);
   }
+  ASSERT_FALSE(gameState.BeamAgent(2, "blue", 7, 8, 1.25));
+  ASSERT_FALSE(gameState.BeamAgent(1, "red", 7, 8, 1.25));
+  gameState.SetCurrent(gameState.playOnState);
+  ASSERT_FALSE(gameState.BeamAgent(1, "blue", 7, 8, 1.25));
 }
 
 /// \class GameStateTest_fullTeams
@@ -356,20 +427,20 @@ class GameStateTest_fullTeams : public GameStateTest_basic
       }
     }
 
-  protected:
-    virtual void resetPositions(int _team)
-    {
-      if (_team != 0 || _team != 1)
-      {
-        return;
-      }
-      for (int j = 0; j < 11; ++j)
-      {
-        GameState::Agent &agent = gameState.teams.at(_team)->members.at(j);
-        gameState.MoveAgent(agent, math::Vector3<double>
-                            (0, 0, GameState::beamHeight));
-      }
-    }
+    // protected:
+    //   virtual void resetPositions(int _team)
+    //   {
+    //     if (_team != 0 || _team != 1)
+    //     {
+    //       return;
+    //     }
+    //     for (int j = 0; j < 11; ++j)
+    //     {
+    //       GameState::Agent &agent = gameState.teams.at(_team)->members.at(j);
+    //       gameState.MoveAgent(agent, math::Vector3<double>
+    //                           (0, 0, GameState::beamHeight));
+    //     }
+    //   }
 };
 
 /// \brief Test for whether beforeKickOff play mode transitions correctly
@@ -392,6 +463,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff)
   }
 
   // try second half
+  gameState.SetCycleCounter(0);
+  gameState.SetCurrent(gameState.beforeKickOffState, true);
   gameState.SetHalf(GameState::Half::SECOND_HALF);
   ASSERT_EQ(gameState.GetHalf(), GameState::Half::SECOND_HALF);
   while (gameState.GetGameTime() < GameState::SecondsBeforeKickOff + 1)
@@ -434,7 +507,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
       // getElapsedTime() << endl;
       if (gameState.GetGameTime() < GameState::SecondsKickOff)
       {
-        ASSERT_EQ(gameState.GetCurrentState()->name, state->name);
+        ASSERT_EQ(gameState.GetCurrentState()->name, state->GetName());
       }
       else
       {
@@ -454,6 +527,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
     ASSERT_TRUE(gameState.touchBallKickoff != NULL);
     ASSERT_EQ(gameState.touchBallKickoff, ballContact);
     ASSERT_EQ(gameState.GetCurrentState()->name, "PlayOn");
+    ASSERT_EQ(gameState.GetLastSideTouchedBall(), gameState.teams.at(i)->side);
 
     // test for transition when double touching occurs
     gameState.SetCurrent(state);
@@ -505,6 +579,12 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
     gameState.ballContactHistory.push_back(ballContact6);
     gameState.Update();
     ASSERT_EQ(gameState.GetCurrentState()->name, "PlayOn");
+
+    // test that ball contact history is cleaned up correctly
+    gameState.ClearBallContactHistory();
+    ASSERT_FALSE(gameState.GetLastBallContact());
+    ASSERT_EQ(gameState.GetLastSideTouchedBall(),
+      GameState::Team::Side::NEITHER);
   }
 }
 
@@ -906,7 +986,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
     }
     gameState.Update();
   }
-  ASSERT_EQ("GameOver", gameState.GetCurrentState()->name);
+  for (int i = 0; i < 50; i++)
+  {
+    ASSERT_EQ("GameOver", gameState.GetCurrentState()->name);
+    gameState.Update();
+  }
 }
 
 /// \brief Test to check whether the GameState CheckCanScore function
@@ -1236,6 +1320,43 @@ TEST_F(GameStateTest_fullTeams, GameState_DropBall)
       ASSERT_GE(agent.pos.Distance(gameState.GetBall()),
                 GameState::dropBallRadius);
     }
+  }
+}
+
+/// \brief Test to check whether the CheckGoalKickIllegalDefense
+/// function in gameState is working as intended
+TEST_F(GameStateTest_fullTeams, GameState_CheckGoalKickIllegalDefense)
+{
+  vector<std::shared_ptr<State> > states;
+  states.push_back(gameState.goalKickLeftState);
+  states.push_back(gameState.goalKickRightState);
+
+  vector<math::Vector3<double>> inPenaltyBox;
+  inPenaltyBox.push_back(math::Vector3<double>(
+                           -SoccerField::HalfFieldWidth + 1, 0,
+                           GameState::beamHeight));
+  inPenaltyBox.push_back(math::Vector3<double>(
+                           SoccerField::HalfFieldWidth - 1, 0,
+                           GameState::beamHeight));
+
+  vector<math::Box> penaltyBox;
+  penaltyBox.push_back(SoccerField::PenaltyBoxLeft);
+  penaltyBox.push_back(SoccerField::PenaltyBoxRight);
+
+  for (size_t i = 0; i < states.size(); ++i)
+  {
+    gameState.MoveBall(inPenaltyBox.at(i));
+    gameState.SetCurrent(states.at(i));
+    while (!states.at(i)->hasInitialized)
+    {
+      gameState.Update();
+    }
+    GameState::Agent &enemyAgent =
+      gameState.teams.at((i + 1) % 2)->members.at(0);
+    gameState.MoveAgent(enemyAgent, inPenaltyBox.at(i));
+    ASSERT_TRUE(penaltyBox.at(i).Contains(enemyAgent.pos));
+    gameState.Update();
+    ASSERT_FALSE(penaltyBox.at(i).Contains(enemyAgent.pos));
   }
 }
 
