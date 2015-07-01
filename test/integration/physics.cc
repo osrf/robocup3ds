@@ -26,7 +26,7 @@ class PhysicsTest : public gazebo::ServerFixture
 
 TEST_F(PhysicsTest, Test1)
 {
-  Load("worlds/arat.world");
+  Load("worlds/empty.world");
   gazebo::physics::WorldPtr world = gazebo::physics::get_world("default");
   ASSERT_TRUE(world != NULL);
 }
