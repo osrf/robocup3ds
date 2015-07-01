@@ -51,7 +51,7 @@ void GoalKickRightState::Update()
     this->Initialize();
   }
 
-  this->gameState->DropBallImpl(GameState::Team::Side::LEFT);
+  this->gameState->DropBallImpl(GameState::Team::Side::RIGHT);
   this->gameState->CheckGoalKickIllegalDefense(GameState::Team::Side::RIGHT);
   State::Update();
 

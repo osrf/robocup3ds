@@ -1,7 +1,5 @@
 #################################################
 macro (robocup3ds_build_tests)
-  set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g" )
-
   # Build all the tests
   foreach(GTEST_SOURCE_file ${ARGN})
     string(REGEX REPLACE ".cc" "" BINARY_NAME ${GTEST_SOURCE_file})
