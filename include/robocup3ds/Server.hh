@@ -57,7 +57,7 @@ namespace gazebo
   /// messages in a single recv(). Without knowing the application and the
   /// format of the messages, it's hard to create a server that parses the
   /// messages. This class uses the concept of a SocketParser class. This class
-  /// should know the format of the data send over the wire. A SocketParser
+  /// should know the format of the data sent over the wire. A SocketParser
   /// class should implement a Parse() method that should be able to return an
   /// entire message. An object of type SocketParser should be passed in as an
   /// argument to the Server constructor.
