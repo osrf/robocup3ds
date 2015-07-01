@@ -92,27 +92,24 @@ std::vector <ignition::math::Plane<double> > &Perceptor::GetViewFrustum()
 /////////////////////////////////////////////////
 void Perceptor::Update()
 {
-  for (size_t i = 0; i < this->gameState->teams.size(); ++i)
+  for (auto &team : this->gameState->teams)
   {
-    std::shared_ptr<GameState::Team> team = this->gameState->teams.at(i);
-    for (size_t j = 0; j < team->members.size(); ++j)
+    for (auto &agent : team->members)
     {
-      GameState::Agent &agent = team->members.at(j);
       this->SetG2LMat(agent);
 
       // update line info
       agent.percept.fieldLines.clear();
-      for (size_t k = 0; k < SoccerField::FieldLines.size(); ++k)
+      for (auto &fieldLine : SoccerField::FieldLines)
       {
-        this->UpdateLine(agent, SoccerField::FieldLines.at(k));
+        this->UpdateLine(agent, fieldLine);
       }
 
       // update landmark info
       agent.percept.landMarks.clear();
-      for (auto iter = SoccerField::LandMarks.begin();
-           iter != SoccerField::LandMarks.end(); ++iter)
+      for (auto &kv : SoccerField::LandMarks)
       {
-        this->UpdateLandmark(agent, iter->first, iter->second);
+        this->UpdateLandmark(agent, kv.first, kv.second);
       }
 
       // update ball info
@@ -120,13 +117,10 @@ void Perceptor::Update()
 
       // update position and messages of other agents
       agent.percept.otherAgentBodyMap.clear();
-      for (size_t k = 0; k < this->gameState->teams.size(); ++k)
+      for (auto &otherTeam : this->gameState->teams)
       {
-        std::shared_ptr<GameState::Team> otherTeam =
-          this->gameState->teams.at(k);
-        for (size_t l = 0; l < otherTeam->members.size(); ++l)
+        for (auto &otherAgent : otherTeam->members)
         {
-          GameState::Agent &otherAgent = otherTeam->members.at(l);
           if (otherAgent.uNum != agent.uNum ||
               otherAgent.team->name != agent.team->name)
           { this->UpdateOtherAgent(agent, otherAgent); }
@@ -149,12 +143,12 @@ void Perceptor::UpdateLine(GameState::Agent &_agent,
 
   if (GameState::restrictVision)
   {
-    for (size_t i = 0; i < this->viewFrustum.size(); ++i)
+    for (auto &viewPlane : this->viewFrustum)
     {
       // std::cout << i << " // " << agentLine << " // " <<
       //           this->viewFrustum.at(i).Normal() << " // " << validLine
       //           << std::endl;
-      if (!Geometry::ClipPlaneLine(agentLine, this->viewFrustum.at(i)))
+      if (!Geometry::ClipPlaneLine(agentLine, viewPlane))
       { return; }
     }
   }
@@ -175,10 +169,9 @@ void Perceptor::UpdateLandmark(GameState::Agent &_agent,
 
   if (GameState::restrictVision)
   {
-    for (size_t i = 0; i < this->viewFrustum.size(); ++i)
+    for (auto &viewPlane : this->viewFrustum)
     {
-      if (!Geometry::PointAbovePlane(_agentLandMark,
-                                     this->viewFrustum.at(i)))
+      if (!Geometry::PointAbovePlane(_agentLandMark, viewPlane))
       { return; }
     }
   }
@@ -191,25 +184,23 @@ void Perceptor::UpdateLandmark(GameState::Agent &_agent,
 void Perceptor::UpdateOtherAgent(GameState::Agent &_agent,
                                  const GameState::Agent &_otherAgent) const
 {
-  for (auto iter = _otherAgent.selfBodyMap.begin();
-       iter != _otherAgent.selfBodyMap.end(); ++iter)
+  for (auto &kv : _otherAgent.selfBodyMap)
   {
     math::Vector3<double> _otherAgentPart =
-      this->G2LMat.TransformAffine(iter->second);
+      this->G2LMat.TransformAffine(kv.second);
 
     if (GameState::restrictVision)
     {
-      for (size_t i = 0; i < this->viewFrustum.size(); ++i)
+      for (auto &viewPlane : this->viewFrustum)
       {
-        if (!Geometry::PointAbovePlane(_otherAgentPart,
-                                       this->viewFrustum.at(i)))
+        if (!Geometry::PointAbovePlane(_otherAgentPart, viewPlane))
         { return; }
       }
     }
 
     GameState::AgentId otherAgentId(_otherAgent.team->name,
                                     _otherAgent.uNum);
-    _agent.percept.otherAgentBodyMap[otherAgentId][iter->first] =
+    _agent.percept.otherAgentBodyMap[otherAgentId][kv.first] =
       addNoise(Geometry::CartToPolar(_otherAgentPart));
   }
 }

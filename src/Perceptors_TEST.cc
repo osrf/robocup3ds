@@ -59,6 +59,7 @@ class PerceptorTest : public ::testing::Test
       return true;
     }
 
+  protected:
     virtual bool UpdateLandmark_Test(GameState::Agent &_agent,
                                      const math::Vector3<double> &_landmark,
                                      math::Vector3<double> &_testLandmark) const
