@@ -26,7 +26,6 @@ class GameState;
 
 namespace states
 {
-  /// \class State State.hh robocup3ds/states/State.hh
   /// \brief State pattern used for the game mode.
   class State
   {
@@ -51,13 +50,13 @@ namespace states
     public: virtual void Update();
 
     /// \brief Returns the name of the state.
-    public: std::string GetName();
+    public: std::string GetName() const;
 
     /// \brief Returns true if an agent contacts ball since Initialize()
-    public: bool HasBallContactOccurred();
+    public: bool HasBallContactOccurred() const;
 
     /// \brief Time elapsed since we entered this game mode.
-    public: double GetElapsedTime();
+    public: double GetElapsedTime() const;
 
     // \brief Used to determine if ball contact has occurred since
     /// Initialize()
@@ -67,7 +66,7 @@ namespace states
     public: const std::string name;
 
     /// \brief Pointer to access full game information.
-    public: GameState *gameState;
+    public: GameState *const gameState;
 
     /// \brief Time when we entered this game mode.
     public: double initTime;

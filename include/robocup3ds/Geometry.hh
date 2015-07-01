@@ -23,7 +23,6 @@
 
 namespace Geometry
 {
-  /// \class Line Geometry.hh robocup3ds/Geometry.hh
   /// \brief 3D Line object
   class Line
   {

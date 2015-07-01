@@ -70,26 +70,3 @@ void KickOffLeftState::Update()
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
 }
-
-// std::vector<math::Pose3<double> > initPoses;
-// for (size_t i = 0; i < this->gameState->teams.size(); ++i)
-// {
-//   GameState::Team *currTeam = this->gameState->teams.at(i);
-//   // Left team
-//   if (currTeam->side == GameState::Team::Side::LEFT)
-//   {
-//     initPoses = SoccerField::leftKickOffPose;
-//   }
-//   // Right team
-//   else
-//   {
-//     initPoses = SoccerField::rightInitPose;
-//   }
-
-//   for (size_t j = 0; j < currTeam->members.size(); ++j)
-//   {
-//     GameState::Agent& agent = currTeam->members.at(j);
-//     this->gameState->MoveAgent(agent, initPoses.at(j).Pos(), agent.rot =
-//     initPoses.at(j).Rot());
-//   }
-// }

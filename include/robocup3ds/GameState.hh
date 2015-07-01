@@ -46,7 +46,6 @@ namespace states
   class State;
 }
 
-/// \class GameState GameState.hh robocup3ds/GameState.hh
 /// \brief Class for controlling play mode transitions and checking rule
 /// violations in a 3d simulation Robocup game
 class GameState : public std::enable_shared_from_this<GameState>
@@ -66,7 +65,6 @@ class GameState : public std::enable_shared_from_this<GameState>
     SECOND_HALF
   };
 
-  /// \class AgentDist GameState.hh robocup3ds/GameState.hh
   /// \brief Struct for helping to sort agents by their distances,
   /// used by CheckCrowding_helper only
   private: class AgentDist
@@ -78,7 +76,6 @@ class GameState : public std::enable_shared_from_this<GameState>
     public: double dist;
   };
 
-  /// \class DataLogger GameState.hh robocup3ds/GameState.hh
   /// \brief Internal Logger for GameState
   private: class Logger
   {
@@ -101,7 +98,7 @@ class GameState : public std::enable_shared_from_this<GameState>
     {
       if (_level >= this->normalLevel)
       {
-        std::cout << "[" << this->gameState->cycleCounter << "]["
+        std::cout << "[" << this->gameState->GetCycleCounter() << "]["
                   << this->gameState->GetGameTime() << "][lvl:" <<
                   _level << "]\t" << _message.c_str();
       }
@@ -114,14 +111,14 @@ class GameState : public std::enable_shared_from_this<GameState>
     {
       if (_level >= this->errorLevel)
       {
-        std::cout << "\033[31m[" << this->gameState->cycleCounter << "]["
+        std::cout << "\033[31m[" << this->gameState->GetCycleCounter() << "]["
                   << this->gameState->GetGameTime() << "][lvl:" <<
                   _level << "]\t" << _message.c_str();
       }
     }
 
     /// \brief Pointer to parent gamestate object
-    private: const GameState *gameState;
+    private: const GameState *const gameState;
 
     /// \brief Level for logging normal messages
     public: const int normalLevel;
@@ -130,7 +127,6 @@ class GameState : public std::enable_shared_from_this<GameState>
     public: const int errorLevel;
   };
 
-  /// \class Team GameState.hh robocup3ds/GameState.hh
   /// \brief Team class for GameState
   public: class Team
   {
@@ -188,7 +184,6 @@ class GameState : public std::enable_shared_from_this<GameState>
     public: bool canScore;
   };
 
-  /// \class Agent GameState.hh robocup3ds/GameState.hh
   /// \brief Agent class for GameState
   public: class Agent
   {
@@ -265,7 +260,6 @@ class GameState : public std::enable_shared_from_this<GameState>
     }
   };
 
-  /// \class BallContact GameState.hh robocup3ds/GameState.hh
   /// \brief Stores ball contact information for GameState
   public: class BallContact
   {
@@ -313,7 +307,7 @@ class GameState : public std::enable_shared_from_this<GameState>
   /// \brief Destructor.
   public: virtual ~GameState();
 
-  /// \Clears the history of ball contacts
+  /// \brief Clears the history of ball contacts
   public: void ClearBallContactHistory();
 
   /// \brief Update the robocup simulation state.

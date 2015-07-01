@@ -26,8 +26,6 @@ class GameState;
 
 namespace states
 {
-  /// \class GameOverState GameOverState.hh
-  /// robocup3ds/states/GameOverState.hh
   /// \brief State that handles the gameover.
   class GameOverState : public State
   {
