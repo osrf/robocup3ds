@@ -18,7 +18,6 @@
 #include <string>
 
 #include "robocup3ds/GameState.hh"
-#include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/KickOffLeftState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
@@ -36,9 +35,8 @@ void KickOffLeftState::Initialize()
 {
   this->gameState->touchBallKickoff = NULL;
   this->gameState->ballContactHistory.clear();
-  for (size_t i = 0; i < this->gameState->teams.size(); ++i)
+  for (auto &team : this->gameState->teams)
   {
-    std::shared_ptr<GameState::Team> team = this->gameState->teams.at(i);
     team->canScore = false;
   }
   this->gameState->MoveBallToCenter();
