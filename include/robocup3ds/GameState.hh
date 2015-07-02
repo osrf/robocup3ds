@@ -209,12 +209,12 @@ class GameState
   {
     /// \brief AgentSay constructor
     public: AgentSay():
-      uNum(-1),
-      isValid(-1)
+      agentId(std::make_pair(-1, "")),
+      isValid(false)
     {}
 
-    /// \brief UNum of agent who said message
-    public: int uNum;
+    /// \brief AgentId of agent who said message
+    public: AgentId agentId;
 
     /// \brief Where the agent said the message
     public: ignition::math::Vector3<double> pos;

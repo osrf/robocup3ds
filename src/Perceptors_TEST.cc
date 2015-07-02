@@ -93,53 +93,6 @@ TEST_F(PerceptorTest, Perceptor_construct_delete)
   SUCCEED();
 }
 
-/// \brief Test whether update line method works when there are no
-/// restrictions on vision and that transformation from global coordinates to
-/// local coordinates are working correctly
-TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
-{
-  math::Line3<double> origLine, gdLine, testLine;
-  GameState::restrictVision = false;
-  perceptor->useNoise = false;
-  gameState->AddAgent(1, "blue");
-  GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
-
-  /// agent's camera is at origin, facing straight down the positive y-axis
-  agent.pos.Set(0, 0, 0);
-  agent.cameraRot.Euler(0, 0, M_PI / 2);
-
-  // we have line on positive y-axis in global coordinates
-  origLine.Set(0, 1, 0, 0, 2, 0);
-  UpdateLine_Test(agent, origLine, testLine);
-  gdLine.Set(1, 0, 0, 2, 0, 0);
-  EXPECT_EQ(testLine, gdLine);
-
-  // agent's camera is facing down negative x-axis
-  agent.cameraRot.Euler(0, 0, M_PI);
-  UpdateLine_Test(agent, origLine, testLine);
-  gdLine.Set(0, -1, 0, 0, -2, 0);
-  EXPECT_EQ(testLine, gdLine);
-
-  // line now in front of agent again
-  origLine.Set(-1, 0, 0, -2, 0, 0);
-  UpdateLine_Test(agent, origLine, testLine);
-  gdLine.Set(1, 0, 0, 2, 0, 0);
-  EXPECT_EQ(testLine, gdLine);
-
-  // line is now parallel with viewing plane
-  origLine.Set(-1, 0, 0, -1, 1, 0);
-  UpdateLine_Test(agent, origLine, testLine);
-  gdLine.Set(1, 0, 0, 1, -1, 0);
-  EXPECT_EQ(testLine, gdLine);
-
-  // offset agent by 1 in every axis, same with line
-  agent.pos.Set(1, 1, 1);
-  origLine.Set(0, 1, 1, 0, 2, 1);
-  UpdateLine_Test(agent, origLine, testLine);
-  gdLine.Set(1, 0, 0, 1, -1, 0);
-  EXPECT_EQ(testLine, gdLine);
-}
-
 /// \brief Test that the view frustum is set correctly based on HFov and VFov
 TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
 {
@@ -188,6 +141,53 @@ TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
   EXPECT_GT(viewFrustum.at(4).Normal().Z(), 0.0);
   EXPECT_DOUBLE_EQ(viewFrustum.at(4).Normal().Y(), 0.0);
   EXPECT_GT(viewFrustum.at(4).Normal().X(), 0.0);
+}
+
+/// \brief Test whether update line method works when there are no
+/// restrictions on vision and that transformation from global coordinates to
+/// local coordinates are working correctly
+TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
+{
+  math::Line3<double> origLine, gdLine, testLine;
+  GameState::restrictVision = false;
+  perceptor->useNoise = false;
+  gameState->AddAgent(1, "blue");
+  GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
+
+  /// agent's camera is at origin, facing straight down the positive y-axis
+  agent.pos.Set(0, 0, 0);
+  agent.cameraRot.Euler(0, 0, M_PI / 2);
+
+  // we have line on positive y-axis in global coordinates
+  origLine.Set(0, 1, 0, 0, 2, 0);
+  UpdateLine_Test(agent, origLine, testLine);
+  gdLine.Set(1, 0, 0, 2, 0, 0);
+  EXPECT_EQ(testLine, gdLine);
+
+  // agent's camera is facing down negative x-axis
+  agent.cameraRot.Euler(0, 0, M_PI);
+  UpdateLine_Test(agent, origLine, testLine);
+  gdLine.Set(0, -1, 0, 0, -2, 0);
+  EXPECT_EQ(testLine, gdLine);
+
+  // line now in front of agent again
+  origLine.Set(-1, 0, 0, -2, 0, 0);
+  UpdateLine_Test(agent, origLine, testLine);
+  gdLine.Set(1, 0, 0, 2, 0, 0);
+  EXPECT_EQ(testLine, gdLine);
+
+  // line is now parallel with viewing plane
+  origLine.Set(-1, 0, 0, -1, 1, 0);
+  UpdateLine_Test(agent, origLine, testLine);
+  gdLine.Set(1, 0, 0, 1, -1, 0);
+  EXPECT_EQ(testLine, gdLine);
+
+  // offset agent by 1 in every axis, same with line
+  agent.pos.Set(1, 1, 1);
+  origLine.Set(0, 1, 1, 0, 2, 1);
+  UpdateLine_Test(agent, origLine, testLine);
+  gdLine.Set(1, 0, 0, 1, -1, 0);
+  EXPECT_EQ(testLine, gdLine);
 }
 
 /// \brief Test that line clipping works correctly
@@ -366,13 +366,13 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
 {
   gameState->AddAgent(1, "red");
   gameState->AddAgent(2, "red");
-  GameState::Team &team = gameState->teams.at(1);
+  auto team = gameState->teams.at(0);
   GameState::Agent &agent1 = team->members.at(0);
   GameState::Agent &agent2 = team->members.at(1);
   agent1.pos.Set(5, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
   agent2.pos.Set(0, 100, 0);
-  gameState->say.uNum = 5;
+  gameState->say.agentId = std::make_pair(5, "red");
   gameState->say.pos.Set(0, 0, 0);
   gameState->say.msg = "hello";
   gameState->say.isValid = true;
@@ -380,10 +380,77 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
   perceptor->SetG2LMat(agent1);
   perceptor->UpdateAgentHear(agent1);
   EXPECT_TRUE(agent1.percept.hear.isValid);
-  EXPECT_EQ(agent1.percept.hear.gameTime = gameState->GetElapsedGameTime());
-  EXPECT_DOUBLE_EQ(agent1.percept.hear.yaw, RAD(180.0));
+  EXPECT_DOUBLE_EQ(agent1.percept.hear.gameTime,
+                   gameState->GetElapsedGameTime());
+  EXPECT_DOUBLE_EQ(agent1.percept.hear.yaw, RAD(90.0));
   EXPECT_FALSE(agent1.percept.hear.self);
   EXPECT_EQ(agent1.percept.hear.msg, "hello");
+
+  gameState->say.agentId = std::make_pair(1, "red");
+  perceptor->UpdateAgentHear(agent1);
+  EXPECT_TRUE(agent1.percept.hear.self);
+
+  gameState->say.isValid = false;
+  perceptor->UpdateAgentHear(agent1);
+  EXPECT_FALSE(agent1.percept.hear.isValid);
+
+  perceptor->SetG2LMat(agent2);
+  gameState->say.isValid = true;
+  perceptor->UpdateAgentHear(agent2);
+  EXPECT_FALSE(agent2.percept.hear.isValid);
+
+  gameState->say.isValid = false;
+  perceptor->UpdateAgentHear(agent2);
+  EXPECT_FALSE(agent2.percept.hear.isValid);
+}
+/// \Brief Test whether the Update() function works
+TEST_F(PerceptorTest, Percepter_Update)
+{
+  string teamNames[2] = {"blue", "red"};
+  for (int i = 0; i < 2; ++i)
+  {
+    for (int j = 0; j < 11; ++j)
+    {
+      gameState->AddAgent(j + 1, teamNames[i]);
+      auto &agent = gameState->teams.at(i)->members.at(j);
+      agent.selfBodyMap["BODY"] = agent.pos;
+    }
+  }
+  gameState->say.agentId = std::make_pair(1, "blue");
+  gameState->say.pos.Set(0, 0, 0);
+  gameState->say.msg = "hello";
+  gameState->say.isValid = true;
+
+  GameState::restrictVision = false;
+  perceptor->useNoise = false;
+  perceptor->Update();
+  for (int i = 0; i < 2; ++i)
+  {
+    for (int j = 0; j < 11; ++j)
+    {
+      auto &agent = gameState->teams.at(i)->members.at(j);
+      ASSERT_EQ(agent.percept.fieldLines.size(),
+                SoccerField::FieldLines.size());
+      ASSERT_EQ(agent.percept.landMarks.size(),
+                SoccerField::LandMarks.size() + 1u);
+      ASSERT_NE(agent.percept.landMarks.find("B"),
+                agent.percept.landMarks.end());
+      ASSERT_EQ(agent.percept.otherAgentBodyMap.size(), 21u);
+      EXPECT_TRUE(agent.percept.hear.isValid);
+      EXPECT_DOUBLE_EQ(agent.percept.hear.gameTime,
+                       gameState->GetElapsedGameTime());
+      EXPECT_DOUBLE_EQ(agent.percept.hear.yaw, 0.0);
+      EXPECT_EQ(agent.percept.hear.msg, "hello");
+      if (j == 0 && i == 0)
+      {
+        EXPECT_TRUE(agent.percept.hear.self);
+      }
+      else
+      {
+        EXPECT_FALSE(agent.percept.hear.self);
+      }
+    }
+  }
 }
 
 int main(int argc, char **argv)

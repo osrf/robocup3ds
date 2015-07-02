@@ -225,7 +225,8 @@ void Perceptor::UpdateAgentHear(GameState::Agent &_agent) const
   hear.isValid = true;
   hear.gameTime = gameState->GetElapsedGameTime();
   hear.yaw = atan2(relPos.Y(), relPos.X());
-  hear.self = say.uNum == _agent.uNum;
+  GameState::AgentId agentId(_agent.uNum, _agent.team->name);
+  hear.self = say.agentId == agentId;
   hear.msg = say.msg;
 }
 
