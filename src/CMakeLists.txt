@@ -1,5 +1,6 @@
 set (sources
   Geometry.cc
+  Effectors.cc
   Perceptors.cc
   states/BeforeKickOffState.cc
   states/CornerKickLeftState.cc
