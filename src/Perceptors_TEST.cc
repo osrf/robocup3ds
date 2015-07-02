@@ -360,6 +360,32 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
             agent1.percept.otherAgentBodyMap.end());
 }
 
+/// \Brief Test whether updating position of messages heard from other agents
+/// is working as intended
+TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
+{
+  gameState->AddAgent(1, "red");
+  gameState->AddAgent(2, "red");
+  GameState::Team &team = gameState->teams.at(1);
+  GameState::Agent &agent1 = team->members.at(0);
+  GameState::Agent &agent2 = team->members.at(1);
+  agent1.pos.Set(5, 0, 0);
+  agent1.cameraRot.Euler(0, 0, M_PI / 2);
+  agent2.pos.Set(0, 100, 0);
+  gameState->say.uNum = 5;
+  gameState->say.pos.Set(0, 0, 0);
+  gameState->say.msg = "hello";
+  gameState->say.isValid = true;
+
+  perceptor->SetG2LMat(agent1);
+  perceptor->UpdateAgentHear(agent1);
+  EXPECT_TRUE(agent1.percept.hear.isValid);
+  EXPECT_EQ(agent1.percept.hear.gameTime = gameState->GetElapsedGameTime());
+  EXPECT_DOUBLE_EQ(agent1.percept.hear.yaw, RAD(180.0));
+  EXPECT_FALSE(agent1.percept.hear.self);
+  EXPECT_EQ(agent1.percept.hear.msg, "hello");
+}
+
 int main(int argc, char **argv)
 {
   // Set a specific seed to avoid occasional test failures due to
