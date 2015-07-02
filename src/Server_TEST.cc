@@ -117,7 +117,7 @@ void senderClient(const int _port)
 
   clientReady = true;
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   cv.notify_one();
 
   // Wait some time until the server checks results.
@@ -149,7 +149,7 @@ void receiverClient(const int _port)
 
   clientReady = true;
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   cv.notify_one();
 
   // Receive some data.
