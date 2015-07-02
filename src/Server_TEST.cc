@@ -200,12 +200,13 @@ TEST(Server, Pop)
   }
 
   // Check that the data is available in the server using its public API.
-  EXPECT_EQ(server.GetClientIds().size(), 1u);
+  auto clientIds = server.GetClientIds();
+  ASSERT_EQ(clientIds.size(), 1u);
 
   // Try with a wrong ID first.
   EXPECT_FALSE(server.Pop(-1, recvData));
 
-  auto clientId = server.GetClientIds().front();
+  auto clientId = clientIds.front();
   EXPECT_TRUE(server.Pop(clientId, recvData));
   EXPECT_EQ(recvData, content);
 
@@ -245,10 +246,11 @@ TEST(Server, Push)
   }
 
   // Verify that a new client is connected.
-  ASSERT_EQ(server.GetClientIds().size(), 1u);
+  auto clientIds = server.GetClientIds();
+  ASSERT_EQ(clientIds.size(), 1u);
 
   // Get the client ID.
-  auto clientId = server.GetClientIds().front();
+  auto clientId = clientIds.front();
 
   // Try with a wrong ID first.
   EXPECT_FALSE(server.Push(-1, content));
