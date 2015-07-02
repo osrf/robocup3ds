@@ -26,7 +26,7 @@
 
 /// \brief Constants and global variables.
 const std::string content = "hello";
-const int kPort = 3100;
+const int kPort = 6234;
 std::mutex mutex;
 std::condition_variable cv;
 bool clientReady = false;
