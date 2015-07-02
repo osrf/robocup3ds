@@ -97,6 +97,7 @@ GameState::GameState():
   goalRightState(std::make_shared<GoalRightState>(GoalRight, this)),
   freeKickLeftState(std::make_shared<FreeKickLeftState>(FreeKickLeft, this)),
   freeKickRightState(std::make_shared<FreeKickRightState>(FreeKickRight, this)),
+
   hasCurrentStateChanged(false),
   touchBallKickoff(std::shared_ptr<BallContact>(nullptr)),
   updateBallPose(false),
