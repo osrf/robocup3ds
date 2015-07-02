@@ -29,7 +29,7 @@ State::State(const std::string &_name,
              GameState *const _gameState):
   name(_name),
   gameState(_gameState),
-  prevState(std::shared_ptr<State>(nullptr)),
+  prevState(nullptr),
   initBallPos(math::Vector3<double>(-999, -999, -999))
 {
   this->hasInitialized = false;

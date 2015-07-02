@@ -18,7 +18,6 @@
 #include <string>
 
 #include "robocup3ds/GameState.hh"
-#include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/CornerKickLeftState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
