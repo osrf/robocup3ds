@@ -27,7 +27,6 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Geometry.hh"
 
-/// \class Perceptor Perceptor.hh robocup3ds/Perceptor.hh
 /// \brief This class keeps up to date the information sent
 /// to the agent
 class Perceptor

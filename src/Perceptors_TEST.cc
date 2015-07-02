@@ -87,7 +87,7 @@ class PerceptorTest : public ::testing::Test
     Perceptor *perceptor;
 };
 
-/// \brief Test whether Perceptor constructor && destructor works
+/// \brief Test whether Perceptor constructor and destructor works
 TEST_F(PerceptorTest, Perceptor_construct_delete)
 {
   SUCCEED();
