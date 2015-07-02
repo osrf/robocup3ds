@@ -99,14 +99,17 @@ GameState::GameState():
   goalRightState(std::make_shared<GoalRightState>(GoalRight, this)),
   freeKickLeftState(std::make_shared<FreeKickLeftState>(FreeKickLeft, this)),
   freeKickRightState(std::make_shared<FreeKickRightState>(FreeKickRight, this)),
+
+  hasCurrentStateChanged(false),
   touchBallKickoff(std::shared_ptr<BallContact>(nullptr)),
-  currentState(std::shared_ptr<State>(nullptr))
+  updateBallPose(false),
+  gameTime(0.0),
+  prevCycleGameTime(0.0),
+  startGameTime(0.0),
+  currentState(std::shared_ptr<State>(nullptr)),
+  half(Half::FIRST_HALF),
+  cycleCounter(0)
 {
-  this->half = Half::FIRST_HALF;
-  this->cycleCounter = 0;
-  this->gameTime = this->prevCycleGameTime = this->startGameTime = 0.0;
-  this->updateBallPose = false;
-  this->hasCurrentStateChanged = false;
   this->SetCurrent(beforeKickOffState);
   this->teams.push_back(
       std::make_shared<Team>(

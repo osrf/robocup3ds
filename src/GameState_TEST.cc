@@ -10,7 +10,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES or CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions &&
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
 */
@@ -50,23 +50,19 @@ using namespace std;
 class GameStateTest_basic : public ::testing::Test
 {
   protected:
-    virtual void SetUp()
-    {
-    }
+    virtual void SetUp() {}
 
   protected:
-    virtual void TearDown()
-    {
-    }
+    virtual void TearDown() {}
 
   protected:
     GameState gameState;
-    // green is third team && shouldnt be added
+    // green is third team and shouldnt be added
   protected:
     string teamNames[3] = {"blue", "red", "green"};
 };
 
-/// \brief Test whether GameState constructor && destructor works
+/// \brief Test whether GameState constructor and destructor works
 TEST_F(GameStateTest_basic, GameState_construct_delete)
 {
   SUCCEED();
@@ -120,10 +116,10 @@ TEST_F(GameStateTest_basic, GameState_LoadConfiguration)
   gameState.LoadConfiguration(config);
 }
 
-/// \brief Test for adding teams && agents
+/// \brief Test for adding teams and agents
 TEST_F(GameStateTest_basic, GameState_add_teams_agents)
 {
-  // make sure that agents with bad unums || teams cannot be added
+  // make sure that agents with bad unums or teams cannot be added
   for (int i = 0; i < 3; ++i)
   {
     for (int j = 0; j < 15; ++j)
@@ -149,7 +145,7 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
     }
   }
 
-  // make sure that their are only two teams && that each
+  // make sure that there are only two teams and that each
   // team is initialized correctly
   EXPECT_EQ(gameState.teams.size(), 2u);
   for (int i = 0; i < 2; ++i)
@@ -174,7 +170,7 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
   }
 }
 
-/// \brief Test for removing teams && agents
+/// \brief Test for removing teams and agents
 TEST_F(GameStateTest_basic, GameState_remove_agents)
 {
   for (int i = 0; i < 2; ++i)
@@ -491,7 +487,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
 
   EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
   EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
-  // Test for both left && right kick offs
+  // Test for both left and right kick offs
   for (size_t i = 0; i < states.size(); ++i)
   {
     std::shared_ptr<State> state = states.at(i);
@@ -935,7 +931,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_goalKick_playOn)
 }
 
 /// \brief Test for whether when running full game, game transitions to
-/// kickOffRight at end of first half && to gameOver at the end of the
+/// kickOffRight at end of first half and to gameOver at the end of the
 /// second half
 TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
 {
@@ -1046,7 +1042,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
     gameState.Update();
     EXPECT_FALSE(gameState.teams.at(i)->canScore);
 
-    // case 3: kickoff agent touches ball, && touches it again afterwards
+    // case 3: kickoff agent touches ball, and touches it again afterwards
     // team should not be able to score
     gameState.SetCurrent(states.at(i));
     gameState.Update();
@@ -1067,7 +1063,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
     gameState.Update();
     EXPECT_FALSE(gameState.teams.at(i)->canScore);
 
-    // case 4: kickoff agent touches ball, &&
+    // case 4: kickoff agent touches ball, and
     // someone on opposing team touches it
     // team should be able to score
     gameState.SetCurrent(states.at(i));
@@ -1131,7 +1127,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
     gameState.Update();
     EXPECT_FALSE(penaltyBox.Contains(agent2.pos));
 
-    // test whether goalie (if fourth goalie) stays in penalty box && farthest
+    // test whether goalie (if fourth goalie) stays in penalty box and farthest
     // agent gets beamed out
     resetPositions();
     gameState.Update();
@@ -1257,7 +1253,7 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
   gameState.AddAgent(1, "blue");
   gameState.SetCurrent(gameState.playOnState);
 
-  // check immobility && fallen for goalie
+  // check immobility and fallen for goalie
   GameState::Agent &agent = gameState.teams.at(0)->members.at(0);
   while (gameState.GetGameTime() < 2 * GameState::immobilityTimeLimit)
   {
@@ -1277,7 +1273,7 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
   }
   EXPECT_NE(agent.pos, fallenPos.at(c % 2));
 
-  // check immobility && fallen for non-goalie
+  // check immobility and fallen for non-goalie
   gameState.SetCycleCounter(0);
   gameState.AddAgent(2, "blue");
   GameState::Agent &agent2 = gameState.teams.at(0)->members.at(1);
