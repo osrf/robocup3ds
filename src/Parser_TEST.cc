@@ -41,6 +41,7 @@ void clientTask(gazebo::Server *_server)
 
   // Send S_expresion.
   std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)"
+      "(beam 1 1 0.4)"
       "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
       "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
       "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)"
@@ -100,6 +101,16 @@ void clientTask(gazebo::Server *_server)
           << playerNumber<< std::endl;
       EXPECT_EQ(teamname, "FCPOpp");
       EXPECT_EQ(playerNumber, 1);
+    }
+
+    double x,y,z;
+
+    if ( parser->getBeamInformation(client.first, x, y, z ) )
+    {
+      std::cout << "Beam Pos:( "<< x << ", " << y <<", "<< z <<")" <<std::endl;
+      EXPECT_DOUBLE_EQ (x, 1);
+      EXPECT_DOUBLE_EQ (y, 1);
+      EXPECT_DOUBLE_EQ (z, 0.4);
     }
   }
   close(sockfd);

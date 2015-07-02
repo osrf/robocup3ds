@@ -72,6 +72,25 @@ class ActionMessageParser
     public: int robotType;
   };
 
+  class BeamMsg
+  {
+    public: BeamMsg(int _agentId, double _x, double _y, double _z)
+    {
+      this->id = _agentId;
+      this->x = _x;
+      this->y = _y;
+      this->z = _z;
+    }
+
+    public: int id;
+
+    public: double x;
+
+    public: double y;
+
+    public: double z;
+  };
+
   class InitMsg
   {
     public: InitMsg(int _agentId, int _playerNum, std::string _teamName)
@@ -100,11 +119,16 @@ class ActionMessageParser
   public: bool getInitInformation(const int _id, std::string &_teamName,
       int &_playerNumber);
 
+  public: bool getBeamInformation(const int _id, double &_x, double &_y,
+      double &_z);
+
   public: std::map<int, double*> jointParserMap;
 
   public: std::map<int, SceneMsg> sceneParserMap;
 
   public: std::map<int, InitMsg> initParserMap;
+
+  public: std::map<int, BeamMsg> beamParserMap;
 
   private: ActionMessageParser();
 
@@ -115,6 +139,8 @@ class ActionMessageParser
   private: void parseSexp(sexp_t *exp);
 
   private: void parseScene(sexp_t *_exp);
+
+  private: void parseBeam(sexp_t *_exp);
 
   private: void parseInit(sexp_t *_exp);
 

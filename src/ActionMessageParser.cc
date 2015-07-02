@@ -85,6 +85,10 @@ void ActionMessageParser::parseSexp(sexp_t *_exp)
   {
     parseScene(_exp);
   }
+  else if (!strcmp(v, "beam"))
+  {
+    parseBeam(_exp);
+  }
   else if (!strcmp(v, "init"))
   {
     parseInit(_exp);
@@ -206,6 +210,20 @@ void ActionMessageParser::parseScene(sexp_t *_exp)
       , SceneMsg(this->agentID, type, address)));
 }
 
+void ActionMessageParser::parseBeam(sexp_t *_exp)
+{
+  double x,y,z = 0;
+
+  x = atof(_exp->list->next->val);
+
+  y = atof(_exp->list->next->next->val);
+
+  z = atof(_exp->list->next->next->next->val);
+
+  this->beamParserMap.insert(std::map<int, BeamMsg >::value_type(this->agentID
+      , BeamMsg(this->agentID, x, y, z)));
+}
+
 void ActionMessageParser::parseInit(sexp_t *_exp)
 {
   int playerNum = 0;
@@ -259,6 +277,22 @@ bool ActionMessageParser::getInitInformation(const int _id, std::string &_teamNa
     }
   }
 
+  return false;
+}
+
+bool ActionMessageParser::getBeamInformation(const int _id, double &_x, double &_y,
+    double &_z)
+{
+  for (auto ob = this->beamParserMap.begin(); ob != this->beamParserMap.end(); ++ob)
+  {
+    if (ob->first == _id)
+    {
+      _x = ob->second.x;
+      _y = ob->second.y;
+      _z = ob->second.z;
+      return true;
+    }
+  }
   return false;
 }
 
