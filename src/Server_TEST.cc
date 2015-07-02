@@ -17,14 +17,27 @@
 
 #include <netdb.h>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <thread>
 #include "gtest/gtest.h"
 #include "robocup3ds/Server.hh"
 #include "robocup3ds/SocketParser.hh"
 
-/// \brief Constants.
+/// \brief Constants and global variables.
 const std::string content = "hello";
 const int kPort = 3100;
+std::mutex mutex;
+std::condition_variable cv;
+bool clientReady = false;
+bool serverReady = false;
+
+//////////////////////////////////////////////////
+void reset()
+{
+  clientReady = false;
+  serverReady = false;
+}
 
 //////////////////////////////////////////////////
 /// \brief This parser assumes that all the messages have a 6 characters.
@@ -102,8 +115,21 @@ void senderClient(const int _port)
   auto sent = write(socket, content.c_str(), content.size() + 1);
   EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
 
-  /// Wait some time until the server processes the request.
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  clientReady = true;
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  cv.notify_one();
+
+  // Wait some time until the server checks results.
+  {
+    std::unique_lock<std::mutex> lk(mutex);
+    auto now = std::chrono::system_clock::now();
+    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
+          [](){return serverReady;}))
+    {
+      FAIL();
+    }
+  }
 
   close(socket);
 }
@@ -121,14 +147,16 @@ void receiverClient(const int _port)
   auto sent = write(socket, content.c_str(), content.size() + 1);
   EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
 
-  // Receive some data.
-  char buffer[8192];
-  ssize_t bytesRead = recv(socket, buffer, sizeof(buffer), 0);
-  EXPECT_GT(bytesRead, 0);
-  EXPECT_EQ(std::string(buffer), content);
+  clientReady = true;
 
-  /// Wait some time until the server processes the request.
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  cv.notify_one();
+
+  // Receive some data.
+  auto parser = std::make_shared<TrivialSocketParser>();
+  std::string data;
+  EXPECT_TRUE(parser->Parse(socket, data));
+  EXPECT_EQ(data, content);
 
   close(socket);
 }
@@ -136,6 +164,8 @@ void receiverClient(const int _port)
 //////////////////////////////////////////////////
 TEST(Server, Disabled)
 {
+  reset();
+
   auto parser = std::make_shared<TrivialSocketParser>();
   gazebo::Server server(kPort, parser);
 
@@ -145,10 +175,11 @@ TEST(Server, Disabled)
   EXPECT_FALSE(server.Pop(0, data));
 }
 
-
 //////////////////////////////////////////////////
 TEST(Server, Pop)
 {
+  reset();
+
   std::string recvData;
   auto parser = std::make_shared<TrivialSocketParser>();
   gazebo::Server server(kPort, parser);
@@ -156,8 +187,17 @@ TEST(Server, Pop)
   server.Start();
   std::thread clientThread(&senderClient, kPort);
 
-  /// Wait some time until the server processes the request.
-  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+  // Wait some time until the client sends the request.
+  {
+    std::unique_lock<std::mutex> lk(mutex);
+    auto now = std::chrono::system_clock::now();
+    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
+          [](){return clientReady;}))
+    {
+      FAIL();
+      return;
+    }
+  }
 
   // Check that the data is available in the server using its public API.
   EXPECT_EQ(server.GetClientIds().size(), 1u);
@@ -173,6 +213,10 @@ TEST(Server, Pop)
   // client should be empty.
   EXPECT_FALSE(server.Pop(clientId, recvData));
 
+  serverReady = true;
+
+  cv.notify_one();
+
   if (clientThread.joinable())
     clientThread.join();
 }
@@ -180,14 +224,25 @@ TEST(Server, Pop)
 ////////////////////////////////////////////////
 TEST(Server, Push)
 {
+  reset();
+
   auto parser = std::make_shared<TrivialSocketParser>();
   gazebo::Server server(kPort + 1, parser);
 
   server.Start();
   std::thread clientThread(&receiverClient, kPort + 1);
 
-  // Wait some time until the server processes the request.
-  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+  // Wait some time until the client sends the request.
+  {
+    std::unique_lock<std::mutex> lk(mutex);
+    auto now = std::chrono::system_clock::now();
+    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
+          [](){return clientReady;}))
+    {
+      FAIL();
+      return;
+    }
+  }
 
   // Verify that a new client is connected.
   ASSERT_EQ(server.GetClientIds().size(), 1u);
