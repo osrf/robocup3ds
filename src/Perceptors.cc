@@ -198,8 +198,8 @@ void Perceptor::UpdateOtherAgent(GameState::Agent &_agent,
       }
     }
 
-    GameState::AgentId otherAgentId(_otherAgent.team->name,
-                                    _otherAgent.uNum);
+    GameState::AgentId otherAgentId(_otherAgent.uNum,
+                                    _otherAgent.team->name);
     _agent.percept.otherAgentBodyMap[otherAgentId][kv.first] =
       addNoise(Geometry::CartToPolar(_otherAgentPart));
   }

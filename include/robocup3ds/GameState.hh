@@ -201,8 +201,8 @@ class GameState
   public: typedef std::map<std::string, ignition::math::Vector3<double> >
     AgentBodyMap;
 
-  /// \brief Typedef for string, int pairs for identifying agents
-  public: typedef std::pair<std::string, int> AgentId;
+  /// \brief Typedef for uNum, teamName pairs for identifying agents
+  public: typedef std::pair<int, std::string> AgentId;
 
   /// \brief Container that contains info for say effector
   public: class AgentSay
