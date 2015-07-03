@@ -31,12 +31,16 @@ std::mutex mutex;
 std::condition_variable cv;
 bool clientReady = false;
 bool serverReady = false;
+bool newConnectionDetected = false;
+bool newDisconnectionDetected = false;
 
 //////////////////////////////////////////////////
 void reset()
 {
   clientReady = false;
   serverReady = false;
+  newConnectionDetected = false;
+  newDisconnectionDetected = false;
 }
 
 //////////////////////////////////////////////////
@@ -51,7 +55,7 @@ class TrivialSocketParser : public gazebo::SocketParser
   public: ~TrivialSocketParser() = default;
 
   /// \brief Documentation inherited.
-  public: bool Parse(const int _socket, std::string &_data)
+  public: bool Parse(const int _socket)
   {
     char buffer[this->kBufferSize];
     bzero(buffer, sizeof(buffer));
@@ -70,12 +74,32 @@ class TrivialSocketParser : public gazebo::SocketParser
       bytesRead += result;
     }
 
-    _data = std::string(buffer);
+    EXPECT_EQ(std::string(buffer), content);
     return true;
+  }
+
+  public: void OnConnection(const int _socket)
+  {
+    this->socket = _socket;
+    newConnectionDetected = true;
+  }
+
+  public: void OnDisconnection(const int /*_socket*/)
+  {
+    newDisconnectionDetected = true;
+  }
+
+  public: void SendSomeData()
+  {
+    size_t sent = write(this->socket, content.c_str(), content.size() + 1);
+    EXPECT_EQ(sent, content.size() + 1u);
   }
 
   /// \brief Maximum size of each message received.
   private: static const int kBufferSize = 8192;
+
+  /// \brief Socket to the connected client.
+  private: int socket;
 };
 
 //////////////////////////////////////////////////
@@ -154,9 +178,7 @@ void receiverClient(const int _port)
 
   // Receive some data.
   auto parser = std::make_shared<TrivialSocketParser>();
-  std::string data;
-  EXPECT_TRUE(parser->Parse(socket, data));
-  EXPECT_EQ(data, content);
+  EXPECT_TRUE(parser->Parse(socket));
 
   close(socket);
 }
@@ -167,22 +189,23 @@ TEST(Server, Disabled)
   reset();
 
   auto parser = std::make_shared<TrivialSocketParser>();
-  gazebo::Server server(kPort, parser);
-
-  EXPECT_EQ(server.GetClientIds().size(), 0u);
-  EXPECT_FALSE(server.Push(0, content));
-  std::string data;
-  EXPECT_FALSE(server.Pop(0, data));
+  gazebo::Server server(kPort, parser,
+    &TrivialSocketParser::OnConnection, parser.get(),
+    &TrivialSocketParser::OnDisconnection, parser.get());
+  EXPECT_FALSE(server.Send(-1, content.c_str(), content.size() + 1));
 }
 
 //////////////////////////////////////////////////
-TEST(Server, Pop)
+TEST(Server, NewClient)
 {
   reset();
 
-  std::string recvData;
+  EXPECT_FALSE(newConnectionDetected);
+
   auto parser = std::make_shared<TrivialSocketParser>();
-  gazebo::Server server(kPort, parser);
+  gazebo::Server server(kPort, parser,
+    &TrivialSocketParser::OnConnection, parser.get(),
+    &TrivialSocketParser::OnDisconnection, parser.get());
 
   server.Start();
   std::thread clientThread(&senderClient, kPort);
@@ -199,36 +222,29 @@ TEST(Server, Pop)
     }
   }
 
-  // Check that the data is available in the server using its public API.
-  auto clientIds = server.GetClientIds();
-  ASSERT_EQ(clientIds.size(), 1u);
-
-  // Try with a wrong ID first.
-  EXPECT_FALSE(server.Pop(-1, recvData));
-
-  auto clientId = clientIds.front();
-  EXPECT_TRUE(server.Pop(clientId, recvData));
-  EXPECT_EQ(recvData, content);
-
-  // Try to read another message. The list of incoming messages for this
-  // client should be empty.
-  EXPECT_FALSE(server.Pop(clientId, recvData));
+  // Check that the callback for detecting new connections was executed.
+  EXPECT_TRUE(newConnectionDetected);
 
   serverReady = true;
-
   cv.notify_one();
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  // Check that the callback for detecting new disconnections was executed.
+  EXPECT_TRUE(newDisconnectionDetected);
 
   if (clientThread.joinable())
     clientThread.join();
 }
 
 ////////////////////////////////////////////////
-TEST(Server, Push)
+TEST(Server, Send)
 {
   reset();
 
   auto parser = std::make_shared<TrivialSocketParser>();
-  gazebo::Server server(kPort + 1, parser);
+  gazebo::Server server(kPort + 1, parser,
+    &TrivialSocketParser::OnConnection, parser.get(),
+    &TrivialSocketParser::OnDisconnection, parser.get());
 
   server.Start();
   std::thread clientThread(&receiverClient, kPort + 1);
@@ -245,18 +261,14 @@ TEST(Server, Push)
     }
   }
 
-  // Verify that a new client is connected.
-  auto clientIds = server.GetClientIds();
-  ASSERT_EQ(clientIds.size(), 1u);
+  // Check that the callback for detecting new connections was executed.
+  EXPECT_TRUE(newConnectionDetected);
 
-  // Get the client ID.
-  auto clientId = clientIds.front();
-
-  // Try with a wrong ID first.
-  EXPECT_FALSE(server.Push(-1, content));
+  // Try to send some data using the wrong socket.
+  EXPECT_FALSE(server.Send(-1, content.c_str(), content.size() + 1));
 
   // Send some data to the client.
-  EXPECT_TRUE(server.Push(clientId, content));
+  parser->SendSomeData();
 
   if (clientThread.joinable())
     clientThread.join();

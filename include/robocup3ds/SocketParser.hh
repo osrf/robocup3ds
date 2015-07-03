@@ -35,7 +35,7 @@ namespace gazebo
     /// \param[in] _socket Socket to read.
     /// \param[out] _data Data parsed.
     /// \return True when data was succesfully parsed or false otherwise.
-    public: virtual bool Parse(const int _socket, std::string &_data) = 0;
+    public: virtual bool Parse(const int _socket) = 0;
   };
 }
 #endif /* _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_ */

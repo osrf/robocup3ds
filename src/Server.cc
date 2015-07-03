@@ -29,15 +29,6 @@
 using namespace gazebo;
 
 //////////////////////////////////////////////////
-Server::Server(const int _port, const std::shared_ptr<SocketParser> &_parser)
-  : port(_port),
-    masterSocket(-1),
-    parser(_parser),
-    enabled(false)
-{
-}
-
-//////////////////////////////////////////////////
 Server::~Server()
 {
   this->enabled = false;
@@ -55,30 +46,35 @@ void Server::Start()
   this->enabled = true;
 
   // Start the thread that receives information.
-  this->threadReception =
-    std::thread(&Server::RunReceptionTask, this);
+  this->threadReception = std::thread(&Server::RunReceptionTask, this);
 }
 
 //////////////////////////////////////////////////
-bool Server::Push(const int _id, const std::string &_data)
+bool Server::Send(const int _socket, const char *_data, const size_t _len)
 {
   if (!this->enabled)
   {
-    std::cerr << "Server::Push() error: Service not enabled yet" << std::endl;
+    std::cerr << "Server::Send() error: Service not enabled yet" << std::endl;
     return false;
   }
 
   std::lock_guard<std::mutex> lock(this->mutex);
 
-  // Sanity check: Make sure that the client ID exists.
-  if (this->clients.find(_id) == this->clients.end())
+  bool found = false;
+  for (size_t i = 1; i < this->pollSockets.size(); ++i)
   {
-    std::cerr << "Server::pop() error. Client not found" << std::endl;
+    if (this->pollSockets.at(i).fd == _socket)
+      found = true;
+  }
+
+  if (!found)
+  {
+    std::cerr << "Socket not found" << std::endl;
     return false;
   }
 
   // Send data using the soket.
-  auto bytes_written = write(_id, _data.c_str(), _data.size() + 1);
+  auto bytes_written = write(_socket, _data, _len);
   if (bytes_written < 0)
   {
     std::cerr << "ERROR writing to socket" << std::endl;
@@ -86,47 +82,6 @@ bool Server::Push(const int _id, const std::string &_data)
   }
 
   return true;
-}
-
-//////////////////////////////////////////////////
-bool Server::Pop(const int _id, std::string &_data)
-{
-  if (!this->enabled)
-  {
-    std::cerr << "Server::Push() error: Service not enabled yet" << std::endl;
-    return false;
-  }
-
-  std::lock_guard<std::mutex> lock(this->mutex);
-
-  // Sanity check: Make sure that the client ID exists.
-  if (this->clients.find(_id) == this->clients.end())
-  {
-    std::cerr << "Server::pop() error. Client not found" << std::endl;
-    return false;
-  }
-
-  // Sanity check: Make sure that the mailbox is not empty.
-  if (this->clients[_id]->incoming.empty())
-    return false;
-
-  // Pop the oldest message and return it.
-  _data = this->clients[_id]->incoming.front();
-  this->clients[_id]->incoming.pop();
-  return true;
-}
-
-//////////////////////////////////////////////////
-std::vector<int> Server::GetClientIds() const
-{
-  std::vector<int> clientIds;
-
-  std::lock_guard<std::mutex> lock(this->mutex);
-  clientIds.reserve(this->clients.size());
-  for (const auto client : this->clients)
-    clientIds.push_back(client.first);
-
-  return clientIds;
 }
 
 //////////////////////////////////////////////////
@@ -219,8 +174,8 @@ void Server::RunReceptionTask()
   }
 
   // About to leave, close pending sockets.
-  for (auto client : this->clients)
-    close(client.second->socket);
+  for (size_t i = 1; i < this->pollSockets.size(); ++i)
+    close(this->pollSockets.at(i).fd);
 }
 
 //////////////////////////////////////////////////
@@ -244,12 +199,8 @@ void Server::DispatchRequestOnMasterSocket()
   // Add the new socket to the list of sockets to poll.
   this->pollSockets.push_back(newSocketPollItem);
 
-  {
-    std::lock_guard<std::mutex> lock(this->mutex);
-
-    // Register the new client.
-    this->clients[newSocketFd] = std::make_shared<Client>(newSocketFd);
-  }
+  // Call connectCb().
+  this->connectionCb(newSocketFd);
 }
 
 //////////////////////////////////////////////////
@@ -265,34 +216,27 @@ void Server::DispatchRequestOnClientSocket()
       if (nread == 0)
       {
         int socket = this->pollSockets.at(i).fd;
+
+        // Call disconnectCb().
+        this->disconnectionCb(this->pollSockets.at(i).fd);
+
         // Remove the client from the list used by poll.
         close(socket);
         this->pollSockets.at(i).events = 0;
         this->pollSockets.erase(this->pollSockets.begin() + i);
 
-        // Remove the client from the server list.
-        {
-          std::lock_guard<std::mutex> lock(this->mutex);
-          this->clients.erase(socket);
-        }
         break;
       }
 
       // The client has send some data.
       // Read data from the socket using the parser.
-      std::string data;
-      if (!this->parser->Parse(this->pollSockets.at(i).fd, data))
+      if (!this->parser->Parse(this->pollSockets.at(i).fd))
       {
         std::cerr << "Server::DispatchRequestOnClientSocket() error: "
                   << "Problem parsing incoming data" << std::endl;
         break;
       }
 
-      // Register new incoming data.
-      {
-        std::lock_guard<std::mutex> lock(this->mutex);
-        this->clients[this->pollSockets.at(i).fd]->incoming.push(data);
-      }
       continue;
     }
   }

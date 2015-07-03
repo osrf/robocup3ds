@@ -20,7 +20,7 @@
 
 #include <poll.h>
 #include <atomic>
-#include <map>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -45,11 +45,7 @@ namespace gazebo
   /// |      |   ClientN socket
   ///  ------ <-----------------> ClientN data exchange
   ///
-  /// For each client connected, the Server class will keep a data structure
-  /// named Client. This data structure will queue the incoming messages coming
-  /// from the clients. The public API of the Server class will allow to pop
-  /// the first message received for a given client. Symmetrically, the Server
-  /// API allows to send (push) a message to a specific client.
+  ///  The Server API allows to send a message to a specific socket (client).
   ///
   /// When data is available for reading on a socket, it's not always possible
   /// to read it with one recv() call. Sometimes we just get a partial message
@@ -58,59 +54,47 @@ namespace gazebo
   /// format of the messages, it's hard to create a server that parses the
   /// messages. This class uses the concept of a SocketParser class. This class
   /// should know the format of the data sent over the wire. A SocketParser
-  /// class should implement a Parse() method that should be able to return an
-  /// entire message. An object of type SocketParser should be passed in as an
-  /// argument to the Server constructor.
+  /// class should implement a Parse() method that should be able to read from
+  /// the socket the correct amount of bytes. An object of type SocketParser
+  /// should be passed in as an argument to the Server constructor.
+  ///
+  /// Two callbacks are also needed in the class constructor. These callbacks
+  /// will be executed when a new client is connected or disconnected.
+  ///
+  /// This is an example of how to instantitate a Server class:
+  /// auto parser = std::make_shared<TrivialSocketParser>();
+  //  gazebo::Server server(kPort, parser,
+  //    &TrivialSocketParser::OnConnection, parser.get(),
+  //    &TrivialSocketParser::OnDisconnection, parser.get());
   class Server
   {
-    /// \brief Class that stores the socket connection to a given client.
-    /// It also uses a queue to store the incoming messages from the client.
-    class Client
-    {
-      /// \brief Class constructor.
-      /// \param[in] _socket Existing socket with a client
-      public: Client(const int _socket)
-        : socket(_socket)
-      {
-      }
-
-      /// \brief Class destructor.
-      public: ~Client() = default;
-
-      /// \brief TCP client socket.
-      public: int socket;
-
-      /// \brief Queue used to store message coming from the clients.
-      public: std::queue<std::string> incoming;
-    };
-
     /// \brief Constructor.
     /// \param[in] _port TCP port for incoming connections.
     /// \param[in] _parser Parser in charge of reading incoming data from
     /// the sockets.
-    public: Server(const int _port,
-                   const std::shared_ptr<SocketParser> &_parser);
+    public: template<typename C>
+    Server(const int _port,
+           const std::shared_ptr<SocketParser> &_parser,
+           void(C::*_connectCb)(const int _socket), C *_obj1,
+           void(C::*_disconnectCb)(const int _socket), C *_obj2)
+    : port(_port),
+      masterSocket(-1),
+      parser(_parser),
+      enabled(false)
+    {
+      this->connectionCb = std::bind(_connectCb, _obj1, std::placeholders::_1);
+      this->disconnectionCb =
+        std::bind(_disconnectCb, _obj2, std::placeholders::_1);
+    }
 
     /// \brief Destructor
     public: virtual ~Server();
 
     /// \brief Push some data to be sent by the server.
-    /// \param[in] _id Client ID.
+    /// \param[in] _socket Client ID.
     /// \param[in] _data Data to send.
     /// \return True when data was succesfully send or false otherwise.
-    public: bool Push(const int _id, const std::string &_data);
-
-    /// \brief Get some data received from the server. No that the data removed
-    /// will be the oldest message received.
-    /// \param[in] _id Client ID.
-    /// \param[out] _data Data received.
-    /// \return True when there was data available for client ID
-    /// or false otherwise.
-    public: bool Pop(const int _id, std::string &_data);
-
-    /// \brief Get the list of client IDs connected at this moment.
-    /// \return A Vector of client IDs.
-    public: std::vector<int> GetClientIds() const;
+    public: bool Send(const int _socket, const char *_data, const size_t _len);
 
     /// \brief Enable the server.
     public: void Start();
@@ -131,10 +115,6 @@ namespace gazebo
     /// \brief Initialize sockets, options and start accepting connections.
     /// \return true when success or false otherwise.
     private: bool InitializeSockets();
-
-    /// \brief Map to keep track of all the clients currently connected.
-    /// The key is the socket ID and the value is a pointer to the client.
-    public: std::map<int, std::shared_ptr<Client>> clients;
 
     /// \brief Maximum size of each message received.
     private: static const int kBufferSize = 8192;
@@ -160,6 +140,12 @@ namespace gazebo
 
     /// \brief Thread in charge of receiving and handling incoming messages.
     private: std::thread threadReception;
+
+    /// \brief New connections callback.
+    private: std::function<void(const int _socket)> connectionCb;
+
+    /// \brief New disconections callback.
+    private: std::function<void(const int _socket)> disconnectionCb;
   };
 }
 #endif /* _GAZEBO_ROBOCUP3DS_SERVER_HH_ */
