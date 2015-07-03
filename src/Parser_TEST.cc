@@ -17,112 +17,136 @@
 
 #include <netdb.h>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <thread>
 #include "gtest/gtest.h"
 #include "robocup3ds/Server.hh"
+#include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/ActionMessageParser.hh"
 
-//////////////////////////////////////////////////
-void clientTask(gazebo::Server *_server)
-{
-  // Wait some time to make sure that the server is alive.
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-  // Create a client.
-  struct sockaddr_in servaddr;
-  auto sockfd = socket(AF_INET, SOCK_STREAM, 0);
-
-  bzero(&servaddr, sizeof(servaddr));
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(3100);
-
-  connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr));
-
-  // Send S_expresion.
-  std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)"
-      "(beam 1 1 0.4)"
-      "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
+const std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)"
+      "(beam 1 1 0.4)(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
       "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
       "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)"
       "(lae4 0)(rae4 0)(init (unum 1)(teamname FCPOpp))(he1 3.20802)";
 
-  auto sent = write(sockfd, content.c_str(), content.size() + 1);
-  EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
+const int kPort = 6334;
+std::mutex mutex;
+std::condition_variable cv;
+bool clientReady = false;
+bool serverReady = false;
 
-  /// Wait some time until the server processes the request.
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-  // Check that the data is available in the server.
-  EXPECT_EQ(_server->clients.size(), 1u);
-  for (auto client : _server->clients)
-  {
-    std::string recvData;
-    EXPECT_TRUE(_server->Pop(client.second->socket, recvData));
-    std::cout << "Data received: " << recvData << std::endl;
-    EXPECT_EQ(recvData, content);
-
-    // Create a Parser
-    ActionMessageParser *parser = ActionMessageParser::GetUniqueInstance();
-    parser->parseMessage(recvData, client.first);
-
-    std::cout << "Joints Msg Parsed, he1"<< ": "
-        << parser->jointParserMap[client.first][ActionMessageParser::he1]
-                                                << std::endl;
-    // Test joint message Parser
-    EXPECT_DOUBLE_EQ(parser->jointParserMap[client.first][ActionMessageParser::he1]
-                                                          , 3.20802);
-    EXPECT_DOUBLE_EQ(parser->jointParserMap[client.first][ActionMessageParser::he2]
-                                                          , -1.80708);
-    EXPECT_DOUBLE_EQ(parser->jointParserMap[client.first][ActionMessageParser::lle1]
-                                                          , 0);
-    EXPECT_DOUBLE_EQ(parser->jointParserMap[client.first][ActionMessageParser::lae1]
-                                                          , -0.259697);
-
-    std::string sceneAddress;
-    int rType;
-
-    // Test Scene message Parser
-    if ( parser->getSceneInformation ( client.first, sceneAddress, rType ) )
-    {
-      std::cout << "Scene Msg Parsed: " << sceneAddress
-          << ", " << rType << std::endl;
-      EXPECT_EQ(sceneAddress, "rsg/agent/nao/nao_hetero.rsg");
-      EXPECT_EQ(rType, 0);
-    }
-
-    // Test Init message Parser
-    std::string teamname;
-    int playerNumber;
-
-    if ( parser->getInitInformation(client.first, teamname, playerNumber) )
-    {
-      std::cout << "Init Msg Parsed: "<< teamname << ", "
-          << playerNumber<< std::endl;
-      EXPECT_EQ(teamname, "FCPOpp");
-      EXPECT_EQ(playerNumber, 1);
-    }
-
-    double x,y,z;
-
-    if ( parser->getBeamInformation(client.first, x, y, z ) )
-    {
-      std::cout << "Beam Pos:( "<< x << ", " << y <<", "<< z <<")" <<std::endl;
-      EXPECT_DOUBLE_EQ (x, 1);
-      EXPECT_DOUBLE_EQ (y, 1);
-      EXPECT_DOUBLE_EQ (z, 0.4);
-    }
-  }
-  close(sockfd);
+//////////////////////////////////////////////////
+void reset()
+{
+  clientReady = false;
+  serverReady = false;
 }
 
 //////////////////////////////////////////////////
-TEST(ActionParser, Nima)
+bool createClient(const int _port, int &_socket)
 {
-  gazebo::Server testServer(3100);
+  struct sockaddr_in servaddr;
+  _socket = socket(AF_INET, SOCK_STREAM, 0);
 
-  testServer.Start();
-  std::thread clientThread(&clientTask, &testServer);
+  bzero(&servaddr, sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(_port);
+
+  if (connect(_socket, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
+  {
+    std::cerr << "createClient::connect() error" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+//////////////////////////////////////////////////
+void senderClient(const int _port)
+{
+  int socket;
+  if (!createClient(_port, socket))
+    return;
+
+  // Send some data.
+  auto sent = write(socket, content.c_str(), content.size() + 1);
+  EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
+
+  clientReady = true;
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  cv.notify_one();
+
+  // Wait some time until the server checks results.
+  {
+    std::unique_lock<std::mutex> lk(mutex);
+    auto now = std::chrono::system_clock::now();
+    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
+          [](){return serverReady;}))
+    {
+      FAIL();
+    }
+  }
+
+  close(socket);
+}
+
+//////////////////////////////////////////////////
+void receiverClient(const int _port)
+{
+  int socket;
+  if (!createClient(_port, socket))
+    return;
+
+  // Send some data to trigger the creation of a new client.
+  auto sent = write(socket, content.c_str(), content.size() + 1);
+  EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
+
+  clientReady = true;
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  cv.notify_one();
+
+  // Receive some data.
+  auto parser = std::make_shared<ActionMessageParser>();
+  EXPECT_TRUE(parser->Parse(socket));
+  EXPECT_EQ(parser->message.str(),content);
+  close(socket);
+}
+
+//////////////////////////////////////////////////
+TEST(Server, NewClient)
+{
+  reset();
+
+  auto parser = std::make_shared<ActionMessageParser>();
+  gazebo::Server server(kPort, parser,
+    &ActionMessageParser::OnConnection, parser.get(),
+    &ActionMessageParser::OnDisconnection, parser.get());
+
+  server.Start();
+  std::thread clientThread(&senderClient, kPort);
+
+  {
+    std::unique_lock<std::mutex> lk(mutex);
+    auto now = std::chrono::system_clock::now();
+    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
+          [](){return clientReady;}))
+    {
+      FAIL();
+      return;
+    }
+  }
+
+
+  serverReady = true;
+  cv.notify_one();
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
   if (clientThread.joinable())
     clientThread.join();

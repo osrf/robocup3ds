@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
-#include <gtest/gtest.h>
+#ifndef _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
+#define _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 
-#include <gazebo/physics/physics.hh>
-#include <gazebo/test/ServerFixture.hh>
+#include <string>
 
-class PhysicsTest : public gazebo::ServerFixture
+namespace gazebo
 {
-};
+  /// \brief
+  class SocketParser
+  {
+    /// \brief Constructor.
+    public: SocketParser() = default;
 
-TEST_F(PhysicsTest, Test1)
-{
-  Load("worlds/empty.world");
-  gazebo::physics::WorldPtr world = gazebo::physics::get_world("default");
-  ASSERT_TRUE(world != NULL);
+    /// \brief Destructor
+    public: virtual ~SocketParser() = default;
+
+    /// \brief Parse some data from a socket.
+    /// \param[in] _socket Socket to read.
+    /// \param[out] _data Data parsed.
+    /// \return True when data was succesfully parsed or false otherwise.
+    public: virtual bool Parse(const int _socket) = 0;
+  };
 }
-
-int main(int argc, char **argv)
-{
-  // Set a specific seed to avoid occasional test failures due to
-  // statistically unlikely, but possible results.
-  gazebo::math::Rand::SetSeed(42);
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+#endif /* _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_ */

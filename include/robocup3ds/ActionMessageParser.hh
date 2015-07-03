@@ -26,35 +26,10 @@
 #include <memory>
 #include "../../src/sexpLibrary/sexp.h"
 #include "../../src/sexpLibrary/sexp_ops.h"
+#include "robocup3ds/SocketParser.hh"
 
-class ActionMessageParser
+class ActionMessageParser: public gazebo::SocketParser
 {
-  public: enum Joints
-  {
-    he1,      // 0
-    he2,      // 1
-    lle1,     // 2
-    rle1,     // 3
-    lle2,     // 4
-    rle2,     // 5
-    lle3,     // 6
-    rle3,     // 7
-    lle4,     // 8
-    rle4,     // 9
-    lle5,     // 10
-    rle5,     // 11
-    lle6,     // 12
-    rle6,     // 13
-    lae1,     // 14
-    rae1,     // 15
-    lae2,     // 16
-    rae2,     // 17
-    lae3,     // 18
-    rae3,     // 19
-    lae4,     // 20
-    rae4,     // 21
-    NJOINTS,
-  };
 
   class SceneMsg
   {
@@ -107,11 +82,31 @@ class ActionMessageParser
     public: std::string teamName;
   };
 
-  public: static ActionMessageParser *GetUniqueInstance();
+  private: std::map<int, SceneMsg> sceneParserMap;
 
-  public: virtual ~ActionMessageParser();
+  private: std::map<int, InitMsg> initParserMap;
 
-  public: void parseMessage(const std::string &_msg, int _agentID);
+  private: std::map<int, BeamMsg> beamParserMap;
+
+  private: int agentID;
+
+  private: void parseSexp(sexp_t *exp);
+
+  private: void parseScene(sexp_t *_exp);
+
+  private: void parseBeam(sexp_t *_exp);
+
+  private: void parseInit(sexp_t *_exp);
+
+  private: void parseHingeJoint(sexp_t *exp);
+
+  public: std::stringstream message;
+
+  public: ActionMessageParser();
+
+  public: bool Parse(const int _socket);
+
+  public: void parseMessage(const std::string &_msg);
 
   public: bool getSceneInformation(const int _id, std::string &_msg,
       int &_robotType);
@@ -122,28 +117,21 @@ class ActionMessageParser
   public: bool getBeamInformation(const int _id, double &_x, double &_y,
       double &_z);
 
-  public: std::map<int, double*> jointParserMap;
+  public: std::map<std::string, double> jointParserMap;
 
-  public: std::map<int, SceneMsg> sceneParserMap;
+  public: void OnConnection(const int _socket)
+  {
+    this->socket = _socket;
+  }
 
-  public: std::map<int, InitMsg> initParserMap;
+  public: void OnDisconnection(const int /*_socket*/)
+  {
+  }
 
-  public: std::map<int, BeamMsg> beamParserMap;
+  private: static const int kBufferSize = 8192;
 
-  private: ActionMessageParser();
+  private: int socket;
 
-  private: int agentID;
-
-  private: double jointsActions[NJOINTS];
-
-  private: void parseSexp(sexp_t *exp);
-
-  private: void parseScene(sexp_t *_exp);
-
-  private: void parseBeam(sexp_t *_exp);
-
-  private: void parseInit(sexp_t *_exp);
-
-  private: void parseHingeJoint(int jointID, sexp_t *exp);
+  public: virtual ~ActionMessageParser();
 };
 #endif /* _GAZEBO_ROBOCUP3DS_ACTIONMESSAGEPARSER_HH_ */

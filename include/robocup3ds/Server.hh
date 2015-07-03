@@ -18,54 +18,83 @@
 #ifndef _GAZEBO_ROBOCUP3DS_SERVER_HH_
 #define _GAZEBO_ROBOCUP3DS_SERVER_HH_
 
+#include <poll.h>
 #include <atomic>
-#include <map>
+#include <functional>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <string>
 #include <thread>
 #include <vector>
+#include "robocup3ds/SocketParser.hh"
 
 namespace gazebo
 {
-  /// \brief
+  /// \brief Server class that will accept TCP sockets from external clients
+  /// (using the master socket).
+  /// For each external client request on the master socket, the server will
+  /// create a new socket to allow bidirectional communication between the
+  /// server and the new client.
+  ///
+  ///  ------    Master socket
+  /// |      |<------------------ New client requests
+  /// |      |
+  /// |Server|   Client1 socket
+  /// |      |<-----------------> Client1 data exchange
+  /// |      |   ClientN socket
+  ///  ------ <-----------------> ClientN data exchange
+  ///
+  ///  The Server API allows to send a message to a specific socket (client).
+  ///
+  /// When data is available for reading on a socket, it's not always possible
+  /// to read it with one recv() call. Sometimes we just get a partial message
+  /// with a recv() call and we need a second call. Also, we might receive two
+  /// messages in a single recv(). Without knowing the application and the
+  /// format of the messages, it's hard to create a server that parses the
+  /// messages. This class uses the concept of a SocketParser class. This class
+  /// should know the format of the data sent over the wire. A SocketParser
+  /// class should implement a Parse() method that should be able to read from
+  /// the socket the correct amount of bytes. An object of type SocketParser
+  /// should be passed in as an argument to the Server constructor.
+  ///
+  /// Two callbacks are also needed in the class constructor. These callbacks
+  /// will be executed when a new client is connected or disconnected.
+  ///
+  /// This is an example of how to instantitate a Server class:
+  /// auto parser = std::make_shared<TrivialSocketParser>();
+  //  gazebo::Server server(kPort, parser,
+  //    &TrivialSocketParser::OnConnection, parser.get(),
+  //    &TrivialSocketParser::OnDisconnection, parser.get());
   class Server
   {
-    /// \brief
-    class Client
-    {
-      /// \brief
-      public: Client(int _socket)
-      {
-        this->socket = _socket;
-      }
-
-      /// \brief
-      public: int socket;
-
-      /// \brief
-      public: std::vector<std::string> incoming;
-    };
-
     /// \brief Constructor.
     /// \param[in] _port TCP port for incoming connections.
-    public: Server(int _port);
+    /// \param[in] _parser Parser in charge of reading incoming data from
+    /// the sockets.
+    public: template<typename C>
+    Server(const int _port,
+           const std::shared_ptr<SocketParser> &_parser,
+           void(C::*_connectCb)(const int _socket), C *_obj1,
+           void(C::*_disconnectCb)(const int _socket), C *_obj2)
+    : port(_port),
+      masterSocket(-1),
+      parser(_parser),
+      enabled(false)
+    {
+      this->connectionCb = std::bind(_connectCb, _obj1, std::placeholders::_1);
+      this->disconnectionCb =
+        std::bind(_disconnectCb, _obj2, std::placeholders::_1);
+    }
 
     /// \brief Destructor
     public: virtual ~Server();
 
     /// \brief Push some data to be sent by the server.
-    /// \param[in] _id Client ID.
+    /// \param[in] _socket Client ID.
     /// \param[in] _data Data to send.
     /// \return True when data was succesfully send or false otherwise.
-    public: bool Push(const int _id, const std::string &_data);
-
-    /// \brief Get some data received from the server.
-    /// \param[in] _id Client ID.
-    /// \param[out] _data Data received.
-    /// \return True when there was data available for client ID
-    /// or false otherwise.
-    public: bool Pop(const int _id, std::string &_data);
+    public: bool Send(const int _socket, const char *_data, const size_t _len);
 
     /// \brief Enable the server.
     public: void Start();
@@ -74,23 +103,49 @@ namespace gazebo
     /// new connections.
     private: void RunReceptionTask();
 
-    /// \brief
-    public: std::map<int, std::shared_ptr<Client>> clients;
+    /// \brief Dispatch a new request received on the master socket. This will
+    /// require to create a new socket and add it to the list of sockets to poll
+    private: void DispatchRequestOnMasterSocket();
 
-    /// \brief
+    /// brief Dispatch a new request received on a client socket. This will
+    /// require to read the data and store it and the queue for this specific
+    /// client.
+    private: void DispatchRequestOnClientSocket();
+
+    /// \brief Initialize sockets, options and start accepting connections.
+    /// \return true when success or false otherwise.
+    private: bool InitializeSockets();
+
+    /// \brief Maximum size of each message received.
     private: static const int kBufferSize = 8192;
 
-    /// \brief
+    /// \brief TCP master port used for the initial client requests.
     private: int port;
 
-    /// \brief
+    /// \brief TCP socket where new clients can make requests.
+    private: int masterSocket;
+
+    /// \brief Vector of pollfd entries with the list of sockets to poll
+    /// for activity.
+    private: std::vector<pollfd> pollSockets;
+
+    /// \brief Parser used to read incoming messages.
+    private: std::shared_ptr<SocketParser> parser;
+
+    /// \brief Flag used to detect when we have to destroy the server.
     private: std::atomic<bool> enabled;
 
-    /// \brief
-    private: std::mutex mutex;
+    /// \brief Protect concurrent access.
+    private: mutable std::mutex mutex;
 
     /// \brief Thread in charge of receiving and handling incoming messages.
     private: std::thread threadReception;
+
+    /// \brief New connections callback.
+    private: std::function<void(const int _socket)> connectionCb;
+
+    /// \brief New disconections callback.
+    private: std::function<void(const int _socket)> disconnectionCb;
   };
 }
-#endif /* INCLUDE_ROBOCUP3DS_SERVER_HH_ */
+#endif /* _GAZEBO_ROBOCUP3DS_SERVER_HH_ */

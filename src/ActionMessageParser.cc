@@ -16,31 +16,47 @@
  */
 
 #include "robocup3ds/ActionMessageParser.hh"
-
-ActionMessageParser* ActionMessageParser::GetUniqueInstance()
-{
-  static ActionMessageParser parser;
-  return &parser;
-}
+#include <sys/socket.h>
 
 ActionMessageParser::ActionMessageParser()
 {
-  for (int i = 0; i < this->NJOINTS; i++ )
-    this->jointsActions[i]=0;  // initialize with zero;
+
 }
 
-void ActionMessageParser::parseMessage(const std::string &_msg, int _agentID)
+bool ActionMessageParser::Parse(int _socket)
+{
+  char buffer[8092];
+  bzero(buffer, sizeof(buffer));
+  int bytesRead = 0;
+  int totalBytes = 1000;
+
+  while (bytesRead < totalBytes)
+  {
+    int result = recv(_socket, buffer + bytesRead, totalBytes - bytesRead, 0);
+    if (result < 1)
+    {
+      return false;
+    }
+
+    bytesRead += result;
+  }
+
+  parseMessage(std::string(buffer));
+
+  return true;
+}
+
+
+void ActionMessageParser::parseMessage(const std::string &_msg)
 {
   char linebuf[BUFSIZ+16000];
   sexp_t *exp;
 
-  this->agentID = _agentID;
+//  std::stringstream message;
 
-  std::stringstream ss;
+  this->message << "(msg " << _msg << ")";
 
-  ss << "(msg " << _msg << ")";
-
-  strcpy(linebuf, ss.str().c_str());
+  strcpy(linebuf, message.str().c_str());
 
   exp = parse_sexp(linebuf, BUFSIZ+16000);
 
@@ -62,9 +78,6 @@ void ActionMessageParser::parseMessage(const std::string &_msg, int _agentID)
   }
 
   destroy_sexp(exp);
-
-  this->jointParserMap.insert(std::pair<int, double*> (_agentID,
-      this->jointsActions));
 }
 
 void ActionMessageParser::parseSexp(sexp_t *_exp)
@@ -95,91 +108,91 @@ void ActionMessageParser::parseSexp(sexp_t *_exp)
   }
   else if (!strcmp(v, "he1"))
   {
-    parseHingeJoint(0, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "he2"))
   {
-    parseHingeJoint(1, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle1"))
   {
-    parseHingeJoint(2, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle1"))
   {
-    parseHingeJoint(3, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle2"))
   {
-    parseHingeJoint(4, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle2"))
   {
-    parseHingeJoint(5, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle3"))
   {
-    parseHingeJoint(6, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle3"))
   {
-    parseHingeJoint(7, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle4"))
   {
-    parseHingeJoint(8, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle4"))
   {
-    parseHingeJoint(9, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle5"))
   {
-    parseHingeJoint(10, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle5"))
   {
-    parseHingeJoint(11, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle6"))
   {
-    parseHingeJoint(12, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle6"))
   {
-    parseHingeJoint(13, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lae1"))
   {
-    parseHingeJoint(14, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rae1"))
   {
-    parseHingeJoint(15, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lae2"))
   {
-    parseHingeJoint(16, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rae2"))
   {
-    parseHingeJoint(17, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lae3"))
   {
-    parseHingeJoint(18, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rae3"))
   {
-    parseHingeJoint(19, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lae4"))
   {
-    parseHingeJoint(20, _exp);
+    parseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rae4"))
   {
-    parseHingeJoint(21, _exp);
+    parseHingeJoint(_exp);
   }
   else
   {
@@ -187,13 +200,13 @@ void ActionMessageParser::parseSexp(sexp_t *_exp)
   }
 }
 
-void ActionMessageParser::parseHingeJoint(int _jointID, sexp_t *_exp)
+void ActionMessageParser::parseHingeJoint(sexp_t *_exp)
 {
   std::string name;
   double effector;
   name =_exp->list->val;
   effector = atof(_exp->list->next->val);
-  this->jointsActions[_jointID]=effector;
+  this->jointParserMap.insert(std::map <std::string, double> ::value_type(name, effector));
 }
 
 void ActionMessageParser::parseScene(sexp_t *_exp)
@@ -299,5 +312,3 @@ bool ActionMessageParser::getBeamInformation(const int _id, double &_x, double &
 ActionMessageParser::~ActionMessageParser()
 {
 }
-
-
