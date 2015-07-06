@@ -66,7 +66,7 @@ class PerceptorTest : public ::testing::Test
       this->perceptor->SetG2LMat(_agent);
       _agent.percept.landMarks.clear();
       this->perceptor->UpdateLandmark(_agent, "test", _landmark);
-      if (_agent.percept.landMarks.size() == 0)
+      if (_agent.percept.landMarks.empty())
       {
         return false;
       }
