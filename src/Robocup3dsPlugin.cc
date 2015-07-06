@@ -17,6 +17,7 @@
 
 #include <boost/bind.hpp>
 #include <gazebo/gazebo.hh>
+#include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 #include "robocup3ds/Robocup3dsPlugin.hh"
 
@@ -35,12 +36,16 @@ Robocup3dsPlugin::~Robocup3dsPlugin()
 }
 
 /////////////////////////////////////////////////
-void Robocup3dsPlugin::Load(physics::WorldPtr /*_world*/,
-  sdf::ElementPtr /*_sdf*/)
+void Robocup3dsPlugin::Load(physics::WorldPtr _world,
+                            sdf::ElementPtr _sdf)
 {
   // Connect to the update event.
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-      boost::bind(&Robocup3dsPlugin::Update, this, _1));
+                             boost::bind(&Robocup3dsPlugin::Update, this, _1));
+  this->world = _world;
+  this->sdf = _sdf;
+
+  this->world->InsertModelFile("model://nao");
 }
 
 /////////////////////////////////////////////////

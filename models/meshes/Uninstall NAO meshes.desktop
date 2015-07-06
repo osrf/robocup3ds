@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Version=0.9.4
-Name=Uninstall NAO meshes
-Comment=Uninstall
-Icon=
-Exec=/tmp/buildd/ros-indigo-nao-meshes-0.1.8-0trusty-20150424-0417/obj-x86_64-linux-gnu/devel/tmp/uninstall
-Terminal=false
-Path=/tmp/buildd/ros-indigo-nao-meshes-0.1.8-0trusty-20150424-0417/obj-x86_64-linux-gnu/devel/tmp

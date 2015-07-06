@@ -42,6 +42,12 @@ namespace gazebo
 
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
+
+    /// \brief Pointer to world
+    private: physics::WorldPtr world;
+
+    /// \brief Pointer to sdf
+    private: sdf::ElementPtr sdf;
   };
 }
 #endif
