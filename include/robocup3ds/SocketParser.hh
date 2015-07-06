@@ -18,8 +18,6 @@
 #ifndef _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 #define _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 
-#include <string>
-
 namespace gazebo
 {
   /// \brief
