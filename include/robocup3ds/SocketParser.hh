@@ -33,7 +33,6 @@ namespace gazebo
 
     /// \brief Parse some data from a socket.
     /// \param[in] _socket Socket to read.
-    /// \param[out] _data Data parsed.
     /// \return True when data was succesfully parsed or false otherwise.
     public: virtual bool Parse(const int _socket) = 0;
   };
