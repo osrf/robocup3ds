@@ -162,15 +162,19 @@ void Server::RunReceptionTask()
       continue;
     }
 
-    // Data received on master socket.
-    if (this->pollSockets.at(0).revents && POLLIN)
     {
-      this->DispatchRequestOnMasterSocket();
-      continue;
-    }
+      std::lock_guard<std::mutex> lock(this->mutex);
 
-    // Data received on any of the client sockets.
-    this->DispatchRequestOnClientSocket();
+      // Data received on master socket.
+      if (this->pollSockets.at(0).revents && POLLIN)
+      {
+        this->DispatchRequestOnMasterSocket();
+        continue;
+      }
+
+      // Data received on any of the client sockets.
+      this->DispatchRequestOnClientSocket();
+    }
   }
 
   // About to leave, close pending sockets.
