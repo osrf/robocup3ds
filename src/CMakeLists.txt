@@ -1,9 +1,30 @@
 set (sources
+  Geometry.cc
+  Perceptors.cc
+  states/BeforeKickOffState.cc
+  states/CornerKickLeftState.cc
+  states/CornerKickRightState.cc
+  states/FreeKickLeftState.cc
+  states/FreeKickRightState.cc
+  states/GameOverState.cc
+  states/GoalKickLeftState.cc
+  states/GoalKickRightState.cc
+  states/GoalLeftState.cc
+  states/GoalRightState.cc
+  states/KickInLeftState.cc
+  states/KickInRightState.cc
+  states/KickOffLeftState.cc
+  states/KickOffRightState.cc
+  states/PlayOnState.cc
+  states/State.cc
+  GameState.cc
   Robocup3dsPlugin.cc
 )
 
 set (gtest_sources
   Robocup3dsPlugin_TEST.cc
+  GameState_TEST.cc
+  Perceptors_TEST.cc
 )
 
 # make below target specific?
@@ -18,5 +39,9 @@ link_directories(
 
 robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources})
 robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
+
+target_link_libraries(${PROJECT_NAME_LOWER}Plugin
+  gazebo_common
+)
 
 robocup3ds_build_tests(${gtest_sources})

@@ -14,6 +14,7 @@ macro (robocup3ds_build_tests)
       gtest gtest_main
       )
 
+    # message(${GAZEBO_LIBRARIES})
     target_link_libraries(${BINARY_NAME}
       libgtest.a
       libgtest_main.a
@@ -26,8 +27,8 @@ macro (robocup3ds_build_tests)
       gazebo_sensors
       ${GAZEBO_LIBRARIES}
       ${Boost_LIBRARIES}
+      ${PROJECT_NAME_LOWER}Plugin
     )
-
     add_test(${BINARY_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${BINARY_NAME}
 	--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${BINARY_NAME}.xml)
 
