@@ -17,28 +17,31 @@
 #include <string>
 
 #include "robocup3ds/GameState.hh"
-#include "robocup3ds/states/GoalLeftState.hh"
-#include "robocup3ds/states/KickOffRightState.hh"
+#include "robocup3ds/states/GoalState.hh"
+#include "robocup3ds/states/KickOffState.hh"
 
 using namespace states;
 
 /////////////////////////////////////////////////
-GoalLeftState::GoalLeftState(const std::string &_name,
-                             GameState *const _gameState)
+GoalState::GoalState(const std::string &_name,
+                     GameState *const _gameState)
   : State(_name, _gameState)
 {
   this->validGoal = false;
 }
 
 /////////////////////////////////////////////////
-void GoalLeftState::Initialize()
+void GoalState::Initialize()
 {
   this->validGoal = true;
 
   // Register the left team goal.
   for (auto &team : this->gameState->teams)
   {
-    if (team->side == GameState::Team::Side::LEFT)
+    if ((team->side == GameState::Team::Side::LEFT
+         && this->name == "GoalLeft")
+        || (team->side == GameState::Team::Side::RIGHT
+            && this->name == "GoalRight"))
     {
       if (team->canScore)
       {
@@ -54,7 +57,7 @@ void GoalLeftState::Initialize()
 }
 
 /////////////////////////////////////////////////
-void GoalLeftState::Update()
+void GoalState::Update()
 {
   if (!this->hasInitialized)
   {
@@ -63,6 +66,9 @@ void GoalLeftState::Update()
   // Afer some time, go to right team kick off mode.
   if (this->GetElapsedTime() >= GameState::SecondsGoalPause || !validGoal)
   {
-    this->gameState->SetCurrent(this->gameState->kickOffRightState);
+    if (this->name == "GoalLeft")
+    { this->gameState->SetCurrent(this->gameState->kickOffRightState); }
+    else
+    { this->gameState->SetCurrent(this->gameState->kickOffLeftState); }
   }
 }

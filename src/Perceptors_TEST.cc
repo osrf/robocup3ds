@@ -429,13 +429,13 @@ TEST_F(PerceptorTest, Percepter_Update)
     for (int j = 0; j < 11; ++j)
     {
       auto &agent = gameState->teams.at(i)->members.at(j);
-      ASSERT_EQ(agent.percept.fieldLines.size(),
+      EXPECT_EQ(agent.percept.fieldLines.size(),
                 SoccerField::FieldLines.size());
-      ASSERT_EQ(agent.percept.landMarks.size(),
+      EXPECT_EQ(agent.percept.landMarks.size(),
                 SoccerField::LandMarks.size() + 1u);
-      ASSERT_NE(agent.percept.landMarks.find("B"),
+      EXPECT_NE(agent.percept.landMarks.find("B"),
                 agent.percept.landMarks.end());
-      ASSERT_EQ(agent.percept.otherAgentBodyMap.size(), 21u);
+      EXPECT_EQ(agent.percept.otherAgentBodyMap.size(), 21u);
       EXPECT_TRUE(agent.percept.hear.isValid);
       EXPECT_DOUBLE_EQ(agent.percept.hear.gameTime,
                        gameState->GetElapsedGameTime());

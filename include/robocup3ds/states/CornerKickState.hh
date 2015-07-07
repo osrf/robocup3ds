@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_GOAL_RIGHT_STATE_HH_
-#define _GAZEBO_GOAL_RIGHT_STATE_HH_
+#ifndef _GAZEBO_CORNER_KICK_STATE_HH_
+#define _GAZEBO_CORNER_KICK_STATE_HH_
 
 #include <string>
 
@@ -26,21 +26,20 @@ class GameState;
 
 namespace states
 {
-  /// \brief State that handles the right goal state.
-  class GoalRightState : public State
+  /// \brief State that handles the corner kick state.
+  class CornerKickState : public State
   {
-    // Documentation inherited
-    public: GoalRightState(const std::string &_name,
-                   GameState *const _gameState);
+    /// \brief Constructor.
+    /// \param[in] _name Name of this state.
+    /// \param[in] _gameState GameState to be used inside the state.
+    public: CornerKickState(const std::string &_name,
+                                GameState *const _gameState);
 
     // Documentation inherited
     public: virtual void Initialize();
 
     // Documentation inherited
     public: virtual void Update();
-
-    /// \brief Flag to determine whether goal scored is valid
-    private: bool validGoal;
   };
 }
 

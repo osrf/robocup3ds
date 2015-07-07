@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_GOAL_KICK_LEFT_STATE_HH_
-#define _GAZEBO_GOAL_KICK_LEFT_STATE_HH_
+#ifndef _GAZEBO_KICKOFF_STATE_HH_
+#define _GAZEBO_KICKOFF_STATE_HH_
 
 #include <string>
 
@@ -26,12 +26,12 @@ class GameState;
 
 namespace states
 {
-  /// \brief State that handles the goal kick left state.
-  class GoalKickLeftState : public State
+  /// \brief State that handles the kickoff state.
+  class KickOffState : public State
   {
     // Documentation inherited
-    public: GoalKickLeftState(const std::string &_name,
-                              GameState *const _gameState);
+    public: KickOffState(const std::string &_name,
+                             GameState *const _gameState);
 
     // Documentation inherited
     public: virtual void Initialize();

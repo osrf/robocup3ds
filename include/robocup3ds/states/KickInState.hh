@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_FREE_KICK_LEFT_STATE_HH_
-#define _GAZEBO_FREE_KICK_LEFT_STATE_HH_
+#ifndef _GAZEBO_KICKIN_STATE_HH_
+#define _GAZEBO_KICKIN_STATE_HH_
 
 #include <string>
 
@@ -26,18 +26,18 @@ class GameState;
 
 namespace states
 {
-  /// \brief State that handles the free kick left state.
-  class FreeKickLeftState : public State
+  /// \brief State that handles the kick in state.
+  class KickInState : public State
   {
     // Documentation inherited
-    public: FreeKickLeftState(const std::string &_name,
+    public: KickInState(const std::string &_name,
                               GameState *const _gameState);
 
     // Documentation inherited
     public: virtual void Initialize();
 
     // Documentation inherited
-    public: virtual void Update();
+    public: virtual void Update(); \
   };
 }
 

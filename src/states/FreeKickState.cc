@@ -17,20 +17,20 @@
 #include <string>
 
 #include "robocup3ds/GameState.hh"
-#include "robocup3ds/states/FreeKickRightState.hh"
+#include "robocup3ds/states/FreeKickState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
 using namespace states;
 
 /////////////////////////////////////////////////
-FreeKickRightState::FreeKickRightState(const std::string &_name,
-                                       GameState *const _gameState)
+FreeKickState::FreeKickState(const std::string &_name,
+                                     GameState *const _gameState)
   : State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
-void FreeKickRightState::Initialize()
+void FreeKickState::Initialize()
 {
   // Move ball in bounds
   this->gameState->MoveBallInBounds();
@@ -38,7 +38,7 @@ void FreeKickRightState::Initialize()
 }
 
 /////////////////////////////////////////////////
-void FreeKickRightState::Update()
+void FreeKickState::Update()
 {
   if (this->GetElapsedTime() < GameState::SecondsKickInPause)
   {
@@ -48,8 +48,12 @@ void FreeKickRightState::Update()
   {
     this->Initialize();
   }
-  // The left team is not allowed to be close to the ball.
-  this->gameState->DropBallImpl(GameState::Team::Side::RIGHT);
+
+  // The right team is not allowed to be close to the ball.
+  if (this->name == "FreeKickLeft")
+  { this->gameState->DropBallImpl(GameState::Team::Side::LEFT); }
+  else
+  { this->gameState->DropBallImpl(GameState::Team::Side::RIGHT); }
   State::Update();
 
   // After some time, go to play mode.
@@ -63,3 +67,4 @@ void FreeKickRightState::Update()
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
 }
+

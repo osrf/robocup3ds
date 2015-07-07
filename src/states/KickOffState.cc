@@ -14,54 +14,60 @@
  * limitations under the License.
  *
 */
+
 #include <string>
 
 #include "robocup3ds/GameState.hh"
-#include "robocup3ds/states/FreeKickLeftState.hh"
+#include "robocup3ds/states/KickOffState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
 using namespace states;
 
 /////////////////////////////////////////////////
-FreeKickLeftState::FreeKickLeftState(const std::string &_name,
-                                     GameState *const _gameState)
+KickOffState::KickOffState(const std::string &_name,
+                           GameState *const _gameState)
   : State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
-void FreeKickLeftState::Initialize()
+void KickOffState::Initialize()
 {
-  // Move ball in bounds
-  this->gameState->MoveBallInBounds();
+  this->gameState->touchBallKickoff = NULL;
+  this->gameState->ballContactHistory.clear();
+  for (auto &team : this->gameState->teams)
+  {
+    team->canScore = false;
+  }
+  this->gameState->MoveBallToCenter();
+  this->gameState->ReleasePlayers();
   State::Initialize();
 }
 
 /////////////////////////////////////////////////
-void FreeKickLeftState::Update()
+void KickOffState::Update()
 {
-  if (this->GetElapsedTime() < GameState::SecondsKickInPause)
-  {
-    return;
-  }
-  else if (!this->hasInitialized)
+  if (!this->hasInitialized)
   {
     this->Initialize();
   }
 
-  // The right team is not allowed to be close to the ball.
-  this->gameState->DropBallImpl(GameState::Team::Side::LEFT);
+  // check for agents that violate sides
+  if (this->name == "KickOffLeft")
+  { gameState->CheckOffSidesOnKickOff(GameState::Team::Side::LEFT); }
+  else
+  { gameState->CheckOffSidesOnKickOff(GameState::Team::Side::RIGHT); }
   State::Update();
 
   // After some time, go to play mode.
-  if (this->GetElapsedTime() >= GameState::SecondsKickIn)
+  if (this->GetElapsedTime() >= GameState::SecondsKickOff)
   {
     this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
   else if (this->HasBallContactOccurred())
   {
+    this->gameState->touchBallKickoff = this->gameState->GetLastBallContact();
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
 }
-

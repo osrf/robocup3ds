@@ -18,29 +18,28 @@
 #include <string>
 
 #include "robocup3ds/GameState.hh"
-#include "robocup3ds/states/KickInLeftState.hh"
+#include "robocup3ds/states/CornerKickState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
 using namespace states;
 
 /////////////////////////////////////////////////
-KickInLeftState::KickInLeftState(const std::string &_name,
-                                 GameState *const _gameState)
-  : State(_name, _gameState)
+CornerKickState::CornerKickState(const std::string &_name,
+                                 GameState *const _gameState):
+  State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
-void KickInLeftState::Initialize()
+void CornerKickState::Initialize()
 {
-  // Move the ball to the sideline.
   this->gameState->MoveBall(initBallPos);
-  this->gameState->MoveBallInBounds();
+  this->gameState->MoveBallToCorner();
   State::Initialize();
 }
 
 /////////////////////////////////////////////////
-void KickInLeftState::Update()
+void CornerKickState::Update()
 {
   if (this->GetElapsedTime() < GameState::SecondsKickInPause)
   {
@@ -50,8 +49,12 @@ void KickInLeftState::Update()
   {
     this->Initialize();
   }
+
   // The right team is not allowed to be close to the ball.
-  this->gameState->DropBallImpl(GameState::Team::Side::LEFT);
+  if (this->name == "CornerKickLeft")
+  { this->gameState->DropBallImpl(GameState::Team::Side::LEFT); }
+  else
+  { this->gameState->DropBallImpl(GameState::Team::Side::RIGHT); }
   State::Update();
 
   // After some time, go to play mode.

@@ -15,23 +15,25 @@
  *
 */
 #include <string>
+#include <ignition/math.hh>
 
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
-#include "robocup3ds/states/GoalKickLeftState.hh"
+#include "robocup3ds/states/GoalKickState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
 using namespace states;
+using namespace ignition;
 
 /////////////////////////////////////////////////
-GoalKickLeftState::GoalKickLeftState(const std::string &_name,
+GoalKickState::GoalKickState(const std::string &_name,
                                      GameState *const _gameState)
   : State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
-void GoalKickLeftState::Initialize()
+void GoalKickState::Initialize()
 {
   // Move the ball.
   this->gameState->MoveBall(initBallPos);
@@ -40,7 +42,7 @@ void GoalKickLeftState::Initialize()
 }
 
 /////////////////////////////////////////////////
-void GoalKickLeftState::Update()
+void GoalKickState::Update()
 {
   if (this->GetElapsedTime() < GameState::SecondsKickInPause)
   {
@@ -51,8 +53,19 @@ void GoalKickLeftState::Update()
     this->Initialize();
   }
 
-  this->gameState->DropBallImpl(GameState::Team::Side::LEFT);
-  this->gameState->CheckGoalKickIllegalDefense(GameState::Team::Side::LEFT);
+  math::Box penaltyBox;
+  if (this->name == "GoalKickLeft")
+  {
+    this->gameState->DropBallImpl(GameState::Team::Side::LEFT);
+    this->gameState->CheckGoalKickIllegalDefense(GameState::Team::Side::LEFT);
+    penaltyBox = SoccerField::PenaltyBoxLeft;
+  }
+  else
+  {
+    this->gameState->DropBallImpl(GameState::Team::Side::RIGHT);
+    this->gameState->CheckGoalKickIllegalDefense(GameState::Team::Side::RIGHT);
+    penaltyBox = SoccerField::PenaltyBoxRight;
+  }
   State::Update();
 
   // After some time, go to play mode.
@@ -61,7 +74,7 @@ void GoalKickLeftState::Update()
     this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
-  else if (!SoccerField::PenaltyBoxLeft.Contains(this->gameState->GetBall()))
+  else if (!penaltyBox.Contains(this->gameState->GetBall()))
   {
     this->gameState->SetCurrent(this->gameState->playOnState);
   }

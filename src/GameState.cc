@@ -25,19 +25,13 @@
 #include "robocup3ds/Geometry.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
-#include "robocup3ds/states/CornerKickLeftState.hh"
-#include "robocup3ds/states/CornerKickRightState.hh"
-#include "robocup3ds/states/FreeKickLeftState.hh"
-#include "robocup3ds/states/FreeKickRightState.hh"
+#include "robocup3ds/states/CornerKickState.hh"
+#include "robocup3ds/states/FreeKickState.hh"
 #include "robocup3ds/states/GameOverState.hh"
-#include "robocup3ds/states/GoalKickLeftState.hh"
-#include "robocup3ds/states/GoalKickRightState.hh"
-#include "robocup3ds/states/GoalLeftState.hh"
-#include "robocup3ds/states/GoalRightState.hh"
-#include "robocup3ds/states/KickInLeftState.hh"
-#include "robocup3ds/states/KickInRightState.hh"
-#include "robocup3ds/states/KickOffLeftState.hh"
-#include "robocup3ds/states/KickOffRightState.hh"
+#include "robocup3ds/states/GoalKickState.hh"
+#include "robocup3ds/states/GoalState.hh"
+#include "robocup3ds/states/KickInState.hh"
+#include "robocup3ds/states/KickOffState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
 using namespace ignition;
@@ -83,22 +77,22 @@ bool   GameState::restrictVision = true;
 /////////////////////////////////////////////////
 GameState::GameState():
   beforeKickOffState(std::make_shared<BeforeKickOffState>(BeforeKickOff, this)),
-  kickOffLeftState(std::make_shared<KickOffLeftState>(KickOffLeft, this)),
-  kickOffRightState(std::make_shared<KickOffRightState>(KickOffRight, this)),
+  kickOffLeftState(std::make_shared<KickOffState>(KickOffLeft, this)),
+  kickOffRightState(std::make_shared<KickOffState>(KickOffRight, this)),
   playOnState(std::make_shared<PlayOnState>(PlayOn, this)),
-  kickInLeftState(std::make_shared<KickInLeftState>(KickInLeft, this)),
-  kickInRightState(std::make_shared<KickInRightState>(KickInRight, this)),
-  cornerKickLeftState(std::make_shared<CornerKickLeftState>(
+  kickInLeftState(std::make_shared<KickInState>(KickInLeft, this)),
+  kickInRightState(std::make_shared<KickInState>(KickInRight, this)),
+  cornerKickLeftState(std::make_shared<CornerKickState>(
                         CornerKickLeft, this)),
-  cornerKickRightState(std::make_shared<CornerKickRightState>(
+  cornerKickRightState(std::make_shared<CornerKickState>(
                          CornerKickRight, this)),
-  goalKickLeftState(std::make_shared<GoalKickLeftState>(GoalKickLeft, this)),
-  goalKickRightState(std::make_shared<GoalKickRightState>(GoalKickRight, this)),
+  goalKickLeftState(std::make_shared<GoalKickState>(GoalKickLeft, this)),
+  goalKickRightState(std::make_shared<GoalKickState>(GoalKickRight, this)),
   gameOverState(std::make_shared<GameOverState>(GameOver, this)),
-  goalLeftState(std::make_shared<GoalLeftState>(GoalLeft, this)),
-  goalRightState(std::make_shared<GoalRightState>(GoalRight, this)),
-  freeKickLeftState(std::make_shared<FreeKickLeftState>(FreeKickLeft, this)),
-  freeKickRightState(std::make_shared<FreeKickRightState>(FreeKickRight, this)),
+  goalLeftState(std::make_shared<GoalState>(GoalLeft, this)),
+  goalRightState(std::make_shared<GoalState>(GoalRight, this)),
+  freeKickLeftState(std::make_shared<FreeKickState>(FreeKickLeft, this)),
+  freeKickRightState(std::make_shared<FreeKickState>(FreeKickRight, this)),
 
   hasCurrentStateChanged(false),
   touchBallKickoff(std::shared_ptr<BallContact>(nullptr)),
@@ -112,11 +106,11 @@ GameState::GameState():
 {
   this->SetCurrent(beforeKickOffState);
   this->teams.push_back(
-      std::make_shared<Team>(
-        "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
+    std::make_shared<Team>(
+      "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
   this->teams.push_back(
-      std::make_shared<Team>(
-        "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
+    std::make_shared<Team>(
+      "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
 }
 
 /////////////////////////////////////////////////
@@ -153,7 +147,7 @@ void GameState::LoadConfiguration(
   if (LoadConfigParameter(_config, "gamestate_dropballradius", value))
   { GameState::dropBallRadius = value; }
   if (LoadConfigParameterBool(
-    _config, "gamestate_usecounterforgametime", boolValue))
+        _config, "gamestate_usecounterforgametime", boolValue))
   { GameState::useCounterForGameTime = boolValue; }
   if (LoadConfigParameter(_config, "gamestate_playerlimit", value))
   { GameState::playerLimit = static_cast<int>(value); }
@@ -271,7 +265,7 @@ void GameState::SetCurrent(const std::shared_ptr<State> &_newState,
   if (this->currentState != _newState || _resetState)
   {
     this->Initialize();
-    if (this->currentState != NULL)
+    if (this->currentState)
     {
       this->currentState->Uninitialize();
     }
@@ -293,22 +287,21 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
       for (auto &agent : team->members)
       {
         // Move the player if it's close enough to the ball.
-        if (agent.pos.Distance(ballPos) < GameState::dropBallRadius)
+        if (agent.pos.Distance(this->ballPos) < GameState::dropBallRadius)
         {
-          // Calculate the general form equation of a line from two points.
-          // a = y1 - y2
-          // b = x2 - x1
-          // c = (x1-x2)*y1 + (y2-y1)*x1
-          math::Vector3<double> v(ballPos.Y() - agent.pos.Y(),
-                                  agent.pos.X() - ballPos.X(),
-                                  (ballPos.X() - agent.pos.X()) * ballPos.Y() +
-                                  (agent.pos.Y() - ballPos.Y()) * ballPos.X());
+          if (fabs(agent.pos.X() - this->ballPos.X()) < 0.001 &&
+              fabs(agent.pos.Y() - this->ballPos.Y()) < 0.001)
+          {
+            agent.pos.Set(agent.pos.X() + 0.002,
+                          agent.pos.Y() + 0.002, agent.pos.Z());
+          }
+          math::Line3<double> line(agent.pos, this->ballPos);
           math::Vector3<double> newPos;
           newPos.Set(0, 0, beamHeight);
           math::Vector3<double> newPos2;
           newPos2.Set(0, 0, beamHeight);
-          if (Geometry::IntersectionCircunferenceLine(v, ballPos, 1.25 *
-              GameState::dropBallRadius, newPos, newPos2))
+          if (Geometry::IntersectionCircunferenceLine(line, this->ballPos,
+              1.25 * GameState::dropBallRadius, newPos, newPos2))
           {
             if (agent.pos.Distance(newPos) < agent.pos.Distance(newPos2))
             {
@@ -517,7 +510,7 @@ void GameState::CheckIllegalDefense()
                 bestAgent = &nonGoalieAgent;
               }
             }
-            if (bestAgent != NULL)
+            if (bestAgent)
             {
               this->MoveAgentToSide(*bestAgent);
             }
@@ -663,8 +656,8 @@ void GameState::CheckDoubleTouch()
   // (or second overall contact) is not by the same agent who performed
   // the kick off
   std::shared_ptr<BallContact> firstContact = this->ballContactHistory.at(1);
-  if (this->touchBallKickoff != NULL
-      && this->currentState->prevState != NULL
+  if (this->touchBallKickoff
+      && this->currentState->prevState
       && (this->currentState->prevState->GetName() == "KickOffRight"
           || this->currentState->prevState->GetName() == "KickOffLeft")
       && this->touchBallKickoff->side == firstContact->side
@@ -685,14 +678,14 @@ void GameState::CheckDoubleTouch()
 void GameState::CheckCanScore()
 {
   std::shared_ptr<BallContact> ballContact = this->GetLastBallContact();
-  if (ballContact == NULL)
+  if (!ballContact)
   {
     return;
   }
   for (auto &team : this->teams)
   {
     if ((!team->canScore)
-        && (this->touchBallKickoff != NULL)
+        && (this->touchBallKickoff)
         && ((ballContact->side != team->side)
             || (ballContact->side == team->side
                 && this->touchBallKickoff->uNum != ballContact->uNum
@@ -1101,7 +1094,7 @@ std::shared_ptr<State> GameState::GetCurrentState() const
 ////////////////////////////////////////////////
 GameState::Team::Side GameState::GetLastSideTouchedBall() const
 {
-  if (this->GetLastBallContact() != NULL)
+  if (this->GetLastBallContact())
   {
     return this->GetLastBallContact()->side;
   }

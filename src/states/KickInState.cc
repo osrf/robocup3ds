@@ -14,33 +14,33 @@
  * limitations under the License.
  *
 */
+
 #include <string>
 
 #include "robocup3ds/GameState.hh"
-#include "robocup3ds/SoccerField.hh"
-#include "robocup3ds/states/GoalKickRightState.hh"
+#include "robocup3ds/states/KickInState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
 using namespace states;
 
 /////////////////////////////////////////////////
-GoalKickRightState::GoalKickRightState(const std::string &_name,
-                                       GameState *const _gameState)
+KickInState::KickInState(const std::string &_name,
+                         GameState *const _gameState)
   : State(_name, _gameState)
 {
 }
 
 /////////////////////////////////////////////////
-void GoalKickRightState::Initialize()
+void KickInState::Initialize()
 {
-  // Move the ball.
+  // Move the ball to the sideline.
   this->gameState->MoveBall(initBallPos);
-  this->gameState->MoveBallForGoalKick();
+  this->gameState->MoveBallInBounds();
   State::Initialize();
 }
 
 /////////////////////////////////////////////////
-void GoalKickRightState::Update()
+void KickInState::Update()
 {
   if (this->GetElapsedTime() < GameState::SecondsKickInPause)
   {
@@ -50,9 +50,11 @@ void GoalKickRightState::Update()
   {
     this->Initialize();
   }
-
-  this->gameState->DropBallImpl(GameState::Team::Side::RIGHT);
-  this->gameState->CheckGoalKickIllegalDefense(GameState::Team::Side::RIGHT);
+  // The right team is not allowed to be close to the ball.
+  if (this->name == "KickInLeft")
+  { this->gameState->DropBallImpl(GameState::Team::Side::LEFT); }
+  else
+  { this->gameState->DropBallImpl(GameState::Team::Side::RIGHT); }
   State::Update();
 
   // After some time, go to play mode.
@@ -61,7 +63,7 @@ void GoalKickRightState::Update()
     this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
-  else if (!SoccerField::PenaltyBoxRight.Contains(this->gameState->GetBall()))
+  else if (this->HasBallContactOccurred())
   {
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
