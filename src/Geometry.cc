@@ -16,55 +16,46 @@
 */
 #include <cfloat>
 #include <cmath>
+#include <iostream>
+
 #include "robocup3ds/Geometry.hh"
 
 using namespace ignition;
 
 /////////////////////////////////////////////////
 bool Geometry::IntersectionCircunferenceLine(
-  const math::Vector3<double> &_v, const math::Vector3<double> &_pc, double _r,
+  const math::Line3<double> &_line, const math::Vector3<double> &_pc, double _r,
   math::Vector3<double> &_int1, math::Vector3<double> &_int2)
 {
-  // Solve equations:
-  // (x-px)^2 + (y - py)^2 = r^2
-  // Ax + By + C = 0
+  math::Vector3<double> localP1 = _line[0] - _pc;
+  math::Vector3<double> localP2 = _line[1] - _pc;
+  math::Vector3<double> localDir = localP2 - localP1;
 
-  double i, j, k, A_2;
-  double a, b, c;
-  double tmp;
-  math::Vector3<double> v;
+  double a = G_SQUARE(localDir.X()) + G_SQUARE(localDir.Y());
+  double b = 2 * ((localDir.X() * localP1.X()) + (localDir.Y() * localP1.Y()));
+  double c = G_SQUARE(localP1.X()) + G_SQUARE(localP1.Y()) - G_SQUARE(_r);
 
-  v = _v;
-
-  if (fabs(v.X() - 0.0) < DBL_EPSILON)
+  double delta = G_SQUARE(b) - (4 * a * c);
+  // std::cout << localP1 << std::endl;
+  // std::cout << localP2 << std::endl;
+  // std::cout << localDir << std::endl;
+  // std::cout << delta << " " << b << " " << a << " " << c << std::endl;
+  if (delta < DBL_EPSILON)
   {
-    // Avoid div by 0
-    v.X() = DBL_EPSILON;
-  }
-
-  i = -2 * _pc.X();
-  j = -2 * _pc.Y();
-  k = G_SQUARE(_pc.X()) + G_SQUARE(_pc.Y()) - G_SQUARE(_r);
-
-  A_2 = G_SQUARE(v.X());
-  a = G_SQUARE(-v.Y()) / A_2 + 1;
-  b = -2 * v.Z() * -v.Y() / A_2  - v.Y() * i / v.X() + j;
-  c = G_SQUARE(v.Z()) / A_2 - v.Z() * i / v.X() + k;
-
-  // Solve a*y^2 + b+y + c = 0
-  tmp = G_SQUARE(b) - 4 * a * c;
-  if (tmp < 0)
-  {
-    // No intersection
     return false;
   }
 
-  tmp = sqrt(tmp);
-  _int1.Y() = (-b + tmp) / (2 * a);
-  _int2.Y() = (-b - tmp) / (2 * a);
+  double sqrtDelta = sqrt(delta);
+  double u1 = (-b - sqrtDelta) / (2 * a);
+  double u2 = (-b + sqrtDelta) / (2 * a);
 
-  _int1.X() = (-v.Y() * _int1.Y() - v.Z()) / v.X();
-  _int2.X() = (-v.Y() * _int2.Y() - v.Z()) / v.X();
+  _int1.Set(_line[0].X() + (u1 * localDir.X()),
+            _line[0].Y() + (u1 * localDir.Y()),
+            _int1.Z());
+
+  _int2.Set(_line[0].X() + (u2 * localDir.X()),
+            _line[0].Y() + (u2 * localDir.Y()),
+            _int2.Z());
 
   return true;
 }

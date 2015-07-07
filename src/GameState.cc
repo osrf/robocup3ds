@@ -106,11 +106,11 @@ GameState::GameState():
 {
   this->SetCurrent(beforeKickOffState);
   this->teams.push_back(
-      std::make_shared<Team>(
-        "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
+    std::make_shared<Team>(
+      "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
   this->teams.push_back(
-      std::make_shared<Team>(
-        "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
+    std::make_shared<Team>(
+      "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
 }
 
 /////////////////////////////////////////////////
@@ -147,7 +147,7 @@ void GameState::LoadConfiguration(
   if (LoadConfigParameter(_config, "gamestate_dropballradius", value))
   { GameState::dropBallRadius = value; }
   if (LoadConfigParameterBool(
-    _config, "gamestate_usecounterforgametime", boolValue))
+        _config, "gamestate_usecounterforgametime", boolValue))
   { GameState::useCounterForGameTime = boolValue; }
   if (LoadConfigParameter(_config, "gamestate_playerlimit", value))
   { GameState::playerLimit = static_cast<int>(value); }
@@ -287,22 +287,21 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
       for (auto &agent : team->members)
       {
         // Move the player if it's close enough to the ball.
-        if (agent.pos.Distance(ballPos) < GameState::dropBallRadius)
+        if (agent.pos.Distance(this->ballPos) < GameState::dropBallRadius)
         {
-          // Calculate the general form equation of a line from two points.
-          // a = y1 - y2
-          // b = x2 - x1
-          // c = (x1-x2)*y1 + (y2-y1)*x1
-          math::Vector3<double> v(ballPos.Y() - agent.pos.Y(),
-                                  agent.pos.X() - ballPos.X(),
-                                  (ballPos.X() - agent.pos.X()) * ballPos.Y() +
-                                  (agent.pos.Y() - ballPos.Y()) * ballPos.X());
+          if (fabs(agent.pos.X() - this->ballPos.X()) < 0.001 &&
+              fabs(agent.pos.Y() - this->ballPos.Y()) < 0.001)
+          {
+            agent.pos.Set(agent.pos.X() + 0.002,
+                          agent.pos.Y() + 0.002, agent.pos.Z());
+          }
+          math::Line3<double> line(agent.pos, this->ballPos);
           math::Vector3<double> newPos;
           newPos.Set(0, 0, beamHeight);
           math::Vector3<double> newPos2;
           newPos2.Set(0, 0, beamHeight);
-          if (Geometry::IntersectionCircunferenceLine(v, ballPos, 1.25 *
-              GameState::dropBallRadius, newPos, newPos2))
+          if (Geometry::IntersectionCircunferenceLine(line, this->ballPos,
+              1.25 * GameState::dropBallRadius, newPos, newPos2))
           {
             if (agent.pos.Distance(newPos) < agent.pos.Distance(newPos2))
             {
