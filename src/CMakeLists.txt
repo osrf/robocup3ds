@@ -2,19 +2,13 @@ set (sources
   Geometry.cc
   Perceptors.cc
   states/BeforeKickOffState.cc
-  states/CornerKickLeftState.cc
-  states/CornerKickRightState.cc
-  states/FreeKickLeftState.cc
-  states/FreeKickRightState.cc
+  states/CornerKickState.cc
+  states/FreeKickState.cc
   states/GameOverState.cc
-  states/GoalKickLeftState.cc
-  states/GoalKickRightState.cc
-  states/GoalLeftState.cc
-  states/GoalRightState.cc
-  states/KickInLeftState.cc
-  states/KickInRightState.cc
-  states/KickOffLeftState.cc
-  states/KickOffRightState.cc
+  states/GoalKickState.cc
+  states/GoalState.cc
+  states/KickInState.cc
+  states/KickOffState.cc
   states/PlayOnState.cc
   states/State.cc
   GameState.cc

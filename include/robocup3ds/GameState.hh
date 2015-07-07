@@ -30,19 +30,13 @@
 namespace states
 {
   class BeforeKickOffState;
-  class CornerKickLeftState;
-  class CornerKickRightState;
-  class FreeKickLeftState;
-  class FreeKickRightState;
+  class CornerKickState;
+  class FreeKickState;
   class GameOverState;
-  class GoalKickLeftState;
-  class GoalKickRightState;
-  class GoalLeftState;
-  class GoalRightState;
-  class KickInLeftState;
-  class KickInRightState;
-  class KickOffLeftState;
-  class KickOffRightState;
+  class GoalKickState;
+  class GoalState;
+  class KickInState;
+  class KickOffState;
   class PlayOnState;
   class State;
 }
@@ -50,7 +44,7 @@ namespace states
 /// \brief Class for controlling play mode transitions and checking rule
 /// violations in a 3D simulation Robocup game.
 ///
-/// To use GameState object, you need perform the following three actions
+/// To use GameState object, you need perform the following actions
 /// repeatedly until the game is over:
 /// 1) Use the simulation world model to update the pose of all
 /// the players and ball. Also, check for collisions in simulation world model
@@ -647,46 +641,46 @@ class GameState
   public: std::shared_ptr<states::BeforeKickOffState> beforeKickOffState;
 
   /// \brief kickOffLeftState playmode
-  public: std::shared_ptr<states::KickOffLeftState> kickOffLeftState;
+  public: std::shared_ptr<states::KickOffState> kickOffLeftState;
 
   /// \brief kickOffRightState playmode
-  public: std::shared_ptr<states::KickOffRightState> kickOffRightState;
+  public: std::shared_ptr<states::KickOffState> kickOffRightState;
 
   /// \brief playState playmode
   public: std::shared_ptr<states::PlayOnState> playOnState;
 
   /// \brief kickInLeftState playmode
-  public: std::shared_ptr<states::KickInLeftState> kickInLeftState;
+  public: std::shared_ptr<states::KickInState> kickInLeftState;
 
   /// \brief kickInRightState playmode
-  public: std::shared_ptr<states::KickInRightState> kickInRightState;
+  public: std::shared_ptr<states::KickInState> kickInRightState;
 
   /// \brief cornerKickLeftState playmode
-  public: std::shared_ptr<states::CornerKickLeftState> cornerKickLeftState;
+  public: std::shared_ptr<states::CornerKickState> cornerKickLeftState;
 
   /// \brief cornerKickRightState playmode
-  public: std::shared_ptr<states::CornerKickRightState> cornerKickRightState;
+  public: std::shared_ptr<states::CornerKickState> cornerKickRightState;
 
   /// \brief goalKickLeftState playmode
-  public: std::shared_ptr<states::GoalKickLeftState> goalKickLeftState;
+  public: std::shared_ptr<states::GoalKickState> goalKickLeftState;
 
   /// \brief goalKickRightState playmode
-  public: std::shared_ptr<states::GoalKickRightState> goalKickRightState;
+  public: std::shared_ptr<states::GoalKickState> goalKickRightState;
 
   /// \brief gameOverState playmode
   public: std::shared_ptr<states::GameOverState> gameOverState;
 
   /// \brief goalLeftState playmode
-  public: std::shared_ptr<states::GoalLeftState> goalLeftState;
+  public: std::shared_ptr<states::GoalState> goalLeftState;
 
   /// \brief goalRightState playmode
-  public: std::shared_ptr<states::GoalRightState> goalRightState;
+  public: std::shared_ptr<states::GoalState> goalRightState;
 
   /// \brief freeKickLeftState playmode
-  public: std::shared_ptr<states::FreeKickLeftState> freeKickLeftState;
+  public: std::shared_ptr<states::FreeKickState> freeKickLeftState;
 
   /// \brief freeKickRightState playmode
-  public: std::shared_ptr<states::FreeKickRightState> freeKickRightState;
+  public: std::shared_ptr<states::FreeKickState> freeKickRightState;
 
   /// \brief Name of BeforeKickOff playmode
   public: static const std::string BeforeKickOff;

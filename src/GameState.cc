@@ -25,19 +25,13 @@
 #include "robocup3ds/Geometry.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
-#include "robocup3ds/states/CornerKickLeftState.hh"
-#include "robocup3ds/states/CornerKickRightState.hh"
-#include "robocup3ds/states/FreeKickLeftState.hh"
-#include "robocup3ds/states/FreeKickRightState.hh"
+#include "robocup3ds/states/CornerKickState.hh"
+#include "robocup3ds/states/FreeKickState.hh"
 #include "robocup3ds/states/GameOverState.hh"
-#include "robocup3ds/states/GoalKickLeftState.hh"
-#include "robocup3ds/states/GoalKickRightState.hh"
-#include "robocup3ds/states/GoalLeftState.hh"
-#include "robocup3ds/states/GoalRightState.hh"
-#include "robocup3ds/states/KickInLeftState.hh"
-#include "robocup3ds/states/KickInRightState.hh"
-#include "robocup3ds/states/KickOffLeftState.hh"
-#include "robocup3ds/states/KickOffRightState.hh"
+#include "robocup3ds/states/GoalKickState.hh"
+#include "robocup3ds/states/GoalState.hh"
+#include "robocup3ds/states/KickInState.hh"
+#include "robocup3ds/states/KickOffState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
 
 using namespace ignition;
@@ -83,22 +77,22 @@ bool   GameState::restrictVision = true;
 /////////////////////////////////////////////////
 GameState::GameState():
   beforeKickOffState(std::make_shared<BeforeKickOffState>(BeforeKickOff, this)),
-  kickOffLeftState(std::make_shared<KickOffLeftState>(KickOffLeft, this)),
-  kickOffRightState(std::make_shared<KickOffRightState>(KickOffRight, this)),
+  kickOffLeftState(std::make_shared<KickOffState>(KickOffLeft, this)),
+  kickOffRightState(std::make_shared<KickOffState>(KickOffRight, this)),
   playOnState(std::make_shared<PlayOnState>(PlayOn, this)),
-  kickInLeftState(std::make_shared<KickInLeftState>(KickInLeft, this)),
-  kickInRightState(std::make_shared<KickInRightState>(KickInRight, this)),
-  cornerKickLeftState(std::make_shared<CornerKickLeftState>(
+  kickInLeftState(std::make_shared<KickInState>(KickInLeft, this)),
+  kickInRightState(std::make_shared<KickInState>(KickInRight, this)),
+  cornerKickLeftState(std::make_shared<CornerKickState>(
                         CornerKickLeft, this)),
-  cornerKickRightState(std::make_shared<CornerKickRightState>(
+  cornerKickRightState(std::make_shared<CornerKickState>(
                          CornerKickRight, this)),
-  goalKickLeftState(std::make_shared<GoalKickLeftState>(GoalKickLeft, this)),
-  goalKickRightState(std::make_shared<GoalKickRightState>(GoalKickRight, this)),
+  goalKickLeftState(std::make_shared<GoalKickState>(GoalKickLeft, this)),
+  goalKickRightState(std::make_shared<GoalKickState>(GoalKickRight, this)),
   gameOverState(std::make_shared<GameOverState>(GameOver, this)),
-  goalLeftState(std::make_shared<GoalLeftState>(GoalLeft, this)),
-  goalRightState(std::make_shared<GoalRightState>(GoalRight, this)),
-  freeKickLeftState(std::make_shared<FreeKickLeftState>(FreeKickLeft, this)),
-  freeKickRightState(std::make_shared<FreeKickRightState>(FreeKickRight, this)),
+  goalLeftState(std::make_shared<GoalState>(GoalLeft, this)),
+  goalRightState(std::make_shared<GoalState>(GoalRight, this)),
+  freeKickLeftState(std::make_shared<FreeKickState>(FreeKickLeft, this)),
+  freeKickRightState(std::make_shared<FreeKickState>(FreeKickRight, this)),
 
   hasCurrentStateChanged(false),
   touchBallKickoff(std::shared_ptr<BallContact>(nullptr)),
@@ -271,7 +265,7 @@ void GameState::SetCurrent(const std::shared_ptr<State> &_newState,
   if (this->currentState != _newState || _resetState)
   {
     this->Initialize();
-    if (this->currentState != NULL)
+    if (this->currentState)
     {
       this->currentState->Uninitialize();
     }
