@@ -22,7 +22,6 @@
 
 ActionMessageParser::ActionMessageParser()
 {
-
 }
 
 //////////////////////////////////////////////////

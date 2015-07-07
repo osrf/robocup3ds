@@ -25,12 +25,15 @@
 #include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/ActionMessageParser.hh"
 
-
+/// \brief This test uses s-expressions messages,
+// extracted form communication of a sample Robocup agents.
 const std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)(beam 1 1 0.4)"
            "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
+           "(init (unum 1)(teamname sampleAgent))(he1 3.20802)"
            "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
            "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)";
 
+/// \brief Constants and global variables.
 const int kPort = 6234;
 std::mutex mutex;
 std::condition_variable cv;
@@ -38,6 +41,8 @@ bool clientReady = false;
 bool serverReady = false;
 
 //////////////////////////////////////////////////
+/// \brief Send data and its size to a socket
+// \param[in] _client_socket Socket for sending/receiving data
 void SendSomeData(int _client_socket)
 {
   char mBuffer[8192];
@@ -56,6 +61,11 @@ void SendSomeData(int _client_socket)
   EXPECT_EQ(sent, content.size() + 4u);
 }
 
+//////////////////////////////////////////////////
+/// \brief Create a client and connect it with the server.
+/// \param[in] _port Port where the server accepts connections.
+/// \param[out] _socket Socket for sending/receiving data to/from the server.
+/// \return true when success or false otherwise.,
 //////////////////////////////////////////////////
 bool createClient(const int _port, int &_socket)
 {
@@ -77,6 +87,10 @@ bool createClient(const int _port, int &_socket)
 }
 
 //////////////////////////////////////////////////
+/// \brief Create a client that connects to the server and wait for a reply.
+//  It tests and Message received and the Parser procedure to extract
+//  information on s-expresion messages.
+/// \param[in] _port Port where the server accepts connections.
 void receiverClient(const int _port)
 {
   int socket_ID;
@@ -94,8 +108,11 @@ void receiverClient(const int _port)
   cv.notify_one();
 
   auto parser = std::make_shared<ActionMessageParser>();
+
+  // Test pareser for whole s-expression messages parsing
   EXPECT_TRUE(parser->Parse(socket_ID));
 
+  // Test Message received
   EXPECT_EQ(parser->message.str(),content);
 
   // Test Scene message Parser
@@ -110,19 +127,19 @@ void receiverClient(const int _port)
     EXPECT_EQ(rType, 0);
   }
 
-  // Test Init message Parser
+  // Test Init message parser
   std::string teamname;
   int playerNumber;
 
   if ( parser->GetInitInformation(socket_ID, teamname, playerNumber) )
   {
-    std::cout << "Init Msg Parsed: "<< teamname << ", "
+    std::cout << "Init Msg: "<< teamname << ", "
         << playerNumber<< std::endl;
-    EXPECT_EQ(teamname, "FCPOpp");
+    EXPECT_EQ(teamname, "sampleAgent");
     EXPECT_EQ(playerNumber, 1);
   }
 
-  // Test Beam message Parser
+  // Test Beam message parser
   double x,y,z;
 
   if ( parser->GetBeamInformation(socket_ID, x, y, z ) )
@@ -139,6 +156,8 @@ void receiverClient(const int _port)
 }
 
 //////////////////////////////////////////////////
+/// \brief Test procedure of the parser in one TCP message passing scenario.
+
 TEST(Server, Parser)
 {
   auto parser = std::make_shared <ActionMessageParser>();
