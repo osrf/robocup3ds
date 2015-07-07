@@ -22,8 +22,8 @@ using namespace ignition;
 
 /////////////////////////////////////////////////
 bool Geometry::IntersectionCircunferenceLine(
-  const math::Vector3<double> &_v, const math::Vector3<double> &p_c, double r,
-  math::Vector3<double> &int1, math::Vector3<double> &int2)
+  const math::Vector3<double> &_v, const math::Vector3<double> &_pc, double _r,
+  math::Vector3<double> &_int1, math::Vector3<double> &_int2)
 {
   // Solve equations:
   // (x-px)^2 + (y - py)^2 = r^2
@@ -42,9 +42,9 @@ bool Geometry::IntersectionCircunferenceLine(
     v.X() = DBL_EPSILON;
   }
 
-  i = -2 * p_c.X();
-  j = -2 * p_c.Y();
-  k = G_SQUARE(p_c.X()) + G_SQUARE(p_c.Y()) - G_SQUARE(r);
+  i = -2 * _pc.X();
+  j = -2 * _pc.Y();
+  k = G_SQUARE(_pc.X()) + G_SQUARE(_pc.Y()) - G_SQUARE(_r);
 
   A_2 = G_SQUARE(v.X());
   a = G_SQUARE(-v.Y()) / A_2 + 1;
@@ -60,11 +60,11 @@ bool Geometry::IntersectionCircunferenceLine(
   }
 
   tmp = sqrt(tmp);
-  int1.Y() = (-b + tmp) / (2 * a);
-  int2.Y() = (-b - tmp) / (2 * a);
+  _int1.Y() = (-b + tmp) / (2 * a);
+  _int2.Y() = (-b - tmp) / (2 * a);
 
-  int1.X() = (-v.Y() * int1.Y() - v.Z()) / v.X();
-  int2.X() = (-v.Y() * int2.Y() - v.Z()) / v.X();
+  _int1.X() = (-v.Y() * _int1.Y() - v.Z()) / v.X();
+  _int2.X() = (-v.Y() * _int2.Y() - v.Z()) / v.X();
 
   return true;
 }

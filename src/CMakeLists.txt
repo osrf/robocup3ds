@@ -19,6 +19,7 @@ set (gtest_sources
   Robocup3dsPlugin_TEST.cc
   GameState_TEST.cc
   Perceptors_TEST.cc
+  Geometry_TEST.cc
 )
 
 # make below target specific?

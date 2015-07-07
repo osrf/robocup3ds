@@ -38,25 +38,25 @@ class Perceptor
   /// \Brief Destructor for Perceptor object
   public: ~Perceptor();
 
-  /// \Brief Method used to set view frustrum based on HFov, VFov
+  /// \Brief Method used to set view frustum based on HFov, VFov
   public: void SetViewFrustum();
 
-  /// \Brief Method used to get view frustrum
-  public: std::vector <ignition::math::Plane<double> > &GetViewFrustum();
+  /// \Brief Method used to get view frustum
+  public: std::vector <ignition::math::Plane<double>> &GetViewFrustum();
 
   /// \Brief Function to update all relevant agents perception info
   public: void Update();
 
   /// \Brief Helper function to update line info
+  /// \Param[in] _agent Agent object whose perception is updated
   /// \Param[in] _line Line object
-  /// \Param[out] _agent Agent object whose perception is updated
   public: void UpdateLine(GameState::Agent &_agent,
     const ignition::math::Line3<double> &_line) const;
 
   /// \Brief Function to update landmark info
+  /// \Param[in] _agent Agent object whose perception is updated
   /// \Param[in] _landmarkname Name of landmark
   /// \Param[in] _landmark Position of landmark
-  /// \Param[out] _agent Agent object whose perception is updated
   public: void UpdateLandmark(GameState::Agent &_agent,
                 const std::string &_landmarkname,
                 const ignition::math::Vector3<double> &_landmark) const;
@@ -86,7 +86,7 @@ class Perceptor
   public: static bool useNoise;
 
   /// \Brief Distance of message where it still can be heard
-  public: static double hearDist;
+  public: static const double kHearDist;
 
   /// \Brief A constant noise that is added to all observations
   private: static ignition::math::Vector3<double> fixedNoise;
@@ -100,8 +100,8 @@ class Perceptor
   /// \Brief 4x4 transformation to go from global to local coordinates
   private: ignition::math::Matrix4<double> G2LMat;
 
-  /// \Brief View frustrum
-  /// We model view frustrum as a vector of four planes
+  /// \Brief View frustum
+  /// We model view frustum as a vector of four planes
   private: std::vector <ignition::math::Plane<double> > viewFrustum;
 };
 

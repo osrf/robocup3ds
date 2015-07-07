@@ -30,7 +30,7 @@
 using namespace ignition;
 
 bool Perceptor::useNoise = true;
-double Perceptor::hearDist = 50.0;
+const double Perceptor::kHearDist = 50.0;
 
 math::Vector3<double> Perceptor::fixedNoise(
   math::Rand::DblUniform(-0.005, 0.005),
@@ -217,7 +217,7 @@ void Perceptor::UpdateAgentHear(GameState::Agent &_agent) const
     return;
   }
   math::Vector3<double> relPos = this->G2LMat.TransformAffine(say.pos);
-  if (relPos.Length() > Perceptor::hearDist)
+  if (relPos.Length() > Perceptor::kHearDist)
   {
     return;
   }
