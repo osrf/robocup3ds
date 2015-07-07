@@ -17,6 +17,9 @@
 
 #include "robocup3ds/ActionMessageParser.hh"
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <iostream>
+#include <cstdint>
 
 ActionMessageParser::ActionMessageParser()
 {
@@ -25,14 +28,24 @@ ActionMessageParser::ActionMessageParser()
 
 bool ActionMessageParser::Parse(int _socket)
 {
-  char buffer[8092];
+  char buffer[this->kBufferSize];
   bzero(buffer, sizeof(buffer));
   int bytesRead = 0;
-  int totalBytes = 1000;
+  int totalBytes;
+
+  int byteRead=recv(_socket, buffer, 4, 0);
+
+  totalBytes = ntohl(*(unsigned int*) buffer);
+
+  std::cout<<"totalBytes:"<<totalBytes<<std::endl;
+
+  totalBytes = totalBytes-1;
+
+  char *offset = buffer + 4;
 
   while (bytesRead < totalBytes)
   {
-    int result = recv(_socket, buffer + bytesRead, totalBytes - bytesRead, 0);
+    int result = recv(_socket, offset + bytesRead, totalBytes - bytesRead, 0);
     if (result < 1)
     {
       return false;
@@ -41,7 +54,10 @@ bool ActionMessageParser::Parse(int _socket)
     bytesRead += result;
   }
 
-  parseMessage(std::string(buffer));
+
+  this->message << std::string(offset);
+
+  parseMessage(this->message.str());
 
   return true;
 }
@@ -52,9 +68,9 @@ void ActionMessageParser::parseMessage(const std::string &_msg)
   char linebuf[BUFSIZ+16000];
   sexp_t *exp;
 
-//  std::stringstream message;
+  //  std::stringstream message;
 
-  this->message << "(msg " << _msg << ")";
+
 
   strcpy(linebuf, message.str().c_str());
 
@@ -261,6 +277,17 @@ void ActionMessageParser::parseInit(sexp_t *_exp)
 
   this->initParserMap.insert(std::map<int, InitMsg >::value_type(this->agentID
       , InitMsg(this->agentID, playerNum, teamName)));
+}
+
+void ActionMessageParser::OnConnection(const int _socket)
+{
+  this->socket = _socket;
+  this->newConnectionDetected = true;
+}
+
+void ActionMessageParser::OnDisconnection(const int /*_socket*/)
+{
+  this->newDisconnectionDetected = true;
 }
 
 bool ActionMessageParser::getSceneInformation(const int _id, std::string &_msg, int &_robotType)

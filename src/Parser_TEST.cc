@@ -26,15 +26,15 @@
 #include "robocup3ds/ActionMessageParser.hh"
 
 
-const std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)"
-      "(beam 1 1 0.4)(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
-      "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
-      "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)"
-      "(lae4 0)(rae4 0)(init (unum 1)(teamname FCPOpp))(he1 3.20802)";
+const std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)(beam 1 1 0.4)"
+           "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
+           "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
+           "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)";
 
-const int kPort = 6334;
+const int kPort = 6234;
 std::mutex mutex;
 std::condition_variable cv;
+int socket_ID;
 bool clientReady = false;
 bool serverReady = false;
 
@@ -43,6 +43,28 @@ void reset()
 {
   clientReady = false;
   serverReady = false;
+  ActionMessageParser actionObj;
+  actionObj.newConnectionDetected=false;
+  actionObj.newDisconnectionDetected=false;
+}
+
+//////////////////////////////////////////////////
+void SendSomeData(int _client_socket)
+{
+  char mBuffer[8090];
+  char* out = (char*) content.c_str();
+  strcpy(mBuffer + 4, out);
+  unsigned int len = strlen(out) + 1;
+  unsigned int netlen = htonl(len);
+  memcpy(mBuffer, &netlen, 4);
+
+  std::cout << "msgSent \"" << content << "\"\n\n";
+  std::cout << "msglen:"<<len <<std::endl;
+
+
+  size_t sent = write(_client_socket, mBuffer, content.size() + 4);
+  fsync(_client_socket);
+  EXPECT_EQ(sent, content.size() + 4u);
 }
 
 //////////////////////////////////////////////////
@@ -99,6 +121,7 @@ void senderClient(const int _port)
 void receiverClient(const int _port)
 {
   int socket;
+  
   if (!createClient(_port, socket))
     return;
 
@@ -111,26 +134,31 @@ void receiverClient(const int _port)
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
   cv.notify_one();
 
+
   // Receive some data.
   auto parser = std::make_shared<ActionMessageParser>();
   EXPECT_TRUE(parser->Parse(socket));
   EXPECT_EQ(parser->message.str(),content);
+  std::cout<<"message recieved:"<<parser->message.str()<<std::endl;
   close(socket);
 }
 
 //////////////////////////////////////////////////
-TEST(Server, NewClient)
+TEST(Server, Parser)
 {
   reset();
 
-  auto parser = std::make_shared<ActionMessageParser>();
+  auto parser = std::make_shared <ActionMessageParser>();
+
   gazebo::Server server(kPort, parser,
     &ActionMessageParser::OnConnection, parser.get(),
     &ActionMessageParser::OnDisconnection, parser.get());
 
   server.Start();
-  std::thread clientThread(&senderClient, kPort);
 
+  std::thread clientThread(&receiverClient, kPort);
+
+  // Wait some time until the client sends the request.
   {
     std::unique_lock<std::mutex> lk(mutex);
     auto now = std::chrono::system_clock::now();
@@ -142,11 +170,47 @@ TEST(Server, NewClient)
     }
   }
 
+  // Check that the callback for detecting new connections was executed.
+  EXPECT_TRUE(parser->newConnectionDetected);
 
-  serverReady = true;
-  cv.notify_one();
+  // Send some data to the client.
+  SendSomeData(parser->socket);
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  // Test Scene message Parser
+  std::string sceneAddress;
+  int rType;
+
+  if ( parser->getSceneInformation ( parser->socket, sceneAddress, rType ) )
+  {
+    std::cout << "Scene Msg Parsed: " << sceneAddress
+        << ", " << rType << std::endl;
+    EXPECT_EQ(sceneAddress, "rsg/agent/nao/nao_hetero.rsg");
+    EXPECT_EQ(rType, 0);
+  }
+
+  // Test Init message Parser
+  std::string teamname;
+  int playerNumber;
+
+  if ( parser->getInitInformation(parser->socket, teamname, playerNumber) )
+  {
+    std::cout << "Init Msg Parsed: "<< teamname << ", "
+        << playerNumber<< std::endl;
+    EXPECT_EQ(teamname, "FCPOpp");
+    EXPECT_EQ(playerNumber, 1);
+  }
+
+  // Test Beam message Parser
+  double x,y,z;
+
+  if ( parser->getBeamInformation(parser->socket, x, y, z ) )
+  {
+    std::cout << "Beam Pos:( "<< x << ", " << y <<", "<< z <<")" <<std::endl;
+    EXPECT_DOUBLE_EQ (x, 1);
+    EXPECT_DOUBLE_EQ (y, 1);
+    EXPECT_DOUBLE_EQ (z, 0.4);
+  }
+
 
   if (clientThread.joinable())
     clientThread.join();

@@ -82,6 +82,8 @@ class ActionMessageParser: public gazebo::SocketParser
     public: std::string teamName;
   };
 
+  private: static const int kBufferSize = 8192;
+
   private: std::map<int, SceneMsg> sceneParserMap;
 
   private: std::map<int, InitMsg> initParserMap;
@@ -99,6 +101,12 @@ class ActionMessageParser: public gazebo::SocketParser
   private: void parseInit(sexp_t *_exp);
 
   private: void parseHingeJoint(sexp_t *exp);
+
+  public: int socket;
+
+  public: bool newConnectionDetected = false;
+
+  public: bool newDisconnectionDetected = false;
 
   public: std::stringstream message;
 
@@ -119,18 +127,9 @@ class ActionMessageParser: public gazebo::SocketParser
 
   public: std::map<std::string, double> jointParserMap;
 
-  public: void OnConnection(const int _socket)
-  {
-    this->socket = _socket;
-  }
+  public: void OnConnection(const int _socket);
 
-  public: void OnDisconnection(const int /*_socket*/)
-  {
-  }
-
-  private: static const int kBufferSize = 8192;
-
-  private: int socket;
+  public: void OnDisconnection(const int /*_socket*/);
 
   public: virtual ~ActionMessageParser();
 };
