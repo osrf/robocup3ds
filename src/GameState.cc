@@ -503,7 +503,7 @@ void GameState::CheckIllegalDefense()
                 bestAgent = &nonGoalieAgent;
               }
             }
-            if (bestAgent != NULL)
+            if (bestAgent)
             {
               this->MoveAgentToSide(*bestAgent);
             }
@@ -649,8 +649,8 @@ void GameState::CheckDoubleTouch()
   // (or second overall contact) is not by the same agent who performed
   // the kick off
   std::shared_ptr<BallContact> firstContact = this->ballContactHistory.at(1);
-  if (this->touchBallKickoff != NULL
-      && this->currentState->prevState != NULL
+  if (this->touchBallKickoff
+      && this->currentState->prevState
       && (this->currentState->prevState->GetName() == "KickOffRight"
           || this->currentState->prevState->GetName() == "KickOffLeft")
       && this->touchBallKickoff->side == firstContact->side
@@ -671,14 +671,14 @@ void GameState::CheckDoubleTouch()
 void GameState::CheckCanScore()
 {
   std::shared_ptr<BallContact> ballContact = this->GetLastBallContact();
-  if (ballContact == NULL)
+  if (!ballContact)
   {
     return;
   }
   for (auto &team : this->teams)
   {
     if ((!team->canScore)
-        && (this->touchBallKickoff != NULL)
+        && (this->touchBallKickoff)
         && ((ballContact->side != team->side)
             || (ballContact->side == team->side
                 && this->touchBallKickoff->uNum != ballContact->uNum
@@ -1087,7 +1087,7 @@ std::shared_ptr<State> GameState::GetCurrentState() const
 ////////////////////////////////////////////////
 GameState::Team::Side GameState::GetLastSideTouchedBall() const
 {
-  if (this->GetLastBallContact() != NULL)
+  if (this->GetLastBallContact())
   {
     return this->GetLastBallContact()->side;
   }
