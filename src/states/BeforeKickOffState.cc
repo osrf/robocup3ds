@@ -20,8 +20,7 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
-#include "robocup3ds/states/KickOffLeftState.hh"
-#include "robocup3ds/states/KickOffRightState.hh"
+#include "robocup3ds/states/KickOffState.hh"
 
 using namespace states;
 
@@ -58,12 +57,8 @@ void BeforeKickOffState::Update()
   if (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff)
   {
     if (this->gameState->GetHalf() == GameState::Half::FIRST_HALF)
-    {
-      this->gameState->SetCurrent(this->gameState->kickOffLeftState);
-    }
+    { this->gameState->SetCurrent(this->gameState->kickOffLeftState); }
     else
-    {
-      this->gameState->SetCurrent(this->gameState->kickOffRightState);
-    }
+    { this->gameState->SetCurrent(this->gameState->kickOffRightState); }
   }
 }
