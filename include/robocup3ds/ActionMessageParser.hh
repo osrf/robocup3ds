@@ -92,15 +92,15 @@ class ActionMessageParser: public gazebo::SocketParser
 
   private: int agentID;
 
-  private: void parseSexp(sexp_t *exp);
+  private: void ParseSexp(sexp_t *exp);
 
-  private: void parseScene(sexp_t *_exp);
+  private: void ParseScene(sexp_t *_exp);
 
-  private: void parseBeam(sexp_t *_exp);
+  private: void ParseBeam(sexp_t *_exp);
 
-  private: void parseInit(sexp_t *_exp);
+  private: void ParseInit(sexp_t *_exp);
 
-  private: void parseHingeJoint(sexp_t *exp);
+  private: void ParseHingeJoint(sexp_t *exp);
 
   public: int socket;
 
@@ -110,26 +110,26 @@ class ActionMessageParser: public gazebo::SocketParser
 
   public: std::stringstream message;
 
+  public: std::map<std::string, double> jointParserMap;
+
   public: ActionMessageParser();
 
   public: bool Parse(const int _socket);
 
-  public: void parseMessage(const std::string &_msg);
+  public: void ParseMessage(const std::string &_msg);
 
-  public: bool getSceneInformation(const int _id, std::string &_msg,
+  public: bool GetSceneInformation(const int _id, std::string &_msg,
       int &_robotType);
 
-  public: bool getInitInformation(const int _id, std::string &_teamName,
+  public: bool GetInitInformation(const int _id, std::string &_teamName,
       int &_playerNumber);
 
-  public: bool getBeamInformation(const int _id, double &_x, double &_y,
+  public: bool GetBeamInformation(const int _id, double &_x, double &_y,
       double &_z);
-
-  public: std::map<std::string, double> jointParserMap;
 
   public: void OnConnection(const int _socket);
 
-  public: void OnDisconnection(const int /*_socket*/);
+  public: void OnDisconnection(const int );
 
   public: virtual ~ActionMessageParser();
 };

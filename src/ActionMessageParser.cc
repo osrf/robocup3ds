@@ -15,37 +15,44 @@
  *
  */
 
-#include "robocup3ds/ActionMessageParser.hh"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
-#include <cstdint>
+#include "robocup3ds/ActionMessageParser.hh"
 
 ActionMessageParser::ActionMessageParser()
 {
 
 }
 
+//////////////////////////////////////////////////
 bool ActionMessageParser::Parse(int _socket)
 {
+  this->agentID=_socket;
+
   char buffer[this->kBufferSize];
+
   bzero(buffer, sizeof(buffer));
+
   int bytesRead = 0;
+
   int totalBytes;
 
-  int byteRead=recv(_socket, buffer, 4, 0);
+  int endiannessSize=recv(_socket, buffer, 4, 0);
+
+  if(endiannessSize<1)
+  {
+    return false;
+  }
 
   totalBytes = ntohl(*(unsigned int*) buffer);
 
-  std::cout<<"totalBytes:"<<totalBytes<<std::endl;
-
-  totalBytes = totalBytes-1;
-
-  char *offset = buffer + 4;
+  char *offset = buffer;
 
   while (bytesRead < totalBytes)
   {
     int result = recv(_socket, offset + bytesRead, totalBytes - bytesRead, 0);
+
     if (result < 1)
     {
       return false;
@@ -54,27 +61,26 @@ bool ActionMessageParser::Parse(int _socket)
     bytesRead += result;
   }
 
-
   this->message << std::string(offset);
 
-  parseMessage(this->message.str());
+  ParseMessage(this->message.str());
 
   return true;
 }
 
-
-void ActionMessageParser::parseMessage(const std::string &_msg)
+//////////////////////////////////////////////////
+void ActionMessageParser::ParseMessage(const std::string &_msg)
 {
-  char linebuf[BUFSIZ+16000];
+  char linebuf[36000];
   sexp_t *exp;
 
-  //  std::stringstream message;
+  std::stringstream s_expression;
 
+  s_expression << "(msg " << _msg << ")";
 
+  strcpy(linebuf, s_expression.str().c_str());
 
-  strcpy(linebuf, message.str().c_str());
-
-  exp = parse_sexp(linebuf, BUFSIZ+16000);
+  exp = parse_sexp(linebuf, 36000);
 
   if (exp == NULL)
     return;
@@ -88,18 +94,19 @@ void ActionMessageParser::parseMessage(const std::string &_msg)
   while (ptr != NULL)
   {
     if (ptr->ty == SEXP_LIST)
-      parseSexp(ptr);
+      ParseSexp(ptr);
 
     ptr = ptr->next;
   }
 
   destroy_sexp(exp);
+
 }
 
-void ActionMessageParser::parseSexp(sexp_t *_exp)
+//////////////////////////////////////////////////
+void ActionMessageParser::ParseSexp(sexp_t *_exp)
 {
   char *v;
-
   if (_exp->ty == SEXP_LIST)
   {
     if (_exp->list->ty == SEXP_VALUE)
@@ -112,103 +119,103 @@ void ActionMessageParser::parseSexp(sexp_t *_exp)
 
   if (!strcmp(v, "scene"))
   {
-    parseScene(_exp);
+    ParseScene(_exp);
   }
   else if (!strcmp(v, "beam"))
   {
-    parseBeam(_exp);
+    ParseBeam(_exp);
   }
   else if (!strcmp(v, "init"))
   {
-    parseInit(_exp);
+    ParseInit(_exp);
   }
   else if (!strcmp(v, "he1"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "he2"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle1"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle1"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle2"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle2"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle3"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle3"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle4"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle4"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle5"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle5"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lle6"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rle6"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lae1"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rae1"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lae2"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rae2"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lae3"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rae3"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "lae4"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else if (!strcmp(v, "rae4"))
   {
-    parseHingeJoint(_exp);
+    ParseHingeJoint(_exp);
   }
   else
   {
@@ -216,7 +223,8 @@ void ActionMessageParser::parseSexp(sexp_t *_exp)
   }
 }
 
-void ActionMessageParser::parseHingeJoint(sexp_t *_exp)
+//////////////////////////////////////////////////
+void ActionMessageParser::ParseHingeJoint(sexp_t *_exp)
 {
   std::string name;
   double effector;
@@ -225,7 +233,8 @@ void ActionMessageParser::parseHingeJoint(sexp_t *_exp)
   this->jointParserMap.insert(std::map <std::string, double> ::value_type(name, effector));
 }
 
-void ActionMessageParser::parseScene(sexp_t *_exp)
+//////////////////////////////////////////////////
+void ActionMessageParser::ParseScene(sexp_t *_exp)
 {
   int type = 0;
 
@@ -234,12 +243,12 @@ void ActionMessageParser::parseScene(sexp_t *_exp)
   address =_exp->list->next->val;
 
   type = atof(_exp->list->next->next->val);
-
   this->sceneParserMap.insert(std::map<int, SceneMsg >::value_type(this->agentID
       , SceneMsg(this->agentID, type, address)));
 }
 
-void ActionMessageParser::parseBeam(sexp_t *_exp)
+//////////////////////////////////////////////////
+void ActionMessageParser::ParseBeam(sexp_t *_exp)
 {
   double x,y,z = 0;
 
@@ -253,7 +262,8 @@ void ActionMessageParser::parseBeam(sexp_t *_exp)
       , BeamMsg(this->agentID, x, y, z)));
 }
 
-void ActionMessageParser::parseInit(sexp_t *_exp)
+//////////////////////////////////////////////////
+void ActionMessageParser::ParseInit(sexp_t *_exp)
 {
   int playerNum = 0;
 
@@ -279,18 +289,21 @@ void ActionMessageParser::parseInit(sexp_t *_exp)
       , InitMsg(this->agentID, playerNum, teamName)));
 }
 
+//////////////////////////////////////////////////
 void ActionMessageParser::OnConnection(const int _socket)
 {
   this->socket = _socket;
   this->newConnectionDetected = true;
 }
 
+//////////////////////////////////////////////////
 void ActionMessageParser::OnDisconnection(const int /*_socket*/)
 {
   this->newDisconnectionDetected = true;
 }
 
-bool ActionMessageParser::getSceneInformation(const int _id, std::string &_msg, int &_robotType)
+//////////////////////////////////////////////////
+bool ActionMessageParser::GetSceneInformation(const int _id, std::string &_msg, int &_robotType)
 {
   for (auto ob = this->sceneParserMap.begin(); ob != this->sceneParserMap.end(); ++ob)
   {
@@ -304,7 +317,8 @@ bool ActionMessageParser::getSceneInformation(const int _id, std::string &_msg, 
   return false;
 }
 
-bool ActionMessageParser::getInitInformation(const int _id, std::string &_teamName,
+//////////////////////////////////////////////////
+bool ActionMessageParser::GetInitInformation(const int _id, std::string &_teamName,
     int &_playerNumber)
 {
   for (auto ob = this->initParserMap.begin(); ob != this->initParserMap.end(); ++ob)
@@ -320,7 +334,8 @@ bool ActionMessageParser::getInitInformation(const int _id, std::string &_teamNa
   return false;
 }
 
-bool ActionMessageParser::getBeamInformation(const int _id, double &_x, double &_y,
+//////////////////////////////////////////////////
+bool ActionMessageParser::GetBeamInformation(const int _id, double &_x, double &_y,
     double &_z)
 {
   for (auto ob = this->beamParserMap.begin(); ob != this->beamParserMap.end(); ++ob)
@@ -336,6 +351,7 @@ bool ActionMessageParser::getBeamInformation(const int _id, double &_x, double &
   return false;
 }
 
+//////////////////////////////////////////////////
 ActionMessageParser::~ActionMessageParser()
 {
 }

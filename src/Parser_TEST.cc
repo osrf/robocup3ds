@@ -34,27 +34,16 @@ const std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)(beam 1 1 0.4
 const int kPort = 6234;
 std::mutex mutex;
 std::condition_variable cv;
-int socket_ID;
 bool clientReady = false;
 bool serverReady = false;
 
 //////////////////////////////////////////////////
-void reset()
-{
-  clientReady = false;
-  serverReady = false;
-  ActionMessageParser actionObj;
-  actionObj.newConnectionDetected=false;
-  actionObj.newDisconnectionDetected=false;
-}
-
-//////////////////////////////////////////////////
 void SendSomeData(int _client_socket)
 {
-  char mBuffer[8090];
+  char mBuffer[8192];
   char* out = (char*) content.c_str();
   strcpy(mBuffer + 4, out);
-  unsigned int len = strlen(out) + 1;
+  unsigned int len = strlen(out);
   unsigned int netlen = htonl(len);
   memcpy(mBuffer, &netlen, 4);
 
@@ -88,66 +77,70 @@ bool createClient(const int _port, int &_socket)
 }
 
 //////////////////////////////////////////////////
-void senderClient(const int _port)
-{
-  int socket;
-  if (!createClient(_port, socket))
-    return;
-
-  // Send some data.
-  auto sent = write(socket, content.c_str(), content.size() + 1);
-  EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
-
-  clientReady = true;
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  cv.notify_one();
-
-  // Wait some time until the server checks results.
-  {
-    std::unique_lock<std::mutex> lk(mutex);
-    auto now = std::chrono::system_clock::now();
-    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
-          [](){return serverReady;}))
-    {
-      FAIL();
-    }
-  }
-
-  close(socket);
-}
-
-//////////////////////////////////////////////////
 void receiverClient(const int _port)
 {
-  int socket;
-  
-  if (!createClient(_port, socket))
+  int socket_ID;
+  if (!createClient(_port, socket_ID))
     return;
-
-  // Send some data to trigger the creation of a new client.
-  auto sent = write(socket, content.c_str(), content.size() + 1);
-  EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
-
+  
+  /* --- Dangerous lines, caused some unsynchronization in server-----
+   Send some data to trigger the creation of a new client.
+   auto sent = write(socket_ID, content.c_str(), content.size() + 1);
+   EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
+  */
   clientReady = true;
 
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
   cv.notify_one();
 
-
-  // Receive some data.
   auto parser = std::make_shared<ActionMessageParser>();
-  EXPECT_TRUE(parser->Parse(socket));
+  EXPECT_TRUE(parser->Parse(socket_ID));
+
   EXPECT_EQ(parser->message.str(),content);
+
+  // Test Scene message Parser
+  std::string sceneAddress;
+  int rType;
+
+  if ( parser->GetSceneInformation ( socket_ID, sceneAddress, rType ) )
+  {
+    std::cout << "Scene Msg Parsed: " << sceneAddress
+        << ", " << rType << std::endl;
+    EXPECT_EQ(sceneAddress, "rsg/agent/nao/nao_hetero.rsg");
+    EXPECT_EQ(rType, 0);
+  }
+
+  // Test Init message Parser
+  std::string teamname;
+  int playerNumber;
+
+  if ( parser->GetInitInformation(socket_ID, teamname, playerNumber) )
+  {
+    std::cout << "Init Msg Parsed: "<< teamname << ", "
+        << playerNumber<< std::endl;
+    EXPECT_EQ(teamname, "FCPOpp");
+    EXPECT_EQ(playerNumber, 1);
+  }
+
+  // Test Beam message Parser
+  double x,y,z;
+
+  if ( parser->GetBeamInformation(socket_ID, x, y, z ) )
+  {
+    std::cout << "Beam Pos:( "<< x << ", " << y <<", "<< z <<")" <<std::endl;
+    EXPECT_DOUBLE_EQ (x, 1);
+    EXPECT_DOUBLE_EQ (y, 1);
+    EXPECT_DOUBLE_EQ (z, 0.4);
+  }
+
   std::cout<<"message recieved:"<<parser->message.str()<<std::endl;
-  close(socket);
+  close(socket_ID);
+
 }
 
 //////////////////////////////////////////////////
 TEST(Server, Parser)
 {
-  reset();
-
   auto parser = std::make_shared <ActionMessageParser>();
 
   gazebo::Server server(kPort, parser,
@@ -175,41 +168,6 @@ TEST(Server, Parser)
 
   // Send some data to the client.
   SendSomeData(parser->socket);
-
-  // Test Scene message Parser
-  std::string sceneAddress;
-  int rType;
-
-  if ( parser->getSceneInformation ( parser->socket, sceneAddress, rType ) )
-  {
-    std::cout << "Scene Msg Parsed: " << sceneAddress
-        << ", " << rType << std::endl;
-    EXPECT_EQ(sceneAddress, "rsg/agent/nao/nao_hetero.rsg");
-    EXPECT_EQ(rType, 0);
-  }
-
-  // Test Init message Parser
-  std::string teamname;
-  int playerNumber;
-
-  if ( parser->getInitInformation(parser->socket, teamname, playerNumber) )
-  {
-    std::cout << "Init Msg Parsed: "<< teamname << ", "
-        << playerNumber<< std::endl;
-    EXPECT_EQ(teamname, "FCPOpp");
-    EXPECT_EQ(playerNumber, 1);
-  }
-
-  // Test Beam message Parser
-  double x,y,z;
-
-  if ( parser->getBeamInformation(parser->socket, x, y, z ) )
-  {
-    std::cout << "Beam Pos:( "<< x << ", " << y <<", "<< z <<")" <<std::endl;
-    EXPECT_DOUBLE_EQ (x, 1);
-    EXPECT_DOUBLE_EQ (y, 1);
-    EXPECT_DOUBLE_EQ (z, 0.4);
-  }
 
 
   if (clientThread.joinable())
