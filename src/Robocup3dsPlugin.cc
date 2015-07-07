@@ -16,18 +16,26 @@
 */
 
 #include <boost/bind.hpp>
+#include <memory>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
+
 #include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/GameState.hh"
+#include "robocup3ds/Effectors.hh"
+#include "robocup3ds/Perceptors.hh"
 
 using namespace gazebo;
 
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
 /////////////////////////////////////////////////
-Robocup3dsPlugin::Robocup3dsPlugin()
+Robocup3dsPlugin::Robocup3dsPlugin():
+  gameState(std::make_shared<GameState>())
 {
+  perceptor = std::make_shared<Perceptor>(gameState);
+  effector = std::make_shared<Effector>(gameState);
 }
 
 /////////////////////////////////////////////////

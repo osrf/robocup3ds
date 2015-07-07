@@ -253,6 +253,16 @@ class GameState
     public: bool isValid;
   };
 
+  // /// \brief This class serves as a container for perceptor information
+  // public: class AgentEffectors
+  // {
+  //   /// \brief AgentEffectors constructor
+  //   public: AgentEffectors() {}
+
+  //   /// \brief Map of hinge joints and their velocities
+  //   public: std::map<std::string, double> hingeJointVel;
+  // };
+
   /// \brief This class serves as an container for the information sent to
   /// the agent
   public: class AgentPerceptions
@@ -345,6 +355,9 @@ class GameState
 
     /// \brief Container for an agent's perceptions
     public: AgentPerceptions percept;
+
+    // /// \brief Container for an agent's perceptions
+    // public: AgentEffectors effect;
 
     /// \brief Flag whether agent is in penalty box
     public: bool inPenaltyBox;

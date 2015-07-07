@@ -18,7 +18,12 @@
 #ifndef _GAZEBO_ROBOCUP_3DS_PLUGIN_HH_
 #define _GAZEBO_ROBOCUP_3DS_PLUGIN_HH_
 
+#include <memory>
 #include <gazebo/gazebo.hh>
+
+class Perceptor;
+class GameState;
+class Effector;
 
 namespace gazebo
 {
@@ -48,6 +53,16 @@ namespace gazebo
 
     /// \brief Pointer to sdf
     private: sdf::ElementPtr sdf;
+
+    /// \brief Pointer to GameState object
+    private: std::shared_ptr<GameState> gameState;
+
+    /// \brief Pointer to Perceptor object
+    private: std::shared_ptr<Perceptor> perceptor;
+
+    /// \brief Pointer to Effector object;
+    private: std::shared_ptr<Effector> effector;
   };
 }
+
 #endif

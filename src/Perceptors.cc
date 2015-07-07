@@ -40,7 +40,7 @@ math::Vector3<double> Perceptor::fixedNoise(
 math::Vector3<double> Perceptor::dNoiseSigma(0.0965, 0.1225, 0.1480);
 
 /////////////////////////////////////////////////
-Perceptor::Perceptor(GameState *_gameState):
+Perceptor::Perceptor(const std::shared_ptr<GameState> &_gameState):
   gameState(_gameState)
 {
   this->SetViewFrustum();

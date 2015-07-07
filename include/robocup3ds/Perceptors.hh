@@ -33,7 +33,7 @@ class Perceptor
 {
   /// \Brief Constructor for Perceptor object
   /// \Param[in] _gameState Pointer to GameState object
-  public: Perceptor(GameState *_gameState);
+  public: Perceptor(const std::shared_ptr<GameState> &_gameState);
 
   /// \Brief Destructor for Perceptor object
   public: ~Perceptor();
@@ -95,7 +95,7 @@ class Perceptor
   private: static ignition::math::Vector3<double> dNoiseSigma;
 
   /// \Brief Pointer to GameState object
-  private: GameState *gameState;
+  private: const std::shared_ptr<GameState> gameState;
 
   /// \Brief 4x4 transformation to go from global to local coordinates
   private: ignition::math::Matrix4<double> G2LMat;
