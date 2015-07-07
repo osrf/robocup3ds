@@ -21,9 +21,9 @@
 #include <memory>
 #include <gazebo/gazebo.hh>
 
-class Perceptor;
-class GameState;
-class Effector;
+#include "robocup3ds/GameState.hh"
+#include "robocup3ds/Effectors.hh"
+#include "robocup3ds/Perceptors.hh"
 
 namespace gazebo
 {
@@ -55,13 +55,13 @@ namespace gazebo
     private: sdf::ElementPtr sdf;
 
     /// \brief Pointer to GameState object
-    private: std::shared_ptr<GameState> gameState;
+    private: GameState *gameState;
 
     /// \brief Pointer to Perceptor object
-    private: std::shared_ptr<Perceptor> perceptor;
+    private: Perceptor *perceptor;
 
     /// \brief Pointer to Effector object;
-    private: std::shared_ptr<Effector> effector;
+    private: Effector *effector;
   };
 }
 

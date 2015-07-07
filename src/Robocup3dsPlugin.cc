@@ -31,16 +31,19 @@ using namespace gazebo;
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
 /////////////////////////////////////////////////
-Robocup3dsPlugin::Robocup3dsPlugin():
-  gameState(std::make_shared<GameState>())
+Robocup3dsPlugin::Robocup3dsPlugin()
 {
-  perceptor = std::make_shared<Perceptor>(gameState);
-  effector = std::make_shared<Effector>(gameState);
+  gameState = new GameState();
+  perceptor = new Perceptor(gameState);
+  effector = new Effector(gameState);
 }
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::~Robocup3dsPlugin()
 {
+  delete gameState;
+  delete perceptor;
+  delete effector;
 }
 
 /////////////////////////////////////////////////
