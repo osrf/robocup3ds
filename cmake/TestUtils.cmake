@@ -23,6 +23,7 @@ macro (robocup3ds_build_tests)
       # https://bitbucket.org/osrf/gazebo/issue/1568
       # see also handsim issue 87:
       # https://bitbucket.org/osrf/handsim/issue/87
+      gazebo_common
       gazebo_physics
       gazebo_sensors
       gazebo_test_fixture

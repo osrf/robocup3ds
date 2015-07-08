@@ -38,6 +38,8 @@ robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
 
 target_link_libraries(${PROJECT_NAME_LOWER}Plugin
   gazebo_common
+  gazebo_sensors
+  gazebo_physics
 )
 
 robocup3ds_build_tests(${gtest_sources})
