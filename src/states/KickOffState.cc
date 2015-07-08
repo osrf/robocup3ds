@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/KickOffState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
@@ -54,15 +55,15 @@ void KickOffState::Update()
 
   // check for agents that violate sides
   if (this->name == "KickOffLeft")
-  { gameState->CheckOffSidesOnKickOff(GameState::Team::Side::LEFT); }
+  { gameState->CheckOffSidesOnKickOff(Team::Side::LEFT); }
   else
-  { gameState->CheckOffSidesOnKickOff(GameState::Team::Side::RIGHT); }
+  { gameState->CheckOffSidesOnKickOff(Team::Side::RIGHT); }
   State::Update();
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickOff)
   {
-    this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
+    this->gameState->DropBallImpl(Team::Side::NEITHER);
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
   else if (this->HasBallContactOccurred())
