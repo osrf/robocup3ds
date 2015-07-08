@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "robocup3ds/GameState.hh"
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/Geometry.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
@@ -627,7 +628,6 @@ void GameState::CheckImmobility()
       {
         agent.timeFallen = 0;
       }
-
       // move agent to side of field if they have remained fallen
       // or timeout too long.
       double SCALE = 1.0 + (agent.uNum == 1);
@@ -1092,7 +1092,7 @@ std::shared_ptr<State> GameState::GetCurrentState() const
 }
 
 ////////////////////////////////////////////////
-GameState::Team::Side GameState::GetLastSideTouchedBall() const
+Team::Side GameState::GetLastSideTouchedBall() const
 {
   if (this->GetLastBallContact())
   {

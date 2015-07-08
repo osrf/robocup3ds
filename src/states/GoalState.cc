@@ -16,6 +16,7 @@
 */
 #include <string>
 
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/GoalState.hh"
 #include "robocup3ds/states/KickOffState.hh"
@@ -38,9 +39,9 @@ void GoalState::Initialize()
   // Register the left team goal.
   for (auto &team : this->gameState->teams)
   {
-    if ((team->side == GameState::Team::Side::LEFT
+    if ((team->side == Team::Side::LEFT
          && this->name == "GoalLeft")
-        || (team->side == GameState::Team::Side::RIGHT
+        || (team->side == Team::Side::RIGHT
             && this->name == "GoalRight"))
     {
       if (team->canScore)
