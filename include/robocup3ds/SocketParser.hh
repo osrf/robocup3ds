@@ -18,8 +18,6 @@
 #ifndef _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 #define _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 
-#include <string>
-
 namespace gazebo
 {
   /// \brief
@@ -33,7 +31,6 @@ namespace gazebo
 
     /// \brief Parse some data from a socket.
     /// \param[in] _socket Socket to read.
-    /// \param[out] _data Data parsed.
     /// \return True when data was succesfully parsed or false otherwise.
     public: virtual bool Parse(const int _socket) = 0;
   };

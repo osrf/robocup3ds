@@ -72,6 +72,9 @@ namespace gazebo
     /// \param[in] _port TCP port for incoming connections.
     /// \param[in] _parser Parser in charge of reading incoming data from
     /// the sockets.
+    /// \param[in] _connectCb Callback to be executed on new client connections.
+    /// \param[in] _disconnectCb Callback to be executed when an existing client
+    /// is disconnected.
     public: template<typename C>
     Server(const int _port,
            const std::shared_ptr<SocketParser> &_parser,
@@ -93,6 +96,7 @@ namespace gazebo
     /// \brief Push some data to be sent by the server.
     /// \param[in] _socket Client ID.
     /// \param[in] _data Data to send.
+    /// \param[in] _len Data length in bytes.
     /// \return True when data was succesfully send or false otherwise.
     public: bool Send(const int _socket, const char *_data, const size_t _len);
 
