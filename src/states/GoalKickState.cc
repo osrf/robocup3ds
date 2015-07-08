@@ -17,6 +17,7 @@
 #include <string>
 #include <ignition/math.hh>
 
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/GoalKickState.hh"
@@ -56,14 +57,14 @@ void GoalKickState::Update()
   math::Box penaltyBox;
   if (this->name == "GoalKickLeft")
   {
-    this->gameState->DropBallImpl(GameState::Team::Side::LEFT);
-    this->gameState->CheckGoalKickIllegalDefense(GameState::Team::Side::LEFT);
+    this->gameState->DropBallImpl(Team::Side::LEFT);
+    this->gameState->CheckGoalKickIllegalDefense(Team::Side::LEFT);
     penaltyBox = SoccerField::PenaltyBoxLeft;
   }
   else
   {
-    this->gameState->DropBallImpl(GameState::Team::Side::RIGHT);
-    this->gameState->CheckGoalKickIllegalDefense(GameState::Team::Side::RIGHT);
+    this->gameState->DropBallImpl(Team::Side::RIGHT);
+    this->gameState->CheckGoalKickIllegalDefense(Team::Side::RIGHT);
     penaltyBox = SoccerField::PenaltyBoxRight;
   }
   State::Update();
@@ -71,7 +72,7 @@ void GoalKickState::Update()
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickIn)
   {
-    this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
+    this->gameState->DropBallImpl(Team::Side::NEITHER);
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
   else if (!penaltyBox.Contains(this->gameState->GetBall()))

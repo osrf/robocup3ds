@@ -23,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Perceptors.hh"
 #include "robocup3ds/SoccerField.hh"
@@ -134,7 +135,7 @@ void Perceptor::Update()
 }
 
 /////////////////////////////////////////////////
-void Perceptor::UpdateLine(GameState::Agent &_agent,
+void Perceptor::UpdateLine(Agent &_agent,
                            const math::Line3<double> &_line) const
 {
   math::Line3<double> agentLine(
@@ -159,7 +160,7 @@ void Perceptor::UpdateLine(GameState::Agent &_agent,
 }
 
 /////////////////////////////////////////////////
-void Perceptor::UpdateLandmark(GameState::Agent &_agent,
+void Perceptor::UpdateLandmark(Agent &_agent,
                                const std::string &_landmarkname,
                                const math::Vector3<double>
                                &_landmark) const
@@ -181,8 +182,8 @@ void Perceptor::UpdateLandmark(GameState::Agent &_agent,
 }
 
 /////////////////////////////////////////////////
-void Perceptor::UpdateOtherAgent(GameState::Agent &_agent,
-                                 const GameState::Agent &_otherAgent) const
+void Perceptor::UpdateOtherAgent(Agent &_agent,
+                                 const Agent &_otherAgent) const
 {
   for (auto &kv : _otherAgent.selfBodyMap)
   {
@@ -198,7 +199,7 @@ void Perceptor::UpdateOtherAgent(GameState::Agent &_agent,
       }
     }
 
-    GameState::AgentId otherAgentId(_otherAgent.uNum,
+    AgentId otherAgentId(_otherAgent.uNum,
                                     _otherAgent.team->name);
     _agent.percept.otherAgentBodyMap[otherAgentId][kv.first] =
       addNoise(Geometry::CartToPolar(_otherAgentPart));
@@ -206,10 +207,10 @@ void Perceptor::UpdateOtherAgent(GameState::Agent &_agent,
 }
 
 /////////////////////////////////////////////////
-void Perceptor::UpdateAgentHear(GameState::Agent &_agent) const
+void Perceptor::UpdateAgentHear(Agent &_agent) const
 {
-  const GameState::AgentSay &say = this->gameState->say;
-  GameState::AgentHear &hear = _agent.percept.hear;
+  const AgentSay &say = this->gameState->say;
+  AgentHear &hear = _agent.percept.hear;
 
   hear.isValid = false;
   if (!say.isValid)
@@ -225,7 +226,7 @@ void Perceptor::UpdateAgentHear(GameState::Agent &_agent) const
   hear.isValid = true;
   hear.gameTime = gameState->GetElapsedGameTime();
   hear.yaw = atan2(relPos.Y(), relPos.X());
-  GameState::AgentId agentId(_agent.uNum, _agent.team->name);
+  AgentId agentId(_agent.uNum, _agent.team->name);
   hear.self = say.agentId == agentId;
   hear.msg = say.msg;
 }
@@ -256,7 +257,7 @@ Perceptor::addNoise(const ignition::math::Vector3<double> &_pt) const
 }
 
 /////////////////////////////////////////////////
-void Perceptor::SetG2LMat(const GameState::Agent &_agent)
+void Perceptor::SetG2LMat(const Agent &_agent)
 {
   this->G2LMat = math::Matrix4<double>(_agent.cameraRot);
   this->G2LMat.Translate(_agent.pos);

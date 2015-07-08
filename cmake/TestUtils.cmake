@@ -14,17 +14,18 @@ macro (robocup3ds_build_tests)
       gtest gtest_main
       )
 
-    # message(${GAZEBO_LIBRARIES})
+    message(${GAZEBO_LIBRARIES})
     target_link_libraries(${BINARY_NAME}
       libgtest.a
       libgtest_main.a
       pthread
-      gazebo_test_fixture
       # TODO remove gazebo issue #1568 is resolved:
       # https://bitbucket.org/osrf/gazebo/issue/1568
       # see also handsim issue 87:
       # https://bitbucket.org/osrf/handsim/issue/87
+      gazebo_physics
       gazebo_sensors
+      gazebo_test_fixture
       ${GAZEBO_LIBRARIES}
       ${Boost_LIBRARIES}
       ${PROJECT_NAME_LOWER}Plugin

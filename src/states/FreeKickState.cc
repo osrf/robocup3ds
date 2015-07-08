@@ -16,6 +16,7 @@
 */
 #include <string>
 
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/FreeKickState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
@@ -51,15 +52,15 @@ void FreeKickState::Update()
 
   // The right team is not allowed to be close to the ball.
   if (this->name == "FreeKickLeft")
-  { this->gameState->DropBallImpl(GameState::Team::Side::LEFT); }
+  { this->gameState->DropBallImpl(Team::Side::LEFT); }
   else
-  { this->gameState->DropBallImpl(GameState::Team::Side::RIGHT); }
+  { this->gameState->DropBallImpl(Team::Side::RIGHT); }
   State::Update();
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickIn)
   {
-    this->gameState->DropBallImpl(GameState::Team::Side::NEITHER);
+    this->gameState->DropBallImpl(Team::Side::NEITHER);
     this->gameState->SetCurrent(this->gameState->playOnState);
   }
   else if (this->HasBallContactOccurred())

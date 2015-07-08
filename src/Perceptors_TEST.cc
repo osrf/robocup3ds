@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Geometry.hh"
 #include "robocup3ds/Perceptors.hh"
@@ -41,7 +42,7 @@ class PerceptorTest : public ::testing::Test
     }
 
   protected:
-    virtual bool UpdateLine_Test(GameState::Agent &_agent,
+    virtual bool UpdateLine_Test(Agent &_agent,
                                  const math::Line3<double> &_line,
                                  math::Line3<double> &_testLine)
     {
@@ -59,7 +60,7 @@ class PerceptorTest : public ::testing::Test
     }
 
   protected:
-    virtual bool UpdateLandmark_Test(GameState::Agent &_agent,
+    virtual bool UpdateLandmark_Test(Agent &_agent,
                                      const math::Vector3<double> &_landmark,
                                      math::Vector3<double> &_testLandmark)
     {
@@ -152,7 +153,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
   GameState::restrictVision = false;
   perceptor->useNoise = false;
   gameState->AddAgent(1, "blue");
-  GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
+  Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive y-axis
   agent.pos.Set(0, 0, 0);
@@ -200,7 +201,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Restrictvis)
   perceptor->SetViewFrustum();
   perceptor->useNoise = false;
   gameState->AddAgent(1, "blue");
-  GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
+  Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive x-axis
   agent.pos.Set(0, 0, 0);
@@ -249,7 +250,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
   GameState::restrictVision = false;
   perceptor->useNoise = false;
   gameState->AddAgent(1, "blue");
-  GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
+  Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive y-axis
   agent.pos.Set(0, 0, 0);
@@ -288,7 +289,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
   perceptor->SetViewFrustum();
   perceptor->useNoise = false;
   gameState->AddAgent(1, "blue");
-  GameState::Agent &agent = gameState->teams.at(0)->members.at(0);
+  Agent &agent = gameState->teams.at(0)->members.at(0);
 
   agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
@@ -326,15 +327,15 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
   perceptor->useNoise = false;
   gameState->AddAgent(1, "blue");
   gameState->AddAgent(1, "red");
-  GameState::Agent &agent1 = gameState->teams.at(0)->members.at(0);
-  GameState::Agent &agent2 = gameState->teams.at(1)->members.at(0);
+  Agent &agent1 = gameState->teams.at(0)->members.at(0);
+  Agent &agent2 = gameState->teams.at(1)->members.at(0);
   agent1.pos.Set(0, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
   perceptor->SetG2LMat(agent1);
   agent2.pos.Set(1, 1, 0);
   agent2.selfBodyMap["HEAD"] = agent2.pos + math::Vector3<double>(0, 0, 1);
   agent2.selfBodyMap["BODY"] = agent2.pos;
-  GameState::AgentId agent2Id(1, "red");
+  AgentId agent2Id(1, "red");
 
   // without restricted vision, other agent's body parts should be visible
   GameState::restrictVision = false;
@@ -367,8 +368,8 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
   gameState->AddAgent(1, "red");
   gameState->AddAgent(2, "red");
   auto team = gameState->teams.at(0);
-  GameState::Agent &agent1 = team->members.at(0);
-  GameState::Agent &agent2 = team->members.at(1);
+  Agent &agent1 = team->members.at(0);
+  Agent &agent2 = team->members.at(1);
   agent1.pos.Set(5, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
   agent2.pos.Set(0, 100, 0);

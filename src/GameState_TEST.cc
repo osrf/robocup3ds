@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
@@ -148,16 +149,16 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
     if (i == 0)
     {
       EXPECT_EQ(gameState.teams.at(i)->name, "blue");
-      EXPECT_EQ(gameState.teams.at(i)->side, GameState::Team::Side::LEFT);
+      EXPECT_EQ(gameState.teams.at(i)->side, Team::Side::LEFT);
     }
     else
     {
       EXPECT_EQ(gameState.teams.at(i)->name, "red");
-      EXPECT_EQ(gameState.teams.at(i)->side, GameState::Team::Side::RIGHT);
+      EXPECT_EQ(gameState.teams.at(i)->side, Team::Side::RIGHT);
     }
     for (int j = 0; j < 11; ++j)
     {
-      GameState::Agent &agent = gameState.teams.at(i)->members.at(j);
+      Agent &agent = gameState.teams.at(i)->members.at(j);
       EXPECT_EQ(agent.uNum, j + 1);
       EXPECT_TRUE(agent.team != NULL);
     }
@@ -315,7 +316,7 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
 TEST_F(GameStateTest_basic, GameState_move_agent)
 {
   gameState.AddAgent(1, "blue");
-  GameState::Agent &agent = gameState.teams.at(0)->members.at(0);
+  Agent &agent = gameState.teams.at(0)->members.at(0);
   math::Vector3<double> pos(15, 10, GameState::beamHeight);
   gameState.MoveAgent(agent, pos);
   EXPECT_EQ(pos, agent.pos);
@@ -388,7 +389,7 @@ class GameStateTest_fullTeams : public GameStateTest_basic
       {
         for (int j = 0; j < 11; ++j)
         {
-          GameState::Agent &agent = gameState.teams.at(i)->members.at(j);
+          Agent &agent = gameState.teams.at(i)->members.at(j);
           gameState.MoveAgent(agent, math::Vector3<double>
                               (0, 0, GameState::beamHeight));
         }
@@ -402,8 +403,8 @@ class GameStateTest_fullTeams : public GameStateTest_basic
       {
         for (int j = 0; j < 11; ++j)
         {
-          GameState::Agent &agent = gameState.teams.at(i)->members.at(j);
-          if (gameState.teams.at(i)->side == GameState::Team::Side::LEFT)
+          Agent &agent = gameState.teams.at(i)->members.at(j);
+          if (gameState.teams.at(i)->side == Team::Side::LEFT)
           {
             gameState.MoveAgent(agent, math::Vector3<double>
                                 (-5, 0, GameState::beamHeight));
@@ -426,7 +427,7 @@ class GameStateTest_fullTeams : public GameStateTest_basic
     //     }
     //     for (int j = 0; j < 11; ++j)
     //     {
-    //       GameState::Agent &agent = gameState.teams.at(_team)->members.at(j);
+    //       Agent &agent = gameState.teams.at(_team)->members.at(j);
     //       gameState.MoveAgent(agent, math::Vector3<double>
     //                           (0, 0, GameState::beamHeight));
     //     }
@@ -479,8 +480,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
   states.push_back(gameState.kickOffLeftState);
   states.push_back(gameState.kickOffRightState);
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   // Test for both left and right kick offs
   for (size_t i = 0; i < states.size(); ++i)
   {
@@ -574,7 +575,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
     gameState.ClearBallContactHistory();
     EXPECT_FALSE(gameState.GetLastBallContact());
     EXPECT_EQ(gameState.GetLastSideTouchedBall(),
-      GameState::Team::Side::NEITHER);
+      Team::Side::NEITHER);
   }
 }
 
@@ -591,8 +592,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_kickIn)
   ballPositions.push_back(math::Vector3<double>(0, 15,
                           SoccerField::BallRadius));
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   for (size_t i = 0; i < states.size(); ++i)
   {
     for (size_t j = 0; j < ballPositions.size(); ++j)
@@ -632,8 +633,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_cornerKick)
                             SoccerField::HalfFieldWidth + 1,
                             -5, SoccerField::BallRadius));
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   for (size_t i = 0; i < states.size(); ++i)
   {
     gameState.MoveBall(math::Vector3<double>::Zero);
@@ -671,8 +672,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
                             SoccerField::HalfFieldWidth + 0.5,
                             -1, SoccerField::BallRadius));
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   for (size_t i = 0; i < states.size(); ++i)
   {
     gameState.MoveBall(math::Vector3<double>::Zero);
@@ -701,8 +702,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goalKick)
                             SoccerField::HalfFieldWidth + 1,
                             -5, SoccerField::BallRadius));
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   for (size_t i = 0; i < states.size(); ++i)
   {
     gameState.MoveBall(math::Vector3<double>::Zero);
@@ -733,8 +734,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_goal_kickOff)
   afterStates.push_back(gameState.kickOffRightState);
   afterStates.push_back(gameState.kickOffLeftState);
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
 
   for (size_t i = 0; i < beforeStates.size(); ++i)
   {
@@ -765,8 +766,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickIn_playOn)
   states.push_back(gameState.kickInRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   for (size_t i = 0; i < states.size(); ++i)
   {
     // transition from timing out
@@ -806,8 +807,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_cornerKick_playOn)
   states.push_back(gameState.cornerKickRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   for (size_t i = 0; i < states.size(); ++i)
   {
     // transition from timing out
@@ -847,8 +848,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_freeKick_playOn)
   states.push_back(gameState.freeKickRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   for (size_t i = 0; i < states.size(); ++i)
   {
     // transition from timing out
@@ -893,8 +894,8 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_goalKick_playOn)
   ballPositions.push_back(math::Vector3<double>(16, -5,
                           SoccerField::BallRadius));
 
-  EXPECT_EQ(GameState::Team::Side::LEFT, gameState.teams.at(0)->side);
-  EXPECT_EQ(GameState::Team::Side::RIGHT, gameState.teams.at(1)->side);
+  EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
+  EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
   for (size_t i = 0; i < states.size(); ++i)
   {
     // transition from timing out
@@ -941,9 +942,9 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
   {
     EXPECT_TRUE(gameState.GetElapsedGameTime() < GameState::SecondsEachHalf);
     EXPECT_TRUE(gameState.GetHalf() == GameState::Half::FIRST_HALF);
-    EXPECT_TRUE(gameState.teams.at(0)->side == GameState::Team::Side::LEFT
+    EXPECT_TRUE(gameState.teams.at(0)->side == Team::Side::LEFT
                 && gameState.teams.at(1)->side ==
-                GameState::Team::Side::RIGHT);
+                Team::Side::RIGHT);
     if (gameState.GetGameTime() < GameState::SecondsBeforeKickOff)
     {
       EXPECT_EQ("BeforeKickOff", gameState.GetCurrentState()->name);
@@ -962,9 +963,9 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
   while (gameState.GetGameTime() < secondHalfTime)
   {
     EXPECT_TRUE(gameState.GetHalf() == GameState::Half::SECOND_HALF);
-    EXPECT_TRUE(gameState.teams.at(0)->side == GameState::Team::Side::RIGHT
+    EXPECT_TRUE(gameState.teams.at(0)->side == Team::Side::RIGHT
                 && gameState.teams.at(1)->side ==
-                GameState::Team::Side::LEFT);
+                Team::Side::LEFT);
     EXPECT_TRUE(gameState.GetElapsedGameTime() < GameState::SecondsEachHalf);
     if (gameState.GetGameTime() < secondHalfKickOffTime)
     {
@@ -1107,16 +1108,16 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
     gameState.Update();
     for (int j = 0; j < 3; ++j)
     {
-      GameState::Agent &agent = gameState.teams.at(i)->members.at(j + 1);
+      Agent &agent = gameState.teams.at(i)->members.at(j + 1);
       gameState.MoveAgent(agent, penaltyPos);
     }
     gameState.Update();
     for (int j = 0; j < 3; ++j)
     {
-      GameState::Agent &agent = gameState.teams.at(i)->members.at(j + 1);
+      Agent &agent = gameState.teams.at(i)->members.at(j + 1);
       EXPECT_TRUE(penaltyBox.Contains(agent.pos));
     }
-    GameState::Agent &agent2 = gameState.teams.at(i)->members.at(4);
+    Agent &agent2 = gameState.teams.at(i)->members.at(4);
     gameState.MoveAgent(agent2, penaltyPos);
     gameState.Update();
     EXPECT_FALSE(penaltyBox.Contains(agent2.pos));
@@ -1127,7 +1128,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
     gameState.Update();
     for (int j = 1; j < 4; ++j)
     {
-      GameState::Agent &agent = gameState.teams.at(i)->members.at(j);
+      Agent &agent = gameState.teams.at(i)->members.at(j);
       if (j == 3)
       {
         // this agent is farthest away from goal
@@ -1139,13 +1140,13 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
       }
     }
     gameState.Update();
-    GameState::Agent &agent3 = gameState.teams.at(i)->members.at(0);
+    Agent &agent3 = gameState.teams.at(i)->members.at(0);
     gameState.MoveAgent(agent3, penaltyPos);
     gameState.Update();
     EXPECT_TRUE(penaltyBox.Contains(agent3.pos));
     for (int j = 1; j < 4; ++j)
     {
-      GameState::Agent &agent = gameState.teams.at(i)->members.at(j);
+      Agent &agent = gameState.teams.at(i)->members.at(j);
       if (j == 3)
       {
         // this agent is farthest away from goal
@@ -1162,17 +1163,17 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
     gameState.Update();
     for (int j = 0; j < 3; ++j)
     {
-      GameState::Agent &agent = gameState.teams.at(i)->members.at(j);
+      Agent &agent = gameState.teams.at(i)->members.at(j);
       gameState.MoveAgent(agent, penaltyPos);
     }
     gameState.Update();
-    GameState::Agent &agent4 =
+    Agent &agent4 =
       gameState.teams.at((i + 1) % 2)->members.at(1);
     gameState.MoveAgent(agent4, penaltyPos);
     gameState.Update();
     for (int j = 0; j < 3; ++j)
     {
-      GameState::Agent &agent = gameState.teams.at(i)->members.at(j);
+      Agent &agent = gameState.teams.at(i)->members.at(j);
       EXPECT_TRUE(penaltyBox.Contains(agent.pos));
     }
   }
@@ -1206,29 +1207,29 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCrowding)
     resetPositions();
     // put agent on other team within crowding radius to ensure that crowding
     // rules are enabled
-    GameState::Agent &agent =
+    Agent &agent =
       gameState.teams.at((i + 1) % 2)->members.at(1);
     gameState.MoveAgent(agent, crowdingEnablePos);
     gameState.Update();
     EXPECT_EQ(agent.pos, crowdingEnablePos);
 
     // test for whether inner radius crowding check works
-    GameState::Agent &agent2 = gameState.teams.at(i)->members.at(1);
+    Agent &agent2 = gameState.teams.at(i)->members.at(1);
     gameState.MoveAgent(agent2, innerRadius);
     gameState.Update();
     EXPECT_EQ(agent2.pos, innerRadius);
-    GameState::Agent &agent3 = gameState.teams.at(i)->members.at(2);
+    Agent &agent3 = gameState.teams.at(i)->members.at(2);
     gameState.MoveAgent(agent3, innerRadius2);
     gameState.Update();
     EXPECT_GE(agent3.pos.Distance(gameState.GetBall()),
               GameState::innerCrowdingRadius);
 
     // test for whether the outer radius crowding check works
-    GameState::Agent &agent4 = gameState.teams.at(i)->members.at(3);
+    Agent &agent4 = gameState.teams.at(i)->members.at(3);
     gameState.MoveAgent(agent4, outerRadius);
     gameState.Update();
     EXPECT_EQ(agent4.pos, outerRadius);
-    GameState::Agent &agent5 = gameState.teams.at(i)->members.at(4);
+    Agent &agent5 = gameState.teams.at(i)->members.at(4);
     gameState.MoveAgent(agent5, outerRadius2);
     gameState.Update();
     EXPECT_GE(agent5.pos.Distance(gameState.GetBall()),
@@ -1240,7 +1241,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCrowding)
 /// working as intended
 TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
 {
-  math::Vector3<double> pos(0, 0, 0.4);
+  math::Vector3<double> pos(0, 0, GameState::beamHeight);
   vector<math::Vector3<double> >fallenPos;
   fallenPos.push_back(math::Vector3<double>(0.0, 0.0, 0.1));
   fallenPos.push_back(math::Vector3<double>(0.1, 0.1, 0.1));
@@ -1248,7 +1249,8 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
   gameState.SetCurrent(gameState.playOnState);
 
   // check immobility and fallen for goalie
-  GameState::Agent &agent = gameState.teams.at(0)->members.at(0);
+  Agent &agent = gameState.teams.at(0)->members.at(0);
+  agent.pos = agent.prevPos = pos;
   while (gameState.GetGameTime() < 2 * GameState::immobilityTimeLimit)
   {
     EXPECT_EQ(agent.pos, pos);
@@ -1270,7 +1272,8 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
   // check immobility and fallen for non-goalie
   gameState.SetCycleCounter(0);
   gameState.AddAgent(2, "blue");
-  GameState::Agent &agent2 = gameState.teams.at(0)->members.at(1);
+  Agent &agent2 = gameState.teams.at(0)->members.at(1);
+  agent2.pos = agent2.prevPos = pos;
   while (gameState.GetGameTime() < GameState::immobilityTimeLimit)
   {
     EXPECT_EQ(agent2.pos, pos);
@@ -1299,14 +1302,14 @@ TEST_F(GameStateTest_fullTeams, GameState_DropBall)
   for (int i = 0; i < 2; ++i)
   {
     resetPositions();
-    std::shared_ptr<GameState::Team> allowedTeam = gameState.teams.at(i);
-    std::shared_ptr<GameState::Team> notAllowedTeam =
+    std::shared_ptr<Team> allowedTeam = gameState.teams.at(i);
+    std::shared_ptr<Team> notAllowedTeam =
       gameState.teams.at((i + 1) % 2);
     gameState.DropBallImpl(allowedTeam->side);
 
     for (int j = 0; j < 11; ++j)
     {
-      GameState::Agent &agent = notAllowedTeam->members.at(j);
+      Agent &agent = notAllowedTeam->members.at(j);
       EXPECT_GE(agent.pos.Distance(gameState.GetBall()),
                 GameState::dropBallRadius);
     }
@@ -1341,7 +1344,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckGoalKickIllegalDefense)
     {
       gameState.Update();
     }
-    GameState::Agent &enemyAgent =
+    Agent &enemyAgent =
       gameState.teams.at((i + 1) % 2)->members.at(0);
     gameState.MoveAgent(enemyAgent, inPenaltyBox.at(i));
     EXPECT_TRUE(penaltyBox.at(i).Contains(enemyAgent.pos));
@@ -1357,12 +1360,12 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
   vector<std::shared_ptr<State> > states;
   states.push_back(gameState.kickOffLeftState);
   states.push_back(gameState.kickOffRightState);
-  EXPECT_EQ(gameState.teams.at(0)->side, GameState::Team::Side::LEFT);
-  EXPECT_EQ(gameState.teams.at(1)->side, GameState::Team::Side::RIGHT);
+  EXPECT_EQ(gameState.teams.at(0)->side, Team::Side::LEFT);
+  EXPECT_EQ(gameState.teams.at(1)->side, Team::Side::RIGHT);
   for (size_t i = 0; i < states.size(); ++i)
   {
-    GameState::Agent &ourAgent = gameState.teams.at(i)->members.at(0);
-    GameState::Agent &theirAgent = gameState.teams.at(
+    Agent &ourAgent = gameState.teams.at(i)->members.at(0);
+    Agent &theirAgent = gameState.teams.at(
                                      (i + 1) % 2)->members.at(0);
 
     resetPositionsForKickOff();
@@ -1374,7 +1377,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     {
       for (int j = 0; j < 11; ++j)
       {
-        GameState::Agent &agent = gameState.teams.at(k)->members.at(j);
+        Agent &agent = gameState.teams.at(k)->members.at(j);
         if (k == 0)
         {
           EXPECT_EQ(agent.pos, math::Vector3<double>(-5, 0,

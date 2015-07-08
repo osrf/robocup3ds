@@ -24,8 +24,10 @@
 #include <string>
 #include <vector>
 
-#include "robocup3ds/GameState.hh"
 #include "robocup3ds/Geometry.hh"
+
+class Agent;
+class GameState;
 
 /// \brief This class keeps up to date the information sent
 /// to the agent
@@ -50,26 +52,26 @@ class Perceptor
   /// \Brief Helper function to update line info
   /// \Param[in] _agent Agent object whose perception is updated
   /// \Param[in] _line Line object
-  public: void UpdateLine(GameState::Agent &_agent,
+  public: void UpdateLine(Agent &_agent,
     const ignition::math::Line3<double> &_line) const;
 
   /// \Brief Function to update landmark info
   /// \Param[in] _agent Agent object whose perception is updated
   /// \Param[in] _landmarkname Name of landmark
   /// \Param[in] _landmark Position of landmark
-  public: void UpdateLandmark(GameState::Agent &_agent,
+  public: void UpdateLandmark(Agent &_agent,
                 const std::string &_landmarkname,
                 const ignition::math::Vector3<double> &_landmark) const;
 
   /// \Brief Function to update positions of other agents
   /// \Param[in] _agent Agent whose perception we are updating
   /// \Param[in] _otherAgent Other agent whose position is updated
-  public: void UpdateOtherAgent(GameState::Agent &_agent,
-    const GameState::Agent &_otherAgent) const;
+  public: void UpdateOtherAgent(Agent &_agent,
+    const Agent &_otherAgent) const;
 
   /// \Brief Function to update message that agent hears
   /// \Param[in] _agent Agent whose perception we are updating
-  public: void UpdateAgentHear(GameState::Agent &_agent) const;
+  public: void UpdateAgentHear(Agent &_agent) const;
 
   /// \Brief Function to add noise to all observations
   /// \Param[in] _pt Point object
@@ -80,7 +82,7 @@ class Perceptor
   /// \Brief Set the transformation matrix from global to local
   /// coordinates for an agent
   /// \Param[in] _agent Agent object
-  public: void SetG2LMat(const GameState::Agent &_agent);
+  public: void SetG2LMat(const Agent &_agent);
 
   /// \Brief Flag whether to add noise to observations or not
   public: static bool useNoise;

@@ -21,9 +21,9 @@
 #include <memory>
 #include <gazebo/gazebo.hh>
 
-#include "robocup3ds/GameState.hh"
-#include "robocup3ds/Effectors.hh"
-#include "robocup3ds/Perceptors.hh"
+class GameState;
+class Effector;
+class Perceptor;
 
 namespace gazebo
 {
