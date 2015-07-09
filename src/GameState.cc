@@ -104,12 +104,10 @@ GameState::GameState():
   cycleCounter(0)
 {
   this->SetCurrent(beforeKickOffState);
-  this->teams.push_back(
-      std::make_shared<Team>(
-        "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
-  this->teams.push_back(
-      std::make_shared<Team>(
-        "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
+  this->teams.push_back(std::make_shared<Team>(
+      "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
+  this->teams.push_back(std::make_shared<Team>(
+      "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
 }
 
 /////////////////////////////////////////////////
