@@ -85,7 +85,7 @@ class Team
 };
 
 /// \brief Typedef for map of agent's body parts and positions
-typedef std::map<std::string, ignition::math::Vector3<double> >
+typedef std::map<std::string, ignition::math::Vector3<double>>
   AgentBodyMap;
 
 /// \brief Typedef for uNum, teamName pairs for identifying agents
@@ -130,11 +130,11 @@ class AgentPerceptions
 
   /// \brief Map of landmarks that have been transformed to agent's cood
   /// frame
-  public: std::map<std::string, ignition::math::Vector3<double> > landMarks;
+  public: std::map<std::string, ignition::math::Vector3<double>> landMarks;
 
   /// \brief Vector of lines that have been transformed to agent's cood
   /// frame
-  public: std::vector<ignition::math::Line3<double> > fieldLines;
+  public: std::vector<ignition::math::Line3<double>> fieldLines;
 
   /// \brief Map of agent's perceptions of other agent's body parts
   /// Implemented as a nested map
@@ -158,7 +158,7 @@ class AgentPerceptions
 
   /// \brief Force information for right foot of nao
   public: std::pair<ignition::math::Vector3<double>,
-  ignition::math::Vector3<double>> rightFootFR;
+  ignition::math::Vector3<double>> rightFootF;R
 };
 
 /// \brief This class serves as an container for the information by the
