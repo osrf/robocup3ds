@@ -4,7 +4,7 @@ Set(PARSER_HEADER sexpLibrary/sexp.h sexpLibrary/cstring.h sexpLibrary/faststack
 
 
 set (sources
-  ActionMessageParser.cc
+  EffectorParser.cc
   Robocup3dsPlugin.cc
   Server.cc
 )

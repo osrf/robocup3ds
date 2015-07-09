@@ -18,16 +18,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
-#include "robocup3ds/ActionMessageParser.hh"
+#include "robocup3ds/EffectorParser.hh"
 
-ActionMessageParser::ActionMessageParser()
+EffectorParser::EffectorParser()
 {
 }
 
 //////////////////////////////////////////////////
-bool ActionMessageParser::Parse(int _socket)
+bool EffectorParser::Parse(int _socket)
 {
-  this->agentID=_socket;
 
   char buffer[this->kBufferSize];
 
@@ -37,6 +36,7 @@ bool ActionMessageParser::Parse(int _socket)
 
   int totalBytes;
 
+  // Used to read the size of the message in little-endian format
   int endiannessSize=recv(_socket, buffer, 4, 0);
 
   if(endiannessSize<1)
@@ -44,13 +44,13 @@ bool ActionMessageParser::Parse(int _socket)
     return false;
   }
 
+  // Calculate size of the s-expression messages
   totalBytes = ntohl(*(unsigned int*) buffer);
 
-  char *offset = buffer;
-
+  // Read the message using the size of actual s-expression message.
   while (bytesRead < totalBytes)
   {
-    int result = recv(_socket, offset + bytesRead, totalBytes - bytesRead, 0);
+    int result = recv(_socket, buffer + bytesRead, totalBytes - bytesRead, 0);
 
     if (result < 1)
     {
@@ -60,25 +60,26 @@ bool ActionMessageParser::Parse(int _socket)
     bytesRead += result;
   }
 
-  this->message << std::string(offset);
-
-  ParseMessage(this->message.str());
+  // Store the received s-expression messages
+  this->message << std::string(buffer);
 
   return true;
 }
 
 //////////////////////////////////////////////////
-void ActionMessageParser::ParseMessage(const std::string &_msg)
+void EffectorParser::ParseMessage(const std::string &_msg)
 {
   char linebuf[36000];
   sexp_t *exp;
 
   std::stringstream s_expression;
 
+  // Create a s-expression message using the received pile of s-expressions
   s_expression << "(msg " << _msg << ")";
 
   strcpy(linebuf, s_expression.str().c_str());
 
+  // use parse_sexp() from s-expression library
   exp = parse_sexp(linebuf, 36000);
 
   if (exp == NULL)
@@ -87,6 +88,7 @@ void ActionMessageParser::ParseMessage(const std::string &_msg)
     return;
   else if (exp->list->next == NULL)
     return;
+
 
   sexp_t* ptr = exp->list->next;
 
@@ -103,8 +105,9 @@ void ActionMessageParser::ParseMessage(const std::string &_msg)
 }
 
 //////////////////////////////////////////////////
-void ActionMessageParser::ParseSexp(sexp_t *_exp)
+void EffectorParser::ParseSexp(sexp_t *_exp)
 {
+  // Extract the first element of a s-expression
   char *v;
   if (_exp->ty == SEXP_LIST)
   {
@@ -116,6 +119,7 @@ void ActionMessageParser::ParseSexp(sexp_t *_exp)
   else
     return;
 
+  // Decide based on the type of effector message
   if (!strcmp(v, "scene"))
   {
     ParseScene(_exp);
@@ -218,36 +222,36 @@ void ActionMessageParser::ParseSexp(sexp_t *_exp)
   }
   else
   {
-    fprintf(stderr, "EVAL: Unknown = %s\n", v);
+    std::cerr << "Unknown Message : " <<v<< std::endl;
   }
 }
 
 //////////////////////////////////////////////////
-void ActionMessageParser::ParseHingeJoint(sexp_t *_exp)
+void EffectorParser::ParseHingeJoint(sexp_t *_exp)
 {
   std::string name;
   double effector;
+
   name =_exp->list->val;
   effector = atof(_exp->list->next->val);
-  this->jointParserMap.insert(std::map <std::string, double> ::value_type(name, effector));
+
+  this->jointEffectors.insert(std::map <std::string, double> ::value_type(name, effector));
 }
 
 //////////////////////////////////////////////////
-void ActionMessageParser::ParseScene(sexp_t *_exp)
+void EffectorParser::ParseScene(sexp_t *_exp)
 {
   int type = 0;
-
   std::string address;
 
   address =_exp->list->next->val;
-
   type = atof(_exp->list->next->next->val);
-  this->sceneParserMap.insert(std::map<int, SceneMsg >::value_type(this->agentID
-      , SceneMsg(this->agentID, type, address)));
+
+  this->sceneEffectors.push_back(SceneMsg(type, address));
 }
 
 //////////////////////////////////////////////////
-void ActionMessageParser::ParseBeam(sexp_t *_exp)
+void EffectorParser::ParseBeam(sexp_t *_exp)
 {
   double x,y,z = 0;
 
@@ -257,12 +261,11 @@ void ActionMessageParser::ParseBeam(sexp_t *_exp)
 
   z = atof(_exp->list->next->next->next->val);
 
-  this->beamParserMap.insert(std::map<int, BeamMsg >::value_type(this->agentID
-      , BeamMsg(this->agentID, x, y, z)));
+  this->beamEffectors.push_back(BeamMsg(x, y, z));
 }
 
 //////////////////////////////////////////////////
-void ActionMessageParser::ParseInit(sexp_t *_exp)
+void EffectorParser::ParseInit(sexp_t *_exp)
 {
   int playerNum = 0;
 
@@ -284,73 +287,73 @@ void ActionMessageParser::ParseInit(sexp_t *_exp)
     ptr = ptr->next;
   }
 
-  this->initParserMap.insert(std::map<int, InitMsg >::value_type(this->agentID
-      , InitMsg(this->agentID, playerNum, teamName)));
+  this->initEffectors.push_back(InitMsg(playerNum, teamName));
 }
 
 //////////////////////////////////////////////////
-void ActionMessageParser::OnConnection(const int _socket)
+void EffectorParser::OnConnection(const int _socket)
 {
-  this->socket = _socket;
+  this->socketID = _socket;
   this->newConnectionDetected = true;
 }
 
 //////////////////////////////////////////////////
-void ActionMessageParser::OnDisconnection(const int /*_socket*/)
+void EffectorParser::OnDisconnection(const int /*_socket*/)
 {
   this->newDisconnectionDetected = true;
 }
-
 //////////////////////////////////////////////////
-bool ActionMessageParser::GetSceneInformation(const int _id, std::string &_msg, int &_robotType)
+void EffectorParser::Update(){
+  // clear data structures
+  this->beamEffectors.clear();
+  this->initEffectors.clear();
+  this->sceneEffectors.clear();
+  this->jointEffectors.clear();
+
+  //Update Effectors using message received by Parse()
+  ParseMessage(this->message.str());
+
+}
+//////////////////////////////////////////////////
+bool EffectorParser::GetSceneInformation(std::string &_msg, int &_robotType)
 {
-  for (auto ob = this->sceneParserMap.begin(); ob != this->sceneParserMap.end(); ++ob)
+  if (!this->sceneEffectors.empty())
   {
-    if (ob->first == _id)
-    {
-      _msg= ob->second.rsgAddress;
-      _robotType= ob->second.robotType;
-      return true;
-    }
+    _msg=this->sceneEffectors.front().rsgAddress;
+    _robotType=this->sceneEffectors.front().robotType;
+    return true;
   }
   return false;
 }
 
 //////////////////////////////////////////////////
-bool ActionMessageParser::GetInitInformation(const int _id, std::string &_teamName,
+bool EffectorParser::GetInitInformation(std::string &_teamName,
     int &_playerNumber)
 {
-  for (auto ob = this->initParserMap.begin(); ob != this->initParserMap.end(); ++ob)
+  if (!this->initEffectors.empty())
   {
-    if (ob->first == _id)
-    {
-      _teamName= ob->second.teamName;
-      _playerNumber= ob->second.playerNum;
-      return true;
-    }
+    _teamName=this->initEffectors.front().teamName;
+    _playerNumber=this->initEffectors.front().playerNumber;
+    return true;
   }
-
   return false;
 }
 
 //////////////////////////////////////////////////
-bool ActionMessageParser::GetBeamInformation(const int _id, double &_x, double &_y,
-    double &_z)
+bool EffectorParser::GetBeamInformation(double &_x, double &_y, double &_z)
 {
-  for (auto ob = this->beamParserMap.begin(); ob != this->beamParserMap.end(); ++ob)
+  if (!this->initEffectors.empty())
   {
-    if (ob->first == _id)
-    {
-      _x = ob->second.x;
-      _y = ob->second.y;
-      _z = ob->second.z;
-      return true;
-    }
+    _x = this->beamEffectors.front().x;
+    _y = this->beamEffectors.front().y;
+    _z = this->beamEffectors.front().z;
+
+    return true;
   }
   return false;
 }
 
 //////////////////////////////////////////////////
-ActionMessageParser::~ActionMessageParser()
+EffectorParser::~EffectorParser()
 {
 }

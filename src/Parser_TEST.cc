@@ -23,10 +23,9 @@
 #include "gtest/gtest.h"
 #include "robocup3ds/Server.hh"
 #include "robocup3ds/SocketParser.hh"
-#include "robocup3ds/ActionMessageParser.hh"
+#include "robocup3ds/EffectorParser.hh"
 
-/// \brief This test uses s-expressions messages,
-// extracted form communication of a sample Robocup agents.
+/// \brief This test uses s-expression messages belong to a sample RoboCup agent communication.
 const std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)(beam 1 1 0.4)"
            "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
            "(init (unum 1)(teamname sampleAgent))(he1 3.20802)"
@@ -41,8 +40,8 @@ bool clientReady = false;
 bool serverReady = false;
 
 //////////////////////////////////////////////////
-/// \brief Send data and its size to a socket
-// \param[in] _client_socket Socket for sending/receiving data
+/// \brief Send data and its size in little-endian format to a socket.
+/// \param[in] _client_socket Socket for sending/receiving data.
 void SendSomeData(int _client_socket)
 {
   char mBuffer[8192];
@@ -62,11 +61,10 @@ void SendSomeData(int _client_socket)
 }
 
 //////////////////////////////////////////////////
-/// \brief Create a client and connect it with the server.
+/// \brief Create a client and connect it to the server.
 /// \param[in] _port Port where the server accepts connections.
 /// \param[out] _socket Socket for sending/receiving data to/from the server.
-/// \return true when success or false otherwise.,
-//////////////////////////////////////////////////
+/// \return True when it succeeds or false otherwise.,
 bool createClient(const int _port, int &_socket)
 {
   struct sockaddr_in servaddr;
@@ -88,38 +86,38 @@ bool createClient(const int _port, int &_socket)
 
 //////////////////////////////////////////////////
 /// \brief Create a client that connects to the server and wait for a reply.
-//  It tests and Message received and the Parser procedure to extract
-//  information on s-expresion messages.
+/// It tests message received by the socket, and  retrieving procedure of
+/// the effectors information in s-expression messages.
 /// \param[in] _port Port where the server accepts connections.
 void receiverClient(const int _port)
 {
-  int socket_ID;
-  if (!createClient(_port, socket_ID))
+  int socket;
+
+  if (!createClient(_port, socket))
     return;
   
-  /* --- Dangerous lines, caused some unsynchronization in server-----
-   Send some data to trigger the creation of a new client.
-   auto sent = write(socket_ID, content.c_str(), content.size() + 1);
-   EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
-  */
   clientReady = true;
 
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
   cv.notify_one();
 
-  auto parser = std::make_shared<ActionMessageParser>();
+  auto parser = std::make_shared<EffectorParser>();
 
-  // Test pareser for whole s-expression messages parsing
-  EXPECT_TRUE(parser->Parse(socket_ID));
+  // Test whether parser receives whole s-expression messages
+  // from client socket or not
+  EXPECT_TRUE(parser->Parse(socket));
 
-  // Test Message received
+  // Test s-expression messages received by Parse()
   EXPECT_EQ(parser->message.str(),content);
 
-  // Test Scene message Parser
+  //Perform information retrieving procedure and update data structures.
+  parser->Update();
+
+  // Test Beam effector values
   std::string sceneAddress;
   int rType;
 
-  if ( parser->GetSceneInformation ( socket_ID, sceneAddress, rType ) )
+  if ( parser->GetSceneInformation (sceneAddress, rType ) )
   {
     std::cout << "Scene Msg Parsed: " << sceneAddress
         << ", " << rType << std::endl;
@@ -127,11 +125,11 @@ void receiverClient(const int _port)
     EXPECT_EQ(rType, 0);
   }
 
-  // Test Init message parser
+  // Test Beam effector values
   std::string teamname;
   int playerNumber;
 
-  if ( parser->GetInitInformation(socket_ID, teamname, playerNumber) )
+  if ( parser->GetInitInformation(teamname, playerNumber) )
   {
     std::cout << "Init Msg: "<< teamname << ", "
         << playerNumber<< std::endl;
@@ -139,10 +137,10 @@ void receiverClient(const int _port)
     EXPECT_EQ(playerNumber, 1);
   }
 
-  // Test Beam message parser
+  // Test Beam effector values
   double x,y,z;
 
-  if ( parser->GetBeamInformation(socket_ID, x, y, z ) )
+  if ( parser->GetBeamInformation(x, y, z ) )
   {
     std::cout << "Beam Pos:( "<< x << ", " << y <<", "<< z <<")" <<std::endl;
     EXPECT_DOUBLE_EQ (x, 1);
@@ -150,21 +148,33 @@ void receiverClient(const int _port)
     EXPECT_DOUBLE_EQ (z, 0.4);
   }
 
+  // Test joints effector values
+  EXPECT_DOUBLE_EQ (parser->jointEffectors.find("he1")->second, 3.20802);
+
+  EXPECT_DOUBLE_EQ (parser->jointEffectors.find("he2")->second, -1.80708);
+
+  EXPECT_DOUBLE_EQ (parser->jointEffectors.find("lae1")->second, -0.259697);
+
+  EXPECT_DOUBLE_EQ (parser->jointEffectors.find("rae1")->second, -0.259697);
+
   std::cout<<"message recieved:"<<parser->message.str()<<std::endl;
-  close(socket_ID);
+  close(socket);
 
 }
 
 //////////////////////////////////////////////////
-/// \brief Test procedure of the parser in one TCP message passing scenario.
+/// \brief Test parser procedure and effector information retrieving in one
+/// TCP message passing scenario.
 
 TEST(Server, Parser)
 {
-  auto parser = std::make_shared <ActionMessageParser>();
+  // create parser object
+  auto parser = std::make_shared <EffectorParser>();
 
+  // create server object with parser object as input
   gazebo::Server server(kPort, parser,
-    &ActionMessageParser::OnConnection, parser.get(),
-    &ActionMessageParser::OnDisconnection, parser.get());
+    &EffectorParser::OnConnection, parser.get(),
+    &EffectorParser::OnDisconnection, parser.get());
 
   server.Start();
 
@@ -185,8 +195,8 @@ TEST(Server, Parser)
   // Check that the callback for detecting new connections was executed.
   EXPECT_TRUE(parser->newConnectionDetected);
 
-  // Send some data to the client.
-  SendSomeData(parser->socket);
+  // Send some data to the client using socketID of the connected client.
+  SendSomeData(parser->socketID);
 
 
   if (clientThread.joinable())
