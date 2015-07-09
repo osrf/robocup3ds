@@ -67,5 +67,8 @@ void Robocup3dsPlugin::Init()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 {
-  // std::cout << "Update" << std::endl;
+  // effector updates world model
+  this->UpdateEffector();
+  this->UpdateGameState();
+  this->UpdatePerceptor();
 }

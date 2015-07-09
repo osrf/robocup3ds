@@ -15,6 +15,7 @@
  *
 */
 
+#include <boost/format.hpp>
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -200,7 +201,7 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
     }
 
     AgentId otherAgentId(_otherAgent.uNum,
-                                    _otherAgent.team->name);
+                         _otherAgent.team->name);
     _agent.percept.otherAgentBodyMap[otherAgentId][kv.first] =
       addNoise(Geometry::CartToPolar(_otherAgentPart));
   }
@@ -232,8 +233,60 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
 }
 
 /////////////////////////////////////////////////
-ignition::math::Vector3<double>
-Perceptor::addNoise(const ignition::math::Vector3<double> &_pt) const
+void Perceptor::Serialize(const Agent &_agent, std::string &_string) const
+{
+  boost::format fobj("%.2f");
+
+  // make sure string is empty
+  _string.clear();
+
+  // write out perception info
+  _string += "(See ";
+
+  // write out landmark info
+  for (auto &kv : _agent.percept.landMarks)
+  {
+    _string += " (" + kv.first + " " + SerializePoint(kv.second, fobj) + ")";
+  }
+
+  // write out agent body parts
+  for (auto &kv : _agent.percept.otherAgentBodyMap)
+  {
+    int agentNum = kv.first.first;
+    std::string agentTeam = kv.first.second;
+    _string += " (P (team " + agentTeam + ") (id " +
+      (boost::format("%d") % agentNum).str() + ")";
+    for (auto &kv2 : kv.second)
+    {
+      _string += "(" + kv2.first + " " + SerializePoint(kv2.second, fobj) + ")";
+    }
+    _string += ")";
+  }
+
+  // write out fieldlines
+  for (auto &fieldLine : _agent.percept.fieldLines)
+  {
+    _string += " (L " + SerializePoint(fieldLine[0], fobj) + " " +
+               SerializePoint(fieldLine[1], fobj) + ")";
+  }
+
+  // finish writing out perception info
+  _string += ")";
+
+  // write body part info
+}
+
+std::string Perceptor::SerializePoint(const math::Vector3<double> &_pt,
+  boost::format &_fobj) const
+{
+  return "(pol " + (_fobj % _pt.X()).str() + " "
+         + (_fobj % _pt.Y()).str() + " "
+         + (_fobj % _pt.Z()).str() + ")";
+}
+
+/////////////////////////////////////////////////
+ignition::math::Vector3<double> Perceptor::addNoise(
+  const ignition::math::Vector3<double> &_pt) const
 {
   if (!Perceptor::useNoise)
   {

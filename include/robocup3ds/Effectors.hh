@@ -27,17 +27,7 @@ class Effector
   /// \param[in] _gamestate Pointer to GameState object
   public: Effector(GameState *const _gameState);
 
-  /// \brief Processes the init message sent by the agent
-  public: void InitAgent(const int _uNum, const std::string &_teamName);
-
-  /// \brief Processes the beam message sent by the agent
-  public: void BeamAgent(const int _uNum, const std::string &_teamName,
-    const double _x, const double _y, const double _yaw);
-
-  /// \brief Processes the say message sent by the agent
-  public: void SayAgent(const int _uNum, const std::string &_teamName,
-    const std::string &_msg);
-
+  /// \brief Update function
   public: void Update();
 
   /// \brief Pointer to gamestate

@@ -142,6 +142,20 @@ class AgentPerceptions
 
   /// \Brief Hear perceptor
   public: AgentHear hear;
+
+  /// \Brief Map of hinge joints and their angles
+  public: std::map<std::string, double> hingeJoints;
+};
+
+/// \brief This class serves as an container for the information by the
+/// the agent
+class AgentActions
+{
+  /// \brief Constructor
+  public: AgentActions() {}
+
+  /// \brief Stores the velocity and angle information
+  public: std::map<std::string, double> jointEffectors;
 };
 
 /// \brief Agent class for GameState

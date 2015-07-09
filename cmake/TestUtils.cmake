@@ -14,7 +14,7 @@ macro (robocup3ds_build_tests)
       gtest gtest_main
       )
 
-    message(${GAZEBO_LIBRARIES})
+    # message(${GAZEBO_LIBRARIES})
     target_link_libraries(${BINARY_NAME}
       libgtest.a
       libgtest_main.a

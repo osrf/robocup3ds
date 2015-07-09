@@ -18,6 +18,7 @@
 #ifndef _GAZEBO_PERCEPTORS_HH_
 #define _GAZEBO_PERCEPTORS_HH_
 
+#include <boost/format.hpp>
 #include <ignition/math.hh>
 #include <map>
 #include <memory>
@@ -34,7 +35,7 @@ class GameState;
 class Perceptor
 {
   /// \Brief Constructor for Perceptor object
-  /// \Param[in] _gameState Pointer to GameState object
+  /// \param[in] _gameState Pointer to GameState object
   public: Perceptor(GameState *const _gameState);
 
   /// \Brief Destructor for Perceptor object
@@ -50,38 +51,52 @@ class Perceptor
   public: void Update();
 
   /// \Brief Helper function to update line info
-  /// \Param[in] _agent Agent object whose perception is updated
-  /// \Param[in] _line Line object
+  /// \param[in] _agent Agent object whose perception is updated
+  /// \param[in] _line Line object
   public: void UpdateLine(Agent &_agent,
     const ignition::math::Line3<double> &_line) const;
 
   /// \Brief Function to update landmark info
-  /// \Param[in] _agent Agent object whose perception is updated
-  /// \Param[in] _landmarkname Name of landmark
-  /// \Param[in] _landmark Position of landmark
+  /// \param[in] _agent Agent object whose perception is updated
+  /// \param[in] _landmarkname Name of landmark
+  /// \param[in] _landmark Position of landmark
   public: void UpdateLandmark(Agent &_agent,
                 const std::string &_landmarkname,
                 const ignition::math::Vector3<double> &_landmark) const;
 
   /// \Brief Function to update positions of other agents
-  /// \Param[in] _agent Agent whose perception we are updating
-  /// \Param[in] _otherAgent Other agent whose position is updated
+  /// \param[in] _agent Agent whose perception we are updating
+  /// \param[in] _otherAgent Other agent whose position is updated
   public: void UpdateOtherAgent(Agent &_agent,
     const Agent &_otherAgent) const;
 
   /// \Brief Function to update message that agent hears
-  /// \Param[in] _agent Agent whose perception we are updating
+  /// \param[in] _agent Agent whose perception we are updating
   public: void UpdateAgentHear(Agent &_agent) const;
 
+  /// \Brief Function to convert perception information to s-expressions
+  /// and write it to a string
+  /// \param[in] _agent Agent whose perception we are updating
+  /// \param[in] _string String object we are writing to
+  public: void Serialize(const Agent &_agent, std::string &_string) const;
+
+  /// \Brief Converts points to a string
+  /// \param[in] _pt Point object
+  /// \param[in] _fobj Format specifier
+  /// \return String object
+  private: inline std::string SerializePoint(
+    const ignition::math::Vector3<double> &_pt,
+    boost::format &_fobj) const;
+
   /// \Brief Function to add noise to all observations
-  /// \Param[in] _pt Point object
+  /// \param[in] _pt Point object
   /// \return A modified point object with noise
   private: ignition::math::Vector3<double>
     addNoise(const ignition::math::Vector3<double> &_pt) const;
 
   /// \Brief Set the transformation matrix from global to local
   /// coordinates for an agent
-  /// \Param[in] _agent Agent object
+  /// \param[in] _agent Agent object
   public: void SetG2LMat(const Agent &_agent);
 
   /// \Brief Flag whether to add noise to observations or not

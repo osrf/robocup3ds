@@ -45,6 +45,17 @@ namespace gazebo
     /// \param[in] _info Information used in the update event.
     public: void Update(const common::UpdateInfo &_info);
 
+    /// \brief Update the effector, use collected joint information to update
+    /// gazebo world
+    private: void UpdateEffector();
+
+    /// \brief Sync the gameState with the gazebo world
+    private: void UpdateGameState();
+
+    /// \brief Update the effector, use gazebo world joint information to update
+    /// information sent to agents
+    private: void UpdatePerceptor();
+
     /// \brief Pointer to the update event connection.
     private: event::ConnectionPtr updateConnection;
 
