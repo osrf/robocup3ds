@@ -404,6 +404,7 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
   perceptor->UpdateAgentHear(agent2);
   EXPECT_FALSE(agent2.percept.hear.isValid);
 }
+
 /// \Brief Test whether the Update() function works
 TEST_F(PerceptorTest, Percepter_Update)
 {
@@ -452,6 +453,55 @@ TEST_F(PerceptorTest, Percepter_Update)
       }
     }
   }
+}
+
+/// \Brief Test whether the Serialize() function works
+TEST_F(PerceptorTest, Percepter_Serialize)
+{
+  gameState->AddAgent(1, "red");
+  gameState->AddAgent(1, "blue");
+  GameState::restrictVision = true;
+  perceptor->useNoise = false;
+  GameState::HFov = 90;
+  GameState::VFov = 90;
+  perceptor->SetViewFrustum();
+
+  auto &redAgent = gameState->teams.at(0)->members.at(0);
+  redAgent.percept.hingeJoints["joint1"] = 0.5;
+  redAgent.percept.hingeJoints["joint2"] = 0.2;
+  perceptor->SetG2LMat(redAgent);
+  auto &blueAgent = gameState->teams.at(1)->members.at(0);
+  gameState->MoveAgent(blueAgent,
+                       math::Vector3<double>(5.0, 1.0, GameState::beamHeight));
+  blueAgent.selfBodyMap["HEAD"] = blueAgent.pos +
+                                  math::Vector3<double>(0, 0, 1);
+  blueAgent.selfBodyMap["BODY"] = blueAgent.pos;
+  perceptor->Update();
+
+  char testString[4000];
+
+  // currently takes around 400 useconds to finish for all 22 agents
+  for (int i = 0; i < 1000; ++i)
+  { perceptor->Serialize(redAgent, testString, 4000); }
+
+  // check that certain names are there in string
+  ASSERT_TRUE(strstr(testString, "joint1"));
+  ASSERT_TRUE(strstr(testString, "joint2"));
+  ASSERT_TRUE(strstr(testString, "HEAD"));
+  ASSERT_TRUE(strstr(testString, "BODY"));
+
+  // check that parenthesis are balanced
+  int paren = 0;
+  for (int i = 0; i < 4000; ++i)
+  {
+    if (testString[i] == '\0')
+    { break; }
+    if (testString[i] == '(')
+    { paren++; }
+    else if (testString[i] == ')')
+    { paren--; }
+  }
+  ASSERT_EQ(0, paren);
 }
 
 int main(int argc, char **argv)

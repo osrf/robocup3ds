@@ -15,7 +15,6 @@
  *
 */
 
-#include <boost/format.hpp>
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -233,89 +232,93 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
 }
 
 /////////////////////////////////////////////////
-void Perceptor::Serialize(const Agent &_agent, std::string &_string) const
+bool Perceptor::Serialize(const Agent &_agent, char *_string,
+                          const int _size) const
 {
-  boost::format fobj("%.2f");
+  if (_size < 4000)
+  { return false; }
 
-  // make sure string is empty
-  _string.clear();
+  int cx = 0;
 
   // write out perception info
-  _string += "(See ";
+  cx += snprintf(_string + cx, _size - cx, "(See");
 
   // write out landmark info
   for (auto &kv : _agent.percept.landMarks)
   {
-    _string += " (" + kv.first + " " + SerializePoint(kv.second, fobj) + ")";
+    cx += SerializePoint(kv.first.c_str(), kv.second, _string + cx, _size - cx);
   }
 
   // write out other agent body parts
   for (auto &kv : _agent.percept.otherAgentBodyMap)
   {
-    int agentNum = kv.first.first;
-    std::string agentTeam = kv.first.second;
-    _string += " (P (team " + agentTeam + ") (id " +
-               (boost::format("%d") % agentNum).str() + ")";
+    // agentNum = kv.first.first;
+    // agentTeam = kv.first.second;
+    cx += snprintf(_string + cx, _size - cx, " (P (team %s) (id %d)",
+                   kv.first.second.c_str(), kv.first.first);
     for (auto &kv2 : kv.second)
     {
-      _string += "(" + kv2.first + " " + SerializePoint(kv2.second, fobj) + ")";
+      cx += SerializePoint(kv2.first.c_str(),
+                           kv2.second, _string + cx, _size - cx);
     }
-    _string += ")";
+    cx += snprintf(_string + cx, _size - cx, ")");
   }
 
   // write out fieldlines
   for (auto &fieldLine : _agent.percept.fieldLines)
   {
-    _string += " (L " + SerializePoint(fieldLine[0], fobj) + " " +
-               SerializePoint(fieldLine[1], fobj) + ")";
+    cx += snprintf(_string + cx, _size - cx,
+                   " (L (pol %.2f %.2f %.2f) (pol %.2f %.2f %.2f))",
+                   fieldLine[0].X(), fieldLine[0].Y(), fieldLine[0].Z(),
+                   fieldLine[1].X(), fieldLine[1].Y(), fieldLine[1].Z());
   }
 
   // finish writing out perception info
-  _string += ")";
+  cx += snprintf(_string + cx, _size - cx, ")");
 
   // write body joint angle info
   for (auto &kv : _agent.percept.hingeJoints)
   {
-    _string += "(HJ (n " + kv.first + ") (ax " +
-               (fobj % kv.second).str() + "))";
+    cx += snprintf(_string + cx, _size - cx, " (HJ (n %s) (ax %.2f))",
+                   kv.first.c_str(), kv.second);
   }
 
   // write out gyro info
-  _string += "(GYR (n torso) (rt " +
-             (fobj % _agent.percept.gyroRate.X()).str() + " "
-             + (fobj % _agent.percept.gyroRate.Y()).str() + " "
-             + (fobj % _agent.percept.gyroRate.Z()).str() + ")";
+  cx += SerializePoint("GYR (n torso)", _agent.percept.gyroRate,
+                       _string + cx, _size - cx);
 
   // write out acceleration info
-  _string += "(GYR (n ACC) (a " +
-             (fobj % _agent.percept.accel.X()).str() + " "
-             + (fobj % _agent.percept.accel.Y()).str() + " "
-             + (fobj % _agent.percept.accel.Z()).str() + ")";
+  cx += SerializePoint("GYR (n ACC)", _agent.percept.accel,
+                       _string + cx, _size - cx);
 
   // write force resistance information
-  _string += "(FRP (n lf) (c " +
-             (fobj % _agent.percept.leftFootFR.first.X()).str() + " "
-             + (fobj % _agent.percept.leftFootFR.first.Y()).str() + " "
-             + (fobj % _agent.percept.leftFootFR.first.Z()).str() + ") (f"
-             + (fobj % _agent.percept.leftFootFR.second.X()).str() + " "
-             + (fobj % _agent.percept.leftFootFR.second.Y()).str() + " "
-             + (fobj % _agent.percept.leftFootFR.second.Z()).str() + ")";
+  cx += snprintf(_string + cx, _size - cx,
+                 " (FRP (n lf) (c %.2f %.2f %.2f) (f %.2f %.2f %.2f))",
+                 _agent.percept.leftFootFR.first.X(),
+                 _agent.percept.leftFootFR.first.Y(),
+                 _agent.percept.leftFootFR.first.Z(),
+                 _agent.percept.leftFootFR.second.X(),
+                 _agent.percept.leftFootFR.second.Y(),
+                 _agent.percept.leftFootFR.second.Z());
 
-  _string += "(FRP (n rf) (c " +
-             (fobj % _agent.percept.rightFootFR.first.X()).str() + " "
-             + (fobj % _agent.percept.rightFootFR.first.Y()).str() + " "
-             + (fobj % _agent.percept.rightFootFR.first.Z()).str() + ") (f"
-             + (fobj % _agent.percept.rightFootFR.second.X()).str() + " "
-             + (fobj % _agent.percept.rightFootFR.second.Y()).str() + " "
-             + (fobj % _agent.percept.rightFootFR.second.Z()).str() + ")";
+  cx += snprintf(_string + cx, _size - cx,
+                 " (FRP (n rf) (c %.2f %.2f %.2f) (f %.2f %.2f %.2f))",
+                 _agent.percept.rightFootFR.first.X(),
+                 _agent.percept.rightFootFR.first.Y(),
+                 _agent.percept.rightFootFR.first.Z(),
+                 _agent.percept.rightFootFR.second.X(),
+                 _agent.percept.rightFootFR.second.Y(),
+                 _agent.percept.rightFootFR.second.Z());
+
+  return true;
 }
 
-std::string Perceptor::SerializePoint(const math::Vector3<double> &_pt,
-                                      boost::format &_fobj) const
+int Perceptor::SerializePoint(const char *_label,
+                              const math::Vector3<double> &_pt,
+                              char *_string, const int _size) const
 {
-  return "(pol " + (_fobj % _pt.X()).str() + " "
-         + (_fobj % _pt.Y()).str() + " "
-         + (_fobj % _pt.Z()).str() + ")";
+  return snprintf(_string, _size, " (%s (pol %.2f %.2f %.2f))",
+                  _label, _pt.X(), _pt.Y(), _pt.Z());
 }
 
 /////////////////////////////////////////////////

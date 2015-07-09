@@ -513,7 +513,7 @@ class GameState
   /// \brief Radius where not allowed team cannot approach ball
   public: static double dropBallRadius;
 
-  /// \brief Every cycle counts as [counterCycleTime] of 
+  /// \brief Every cycle counts as [counterCycleTime] of
   /// game time (for `fake simulations)
   public: static bool useCounterForGameTime;
 

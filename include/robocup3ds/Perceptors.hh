@@ -18,7 +18,6 @@
 #ifndef _GAZEBO_PERCEPTORS_HH_
 #define _GAZEBO_PERCEPTORS_HH_
 
-#include <boost/format.hpp>
 #include <ignition/math.hh>
 #include <map>
 #include <memory>
@@ -77,16 +76,20 @@ class Perceptor
   /// \Brief Function to convert perception information to s-expressions
   /// and write it to a string
   /// \param[in] _agent Agent whose perception we are updating
-  /// \param[in] _string String object we are writing to
-  public: void Serialize(const Agent &_agent, std::string &_string) const;
+  /// \param[in] _string Buffer we are writing to
+  /// \return True if buffer is large enough
+  public: bool Serialize(const Agent &_agent, char *_string,
+                          const int _size) const;
 
   /// \Brief Converts points to a string
+  /// \param[in] _label Label for point
   /// \param[in] _pt Point object
-  /// \param[in] _fobj Format specifier
-  /// \return String object
-  private: inline std::string SerializePoint(
-    const ignition::math::Vector3<double> &_pt,
-    boost::format &_fobj) const;
+  /// \param[in] _string Pointer to string buffer
+  /// \param[in] _size Size of string buffer
+  /// \return Number of characters written
+  private: inline int SerializePoint(const char *_label,
+                              const ignition::math::Vector3<double> &_pt,
+                              char *_string, const int _size) const;
 
   /// \Brief Function to add noise to all observations
   /// \param[in] _pt Point object
