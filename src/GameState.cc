@@ -74,6 +74,9 @@ double GameState::dropBallRadius = 2;
 double GameState::HFov = 120;
 double GameState::VFov = 120;
 bool   GameState::restrictVision = true;
+const double GameState::counterCycleTime = 0.02;
+const double GameState::dropBallRadiusMargin = 0.5;
+const double GameState::beamNoise = 0.1;
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -220,7 +223,7 @@ void GameState::Update()
   this->cycleCounter++;
   if (GameState::useCounterForGameTime)
   {
-    this->gameTime = this->cycleCounter * 0.02;
+    this->gameTime = this->cycleCounter * GameState::counterCycleTime;
   }
 
   this->hasCurrentStateChanged = false;
@@ -300,7 +303,8 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
           math::Vector3<double> newPos2;
           newPos2.Set(0, 0, beamHeight);
           if (Geometry::IntersectionCircunferenceLine(line, this->ballPos,
-              1.25 * GameState::dropBallRadius, newPos, newPos2))
+              GameState::dropBallRadiusMargin +
+              GameState::dropBallRadius, newPos, newPos2))
           {
             if (agent.pos.Distance(newPos) < agent.pos.Distance(newPos2))
             {
@@ -628,9 +632,9 @@ void GameState::CheckImmobility()
       }
       // move agent to side of field if they have remained fallen
       // or timeout too long.
-      double SCALE = 1.0 + (agent.uNum == 1);
-      if (agent.timeImmoblized >= SCALE * GameState::immobilityTimeLimit
-          || agent.timeFallen >= SCALE * GameState::fallenTimeLimit)
+      const double kScale = 1.0 + (agent.uNum == 1);
+      if (agent.timeImmoblized >= kScale * GameState::immobilityTimeLimit
+          || agent.timeFallen >= kScale * GameState::fallenTimeLimit)
       {
         agent.timeImmoblized = 0;
         agent.timeFallen = 0;
@@ -755,11 +759,12 @@ void GameState::MoveAgent(Agent &_agent, const double _x, const double _y,
 void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                                const double _yaw) const
 {
-  double offsetX = (static_cast<double>(random()) / (RAND_MAX)) * 0.2 - 0.1;
+  double offsetX = (static_cast<double>(random()) / (RAND_MAX)) *
+                   (2 * GameState::beamNoise) - GameState::beamNoise;
   double offsetY = (static_cast<double>(random()) / (RAND_MAX)) *
-                   0.2 - 0.1;
+                   (2 * GameState::beamNoise) - GameState::beamNoise;
   double offsetYaw = (static_cast<double>(random()) / (RAND_MAX)) *
-                     0.2 - 0.1;
+                     (2 * GameState::beamNoise) - GameState::beamNoise;
   _agent.pos.Set(_x + offsetX, _y + offsetY, GameState::beamHeight);
   _agent.rot.Euler(0, 0, _yaw + offsetYaw);
   _agent.updatePose = true;
@@ -1070,7 +1075,7 @@ void GameState::SetCycleCounter(const int _cycleCounter)
 
   if (GameState::useCounterForGameTime)
   {
-    double newGameTime = 0.02 * cycleCounter;
+    double newGameTime = GameState::counterCycleTime * cycleCounter;
     double offsetTime = newGameTime - gameTime;
     this->prevCycleGameTime += offsetTime;
     this->gameTime = newGameTime;
