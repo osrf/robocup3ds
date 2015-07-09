@@ -513,7 +513,8 @@ class GameState
   /// \brief Radius where not allowed team cannot approach ball
   public: static double dropBallRadius;
 
-  /// \brief Every cycle counts as 20ms of game time (for `fake simulations)
+  /// \brief Every cycle counts as [counterCycleTime] of 
+  /// game time (for `fake simulations)
   public: static bool useCounterForGameTime;
 
   /// \brief Max players per team
@@ -548,6 +549,15 @@ class GameState
 
   /// \brief Flag whether to restrict field of view
   public: static bool restrictVision;
+
+  /// \brief How long in game time is each cycle
+  public: static const double counterCycleTime;
+
+  /// \brief Safety margin when beaming players during dropball
+  public: static const double dropBallRadiusMargin;
+
+  /// \ brief Noise added to beams
+  public: static const double beamNoise;
 
   /// \brief Pointer to configuration variables
   public: static std::shared_ptr<std::map<const std::string,
