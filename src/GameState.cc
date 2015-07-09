@@ -96,21 +96,19 @@ GameState::GameState():
   freeKickRightState(std::make_shared<FreeKickState>(FreeKickRight, this)),
 
   hasCurrentStateChanged(false),
-  touchBallKickoff(std::shared_ptr<BallContact>(nullptr)),
+  touchBallKickoff(nullptr),
   updateBallPose(false),
   gameTime(0.0),
   prevCycleGameTime(0.0),
   startGameTime(0.0),
-  currentState(std::shared_ptr<State>(nullptr)),
+  currentState(nullptr),
   half(Half::FIRST_HALF),
   cycleCounter(0)
 {
   this->SetCurrent(beforeKickOffState);
-  this->teams.push_back(
-    std::make_shared<Team>(
+  this->teams.push_back(std::make_shared<Team>(
       "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
-  this->teams.push_back(
-    std::make_shared<Team>(
+  this->teams.push_back(std::make_shared<Team>(
       "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
 }
 
@@ -1114,6 +1112,6 @@ std::shared_ptr<GameState::BallContact> GameState::GetLastBallContact() const
   }
   else
   {
-    return std::shared_ptr<BallContact>(nullptr);
+    return nullptr;
   }
 }

@@ -124,7 +124,7 @@ namespace SoccerField
     ignition::math::Line3<double>(1.618033989, -1.175570505, 2, 0)
   };
 
-  static const std::map<std::string, ignition::math::Vector3<double> >
+  static const std::map<std::string, ignition::math::Vector3<double>>
   LandMarks =
   {
     {"F1L", ignition::math::Vector3<double>(-15, 10, 0)},
