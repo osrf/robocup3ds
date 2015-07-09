@@ -71,7 +71,7 @@ namespace Geometry
     }
 
     /// \brief Starting and ending points of line
-    public: std::vector<ignition::math::Vector3<double> > pts;
+    public: std::vector<ignition::math::Vector3<double>> pts;
   };
 
   /// \brief Calculates the intersection between a line and a plane

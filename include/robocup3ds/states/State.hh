@@ -33,7 +33,7 @@ namespace states
     /// \param[in] _name Name of the state.
     /// \param[out] _gameState Reference to the GameState.
     public: State(const std::string &_name,
-        GameState *const _gameState);
+                  GameState *const _gameState);
 
     /// \brief Initialize the state. Called once after a pause duration after
     /// entering state.

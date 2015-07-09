@@ -33,7 +33,7 @@ namespace states
     /// \param[in] _name Name of this state.
     /// \param[in] _gameState GameState to be used inside the state.
     public: CornerKickState(const std::string &_name,
-                                GameState *const _gameState);
+                            GameState *const _gameState);
 
     // Documentation inherited
     public: virtual void Initialize();
