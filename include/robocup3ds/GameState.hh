@@ -213,7 +213,7 @@ class GameState
   /// \param[out] _agent Reference to agent object
   /// \param[in] _pos New position of agent
   public: void MoveAgent(Agent &_agent,
-                           const ignition::math::Vector3<double> &_pos) const;
+                         const ignition::math::Vector3<double> &_pos) const;
 
   /// \brief Set the agent's position and yaw (beaming the agent)
   /// \param[out] _agent Reference to agent object
@@ -221,7 +221,7 @@ class GameState
   /// \param[in] _y New Y position of agent
   /// \param[in] yaw New yaw of agent
   public: void MoveAgent(Agent &_agent, const double _x, const double _y,
-                           const double yaw) const;
+                         const double yaw) const;
 
   /// \brief Set the agent's position and yaw with some additional noise
   /// \param[out] _agent Reference to agent object
@@ -229,16 +229,15 @@ class GameState
   /// \param[in] _y New Y position of agent
   /// \param[in] _yaw New yaw of agent
   public: void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
-                                const double _yaw) const;
+                              const double _yaw) const;
 
   /// \brief Set the agent's position and orientation
   /// \param[out] _agent Reference to agent object
   /// \param[in] _pos New position of agent
   /// \param[in] _rot New orientation of agent
   public: void MoveAgent(Agent &_agent,
-                           const ignition::math::Vector3<double> &_pos,
-                           const ignition::math::Quaternion<double> &_rot)
-                           const;
+                         const ignition::math::Vector3<double> &_pos,
+                         const ignition::math::Quaternion<double> &_rot) const;
 
   /// \brief Move agent to side of field, the side depends on the agent's side
   /// \param[out] _agent Reference to agent object
@@ -297,7 +296,7 @@ class GameState
   /// \brief Set the angular velocity of the ball
   /// \param[in] _ballAngVel Target angular velocity
   public: void SetBallAngVel(const ignition::math::Vector3<double>
-                               &_ballAngVel);
+                             &_ballAngVel);
 
   /// \brief Add agent to game state
   /// \param[in] _uNum Agent number
@@ -558,7 +557,7 @@ class GameState
   public: bool hasCurrentStateChanged;
 
   /// \brief History of ball contacts;
-  public: std::vector<std::shared_ptr<BallContact> > ballContactHistory;
+  public: std::vector<std::shared_ptr<BallContact>> ballContactHistory;
 
   /// \brief Pointer to the ball contact that causes the game to
   /// transition from kick off to play on

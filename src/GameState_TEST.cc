@@ -38,7 +38,6 @@
 
 using namespace ignition;
 using namespace states;
-using namespace std;
 
 /// \class GameStateTest_basic
 /// \brief This test fixture sets up a gameState object and two empty teams
@@ -54,7 +53,7 @@ class GameStateTest_basic : public ::testing::Test
     GameState gameState;
     // green is third team and shouldnt be added
   protected:
-    string teamNames[3] = {"blue", "red", "green"};
+    std::string teamNames[3] = {"blue", "red", "green"};
 };
 
 /// \brief Test whether GameState constructor and destructor works
@@ -259,7 +258,7 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
             gameState.GetBall());
 
 
-  vector<math::Vector3<double> > nearFourCorners;
+  std::vector<math::Vector3<double>> nearFourCorners;
   nearFourCorners.push_back(math::Vector3<double>(-1, -1,
                             SoccerField::BallRadius));
   nearFourCorners.push_back(math::Vector3<double>(-1, 1,
@@ -269,7 +268,7 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
   nearFourCorners.push_back(math::Vector3<double>(1, 1,
                             SoccerField::BallRadius));
 
-  vector<math::Vector3<double> > fourCorners;
+  std::vector<math::Vector3<double>> fourCorners;
   fourCorners.push_back(math::Vector3<double>(-SoccerField::HalfFieldWidth,
                         -SoccerField::HalfFieldHeight,
                         SoccerField::BallRadius));
@@ -288,13 +287,13 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
     EXPECT_EQ(fourCorners.at(i), gameState.GetBall());
   }
 
-  vector<math::Vector3<double> > outOfBounds;
+  std::vector<math::Vector3<double>> outOfBounds;
   outOfBounds.push_back(math::Vector3<double>(-17, -13, -5));
   outOfBounds.push_back(math::Vector3<double>(17, 13, 5));
   outOfBounds.push_back(math::Vector3<double>(11, -12, -5));
   outOfBounds.push_back(math::Vector3<double>(-11, 12, -5));
 
-  vector<math::Vector3<double> > inBounds;
+  std::vector<math::Vector3<double>> inBounds;
   inBounds.push_back(math::Vector3<double>(-SoccerField::HalfFieldWidth,
                      -SoccerField::HalfFieldHeight, SoccerField::BallRadius));
   inBounds.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth,
@@ -476,7 +475,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff)
 /// \brief Test for whether KickOff play mode transitions correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.kickOffLeftState);
   states.push_back(gameState.kickOffRightState);
 
@@ -582,11 +581,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
 /// \brief Test for whether PlayOn play mode transitions to kickIn correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_kickIn)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.kickInLeftState);
   states.push_back(gameState.kickInRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
-  vector<math::Vector3<double> > ballPositions;
+  std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(0, -15,
                           SoccerField::BallRadius));
   ballPositions.push_back(math::Vector3<double>(0, 15,
@@ -621,11 +620,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_kickIn)
 /// \brief Test for whether PlayOn play mode transitions to cornerKick correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_cornerKick)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.cornerKickLeftState);
   states.push_back(gameState.cornerKickRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
-  vector<math::Vector3<double> > ballPositions;
+  std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(
                             -(SoccerField::HalfFieldWidth + 1),
                             5, SoccerField::BallRadius));
@@ -660,11 +659,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_cornerKick)
 /// \brief Test for whether PlayOn play mode transitions to goal correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.goalLeftState);
   states.push_back(gameState.goalRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
-  vector<math::Vector3<double> > ballPositions;
+  std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(
                             -(SoccerField::HalfFieldWidth + 0.5),
                             1, SoccerField::BallRadius));
@@ -690,11 +689,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
 /// \brief Test for whether PlayOn play mode transitions to goalKick correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goalKick)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.goalKickLeftState);
   states.push_back(gameState.goalKickRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
-  vector<math::Vector3<double> > ballPositions;
+  std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(
                             -(SoccerField::HalfFieldWidth + 1),
                             5, SoccerField::BallRadius));
@@ -726,11 +725,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goalKick)
 /// \brief Test for whether goal play mode transitions to kickOff correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_goal_kickOff)
 {
-  vector<std::shared_ptr<State> > beforeStates;
+  std::vector<std::shared_ptr<State>> beforeStates;
   beforeStates.push_back(gameState.goalLeftState);
   beforeStates.push_back(gameState.goalRightState);
 
-  vector<std::shared_ptr<State> > afterStates;
+  std::vector<std::shared_ptr<State>> afterStates;
   afterStates.push_back(gameState.kickOffRightState);
   afterStates.push_back(gameState.kickOffLeftState);
 
@@ -761,7 +760,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_goal_kickOff)
 /// \brief Test for whether kickIn play mode transitions to playOn correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_kickIn_playOn)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.kickInLeftState);
   states.push_back(gameState.kickInRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
@@ -802,7 +801,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickIn_playOn)
 /// \brief Test for whether cornerKick play mode transitions to playOn correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_cornerKick_playOn)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.cornerKickLeftState);
   states.push_back(gameState.cornerKickRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
@@ -843,7 +842,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_cornerKick_playOn)
 /// \brief Test for whether freeKick play mode transitions to playOn correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_freeKick_playOn)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.freeKickLeftState);
   states.push_back(gameState.freeKickRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
@@ -884,11 +883,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_freeKick_playOn)
 /// \brief Test for whether goalKick play mode transitions to playOn correctly
 TEST_F(GameStateTest_fullTeams, GameState_transition_goalKick_playOn)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.goalKickLeftState);
   states.push_back(gameState.goalKickRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
-  vector<math::Vector3<double> > ballPositions;
+  std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(-16, 5,
                           SoccerField::BallRadius));
   ballPositions.push_back(math::Vector3<double>(16, -5,
@@ -988,7 +987,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
 /// works as intended
 TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.kickOffLeftState);
   states.push_back(gameState.kickOffRightState);
   std::shared_ptr<GameState::BallContact> ballContact;
@@ -1242,7 +1241,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCrowding)
 TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
 {
   math::Vector3<double> pos(0, 0, GameState::beamHeight);
-  vector<math::Vector3<double> >fallenPos;
+  std::vector<math::Vector3<double>> fallenPos;
   fallenPos.push_back(math::Vector3<double>(0.0, 0.0, 0.1));
   fallenPos.push_back(math::Vector3<double>(0.1, 0.1, 0.1));
   gameState.AddAgent(1, "blue");
@@ -1320,11 +1319,11 @@ TEST_F(GameStateTest_fullTeams, GameState_DropBall)
 /// function in gameState is working as intended
 TEST_F(GameStateTest_fullTeams, GameState_CheckGoalKickIllegalDefense)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.goalKickLeftState);
   states.push_back(gameState.goalKickRightState);
 
-  vector<math::Vector3<double>> inPenaltyBox;
+  std::vector<math::Vector3<double>> inPenaltyBox;
   inPenaltyBox.push_back(math::Vector3<double>(
                            -SoccerField::HalfFieldWidth + 1, 0,
                            GameState::beamHeight));
@@ -1332,7 +1331,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckGoalKickIllegalDefense)
                            SoccerField::HalfFieldWidth - 1, 0,
                            GameState::beamHeight));
 
-  vector<math::Box> penaltyBox;
+  std::vector<math::Box> penaltyBox;
   penaltyBox.push_back(SoccerField::PenaltyBoxLeft);
   penaltyBox.push_back(SoccerField::PenaltyBoxRight);
 
@@ -1357,7 +1356,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckGoalKickIllegalDefense)
 /// function in gameState is working as intended
 TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
 {
-  vector<std::shared_ptr<State> > states;
+  std::vector<std::shared_ptr<State>> states;
   states.push_back(gameState.kickOffLeftState);
   states.push_back(gameState.kickOffRightState);
   EXPECT_EQ(gameState.teams.at(0)->side, Team::Side::LEFT);

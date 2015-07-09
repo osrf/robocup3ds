@@ -31,7 +31,7 @@ namespace states
   {
     // Documentation inherited
     public: KickInState(const std::string &_name,
-                              GameState *const _gameState);
+                        GameState *const _gameState);
 
     // Documentation inherited
     public: virtual void Initialize();
