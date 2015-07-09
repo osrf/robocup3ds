@@ -128,23 +128,37 @@ class AgentPerceptions
     this->fieldLines.reserve(21);
   }
 
-  /// \Brief Map of landmarks that have been transformed to agent's cood
+  /// \brief Map of landmarks that have been transformed to agent's cood
   /// frame
   public: std::map<std::string, ignition::math::Vector3<double> > landMarks;
 
-  /// \Brief Vector of lines that have been transformed to agent's cood
+  /// \brief Vector of lines that have been transformed to agent's cood
   /// frame
   public: std::vector<ignition::math::Line3<double> > fieldLines;
 
-  /// \Brief Map of agent's perceptions of other agent's body parts
+  /// \brief Map of agent's perceptions of other agent's body parts
   /// Implemented as a nested map
   public: std::map<AgentId, AgentBodyMap> otherAgentBodyMap;
 
-  /// \Brief Hear perceptor
+  /// \brief Hear perceptor
   public: AgentHear hear;
 
-  /// \Brief Map of hinge joints and their angles
+  /// \brief Map of hinge joints and their angles
   public: std::map<std::string, double> hingeJoints;
+
+  /// \brief Gyro information of torso
+  public: ignition::math::Vector3<double> gyroRate;
+
+  /// \brief Acceleration of torso
+  public: ignition::math::Vector3<double> accel;
+
+  /// \brief Force information for left foot of nao
+  public: std::pair<ignition::math::Vector3<double>,
+  ignition::math::Vector3<double>> leftFootFR;
+
+  /// \brief Force information for right foot of nao
+  public: std::pair<ignition::math::Vector3<double>,
+  ignition::math::Vector3<double>> rightFootFR;
 };
 
 /// \brief This class serves as an container for the information by the
