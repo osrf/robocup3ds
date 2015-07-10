@@ -46,7 +46,7 @@ void reset()
 //////////////////////////////////////////////////
 /// \brief This parser assumes that all the messages have a 6 characters.
 /// E.g.: "hello\0".
-class TrivialSocketParser : public gazebo::SocketParser
+class TrivialSocketParser : public SocketParser
 {
   /// \brief Class constructor.
   public: TrivialSocketParser() = default;
@@ -184,26 +184,26 @@ void receiverClient(const int _port)
 }
 
 //////////////////////////////////////////////////
-TEST(Server, Disabled)
+TEST(RCPServer, Disabled)
 {
   reset();
 
   auto parser = std::make_shared<TrivialSocketParser>();
-  gazebo::Server server(kPort, parser,
+  RCPServer server(kPort, parser,
     &TrivialSocketParser::OnConnection, parser.get(),
     &TrivialSocketParser::OnDisconnection, parser.get());
   EXPECT_FALSE(server.Send(-1, content.c_str(), content.size() + 1));
 }
 
 //////////////////////////////////////////////////
-TEST(Server, NewClient)
+TEST(RCPServer, NewClient)
 {
   reset();
 
   EXPECT_FALSE(newConnectionDetected);
 
   auto parser = std::make_shared<TrivialSocketParser>();
-  gazebo::Server server(kPort, parser,
+  RCPServer server(kPort, parser,
     &TrivialSocketParser::OnConnection, parser.get(),
     &TrivialSocketParser::OnDisconnection, parser.get());
 
@@ -237,12 +237,12 @@ TEST(Server, NewClient)
 }
 
 ////////////////////////////////////////////////
-TEST(Server, Send)
+TEST(RCPServer, Send)
 {
   reset();
 
   auto parser = std::make_shared<TrivialSocketParser>();
-  gazebo::Server server(kPort + 1, parser,
+  RCPServer server(kPort + 1, parser,
     &TrivialSocketParser::OnConnection, parser.get(),
     &TrivialSocketParser::OnDisconnection, parser.get());
 
