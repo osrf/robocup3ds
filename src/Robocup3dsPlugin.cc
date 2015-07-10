@@ -58,29 +58,34 @@ void Robocup3dsPlugin::Load(gazebo::physics::WorldPtr _world,
                              boost::bind(&Robocup3dsPlugin::Update, this, _1));
   this->world = _world;
   this->sdf = _sdf;
-
-  this->world->InsertModelFile("model://nao");
 }
 
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::Init()
 {
+  // do nothing
 }
 
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::Update(const gazebo::common::UpdateInfo & /*_info*/)
 {
-  // effector updates world model
   this->UpdateEffector();
   this->UpdateGameState();
   this->UpdatePerceptor();
 }
 
 /////////////////////////////////////////////////
-void Robocup3dsPlugin::UpdateEffector() {}
+void Robocup3dsPlugin::UpdateEffector()
+{
+  this->effector->Update();
+  this->world->InsertModelFile("model://nao");
+}
 
 /////////////////////////////////////////////////
-void Robocup3dsPlugin::UpdateGameState() {}
+void Robocup3dsPlugin::UpdateGameState()
+{
+  this->gameState->Update();
+}
 
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdatePerceptor()

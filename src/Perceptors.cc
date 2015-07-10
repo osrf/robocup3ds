@@ -318,30 +318,30 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   return cx;
 }
 
-void Perceptor::SendToServer() const
-{
-  for (auto &team : this->gameState->teams)
-  {
-    for (auto &agent : team->members)
-    {
-      int cx = this->Serialize(agent, &this->buffer.get()[4],
-                               Perceptor::bufferSize - 4);
-      unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-      this->buffer.get()[0] = _cx & 0xff;
-      this->buffer.get()[1] = (_cx >> 8)  & 0xff;
-      this->buffer.get()[2] = (_cx >> 16) & 0xff;
-      this->buffer.get()[3] = (_cx >> 24) & 0xff;
-      this->server->Send(agent.socketID, this->buffer.get(), cx + 4);
-    }
-  }
-}
-
 int Perceptor::SerializePoint(const char *_label,
                               const math::Vector3<double> &_pt,
                               char *_string, const int _size) const
 {
   return snprintf(_string, _size, " (%s (pol %.2f %.2f %.2f))",
                   _label, _pt.X(), _pt.Y(), _pt.Z());
+}
+
+void Perceptor::SendToServer() const
+{
+  for (auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      int cx = this->Serialize(agent, &(this->buffer.get())[4],
+                               Perceptor::bufferSize - 4);
+      unsigned int _cx = htonl(static_cast<unsigned int>(cx));
+      this->buffer.get()[0] = _cx         & 0xff;
+      this->buffer.get()[1] = (_cx >> 8)  & 0xff;
+      this->buffer.get()[2] = (_cx >> 16) & 0xff;
+      this->buffer.get()[3] = (_cx >> 24) & 0xff;
+      this->server->Send(agent.socketID, this->buffer.get(), cx + 4);
+    }
+  }
 }
 
 /////////////////////////////////////////////////
