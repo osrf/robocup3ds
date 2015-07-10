@@ -27,7 +27,6 @@ EffectorParser::EffectorParser()
 //////////////////////////////////////////////////
 bool EffectorParser::Parse(int _socket)
 {
-
   char buffer[this->kBufferSize];
 
   bzero(buffer, sizeof(buffer));
@@ -37,15 +36,18 @@ bool EffectorParser::Parse(int _socket)
   int totalBytes;
 
   // Used to read the size of the message in little-endian format
-  int endiannessSize=recv(_socket, buffer, 4, 0);
+  int endianSize = recv(_socket, buffer, 4, 0);
 
-  if(endiannessSize<1)
+  if (endianSize < 1)
   {
     return false;
   }
 
+
   // Calculate size of the s-expression messages
-  totalBytes = ntohl(*(unsigned int*) buffer);
+  uint32_t n;
+  memcpy(&n, buffer, 4);
+  totalBytes = ntohl(n);
 
   // Read the message using the size of actual s-expression message.
   while (bytesRead < totalBytes)
@@ -88,8 +90,6 @@ void EffectorParser::ParseMessage(const std::string &_msg)
     return;
   else if (exp->list->next == NULL)
     return;
-
-
   sexp_t* ptr = exp->list->next;
 
   while (ptr != NULL)
@@ -101,7 +101,6 @@ void EffectorParser::ParseMessage(const std::string &_msg)
   }
 
   destroy_sexp(exp);
-
 }
 
 //////////////////////////////////////////////////
@@ -235,7 +234,8 @@ void EffectorParser::ParseHingeJoint(sexp_t *_exp)
   name =_exp->list->val;
   effector = atof(_exp->list->next->val);
 
-  this->jointEffectors.insert(std::map <std::string, double> ::value_type(name, effector));
+  this->jointEffectors.insert(
+      std::map <std::string, double> ::value_type(name, effector));
 }
 
 //////////////////////////////////////////////////
@@ -253,7 +253,7 @@ void EffectorParser::ParseScene(sexp_t *_exp)
 //////////////////////////////////////////////////
 void EffectorParser::ParseBeam(sexp_t *_exp)
 {
-  double x,y,z = 0;
+  double x, y, z = 0;
 
   x = atof(_exp->list->next->val);
 
@@ -303,24 +303,24 @@ void EffectorParser::OnDisconnection(const int /*_socket*/)
   this->newDisconnectionDetected = true;
 }
 //////////////////////////////////////////////////
-void EffectorParser::Update(){
+void EffectorParser::Update()
+{
   // clear data structures
   this->beamEffectors.clear();
   this->initEffectors.clear();
   this->sceneEffectors.clear();
   this->jointEffectors.clear();
 
-  //Update Effectors using message received by Parse()
+  // Update Effectors using message received by Parse()
   ParseMessage(this->message.str());
-
 }
 //////////////////////////////////////////////////
 bool EffectorParser::GetSceneInformation(std::string &_msg, int &_robotType)
 {
   if (!this->sceneEffectors.empty())
   {
-    _msg=this->sceneEffectors.front().rsgAddress;
-    _robotType=this->sceneEffectors.front().robotType;
+    _msg = this->sceneEffectors.front().rsgAddress;
+    _robotType = this->sceneEffectors.front().robotType;
     return true;
   }
   return false;
@@ -332,8 +332,8 @@ bool EffectorParser::GetInitInformation(std::string &_teamName,
 {
   if (!this->initEffectors.empty())
   {
-    _teamName=this->initEffectors.front().teamName;
-    _playerNumber=this->initEffectors.front().playerNumber;
+    _teamName = this->initEffectors.front().teamName;
+    _playerNumber = this->initEffectors.front().playerNumber;
     return true;
   }
   return false;
@@ -351,6 +351,20 @@ bool EffectorParser::GetBeamInformation(double &_x, double &_y, double &_z)
     return true;
   }
   return false;
+}
+
+//////////////////////////////////////////////////
+bool EffectorParser::GetJointEffector(
+    std::string _jointName, double &_effector)
+{
+  std::map<std::string, double>::const_iterator it =
+      this->jointEffectors.find(_jointName);
+
+  if (it == this->jointEffectors.end()) return false;
+
+  _effector = this->jointEffectors.find(_jointName)->second;
+
+  return true;
 }
 
 //////////////////////////////////////////////////

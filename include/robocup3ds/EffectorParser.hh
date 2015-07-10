@@ -30,7 +30,6 @@
 
 class EffectorParser: public gazebo::SocketParser
 {
-
   /// \brief SceneMsg class contains information of scene message.
   class SceneMsg
   {
@@ -137,11 +136,41 @@ class EffectorParser: public gazebo::SocketParser
   public: bool GetBeamInformation(double &_x, double &_y,
       double &_z);
 
+  /// \brief Interface for accessing to joint effectors.
+  /// \param[in] _jointName, The joint name.
+  /// Joint names and descriptions ordered by DoF number include:
+  /// he1      1 Head Pitch
+  /// he2      2 Head Yaw
+  /// lle1     3 Left hip Pitch
+  /// rle1     4 Right hip Pitch
+  /// lle2     5 Left hip roll
+  /// rle2     6 Right hip roll
+  /// lle3     7 Left hip yaw
+  /// rle3     8 Right hip yaw
+  /// lle4     9 Left knee
+  /// rle4     10 Right knee
+  /// lle5     11 Left ankle pitch
+  /// rle5     12 Right ankle pitch
+  /// lle6     13 Left ankle roll
+  /// rle6     14 Right ankle roll
+  /// lae1     15 Left shoulder yaw
+  /// rae1     16 Right shoulder yaw
+  /// lae2     17 Left shoulder pitch
+  /// rae2     18 Right shoulder pitch
+  /// lae3     19 Left shoulder roll
+  /// rae3     20 Right shoulder roll
+  /// lae4     21 Left elbow
+  /// rae4     22 Right elbow
+  /// \param[out] _effector Effector value, It is target angular speed.
+  /// \return True when the joint effector exists in data structure or false
+  /// otherwise.
+  public: bool GetJointEffector(std::string _jointName, double &_effector);
+
   /// \brief Used in server class constructor.
   public: void OnConnection(const int _socket);
 
   /// \brief Used in server class constructor.
-  public: void OnDisconnection(const int );
+  public: void OnDisconnection(const int);
 
   /// \brief Maximum size of each message received.
   private: static const int kBufferSize = 8192;
@@ -179,6 +208,5 @@ class EffectorParser: public gazebo::SocketParser
   /// \brief Used to parse the joints effector value in S-expression messages.
   /// \param[in] _exp Pointer to a S-expression.
   private: void ParseHingeJoint(sexp_t *exp);
-
 };
 #endif /* _GAZEBO_ROBOCUP3DS_EFFECTOR_PARSER_HH_ */

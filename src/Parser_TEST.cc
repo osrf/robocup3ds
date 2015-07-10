@@ -25,12 +25,14 @@
 #include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/EffectorParser.hh"
 
-/// \brief This test uses s-expression messages belong to a sample RoboCup agent communication.
-const std::string content = "(scene rsg/agent/nao/nao_hetero.rsg 0)(beam 1 1 0.4)"
-           "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
-           "(init (unum 1)(teamname sampleAgent))(he1 3.20802)"
-           "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
-           "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)";
+/// \brief This test uses s-expression messages belong to a sample RoboCup
+/// agent communication.
+const std::string content =
+    "(scene rsg/agent/nao/nao_hetero.rsg 0)(beam 1 1 0.4)"
+    "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)"
+    "(init (unum 1)(teamname sampleAgent))(he1 3.20802)"
+    "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
+    "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)";
 
 /// \brief Constants and global variables.
 const int kPort = 6234;
@@ -44,17 +46,18 @@ bool serverReady = false;
 /// \param[in] _client_socket Socket for sending/receiving data.
 void SendSomeData(int _client_socket)
 {
+  // Add little-endian, Message size.
   char mBuffer[8192];
-  char* out = (char*) content.c_str();
+  const char *out = reinterpret_cast<const char*> (content.c_str());
   strcpy(mBuffer + 4, out);
   unsigned int len = strlen(out);
   unsigned int netlen = htonl(len);
   memcpy(mBuffer, &netlen, 4);
 
   std::cout << "msgSent \"" << content << "\"\n\n";
-  std::cout << "msglen:"<<len <<std::endl;
+  std::cout << "msglen:" << len << std::endl;
 
-
+  // Write to socket, and test it.
   size_t sent = write(_client_socket, mBuffer, content.size() + 4);
   fsync(_client_socket);
   EXPECT_EQ(sent, content.size() + 4u);
@@ -95,7 +98,7 @@ void receiverClient(const int _port)
 
   if (!createClient(_port, socket))
     return;
-  
+
   clientReady = true;
 
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -108,9 +111,9 @@ void receiverClient(const int _port)
   EXPECT_TRUE(parser->Parse(socket));
 
   // Test s-expression messages received by Parse()
-  EXPECT_EQ(parser->message.str(),content);
+  EXPECT_EQ(parser->message.str(), content);
 
-  //Perform information retrieving procedure and update data structures.
+  // Perform information retrieving procedure and update data structures.
   parser->Update();
 
   // Test Beam effector values
@@ -138,28 +141,35 @@ void receiverClient(const int _port)
   }
 
   // Test Beam effector values
-  double x,y,z;
+  double x, y, z;
 
-  if ( parser->GetBeamInformation(x, y, z ) )
+  if (parser->GetBeamInformation(x, y, z ))
   {
     std::cout << "Beam Pos:( "<< x << ", " << y <<", "<< z <<")" <<std::endl;
-    EXPECT_DOUBLE_EQ (x, 1);
-    EXPECT_DOUBLE_EQ (y, 1);
-    EXPECT_DOUBLE_EQ (z, 0.4);
+    EXPECT_DOUBLE_EQ(x, 1);
+    EXPECT_DOUBLE_EQ(y, 1);
+    EXPECT_DOUBLE_EQ(z, 0.4);
   }
 
   // Test joints effector values
-  EXPECT_DOUBLE_EQ (parser->jointEffectors.find("he1")->second, 3.20802);
+  EXPECT_DOUBLE_EQ(parser->jointEffectors.find("he1")->second, 3.20802);
 
-  EXPECT_DOUBLE_EQ (parser->jointEffectors.find("he2")->second, -1.80708);
+  EXPECT_DOUBLE_EQ(parser->jointEffectors.find("he2")->second, -1.80708);
 
-  EXPECT_DOUBLE_EQ (parser->jointEffectors.find("lae1")->second, -0.259697);
+  EXPECT_DOUBLE_EQ(parser->jointEffectors.find("lae1")->second, -0.259697);
 
-  EXPECT_DOUBLE_EQ (parser->jointEffectors.find("rae1")->second, -0.259697);
+  EXPECT_DOUBLE_EQ(parser->jointEffectors.find("rae1")->second, -0.259697);
 
-  std::cout<<"message recieved:"<<parser->message.str()<<std::endl;
+  // Test the interface for joints effectors
+  double effector;
+
+  if (parser->GetJointEffector("lae1", effector) )
+  {
+    EXPECT_DOUBLE_EQ(effector, -0.259697);
+  }
+
+  std::cout << "message recieved:" << parser->message.str() << std::endl;
   close(socket);
-
 }
 
 //////////////////////////////////////////////////
@@ -173,8 +183,8 @@ TEST(Server, Parser)
 
   // create server object with parser object as input
   gazebo::Server server(kPort, parser,
-    &EffectorParser::OnConnection, parser.get(),
-    &EffectorParser::OnDisconnection, parser.get());
+      &EffectorParser::OnConnection, parser.get(),
+      &EffectorParser::OnDisconnection, parser.get());
 
   server.Start();
 
@@ -185,7 +195,7 @@ TEST(Server, Parser)
     std::unique_lock<std::mutex> lk(mutex);
     auto now = std::chrono::system_clock::now();
     if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
-          [](){return clientReady;}))
+        [](){return clientReady;}))
     {
       FAIL();
       return;
