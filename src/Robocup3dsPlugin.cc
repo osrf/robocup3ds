@@ -21,37 +21,40 @@
 #include <gazebo/physics/World.hh>
 #include <sdf/sdf.hh>
 
-#include "robocup3ds/Robocup3dsPlugin.hh"
-#include "robocup3ds/GameState.hh"
 #include "robocup3ds/Effectors.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/Perceptors.hh"
-
-using namespace gazebo;
+#include "robocup3ds/Robocup3dsPlugin.hh"
+#include "robocup3ds/Server.hh"
 
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::Robocup3dsPlugin()
 {
-  this->gameState = new GameState();
-  this->perceptor = new Perceptor(this->gameState);
+  this->server = new Server(3100, nullptr, NULL, NULL, NULL, NULL);
   this->effector = new Effector(this->gameState);
+  this->gameState = new GameState();
+  this->perceptor = new Perceptor(this->gameState, this->server);
+
+  this->server->Start();
 }
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::~Robocup3dsPlugin()
 {
+  delete this->server;
+  delete this->effector;
   delete this->gameState;
   delete this->perceptor;
-  delete this->effector;
 }
 
 /////////////////////////////////////////////////
-void Robocup3dsPlugin::Load(physics::WorldPtr _world,
+void Robocup3dsPlugin::Load(gazebo::physics::WorldPtr _world,
                             sdf::ElementPtr _sdf)
 {
   // Connect to the update event.
-  this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+  this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
                              boost::bind(&Robocup3dsPlugin::Update, this, _1));
   this->world = _world;
   this->sdf = _sdf;
@@ -65,7 +68,7 @@ void Robocup3dsPlugin::Init()
 }
 
 /////////////////////////////////////////////////
-void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
+void Robocup3dsPlugin::Update(const gazebo::common::UpdateInfo & /*_info*/)
 {
   // effector updates world model
   this->UpdateEffector();

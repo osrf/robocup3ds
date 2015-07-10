@@ -191,6 +191,7 @@ class Agent
     uNum(_uNum),
     team(_team)
   {
+    this->socketID = -1;
     this->pos.Set(0, 0, 0);
     this->prevPos.Set(0, 0, 0);
     this->status = Status::RELEASED;
@@ -207,6 +208,8 @@ class Agent
   {
     return this == &_agent;
   }
+  /// \brief Agent socket id
+  public: int socketID;
 
   /// \brief Agent unique id
   public: int uNum;

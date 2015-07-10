@@ -21,59 +21,62 @@
 #include <memory>
 #include <gazebo/gazebo.hh>
 
+class Server;
 class GameState;
 class Effector;
 class Perceptor;
 
-namespace gazebo
+class Robocup3dsPlugin : public gazebo::WorldPlugin
 {
-  class Robocup3dsPlugin : public WorldPlugin
-  {
-    /// \brief Constructor.
-    public: Robocup3dsPlugin();
+  /// \brief Constructor.
+  public: Robocup3dsPlugin();
 
-    /// \brief Destructor.
-    public: virtual ~Robocup3dsPlugin();
+  /// \brief Destructor.
+  public: virtual ~Robocup3dsPlugin();
 
-    // Documentation inherited.
-    public: virtual void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
+  // Documentation inherited.
+  public: virtual void Load(gazebo::physics::WorldPtr _world,
+      sdf::ElementPtr _sdf);
 
-    // Documentation inherited.
-    public: virtual void Init();
+  // Documentation inherited.
+  public: virtual void Init();
 
-    /// \brief Update the robocup simulation state.
-    /// \param[in] _info Information used in the update event.
-    public: void Update(const common::UpdateInfo &_info);
+  /// \brief Update the robocup simulation state.
+  /// \param[in] _info Information used in the update event.
+  public: void Update(const gazebo::common::UpdateInfo &_info);
 
-    /// \brief Update the effector, use collected joint information to update
-    /// gazebo world
-    private: void UpdateEffector();
+  /// \brief Update the effector, use collected joint information to update
+  /// gazebo world
+  private: void UpdateEffector();
 
-    /// \brief Sync the gameState with the gazebo world
-    private: void UpdateGameState();
+  /// \brief Sync the gameState with the gazebo world
+  private: void UpdateGameState();
 
-    /// \brief Update the effector, use gazebo world joint information to update
-    /// information sent to agents
-    private: void UpdatePerceptor();
+  /// \brief Update the effector, use gazebo world joint information to update
+  /// information sent to agents
+  private: void UpdatePerceptor();
 
-    /// \brief Pointer to the update event connection.
-    private: event::ConnectionPtr updateConnection;
+  /// \brief Pointer to the update event connection.
+  private: gazebo::event::ConnectionPtr updateConnection;
 
-    /// \brief Pointer to world
-    private: physics::WorldPtr world;
+  /// \brief Pointer to world
+  private: gazebo::physics::WorldPtr world;
 
-    /// \brief Pointer to sdf
-    private: sdf::ElementPtr sdf;
+  /// \brief Pointer to sdf
+  private: sdf::ElementPtr sdf;
 
-    /// \brief Pointer to GameState object
-    private: GameState *gameState;
+  /// \brief Pointer to server
+  private: Server *server;
 
-    /// \brief Pointer to Perceptor object
-    private: Perceptor *perceptor;
+  /// \brief Pointer to GameState object
+  private: GameState *gameState;
 
-    /// \brief Pointer to Effector object;
-    private: Effector *effector;
-  };
-}
+  /// \brief Pointer to Perceptor object
+  private: Perceptor *perceptor;
+
+  /// \brief Pointer to Effector object;
+  private: Effector *effector;
+};
+
 
 #endif

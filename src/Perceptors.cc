@@ -15,6 +15,7 @@
  *
 */
 
+#include <netinet/in.h>
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -26,12 +27,14 @@
 #include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Perceptors.hh"
+#include "robocup3ds/Server.hh"
 #include "robocup3ds/SoccerField.hh"
 
 using namespace ignition;
 
 bool Perceptor::useNoise = true;
 const double Perceptor::kHearDist = 50.0;
+const int Perceptor::bufferSize = 8000;
 
 math::Vector3<double> Perceptor::fixedNoise(
   math::Rand::DblUniform(-0.005, 0.005),
@@ -41,14 +44,19 @@ math::Vector3<double> Perceptor::fixedNoise(
 math::Vector3<double> Perceptor::dNoiseSigma(0.0965, 0.1225, 0.1480);
 
 /////////////////////////////////////////////////
-Perceptor::Perceptor(GameState *const _gameState):
-  gameState(_gameState)
+Perceptor::Perceptor(GameState *const _gameState, Server *const _server):
+  gameState(_gameState),
+  server(_server)
 {
+  this->buffer = new char[Perceptor::bufferSize];
   this->SetViewFrustum();
 }
 
 /////////////////////////////////////////////////
-Perceptor::~Perceptor() {}
+Perceptor::~Perceptor()
+{
+  delete[] this->buffer;
+}
 
 /////////////////////////////////////////////////
 void Perceptor::SetViewFrustum()
@@ -233,7 +241,7 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
 
 /////////////////////////////////////////////////
 int Perceptor::Serialize(const Agent &_agent, char *_string,
-                          const int _size) const
+                         const int _size) const
 {
   if (_size < 4000)
   { return 0; }
@@ -315,6 +323,20 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
 
 void Perceptor::SendToServer() const
 {
+  for (auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      int cx = this->Serialize(agent, &this->buffer[4],
+                               Perceptor::bufferSize - 4);
+      unsigned int _cx = htonl(cx);
+      this->buffer[0] = _cx & 0xff;
+      this->buffer[1] = (_cx >> 8)  & 0xff;
+      this->buffer[2] = (_cx >> 16) & 0xff;
+      this->buffer[3] = (_cx >> 24) & 0xff;
+      this->server->Send(agent.socketID, this->buffer, cx + 4);
+    }
+  }
 }
 
 int Perceptor::SerializePoint(const char *_label,

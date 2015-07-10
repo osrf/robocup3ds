@@ -2,6 +2,7 @@ set (sources
   Geometry.cc
   Effectors.cc
   Perceptors.cc
+  Server.cc
   states/BeforeKickOffState.cc
   states/CornerKickState.cc
   states/FreeKickState.cc
@@ -21,6 +22,7 @@ set (gtest_sources
   GameState_TEST.cc
   Perceptors_TEST.cc
   Geometry_TEST.cc
+  Server_TEST.cc
 )
 
 # make below target specific?

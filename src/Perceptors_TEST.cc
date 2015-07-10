@@ -38,7 +38,7 @@ class PerceptorTest : public ::testing::Test
     virtual void SetUp()
     {
       this->gameState = new GameState();
-      this->perceptor = new Perceptor(gameState);
+      this->perceptor = new Perceptor(gameState, nullptr);
     }
 
   protected:
