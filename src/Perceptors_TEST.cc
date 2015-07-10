@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-
+#include <netinet/in.h>
 #include <cmath>
 #include <ignition/math.hh>
 #include <memory>
@@ -458,8 +458,22 @@ TEST_F(PerceptorTest, Percepter_Update)
 /// \Brief Test whether the Serialize() function works
 TEST_F(PerceptorTest, Percepter_Serialize)
 {
-  gameState->AddAgent(1, "red");
-  gameState->AddAgent(1, "blue");
+  string teamNames[2] = {"blue", "red"};
+  for (int i = 0; i < 2; ++i)
+  {
+    for (int j = 0; j < 11; ++j)
+    {
+      gameState->AddAgent(j + 1, teamNames[i]);
+      auto &agent = gameState->teams.at(i)->members.at(j);
+      if (i == 0 && j == 0)
+      { continue; }
+      gameState->MoveAgent(agent, math::Vector3<double>(5.0, 1.0,
+                           GameState::beamHeight));
+      agent.selfBodyMap["BODY"] = agent.pos;
+      agent.selfBodyMap["HEAD"] = agent.pos +
+                                  math::Vector3<double>(0, 0, 1);
+    }
+  }
   GameState::restrictVision = true;
   perceptor->useNoise = false;
   GameState::HFov = 90;
@@ -470,29 +484,24 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   redAgent.percept.hingeJoints["joint1"] = 0.5;
   redAgent.percept.hingeJoints["joint2"] = 0.2;
   perceptor->SetG2LMat(redAgent);
-  auto &blueAgent = gameState->teams.at(1)->members.at(0);
-  gameState->MoveAgent(blueAgent,
-                       math::Vector3<double>(5.0, 1.0, GameState::beamHeight));
-  blueAgent.selfBodyMap["HEAD"] = blueAgent.pos +
-                                  math::Vector3<double>(0, 0, 1);
-  blueAgent.selfBodyMap["BODY"] = blueAgent.pos;
   perceptor->Update();
 
-  char testString[4000];
+  char testString[8000];
+  int cx;
 
-  // currently takes around 400 useconds to finish for all 22 agents
+  // currently takes around 1.2 milliseconds to finish for all 22 agents
   for (int i = 0; i < 1000; ++i)
-  { perceptor->Serialize(redAgent, testString, 4000); }
+  { cx = perceptor->Serialize(redAgent, testString, 8000); }
 
   // check that certain names are there in string
-  ASSERT_TRUE(strstr(testString, "joint1"));
-  ASSERT_TRUE(strstr(testString, "joint2"));
-  ASSERT_TRUE(strstr(testString, "HEAD"));
-  ASSERT_TRUE(strstr(testString, "BODY"));
+  EXPECT_TRUE(strstr(testString, "joint1"));
+  EXPECT_TRUE(strstr(testString, "joint2"));
+  EXPECT_TRUE(strstr(testString, "HEAD"));
+  EXPECT_TRUE(strstr(testString, "BODY"));
 
   // check that parenthesis are balanced
   int paren = 0;
-  for (int i = 0; i < 4000; ++i)
+  for (int i = 0; i < 8000; ++i)
   {
     if (testString[i] == '\0')
     { break; }
@@ -501,7 +510,8 @@ TEST_F(PerceptorTest, Percepter_Serialize)
     else if (testString[i] == ')')
     { paren--; }
   }
-  ASSERT_EQ(0, paren);
+  EXPECT_EQ(0, paren);
+  EXPECT_EQ(static_cast<int>(strlen(testString)), cx);
 }
 
 int main(int argc, char **argv)

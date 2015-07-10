@@ -73,12 +73,15 @@ class Perceptor
   /// \param[in] _agent Agent whose perception we are updating
   public: void UpdateAgentHear(Agent &_agent) const;
 
+  /// \Brief Function to send messages to server
+  public: void SendToServer() const;
+
   /// \Brief Function to convert perception information to s-expressions
   /// and write it to a string
   /// \param[in] _agent Agent whose perception we are updating
   /// \param[in] _string Buffer we are writing to
   /// \return True if buffer is large enough
-  public: bool Serialize(const Agent &_agent, char *_string,
+  public: int Serialize(const Agent &_agent, char *_string,
                           const int _size) const;
 
   /// \Brief Converts points to a string

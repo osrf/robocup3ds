@@ -33,17 +33,17 @@ GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 /////////////////////////////////////////////////
 Robocup3dsPlugin::Robocup3dsPlugin()
 {
-  gameState = new GameState();
-  perceptor = new Perceptor(gameState);
-  effector = new Effector(gameState);
+  this->gameState = new GameState();
+  this->perceptor = new Perceptor(this->gameState);
+  this->effector = new Effector(this->gameState);
 }
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::~Robocup3dsPlugin()
 {
-  delete gameState;
-  delete perceptor;
-  delete effector;
+  delete this->gameState;
+  delete this->perceptor;
+  delete this->effector;
 }
 
 /////////////////////////////////////////////////
@@ -80,4 +80,8 @@ void Robocup3dsPlugin::UpdateEffector() {}
 void Robocup3dsPlugin::UpdateGameState() {}
 
 /////////////////////////////////////////////////
-void Robocup3dsPlugin::UpdatePerceptor() {}
+void Robocup3dsPlugin::UpdatePerceptor()
+{
+  this->perceptor->Update();
+  this->perceptor->SendToServer();
+}

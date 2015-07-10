@@ -158,7 +158,7 @@ class AgentPerceptions
 
   /// \brief Force information for right foot of nao
   public: std::pair<ignition::math::Vector3<double>,
-  ignition::math::Vector3<double>> rightFootF;R
+  ignition::math::Vector3<double>> rightFootFR;
 };
 
 /// \brief This class serves as an container for the information by the

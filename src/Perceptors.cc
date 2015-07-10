@@ -232,11 +232,11 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
 }
 
 /////////////////////////////////////////////////
-bool Perceptor::Serialize(const Agent &_agent, char *_string,
+int Perceptor::Serialize(const Agent &_agent, char *_string,
                           const int _size) const
 {
   if (_size < 4000)
-  { return false; }
+  { return 0; }
 
   int cx = 0;
 
@@ -310,7 +310,11 @@ bool Perceptor::Serialize(const Agent &_agent, char *_string,
                  _agent.percept.rightFootFR.second.Y(),
                  _agent.percept.rightFootFR.second.Z());
 
-  return true;
+  return cx;
+}
+
+void Perceptor::SendToServer() const
+{
 }
 
 int Perceptor::SerializePoint(const char *_label,
