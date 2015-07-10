@@ -28,7 +28,7 @@
 
 class Agent;
 class GameState;
-class Server;
+class RCPServer;
 
 /// \brief This class keeps up to date the information sent
 /// to the agent
@@ -36,7 +36,7 @@ class Perceptor
 {
   /// \brief Constructor for Perceptor object
   /// \param[in] _gameState Pointer to GameState object
-  public: Perceptor(GameState *const _gameState, Server *const _server);
+  public: Perceptor(GameState *const _gameState, RCPServer *const _server);
 
   /// \brief Destructor for Perceptor object
   public: ~Perceptor();
@@ -125,7 +125,7 @@ class Perceptor
   private: GameState *const gameState;
 
   /// \brief Pointer to Server object
-  private: Server *const server;
+  private: RCPServer *const server;
 
   /// \brief Buffer used to store data sent to server
   private: char *buffer;

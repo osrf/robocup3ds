@@ -32,7 +32,7 @@ GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 /////////////////////////////////////////////////
 Robocup3dsPlugin::Robocup3dsPlugin()
 {
-  this->server = new Server(3100, nullptr, NULL, NULL, NULL, NULL);
+  this->server = new RCPServer();
   this->effector = new Effector(this->gameState);
   this->gameState = new GameState();
   this->perceptor = new Perceptor(this->gameState, this->server);

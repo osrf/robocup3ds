@@ -29,7 +29,7 @@
 #include <vector>
 #include "robocup3ds/SocketParser.hh"
 
-/// \brief Server class that will accept TCP sockets from external clients
+/// \brief RCPServer class that will accept TCP sockets from external clients
 /// (using the master socket).
 /// For each external client request on the master socket, the server will
 /// create a new socket to allow bidirectional communication between the
@@ -38,12 +38,12 @@
 ///  ------    Master socket
 /// |      |<------------------ New client requests
 /// |      |
-/// |Server|   Client1 socket
+/// |RCPServer|   Client1 socket
 /// |      |<-----------------> Client1 data exchange
 /// |      |   ClientN socket
 ///  ------ <-----------------> ClientN data exchange
 ///
-///  The Server API allows to send a message to a specific socket (client).
+///  The RCPServer API allows to send a message to a specific socket (client).
 ///
 /// When data is available for reading on a socket, it's not always possible
 /// to read it with one recv() call. Sometimes we just get a partial message
@@ -54,17 +54,17 @@
 /// should know the format of the data sent over the wire. A SocketParser
 /// class should implement a Parse() method that should be able to read from
 /// the socket the correct amount of bytes. An object of type SocketParser
-/// should be passed in as an argument to the Server constructor.
+/// should be passed in as an argument to the RCPServer constructor.
 ///
 /// Two callbacks are also needed in the class constructor. These callbacks
 /// will be executed when a new client is connected or disconnected.
 ///
-/// This is an example of how to instantitate a Server class:
+/// This is an example of how to instantitate a RCPServer class:
 /// auto parser = std::make_shared<TrivialSocketParser>();
-//  gazebo::Server server(kPort, parser,
+//  gazebo::RCPServer server(kPort, parser,
 //    &TrivialSocketParser::OnConnection, parser.get(),
 //    &TrivialSocketParser::OnDisconnection, parser.get());
-class Server
+class RCPServer
 {
   /// \brief Constructor.
   /// \param[in] _port TCP port for incoming connections.
@@ -74,7 +74,7 @@ class Server
   /// \param[in] _disconnectCb Callback to be executed when an existing client
   /// is disconnected.
   public: template<typename C>
-  Server(const int _port,
+  RCPServer(const int _port,
          const std::shared_ptr<SocketParser> &_parser,
          void(C::*_connectCb)(const int _socket), C *_obj1,
          void(C::*_disconnectCb)(const int _socket), C *_obj2)
@@ -88,8 +88,11 @@ class Server
       std::bind(_disconnectCb, _obj2, std::placeholders::_1);
   }
 
+  /// \brief Simple constructor for testing purposes
+  public: RCPServer() {}
+
   /// \brief Destructor
-  public: virtual ~Server();
+  public: virtual ~RCPServer();
 
   /// \brief Push some data to be sent by the server.
   /// \param[in] _socket Client ID.

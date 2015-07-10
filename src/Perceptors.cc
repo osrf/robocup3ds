@@ -44,7 +44,7 @@ math::Vector3<double> Perceptor::fixedNoise(
 math::Vector3<double> Perceptor::dNoiseSigma(0.0965, 0.1225, 0.1480);
 
 /////////////////////////////////////////////////
-Perceptor::Perceptor(GameState *const _gameState, Server *const _server):
+Perceptor::Perceptor(GameState *const _gameState, RCPServer *const _server):
   gameState(_gameState),
   server(_server)
 {
@@ -329,7 +329,7 @@ void Perceptor::SendToServer() const
     {
       int cx = this->Serialize(agent, &this->buffer[4],
                                Perceptor::bufferSize - 4);
-      unsigned int _cx = htonl(cx);
+      unsigned int _cx = htonl(static_cast<unsigned int>(cx));
       this->buffer[0] = _cx & 0xff;
       this->buffer[1] = (_cx >> 8)  & 0xff;
       this->buffer[2] = (_cx >> 16) & 0xff;

@@ -21,7 +21,7 @@
 #include <memory>
 #include <gazebo/gazebo.hh>
 
-class Server;
+class RCPServer;
 class GameState;
 class Effector;
 class Perceptor;
@@ -66,7 +66,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: sdf::ElementPtr sdf;
 
   /// \brief Pointer to server
-  private: Server *server;
+  private: RCPServer *server;
 
   /// \brief Pointer to GameState object
   private: GameState *gameState;
