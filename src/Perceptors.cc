@@ -48,15 +48,12 @@ Perceptor::Perceptor(GameState *const _gameState, RCPServer *const _server):
   gameState(_gameState),
   server(_server)
 {
-  this->buffer = new char[Perceptor::bufferSize];
+  this->buffer = std::make_shared<char>(Perceptor::bufferSize);
   this->SetViewFrustum();
 }
 
 /////////////////////////////////////////////////
-Perceptor::~Perceptor()
-{
-  delete[] this->buffer;
-}
+Perceptor::~Perceptor() {}
 
 /////////////////////////////////////////////////
 void Perceptor::SetViewFrustum()
@@ -327,14 +324,14 @@ void Perceptor::SendToServer() const
   {
     for (auto &agent : team->members)
     {
-      int cx = this->Serialize(agent, &this->buffer[4],
+      int cx = this->Serialize(agent, &this->buffer.get()[4],
                                Perceptor::bufferSize - 4);
       unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-      this->buffer[0] = _cx & 0xff;
-      this->buffer[1] = (_cx >> 8)  & 0xff;
-      this->buffer[2] = (_cx >> 16) & 0xff;
-      this->buffer[3] = (_cx >> 24) & 0xff;
-      this->server->Send(agent.socketID, this->buffer, cx + 4);
+      this->buffer.get()[0] = _cx & 0xff;
+      this->buffer.get()[1] = (_cx >> 8)  & 0xff;
+      this->buffer.get()[2] = (_cx >> 16) & 0xff;
+      this->buffer.get()[3] = (_cx >> 24) & 0xff;
+      this->server->Send(agent.socketID, this->buffer.get(), cx + 4);
     }
   }
 }

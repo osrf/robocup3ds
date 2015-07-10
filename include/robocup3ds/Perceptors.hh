@@ -128,7 +128,7 @@ class Perceptor
   private: RCPServer *const server;
 
   /// \brief Buffer used to store data sent to server
-  private: char *buffer;
+  private: std::shared_ptr<char> buffer;
 
   /// \brief 4x4 transformation to go from global to local coordinates
   private: ignition::math::Matrix4<double> G2LMat;
