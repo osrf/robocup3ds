@@ -182,7 +182,7 @@ TEST(Server, Parser)
   auto parser = std::make_shared <EffectorParser>();
 
   // create server object with parser object as input
-  gazebo::Server server(kPort, parser,
+  RCPServer server(kPort, parser,
       &EffectorParser::OnConnection, parser.get(),
       &EffectorParser::OnDisconnection, parser.get());
 

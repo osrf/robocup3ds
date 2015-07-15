@@ -28,7 +28,7 @@
 #include "../../src/sexpLibrary/sexp_ops.h"
 #include "robocup3ds/SocketParser.hh"
 
-class EffectorParser: public gazebo::SocketParser
+class EffectorParser: public SocketParser
 {
   /// \brief SceneMsg class contains information of scene message.
   class SceneMsg

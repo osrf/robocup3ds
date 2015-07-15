@@ -26,35 +26,34 @@
 #include <mutex>
 #include "robocup3ds/Server.hh"
 
-using namespace gazebo;
-
 //////////////////////////////////////////////////
-Server::~Server()
+RCPServer::~RCPServer()
 {
   this->enabled = false;
   if (this->threadReception.joinable())
-    this->threadReception.join();
+  { this->threadReception.join(); }
 }
 
 //////////////////////////////////////////////////
-void Server::Start()
+void RCPServer::Start()
 {
   // The service is already running.
   if (this->enabled)
-    return;
+  { return; }
 
   this->enabled = true;
 
   // Start the thread that receives information.
-  this->threadReception = std::thread(&Server::RunReceptionTask, this);
+  this->threadReception = std::thread(&RCPServer::RunReceptionTask, this);
 }
 
 //////////////////////////////////////////////////
-bool Server::Send(const int _socket, const char *_data, const size_t _len)
+bool RCPServer::Send(const int _socket, const char *_data, const size_t _len)
 {
   if (!this->enabled)
   {
-    std::cerr << "Server::Send() error: Service not enabled yet" << std::endl;
+    std::cerr << "RCPServer::Send() error: Service not enabled yet"
+              << std::endl;
     return false;
   }
 
@@ -64,7 +63,7 @@ bool Server::Send(const int _socket, const char *_data, const size_t _len)
   for (size_t i = 1; i < this->pollSockets.size(); ++i)
   {
     if (this->pollSockets.at(i).fd == _socket)
-      found = true;
+    { found = true; }
   }
 
   if (!found)
@@ -85,7 +84,7 @@ bool Server::Send(const int _socket, const char *_data, const size_t _len)
 }
 
 //////////////////////////////////////////////////
-bool Server::InitializeSockets()
+bool RCPServer::InitializeSockets()
 {
   // Create the master socket.
   this->masterSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -93,7 +92,7 @@ bool Server::InitializeSockets()
   // Socket option: SO_REUSEADDR.
   int value = 1;
   if (setsockopt(this->masterSocket, SOL_SOCKET, SO_REUSEADDR,
-    reinterpret_cast<const char *>(&value), sizeof(value)) != 0)
+                 reinterpret_cast<const char *>(&value), sizeof(value)) != 0)
   {
     std::cerr << "Error setting socket option (SO_REUSEADDR)." << std::endl;
     close(this->masterSocket);
@@ -104,7 +103,8 @@ bool Server::InitializeSockets()
   // Socket option: SO_REUSEPORT.
   int reusePort = 1;
   if (setsockopt(this->masterSocket, SOL_SOCKET, SO_REUSEPORT,
-        reinterpret_cast<const char *>(&reusePort), sizeof(reusePort)) != 0)
+                 reinterpret_cast<const char *>(&reusePort),
+                 sizeof(reusePort)) != 0)
   {
     std::cerr << "Error setting socket option (SO_REUSEPORT)." << std::endl;
     return false;
@@ -118,7 +118,7 @@ bool Server::InitializeSockets()
   mySocketAddr.sin_port = htons(this->port);
   mySocketAddr.sin_addr.s_addr = htonl(INADDR_ANY);
   if (bind(this->masterSocket, (struct sockaddr *)&mySocketAddr,
-    sizeof(struct sockaddr)) < 0)
+           sizeof(struct sockaddr)) < 0)
   {
     std::cerr << "Binding to a local port failed." << std::endl;
     return false;
@@ -126,7 +126,8 @@ bool Server::InitializeSockets()
 
   if (listen(this->masterSocket, 5) != 0)
   {
-    std::cerr << "Server::InitializeSockets() Error on listen()" << std::endl;
+    std::cerr << "RCPServer::InitializeSockets() Error on listen()"
+              << std::endl;
     return false;
   }
 
@@ -134,10 +135,10 @@ bool Server::InitializeSockets()
 }
 
 //////////////////////////////////////////////////
-void Server::RunReceptionTask()
+void RCPServer::RunReceptionTask()
 {
   if (!this->InitializeSockets())
-    return;
+  { return; }
 
   // Add the master socket to the list of sockets.
   struct pollfd masterFd;
@@ -153,7 +154,7 @@ void Server::RunReceptionTask()
       poll(&this->pollSockets[0], this->pollSockets.size(), 500);
     if (pollReturnCode == -1)
     {
-      std::cerr << "Server::RunReceptionTask(): Polling error!" << std::endl;
+      std::cerr << "RCPServer::RunReceptionTask(): Polling error!" << std::endl;
       return;
     }
     else if (pollReturnCode == 0)
@@ -179,11 +180,11 @@ void Server::RunReceptionTask()
 
   // About to leave, close pending sockets.
   for (size_t i = 1; i < this->pollSockets.size(); ++i)
-    close(this->pollSockets.at(i).fd);
+  { close(this->pollSockets.at(i).fd); }
 }
 
 //////////////////////////////////////////////////
-void Server::DispatchRequestOnMasterSocket()
+void RCPServer::DispatchRequestOnMasterSocket()
 {
   // Add a new socket for this client.
   struct sockaddr_in cliAddr;
@@ -192,7 +193,7 @@ void Server::DispatchRequestOnMasterSocket()
     accept(this->masterSocket, (struct sockaddr *) &cliAddr, &clilen);
   if (newSocketFd < 0)
   {
-    std::cerr << "Server::DispatchRequestOnMasterSocket() error on accept()"
+    std::cerr << "RCPServer::DispatchRequestOnMasterSocket() error on accept()"
               << std::endl;
   }
 
@@ -208,7 +209,7 @@ void Server::DispatchRequestOnMasterSocket()
 }
 
 //////////////////////////////////////////////////
-void Server::DispatchRequestOnClientSocket()
+void RCPServer::DispatchRequestOnClientSocket()
 {
   for (size_t i = 1; i < this->pollSockets.size(); ++i)
   {
@@ -236,7 +237,7 @@ void Server::DispatchRequestOnClientSocket()
       // Read data from the socket using the parser.
       if (!this->parser->Parse(this->pollSockets.at(i).fd))
       {
-        std::cerr << "Server::DispatchRequestOnClientSocket() error: "
+        std::cerr << "RCPServer::DispatchRequestOnClientSocket() error: "
                   << "Problem parsing incoming data" << std::endl;
         break;
       }

@@ -18,21 +18,19 @@
 #ifndef _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 #define _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 
-namespace gazebo
+/// \brief
+class SocketParser
 {
-  /// \brief
-  class SocketParser
-  {
-    /// \brief Constructor.
-    public: SocketParser() = default;
+  /// \brief Constructor.
+  public: SocketParser() = default;
 
-    /// \brief Destructor
-    public: virtual ~SocketParser() = default;
+  /// \brief Destructor
+  public: virtual ~SocketParser() = default;
 
-    /// \brief Parse some data from a socket.
-    /// \param[in] _socket Socket to read.
-    /// \return True when data was succesfully parsed or false otherwise.
-    public: virtual bool Parse(const int _socket) = 0;
-  };
-}
+  /// \brief Parse some data from a socket.
+  /// \param[in] _socket Socket to read.
+  /// \return True when data was succesfully parsed or false otherwise.
+  public: virtual bool Parse(const int _socket) = 0;
+};
+
 #endif /* _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_ */
