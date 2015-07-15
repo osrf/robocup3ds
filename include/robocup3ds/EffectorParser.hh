@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _GAZEBO_ROBOCUP3DS_EFFECTRORPARSER_HH_
-#define _GAZEBO_ROBOCUP3DS_EffectorPARSER_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_
+#define _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_
 
 #include <sstream>
 #include <cstring>
@@ -41,9 +41,9 @@ class EffectorParser: public gazebo::SocketParser
       this->robotType = _robotType;
       this->rsgAddress = _rsgAddress;
     }
-
+    /// \brief rsg file address
     public: std::string rsgAddress;
-
+    /// \brief The robot type
     public: int robotType;
   };
 
@@ -58,11 +58,11 @@ class EffectorParser: public gazebo::SocketParser
       this->y = _y;
       this->z = _z;
     }
-
+    /// \brief robot beam position position on x direction
     public: double x;
-
+    /// \brief robot beam position position on y direction
     public: double y;
-
+    /// \brief robot beam position position on z direction
     public: double z;
   };
 
@@ -77,9 +77,9 @@ class EffectorParser: public gazebo::SocketParser
       this->playerNumber = _playerNum;
       this->teamName = _teamName;
     }
-
+    /// \brief Player Number
     public: int playerNumber;
-
+    /// \brief Team name
     public: std::string teamName;
   };
 
@@ -88,23 +88,6 @@ class EffectorParser: public gazebo::SocketParser
 
   /// \brief Class destructor.
   public: virtual ~EffectorParser();
-
-  /// \brief Socket assigned in OnConnection().
-  public: int socketID;
-
-  /// \brief Global variables for determining new connections,
-  /// Assigned in OnConnection().
-  public: bool newConnectionDetected = false;
-
-  /// \brief global variables for determining new disconnections
-  // assigned in OnDisconnection().
-  public: bool newDisconnectionDetected = false;
-
-  /// \brief Message received by socket and Parse().
-  public: std::stringstream message;
-
-  /// \brief Data Structure used to store joints effector values.
-  public: std::map<std::string, double> jointEffectors;
 
   /// \brief Used to read incoming message received by socket.
   /// \param[in] _socket, Socket of the client should be assigned by server.
@@ -117,7 +100,7 @@ class EffectorParser: public gazebo::SocketParser
 
   /// \brief Interface to access to scene information in data structure.
   /// \param[out] _rsgAddress RSG file address in computer belongs to the robot.
-  /// \param[out] _robotType The NAO robot type: robot types include {0 1 2 3}.
+  /// \param[out] _robotType The robot type: robot types include {0 1 2 3}.
   /// \return True when the scene information exists in data structure or
   /// false otherwise.
   public: bool GetSceneInformation(std::string &_rsgAddress, int &_robotType);
@@ -161,29 +144,18 @@ class EffectorParser: public gazebo::SocketParser
   /// rae3     20 Right shoulder roll
   /// lae4     21 Left elbow
   /// rae4     22 Right elbow
-  /// \param[out] _effector Effector value, It is target angular speed.
+  /// \param[out] _targetSpeed target angular speed as joint's effector value.
   /// \return True when the joint effector exists in data structure or false
   /// otherwise.
-  public: bool GetJointEffector(std::string _jointName, double &_effector);
+  public: bool GetJointEffector(std::string _jointName, double &_targetSpeed);
 
-  /// \brief Used in server class constructor.
+  /// \brief Used in server class constructor as a callback function.
+  /// \param[in] _socket the socket used for the server client communication.
   public: void OnConnection(const int _socket);
 
   /// \brief Used in server class constructor.
-  public: void OnDisconnection(const int);
-
-  /// \brief Maximum size of each message received.
-  private: static const int kBufferSize = 8192;
-
-  /// \brief data structure used for scene information.
-  private: std::vector<SceneMsg> sceneEffectors;
-
-  /// \brief data structure used for init information.
-  private: std::vector<InitMsg> initEffectors;
-
-  /// \brief data structure used for beam information.
-  private: std::vector<BeamMsg> beamEffectors;
-
+  /// \param[in] the socket used for for server client communication.
+  public: void OnDisconnection(const int /*_socket*/);
   /// \brief Main procedure of extracting information
   /// in pile of S-expressions using the expression library.
   /// \param[in] _msg S-expression messages.
@@ -208,5 +180,35 @@ class EffectorParser: public gazebo::SocketParser
   /// \brief Used to parse the joints effector value in S-expression messages.
   /// \param[in] _exp Pointer to a S-expression.
   private: void ParseHingeJoint(sexp_t *exp);
+
+  /// \brief Socket assigned in OnConnection().
+  public: int socketID;
+
+  /// \brief Global variables for determining new connections,
+  /// Assigned in OnConnection().
+  public: bool newConnectionDetected = false;
+
+  /// \brief global variables for determining new disconnections
+  // assigned in OnDisconnection().
+  public: bool newDisconnectionDetected = false;
+
+  /// \brief Message received by socket and Parse().
+  public: std::stringstream message;
+
+  /// \brief Data Structure used to store joints effector values.
+  public: std::map<std::string, double> jointEffectors;
+
+  /// \brief Maximum size of each message received.
+  private: static const int kBufferSize = 8192;
+
+  /// \brief data structure used for scene information.
+  private: std::vector<SceneMsg> sceneEffectors;
+
+  /// \brief data structure used for init information.
+  private: std::vector<InitMsg> initEffectors;
+
+  /// \brief data structure used for beam information.
+  private: std::vector<BeamMsg> beamEffectors;
+
 };
-#endif /* _GAZEBO_ROBOCUP3DS_EFFECTOR_PARSER_HH_ */
+#endif /* _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_ */

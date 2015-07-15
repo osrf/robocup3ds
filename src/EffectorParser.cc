@@ -20,8 +20,12 @@
 #include <iostream>
 #include "robocup3ds/EffectorParser.hh"
 
+//////////////////////////////////////////////////
 EffectorParser::EffectorParser()
 {
+  //Initialize global variables
+  this->socketID=0;
+  this->message.str("");
 }
 
 //////////////////////////////////////////////////
@@ -43,7 +47,6 @@ bool EffectorParser::Parse(int _socket)
     return false;
   }
 
-
   // Calculate size of the s-expression messages
   uint32_t n;
   memcpy(&n, buffer, 4);
@@ -62,6 +65,8 @@ bool EffectorParser::Parse(int _socket)
     bytesRead += result;
   }
 
+  // Clear the message
+  this->message.str("");
   // Store the received s-expression messages
   this->message << std::string(buffer);
 
@@ -111,111 +116,43 @@ void EffectorParser::ParseSexp(sexp_t *_exp)
   if (_exp->ty == SEXP_LIST)
   {
     if (_exp->list->ty == SEXP_VALUE)
+    {
       v = _exp->list->val;
+    }
     else
+    {
+      std::cerr << "Not in s-expression message format. the format: (value ....)" << std::endl;
       return;
+    }
   }
   else
+  {
+    std::cerr << "Not an s-expression message. Not begin with a parenthesis" << std::endl;
     return;
+  }
+
 
   // Decide based on the type of effector message
   if (!strcmp(v, "scene"))
   {
-    ParseScene(_exp);
+    this->ParseScene(_exp);
   }
   else if (!strcmp(v, "beam"))
   {
-    ParseBeam(_exp);
+    this->ParseBeam(_exp);
   }
   else if (!strcmp(v, "init"))
   {
-    ParseInit(_exp);
+    this->ParseInit(_exp);
   }
-  else if (!strcmp(v, "he1"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "he2"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lle1"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rle1"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lle2"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rle2"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lle3"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rle3"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lle4"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rle4"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lle5"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rle5"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lle6"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rle6"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lae1"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rae1"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lae2"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rae2"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lae3"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rae3"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "lae4"))
-  {
-    ParseHingeJoint(_exp);
-  }
-  else if (!strcmp(v, "rae4"))
+  else if (!strcmp(v, "he1") || !strcmp(v, "he2") || !strcmp(v, "lle1")
+    || !strcmp(v, "rle1") || !strcmp(v, "lle2") || !strcmp(v, "rle2")
+    || !strcmp(v, "lle3") || !strcmp(v, "rle3") || !strcmp(v, "lle4")
+    || !strcmp(v, "rle4") || !strcmp(v, "lle5") || !strcmp(v, "rle5")
+    || !strcmp(v, "lle6") || !strcmp(v, "rle6") || !strcmp(v, "lae1")
+    || !strcmp(v, "rae1") || !strcmp(v, "lae2") || !strcmp(v, "rae2")
+    || !strcmp(v, "lae3") || !strcmp(v, "rae3") || !strcmp(v, "lae4")
+    || !strcmp(v, "rae4"))
   {
     ParseHingeJoint(_exp);
   }
@@ -273,8 +210,10 @@ void EffectorParser::ParseInit(sexp_t *_exp)
 
   sexp_t* ptr = _exp->list->next;
 
-  while (ptr != NULL) {
-    if (ptr->ty == SEXP_LIST) {
+  while (ptr != NULL)
+  {
+    if (ptr->ty == SEXP_LIST)
+    {
       if (!strcmp(ptr->list->val, "unum"))
       {
         playerNum = atof(ptr->list->next->val);
@@ -302,6 +241,7 @@ void EffectorParser::OnDisconnection(const int /*_socket*/)
 {
   this->newDisconnectionDetected = true;
 }
+
 //////////////////////////////////////////////////
 void EffectorParser::Update()
 {
@@ -314,6 +254,7 @@ void EffectorParser::Update()
   // Update Effectors using message received by Parse()
   ParseMessage(this->message.str());
 }
+
 //////////////////////////////////////////////////
 bool EffectorParser::GetSceneInformation(std::string &_msg, int &_robotType)
 {
@@ -355,14 +296,14 @@ bool EffectorParser::GetBeamInformation(double &_x, double &_y, double &_z)
 
 //////////////////////////////////////////////////
 bool EffectorParser::GetJointEffector(
-    std::string _jointName, double &_effector)
+    std::string _jointName, double &_targetSpeed)
 {
   std::map<std::string, double>::const_iterator it =
       this->jointEffectors.find(_jointName);
 
   if (it == this->jointEffectors.end()) return false;
 
-  _effector = this->jointEffectors.find(_jointName)->second;
+  _targetSpeed = this->jointEffectors.find(_jointName)->second;
 
   return true;
 }

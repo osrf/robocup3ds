@@ -186,6 +186,7 @@ TEST(Server, Parser)
       &EffectorParser::OnConnection, parser.get(),
       &EffectorParser::OnDisconnection, parser.get());
 
+
   server.Start();
 
   std::thread clientThread(&receiverClient, kPort);
