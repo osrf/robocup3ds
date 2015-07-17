@@ -27,7 +27,8 @@
 
 #include "robocup3ds/SocketParser.hh"
 
-struct sexp_t;
+struct elt;
+typedef elt sexp_t;
 class GameState;
 
 class Effector: public SocketParser

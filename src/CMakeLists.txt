@@ -1,6 +1,6 @@
 
-set(PARSER_SOURCE sexpLibrary/parser.c sexpLibrary/sexp.c sexpLibrary/event_temp.c sexpLibrary/sexp_ops.c sexpLibrary/cstring.c sexpLibrary/faststack.c)
-Set(PARSER_HEADER sexpLibrary/sexp.h sexpLibrary/cstring.h sexpLibrary/faststack.h sexpLibrary/sexp_errors.h sexpLibrary/sexp_ops.h )
+set(PARSER_SOURCE ../lib/sexpLibrary/parser.c ../lib/sexpLibrary/sexp.c ../lib/sexpLibrary/event_temp.c ../lib/sexpLibrary/sexp_ops.c ../lib/sexpLibrary/cstring.c ../lib/sexpLibrary/faststack.c)
+Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/sexpLibrary/faststack.h ../lib/sexpLibrary/sexp_errors.h ../lib/sexpLibrary/sexp_ops.h )
 
 
 set (sources
