@@ -161,10 +161,10 @@ void Robocup3dsPlugin::UpdatePerceptor()
       agent.cameraRot = G2I(cameraPose.rot);
 
       // update agent's self body map
-      for (auto &bodyPart : NaoRobot::bodyParts)
+      for (auto &bodyPartName : NaoRobot::bodyPartNames)
       {
-        agent.selfBodyMap[bodyPart] =
-          G2I(model->GetLink(bodyPart)->GetWorldPose().pos);
+        agent.selfBodyMap[bodyPartName] =
+          G2I(model->GetLink(bodyPartName)->GetWorldPose().pos);
       }
 
       // update agent's percept joints angles

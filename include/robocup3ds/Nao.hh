@@ -27,7 +27,7 @@ namespace NaoRobot
 
   static const double torsoHeight = 0.3;
 
-  static const std::vector<std::string> bodyParts =
+  static const std::vector<std::string> bodyPartNames =
   {
     "LForeArm",
     "RForeArm",

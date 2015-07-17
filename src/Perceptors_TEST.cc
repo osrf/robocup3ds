@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-// #include <netinet/in.h>
+#include <netinet/in.h>
 #include <cmath>
 #include <ignition/math.hh>
 #include <memory>
