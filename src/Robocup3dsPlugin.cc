@@ -17,6 +17,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <netinet/in.h>
 #include <memory>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/Model.hh>
@@ -27,6 +28,7 @@
 
 #include "robocup3ds/Effectors.hh"
 #include "robocup3ds/GameState.hh"
+#include "robocup3ds/Nao.hh"
 #include "robocup3ds/Perceptors.hh"
 #include "robocup3ds/Robocup3dsPlugin.hh"
 #include "robocup3ds/Server.hh"
@@ -42,7 +44,7 @@ Robocup3dsPlugin::Robocup3dsPlugin()
   this->server = new RCPServer();
   this->effector = new Effector(this->gameState);
   this->gameState = new GameState();
-  this->perceptor = new Perceptor(this->gameState, this->server);
+  this->perceptor = new Perceptor(this->gameState);
 
   this->server->Start();
 }
@@ -91,22 +93,17 @@ void Robocup3dsPlugin::UpdateEffector()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateGameState()
 {
-  // use models in gazebo world to update gameState
+  // use models in gazebo world to update agents and perception info
   for (auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
     {
-      // set camera and body pose in gameState
+      // set agent pose in gameState
       physics::ModelPtr model = this->world->GetModel(agent.GetName());
       auto &modelPose = model->GetWorldPose();
-      auto &cameraPose = model->GetLink("CameraTop_joint")->GetWorldPose();
-      agent.cameraPos = G2I(cameraPose.pos);
-      agent.cameraRot = G2I(cameraPose.rot);
       agent.pos = G2I(modelPose.pos);
       agent.rot = G2I(modelPose.rot);
       agent.updatePose = false;
-
-      // set bodyMap in gameState
     }
   }
   // find ball in gazebo world and use it to update gameState
@@ -120,7 +117,7 @@ void Robocup3dsPlugin::UpdateGameState()
   // update game state
   this->gameState->Update();
 
-  // use gameState agents to update gazebo world models
+  // use gameState agents pose to update gazebo world agent pose
   for (auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
@@ -133,7 +130,7 @@ void Robocup3dsPlugin::UpdateGameState()
       agent.updatePose = false;
     }
   }
-  // use gameState ball to update gazebo world
+  // use gameState ball to update gazebo world ball
   if (this->gameState->updateBallPose)
   {
     auto newBallPose =
@@ -148,6 +145,71 @@ void Robocup3dsPlugin::UpdateGameState()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdatePerceptor()
 {
+  char* buffer = new char[Perceptor::kBufferSize];
+
+  // update perception related info using gazebo world model
+  for (auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      physics::ModelPtr model = this->world->GetModel(agent.GetName());
+
+      // update agent's camera pose
+      auto &cameraPose = model->GetLink(NaoRobot::cameraLinkName)->
+                         GetWorldPose();
+      agent.cameraPos = G2I(cameraPose.pos);
+      agent.cameraRot = G2I(cameraPose.rot);
+
+      // update agent's self body map
+      for (auto &bodyPart : NaoRobot::bodyParts)
+      {
+        agent.selfBodyMap[bodyPart] =
+          G2I(model->GetLink(bodyPart)->GetWorldPose().pos);
+      }
+
+      // update agent's percept joints angles
+      for (auto &joint : model->GetJoints())
+      {
+        agent.percept.hingeJoints[joint->GetName()] =
+          joint->GetAngle(0).Degree();
+      }
+
+      // update agent's percept gyroRate
+      auto torsoLink = model->GetLink(NaoRobot::torsoLinkName);
+      agent.percept.gyroRate = G2I(torsoLink->GetWorldAngularVel());
+
+      // update agent's percept acceleration
+      agent.percept.accel = G2I(torsoLink->GetWorldLinearAccel());
+
+      // update agent's percept left and right foot force info
+      agent.percept.leftFootFR =
+        std::make_pair(
+          G2I(model->GetLink(NaoRobot::leftFootLinkName)->GetWorldPose().pos),
+          G2I(model->GetLink(NaoRobot::leftFootLinkName)->GetWorldForce()));
+      agent.percept.rightFootFR =
+        std::make_pair(
+          G2I(model->GetLink(NaoRobot::rightFootLinkName)->GetWorldPose().pos),
+          G2I(model->GetLink(NaoRobot::rightFootLinkName)->GetWorldForce()));
+    }
+  }
+  // call update function
   this->perceptor->Update();
-  this->perceptor->SendToServer();
+
+  // send messages to server
+  for (auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      int cx = perceptor->Serialize(agent, &(buffer[4]),
+                                    Perceptor::kBufferSize - 4);
+      unsigned int _cx = htonl(static_cast<unsigned int>(cx));
+      buffer[0] =  _cx        & 0xff;
+      buffer[1] = (_cx >>  8) & 0xff;
+      buffer[2] = (_cx >> 16) & 0xff;
+      buffer[3] = (_cx >> 24) & 0xff;
+      server->Send(agent.socketID, buffer, cx + 4);
+    }
+  }
+
+  delete[] buffer;
 }

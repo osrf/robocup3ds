@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-#include <netinet/in.h>
+// #include <netinet/in.h>
 #include <cmath>
 #include <ignition/math.hh>
 #include <memory>
@@ -38,7 +38,7 @@ class PerceptorTest : public ::testing::Test
     virtual void SetUp()
     {
       this->gameState = new GameState();
-      this->perceptor = new Perceptor(gameState, nullptr);
+      this->perceptor = new Perceptor(gameState);
     }
 
   protected:

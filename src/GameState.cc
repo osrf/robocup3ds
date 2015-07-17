@@ -24,6 +24,7 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Agent.hh"
 #include "robocup3ds/Geometry.hh"
+#include "robocup3ds/Nao.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
 #include "robocup3ds/states/CornerKickState.hh"
@@ -64,7 +65,7 @@ double GameState::SecondsKickOff = 15;
 bool   GameState::useCounterForGameTime = true;
 int    GameState::playerLimit = 11;
 int    GameState::penaltyBoxLimit = 3;
-double GameState::beamHeight = SoccerField::RobotPoseHeight + 0.05;
+double GameState::beamHeight = NaoRobot::torsoHeight + 0.05;
 double GameState::crowdingEnableRadius = 0.8;
 double GameState::innerCrowdingRadius = 0.4;
 double GameState::outerCrowdingRadius = 1.0;
@@ -622,7 +623,7 @@ void GameState::CheckImmobility()
         agent.timeImmoblized = 0;
       }
 
-      if (agent.pos.Z() < SoccerField::RobotPoseHeight * 0.5)
+      if (agent.pos.Z() < NaoRobot::torsoHeight * 0.5)
       {
         agent.timeFallen += this->GetElapsedCycleGameTime();
       }

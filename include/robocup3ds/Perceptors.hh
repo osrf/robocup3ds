@@ -36,7 +36,7 @@ class Perceptor
 {
   /// \brief Constructor for Perceptor object
   /// \param[in] _gameState Pointer to GameState object
-  public: Perceptor(GameState *const _gameState, RCPServer *const _server);
+  public: Perceptor(GameState *const _gameState);
 
   /// \brief Destructor for Perceptor object
   public: ~Perceptor();
@@ -75,7 +75,7 @@ class Perceptor
   public: void UpdateAgentHear(Agent &_agent) const;
 
   /// \brief Function to send messages to server
-  public: void SendToServer() const;
+  // public: void SendToServer() const;
 
   /// \brief Function to convert perception information to s-expressions
   /// and write it to a string
@@ -107,7 +107,7 @@ class Perceptor
   public: void SetG2LMat(const Agent &_agent);
 
   /// \Brief Size of buffer used to store message sent to server
-  public: static const int bufferSize;
+  public: static const int kBufferSize;
 
   /// \brief Distance of message where it still can be heard
   public: static const double kHearDist;
@@ -125,10 +125,10 @@ class Perceptor
   private: GameState *const gameState;
 
   /// \brief Pointer to Server object
-  private: RCPServer *const server;
+  // private: RCPServer *const server;
 
   /// \brief Buffer used to store data sent to server
-  private: std::shared_ptr<char> buffer;
+  // private: std::shared_ptr<char> buffer;
 
   /// \brief 4x4 transformation to go from global to local coordinates
   private: ignition::math::Matrix4<double> G2LMat;

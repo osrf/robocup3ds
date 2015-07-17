@@ -37,7 +37,6 @@ namespace SoccerField
   static const double HalfGoalWidth = GoalWidth * 0.5;
   static const double GoalDepth = 0.6;
   static const double GoalHeight = 0.8;
-  static const double RobotPoseHeight = 0.3;
   static const double BallRadius = 0.042;
   static const double OutofBoundsTol = BallRadius;
   static const double PenaltyBoxWidth = 3.9;

@@ -15,7 +15,6 @@
  *
 */
 
-#include <netinet/in.h>
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -32,9 +31,9 @@
 
 using namespace ignition;
 
-bool Perceptor::useNoise = true;
-const double Perceptor::kHearDist = 50.0;
-const int Perceptor::bufferSize = 8000;
+bool         Perceptor::useNoise          = true;
+const double Perceptor::kHearDist         = 50.0;
+const int    Perceptor::kBufferSize       = 8000;
 
 math::Vector3<double> Perceptor::fixedNoise(
   math::Rand::DblUniform(-0.005, 0.005),
@@ -44,11 +43,10 @@ math::Vector3<double> Perceptor::fixedNoise(
 math::Vector3<double> Perceptor::dNoiseSigma(0.0965, 0.1225, 0.1480);
 
 /////////////////////////////////////////////////
-Perceptor::Perceptor(GameState *const _gameState, RCPServer *const _server):
-  gameState(_gameState),
-  server(_server)
+Perceptor::Perceptor(GameState *const _gameState):
+  gameState(_gameState)
 {
-  this->buffer = std::make_shared<char>(Perceptor::bufferSize);
+  // this->buffer = std::make_shared<char>(Perceptor::bufferSize);
   this->SetViewFrustum();
 }
 
@@ -326,23 +324,23 @@ int Perceptor::SerializePoint(const char *_label,
                   _label, _pt.X(), _pt.Y(), _pt.Z());
 }
 
-void Perceptor::SendToServer() const
-{
-  for (auto &team : this->gameState->teams)
-  {
-    for (auto &agent : team->members)
-    {
-      int cx = this->Serialize(agent, &(this->buffer.get())[4],
-                               Perceptor::bufferSize - 4);
-      unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-      this->buffer.get()[0] = _cx         & 0xff;
-      this->buffer.get()[1] = (_cx >> 8)  & 0xff;
-      this->buffer.get()[2] = (_cx >> 16) & 0xff;
-      this->buffer.get()[3] = (_cx >> 24) & 0xff;
-      this->server->Send(agent.socketID, this->buffer.get(), cx + 4);
-    }
-  }
-}
+// void Perceptor::SendToServer() const
+// {
+//   for (auto &team : this->gameState->teams)
+//   {
+//     for (auto &agent : team->members)
+//     {
+//       int cx = this->Serialize(agent, &(this->buffer.get())[4],
+//                                Perceptor::bufferSize - 4);
+//       unsigned int _cx = htonl(static_cast<unsigned int>(cx));
+//       this->buffer.get()[0] = _cx         & 0xff;
+//       this->buffer.get()[1] = (_cx >> 8)  & 0xff;
+//       this->buffer.get()[2] = (_cx >> 16) & 0xff;
+//       this->buffer.get()[3] = (_cx >> 24) & 0xff;
+//       this->server->Send(agent.socketID, this->buffer.get(), cx + 4);
+//     }
+//   }
+// }
 
 /////////////////////////////////////////////////
 ignition::math::Vector3<double> Perceptor::addNoise(
