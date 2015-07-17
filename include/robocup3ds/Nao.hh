@@ -19,6 +19,7 @@
 #define _GAZEBO_NAO_HH_
 
 #include <string>
+#include <map>
 #include <vector>
 
 namespace NaoRobot
@@ -27,13 +28,65 @@ namespace NaoRobot
 
   static const double torsoHeight = 0.3;
 
-  static const std::vector<std::string> bodyPartNames =
+  static const std::map<std::string, std::string> bodyPartMap =
   {
-    "LForeArm",
-    "RForeArm",
-    "l_ankle",
-    "r_ankle",
-    "Head"
+    {"head", "Head"},
+    {"llowerarm", "LForeArm"},
+    {"rlowerarm", "RForeArm"},
+    {"lfoot", "l_sole"},
+    {"rfoot", "r_sole"}
+  };
+
+  static const std::map<std::string, std::string> hingeJointEffectorMap =
+  {
+    {"he1", "HeadYaw"},
+    {"he2", "HeadPitch"},
+    {"lae1", "LShoulderPitch"},
+    {"lae2", "LShoulderRoll"},
+    {"lae3", "LElbowRoll"},
+    {"lae4", "LElbowYaw"},
+    {"lle1", "LHipYawPitch"},
+    {"lle2", "LHipRoll"},
+    {"lle3", "LHipPitch"},
+    {"lle4", "LKneePitch"},
+    {"lle5", "LAnklePitch"},
+    {"lle6", "LAnkleRoll"},
+    {"rle1", "RHipYawPitch"},
+    {"rle2", "RHipRoll"},
+    {"rle3", "RHipPitch"},
+    {"rle4", "RKneePitch"},
+    {"rle5", "RAnklePitch"},
+    {"rle6", "RAnkleRoll"},
+    {"rae1", "RShoulderPitch"},
+    {"rae2", "RShoulderRoll"},
+    {"rae3", "RElbowRoll"},
+    {"rae4", "RElbowYaw"}
+  };
+
+  static const std::map<std::string, std::string> hingeJointPerceptorMap =
+  {
+    {"hj1", "HeadYaw"},
+    {"hj2", "HeadPitch"},
+    {"laj1", "LShoulderPitch"},
+    {"laj2", "LShoulderRoll"},
+    {"laj3", "LElbowRoll"},
+    {"laj4", "LElbowYaw"},
+    {"llj1", "LHipYawPitch"},
+    {"llj2", "LHipRoll"},
+    {"llj3", "LHipPitch"},
+    {"llj4", "LKneePitch"},
+    {"llj5", "LAnklePitch"},
+    {"llj6", "LAnkleRoll"},
+    {"rlj1", "RHipYawPitch"},
+    {"rlj2", "RHipRoll"},
+    {"rlj3", "RHipPitch"},
+    {"rlj4", "RKneePitch"},
+    {"rlj5", "RAnklePitch"},
+    {"rlj6", "RAnkleRoll"},
+    {"raj1", "RShoulderPitch"},
+    {"raj2", "RShoulderRoll"},
+    {"raj3", "RElbowRoll"},
+    {"raj4", "RElbowYaw"}
   };
 
   static const std::string cameraLinkName = "CameraTop_joint";
