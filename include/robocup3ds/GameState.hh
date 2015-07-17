@@ -298,6 +298,14 @@ class GameState
   public: void SetBallAngVel(const ignition::math::Vector3<double>
                              &_ballAngVel);
 
+  /// \brief Get the linear velocity of the ball
+  /// \return Ball linear velocity
+  public: ignition::math::Vector3<double> GetBallVel() const;
+
+  /// \brief Get the angular velocity of the ball
+  /// \return Ball angular velocity
+  public: ignition::math::Vector3<double> GetBallAngVel() const;
+
   /// \brief Add agent to game state
   /// \param[in] _uNum Agent number
   /// \param[in] _teamName Agent name

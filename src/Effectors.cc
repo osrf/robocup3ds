@@ -26,3 +26,5 @@ Effector::Effector(GameState *const _gameState):
 {
 }
 
+/////////////////////////////////////////////////
+void Effector::Update() {}

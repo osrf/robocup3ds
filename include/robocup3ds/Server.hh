@@ -38,7 +38,7 @@
 ///  ------    Master socket
 /// |      |<------------------ New client requests
 /// |      |
-/// |RCPServer|   Client1 socket
+/// |Server|   Client1 socket
 /// |      |<-----------------> Client1 data exchange
 /// |      |   ClientN socket
 ///  ------ <-----------------> ClientN data exchange

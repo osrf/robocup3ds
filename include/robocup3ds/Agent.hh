@@ -192,8 +192,6 @@ class Agent
     team(_team)
   {
     this->socketID = -1;
-    this->pos.Set(0, 0, 0);
-    this->prevPos.Set(0, 0, 0);
     this->status = Status::RELEASED;
     this->updatePose = false;
     this->inPenaltyBox = false;
@@ -208,6 +206,25 @@ class Agent
   {
     return this == &_agent;
   }
+
+  /// \brief Return AgentId of agent
+  /// \return AgentId, a pair of unum and team name
+  public: AgentId GetAgentID() const
+  {
+    if (!this->team)
+      return std::make_pair(this->uNum, "");
+    return std::make_pair(this->uNum, this->team->name);
+  }
+
+  /// \brief Return name of agent
+  /// \return A String that is composed of unum and team name
+  public: std::string GetName() const
+  {
+    if (!this->team)
+      return std::to_string(this->uNum);
+    return std::to_string(this->uNum) + "_" + this->team->name;
+  }
+
   /// \brief Agent socket id
   public: int socketID;
 
@@ -226,11 +243,14 @@ class Agent
   /// \brief Agent position in previous cycle
   public: ignition::math::Vector3<double> prevPos;
 
+  /// \brief Agent orientation
+  public: ignition::math::Quaternion<double> rot;
+
   /// \brief Agent camera orientation
   public: ignition::math::Quaternion<double> cameraRot;
 
-  /// \brief Agent orientation
-  public: ignition::math::Quaternion<double> rot;
+  /// \brief Agent camera position
+  public: ignition::math::Vector3<double> cameraPos;
 
   /// \brief Flag whether to update agent pose in world to match
   /// gamestate.

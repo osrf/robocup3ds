@@ -373,6 +373,6 @@ ignition::math::Vector3<double> Perceptor::addNoise(
 void Perceptor::SetG2LMat(const Agent &_agent)
 {
   this->G2LMat = math::Matrix4<double>(_agent.cameraRot);
-  this->G2LMat.Translate(_agent.pos);
+  this->G2LMat.Translate(_agent.cameraPos);
   this->G2LMat = this->G2LMat.Inverse();
 }

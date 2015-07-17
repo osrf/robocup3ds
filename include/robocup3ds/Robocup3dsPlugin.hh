@@ -78,5 +78,4 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: Effector *effector;
 };
 
-
 #endif

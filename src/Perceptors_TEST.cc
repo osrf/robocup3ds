@@ -156,7 +156,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive y-axis
-  agent.pos.Set(0, 0, 0);
+  agent.cameraPos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, M_PI / 2);
 
   // we have line on positive y-axis in global coordinates
@@ -184,7 +184,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
   EXPECT_EQ(testLine, gdLine);
 
   // offset agent by 1 in every axis, same with line
-  agent.pos.Set(1, 1, 1);
+  agent.cameraPos.Set(1, 1, 1);
   origLine.Set(0, 1, 1, 0, 2, 1);
   UpdateLine_Test(agent, origLine, testLine);
   gdLine.Set(1, 0, 0, 1, -1, 0);
@@ -204,7 +204,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Restrictvis)
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive x-axis
-  agent.pos.Set(0, 0, 0);
+  agent.cameraPos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
 
   // we have line spanning Y-axis, must be clipped
@@ -253,7 +253,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive y-axis
-  agent.pos.Set(0, 0, 0);
+  agent.cameraPos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, M_PI / 2);
 
   origLandmark.Set(1, 0, 0);
@@ -272,7 +272,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
   gdLandmark.Set(1 / sqrt(2), -1 / sqrt(2), 0);
   EXPECT_EQ(gdLandmark, testLandmark);
 
-  agent.pos.Set(1, 2, 3);
+  agent.cameraPos.Set(1, 2, 3);
   origLandmark.Set(1, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
   UpdateLandmark_Test(agent, origLandmark, testLandmark);
@@ -291,7 +291,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
-  agent.pos.Set(0, 0, 0);
+  agent.cameraPos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
 
   origLandmark.Set(-999, 0, 0);
@@ -329,12 +329,13 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
   gameState->AddAgent(1, "red");
   Agent &agent1 = gameState->teams.at(0)->members.at(0);
   Agent &agent2 = gameState->teams.at(1)->members.at(0);
-  agent1.pos.Set(0, 0, 0);
+  agent1.cameraPos.Set(0, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
   perceptor->SetG2LMat(agent1);
-  agent2.pos.Set(1, 1, 0);
-  agent2.selfBodyMap["HEAD"] = agent2.pos + math::Vector3<double>(0, 0, 1);
-  agent2.selfBodyMap["BODY"] = agent2.pos;
+  agent2.cameraPos.Set(1, 1, 0);
+  agent2.selfBodyMap["HEAD"] = agent2.cameraPos +
+    math::Vector3<double>(0, 0, 1);
+  agent2.selfBodyMap["BODY"] = agent2.cameraPos;
   AgentId agent2Id(1, "red");
 
   // without restricted vision, other agent's body parts should be visible
@@ -370,9 +371,9 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
   auto team = gameState->teams.at(0);
   Agent &agent1 = team->members.at(0);
   Agent &agent2 = team->members.at(1);
-  agent1.pos.Set(5, 0, 0);
+  agent1.cameraPos.Set(5, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
-  agent2.pos.Set(0, 100, 0);
+  agent2.cameraPos.Set(0, 100, 0);
   gameState->say.agentId = std::make_pair(5, "red");
   gameState->say.pos.Set(0, 0, 0);
   gameState->say.msg = "hello";
@@ -518,8 +519,8 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   // ensure that encoding is correct
   char b[4];
   unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-  b[0] = _cx & 0xff;
-  b[1] = (_cx >> 8)  & 0xff;
+  b[0] =  _cx        & 0xff;
+  b[1] = (_cx >>  8) & 0xff;
   b[2] = (_cx >> 16) & 0xff;
   b[3] = (_cx >> 24) & 0xff;
   unsigned int _cx2 = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | (b[0]);
