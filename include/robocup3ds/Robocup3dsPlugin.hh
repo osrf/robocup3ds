@@ -76,6 +76,12 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Pointer to Effector object;
   private: Effector *effector;
+
+  /// \brief Pointer to buffer for sending messages to server;
+  private: char* buffer;
+
+  /// \brief Size of buffer in bytes
+  private: static const int kBufferSize = 16384;
 };
 
 #endif

@@ -45,6 +45,7 @@ Robocup3dsPlugin::Robocup3dsPlugin()
   this->effector = new Effector(this->gameState);
   this->gameState = new GameState();
   this->perceptor = new Perceptor(this->gameState);
+  this->buffer = new char[Robocup3dsPlugin::kBufferSize];
 
   this->server->Start();
 }
@@ -56,6 +57,7 @@ Robocup3dsPlugin::~Robocup3dsPlugin()
   delete this->effector;
   delete this->gameState;
   delete this->perceptor;
+  delete[] this->buffer;
 }
 
 /////////////////////////////////////////////////
@@ -86,6 +88,7 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateEffector()
 {
+  // update effector
   this->effector->Update();
   this->world->InsertModelFile("model://nao");
 }
@@ -103,7 +106,6 @@ void Robocup3dsPlugin::UpdateGameState()
       auto &modelPose = model->GetWorldPose();
       agent.pos = G2I(modelPose.pos);
       agent.rot = G2I(modelPose.rot);
-      agent.updatePose = false;
     }
   }
   // find ball in gazebo world and use it to update gameState
@@ -112,7 +114,6 @@ void Robocup3dsPlugin::UpdateGameState()
   this->gameState->MoveBall(G2I(ballPose.pos));
   this->gameState->SetBallVel(G2I(ball->GetWorldLinearVel()));
   this->gameState->SetBallAngVel(G2I(ball->GetWorldAngularVel()));
-  this->gameState->updateBallPose = false;
 
   // update game state
   this->gameState->Update();
@@ -145,8 +146,6 @@ void Robocup3dsPlugin::UpdateGameState()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdatePerceptor()
 {
-  char* buffer = new char[Perceptor::kBufferSize];
-
   // update perception related info using gazebo world model
   for (auto &team : this->gameState->teams)
   {
@@ -174,7 +173,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
           model->GetJoint(kv.second)->GetAngle(0).Degree();
       }
 
-      // update agent's percept gyroRate
+      // update agent's percept gyro rate
       auto torsoLink = model->GetLink(NaoRobot::torsoLinkName);
       agent.percept.gyroRate = G2I(torsoLink->GetWorldAngularVel());
 
@@ -186,6 +185,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
         std::make_pair(
           G2I(model->GetLink(NaoRobot::leftFootLinkName)->GetWorldPose().pos),
           G2I(model->GetLink(NaoRobot::leftFootLinkName)->GetWorldForce()));
+
       agent.percept.rightFootFR =
         std::make_pair(
           G2I(model->GetLink(NaoRobot::rightFootLinkName)->GetWorldPose().pos),
@@ -200,16 +200,14 @@ void Robocup3dsPlugin::UpdatePerceptor()
   {
     for (auto &agent : team->members)
     {
-      int cx = perceptor->Serialize(agent, &(buffer[4]),
-                                    Perceptor::kBufferSize - 4);
+      int cx = perceptor->Serialize(agent, &(this->buffer[4]),
+                                    Robocup3dsPlugin::kBufferSize - 4);
       unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-      buffer[0] =  _cx        & 0xff;
-      buffer[1] = (_cx >>  8) & 0xff;
-      buffer[2] = (_cx >> 16) & 0xff;
-      buffer[3] = (_cx >> 24) & 0xff;
-      server->Send(agent.socketID, buffer, cx + 4);
+      this->buffer[0] =  _cx        & 0xff;
+      this->buffer[1] = (_cx >>  8) & 0xff;
+      this->buffer[2] = (_cx >> 16) & 0xff;
+      this->buffer[3] = (_cx >> 24) & 0xff;
+      server->Send(agent.socketID, this->buffer, cx + 4);
     }
   }
-
-  delete[] buffer;
 }

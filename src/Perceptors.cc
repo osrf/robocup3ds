@@ -33,7 +33,7 @@ using namespace ignition;
 
 bool         Perceptor::useNoise          = true;
 const double Perceptor::kHearDist         = 50.0;
-const int    Perceptor::kBufferSize       = 8000;
+// const int    Perceptor::kBufferSize       = 8000;
 
 math::Vector3<double> Perceptor::fixedNoise(
   math::Rand::DblUniform(-0.005, 0.005),

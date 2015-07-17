@@ -107,7 +107,7 @@ class Perceptor
   public: void SetG2LMat(const Agent &_agent);
 
   /// \Brief Size of buffer used to store message sent to server
-  public: static const int kBufferSize;
+  // public: static const int kBufferSize;
 
   /// \brief Distance of message where it still can be heard
   public: static const double kHearDist;

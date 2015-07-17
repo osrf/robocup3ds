@@ -189,20 +189,17 @@ class Effector: public SocketParser
 
   /// \brief Global variables for determining new connections,
   /// Assigned in OnConnection().
-  public: bool newConnectionDetected = false;
+  public: bool newConnectionDetected;
 
   /// \brief global variables for determining new disconnections
   // assigned in OnDisconnection().
-  public: bool newDisconnectionDetected = false;
+  public: bool newDisconnectionDetected;
 
   /// \brief Message received by socket and Parse().
   public: std::stringstream message;
 
   /// \brief Data Structure used to store joints effector values.
   public: std::map<std::string, double> jointEffectors;
-
-  /// \brief Maximum size of each message received.
-  private: static const int kBufferSize = 8192;
 
   /// \brief data structure used for scene information.
   private: std::vector<SceneMsg> sceneEffectors;
@@ -215,5 +212,8 @@ class Effector: public SocketParser
 
   /// \brief Pointer to GameState object
   private: GameState *const gameState;
+
+  /// \brief Maximum size of each message received.
+  private: static const int kBufferSize = 16384;
 };
 #endif /* _GAZEBO_ROBOCUP3DS_EFFECTOR_HH_ */

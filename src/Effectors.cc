@@ -26,10 +26,13 @@
 
 #include "robocup3ds/Effectors.hh"
 #include "robocup3ds/GameState.hh"
+#include "robocup3ds/Nao.hh"
 
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
-  gameState(_gameState)
+  gameState(_gameState),
+  newConnectionDetected(false),
+  newDisconnectionDetected(false)
 {
   // Initialize global variables
   this->socketID = 0;
@@ -156,16 +159,10 @@ void Effector::ParseSexp(sexp_t *_exp)
   {
     this->ParseInit(_exp);
   }
-  else if (!strcmp(v, "he1") || !strcmp(v, "he2") || !strcmp(v, "lle1")
-           || !strcmp(v, "rle1") || !strcmp(v, "lle2") || !strcmp(v, "rle2")
-           || !strcmp(v, "lle3") || !strcmp(v, "rle3") || !strcmp(v, "lle4")
-           || !strcmp(v, "rle4") || !strcmp(v, "lle5") || !strcmp(v, "rle5")
-           || !strcmp(v, "lle6") || !strcmp(v, "rle6") || !strcmp(v, "lae1")
-           || !strcmp(v, "rae1") || !strcmp(v, "lae2") || !strcmp(v, "rae2")
-           || !strcmp(v, "lae3") || !strcmp(v, "rae3") || !strcmp(v, "lae4")
-           || !strcmp(v, "rae4"))
+  else if (NaoRobot::hingeJointEffectorMap.find(std::string(v)) !=
+           NaoRobot::hingeJointEffectorMap.end())
   {
-    ParseHingeJoint(_exp);
+    this->ParseHingeJoint(_exp);
   }
   else
   {
