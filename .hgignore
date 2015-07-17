@@ -9,4 +9,4 @@ Ogre.log
 *.tags
 *.tags_*
 *.o
-
+.hgrc

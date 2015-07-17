@@ -1,3 +1,8 @@
+
+set(PARSER_SOURCE sexpLibrary/parser.c sexpLibrary/sexp.c sexpLibrary/event_temp.c sexpLibrary/sexp_ops.c sexpLibrary/cstring.c sexpLibrary/faststack.c)
+Set(PARSER_HEADER sexpLibrary/sexp.h sexpLibrary/cstring.h sexpLibrary/faststack.h sexpLibrary/sexp_errors.h sexpLibrary/sexp_ops.h )
+
+
 set (sources
   Geometry.cc
   Effectors.cc
@@ -18,6 +23,7 @@ set (sources
 )
 
 set (gtest_sources
+  Effectors_TEST.cc
   Robocup3dsPlugin_TEST.cc
   GameState_TEST.cc
   Perceptors_TEST.cc
@@ -35,7 +41,7 @@ link_directories(
   ${GAZEBO_LIBRARY_DIRS}
 )
 
-robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources})
+robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources} ${PARSER_SOURCE} ${HEADER_SOURCE})
 robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
 
 target_link_libraries(${PROJECT_NAME_LOWER}Plugin
