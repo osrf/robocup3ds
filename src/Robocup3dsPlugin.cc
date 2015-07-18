@@ -133,6 +133,8 @@ void Robocup3dsPlugin::UpdateGameState()
     for (auto &agent : team->members)
     {
       // set agent pose in gameState
+      if (agent.updatePose)
+      { continue; }
       physics::ModelPtr model = this->world->GetModel(agent.GetName());
       auto &modelPose = model->GetWorldPose();
       agent.pos = G2I(modelPose.pos);
@@ -142,9 +144,12 @@ void Robocup3dsPlugin::UpdateGameState()
   // find ball in gazebo world and use it to update gameState
   physics::ModelPtr ball = this->world->GetModel("ball");
   auto &ballPose = ball->GetWorldPose();
-  this->gameState->MoveBall(G2I(ballPose.pos));
-  this->gameState->SetBallVel(G2I(ball->GetWorldLinearVel()));
-  this->gameState->SetBallAngVel(G2I(ball->GetWorldAngularVel()));
+  if (!this->gameState->updateBallPose)
+  {
+    this->gameState->MoveBall(G2I(ballPose.pos));
+    this->gameState->SetBallVel(G2I(ball->GetWorldLinearVel()));
+    this->gameState->SetBallAngVel(G2I(ball->GetWorldAngularVel()));
+  }
 
   // update game state
   this->gameState->Update();
