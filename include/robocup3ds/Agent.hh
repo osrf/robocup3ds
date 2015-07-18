@@ -225,6 +225,15 @@ class Agent
     return std::to_string(this->uNum) + "_" + this->team->name;
   }
 
+  /// \brief Flag whether player is goalkeeper
+  public: bool IsGoalKeeper()
+  {
+    return this->uNum == 1;
+  }
+
+  /// \brief Flag whether to delete agent model from gazebo world
+  public: bool deleteModel;
+
   /// \brief Agent socket id
   public: int socketID;
 
@@ -262,6 +271,9 @@ class Agent
   /// \brief Container for an agent's perceptions
   public: AgentPerceptions percept;
 
+  /// \brief Container for agent's effector actions
+  public: AgentActions action;
+
   /// \brief Flag whether agent is in penalty box
   public: bool inPenaltyBox;
 
@@ -270,11 +282,6 @@ class Agent
 
   /// \brief Stores time the agent has fallen
   public: double timeFallen;
-
-  /// \brief Flag whether player is goalkeeper
-  public: bool IsGoalKeeper() {
-    return this->uNum == 1;
-  }
 };
 
 /// \brief Container that contains info for say effector

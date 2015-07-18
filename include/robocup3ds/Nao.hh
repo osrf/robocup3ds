@@ -96,6 +96,8 @@ namespace NaoRobot
   static const std::string leftFootLinkName = "l_sole";
 
   static const std::string rightFootLinkName = "r_sole";
+
+  static const std::string defaultModelName = "naoH25V40";
 }
 
 #endif

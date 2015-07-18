@@ -30,9 +30,9 @@
 
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
-  gameState(_gameState),
   newConnectionDetected(false),
-  newDisconnectionDetected(false)
+  newDisconnectionDetected(false),
+  gameState(_gameState)
 {
   // Initialize global variables
   this->socketID = 0;
@@ -212,7 +212,7 @@ void Effector::ParseBeam(sexp_t *_exp)
 //////////////////////////////////////////////////
 void Effector::ParseInit(sexp_t *_exp)
 {
-  int playerNum = 0;
+  int uNum = 0;
 
   std::string teamName = "";
 
@@ -224,7 +224,7 @@ void Effector::ParseInit(sexp_t *_exp)
     {
       if (!strcmp(ptr->list->val, "unum"))
       {
-        playerNum = atof(ptr->list->next->val);
+        uNum = atof(ptr->list->next->val);
       }
       if (!strcmp(ptr->list->val, "teamname"))
       {
@@ -234,7 +234,7 @@ void Effector::ParseInit(sexp_t *_exp)
     ptr = ptr->next;
   }
 
-  this->initEffectors.push_back(InitMsg(playerNum, teamName));
+  this->agentsToAdd.push_back(InitMsg(uNum, teamName));
 }
 
 //////////////////////////////////////////////////
@@ -255,7 +255,7 @@ void Effector::Update()
 {
   // clear data structures
   this->beamEffectors.clear();
-  this->initEffectors.clear();
+  this->agentsToAdd.clear();
   this->sceneEffectors.clear();
   this->jointEffectors.clear();
 
@@ -277,12 +277,12 @@ bool Effector::GetSceneInformation(std::string &_msg, int &_robotType)
 
 //////////////////////////////////////////////////
 bool Effector::GetInitInformation(std::string &_teamName,
-                                  int &_playerNumber)
+                                  int &_uNum)
 {
-  if (!this->initEffectors.empty())
+  if (!this->agentsToAdd.empty())
   {
-    _teamName = this->initEffectors.front().teamName;
-    _playerNumber = this->initEffectors.front().playerNumber;
+    _teamName = this->agentsToAdd.front().teamName;
+    _uNum = this->agentsToAdd.front().uNum;
     return true;
   }
   return false;
@@ -291,7 +291,7 @@ bool Effector::GetInitInformation(std::string &_teamName,
 //////////////////////////////////////////////////
 bool Effector::GetBeamInformation(double &_x, double &_y, double &_z)
 {
-  if (!this->initEffectors.empty())
+  if (!this->agentsToAdd.empty())
   {
     _x = this->beamEffectors.front().x;
     _y = this->beamEffectors.front().y;

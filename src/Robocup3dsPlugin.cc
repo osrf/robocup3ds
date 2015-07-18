@@ -24,6 +24,7 @@
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/World.hh>
 #include <ignition/math.hh>
+#include <string>
 #include <sdf/sdf.hh>
 
 #include "robocup3ds/Effectors.hh"
@@ -90,7 +91,37 @@ void Robocup3dsPlugin::UpdateEffector()
 {
   // update effector
   this->effector->Update();
-  this->world->InsertModelFile("model://nao");
+
+  // create new model and insert it into world
+  for (auto &agentInfo : this->effector->agentsToAdd)
+  {
+    std::string agentName = std::to_string(agentInfo.uNum) + "_" +
+                            agentInfo.teamName;
+    this->world->InsertModelFile("model://nao");
+    auto model = this->world->GetModel(NaoRobot::defaultModelName);
+    model->SetName(agentName);
+  }
+
+  // remove models that need to be removed from world
+  for (auto &agentInfo : this->effector->agentsToRemove)
+  {
+    std::string agentName = std::to_string(agentInfo.uNum) + "_" +
+                            agentInfo.teamName;
+    this->world->RemoveModel(agentName);
+  }
+
+  // set joint velocities of agent model
+  for (auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      auto model = this->world->GetModel(agent.GetName());
+      for (auto &kv : agent.action.jointEffectors)
+      {
+        model->GetJoint(kv.first)->SetVelocity(0, kv.second);
+      }
+    }
+  }
 }
 
 /////////////////////////////////////////////////

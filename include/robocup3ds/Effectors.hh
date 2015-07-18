@@ -75,13 +75,13 @@ class Effector: public SocketParser
     /// \brief Class constructor.
     /// \param[in] _playerNum Player number.
     /// \param[in] _teamName Team name.
-    public: InitMsg(int _playerNum, std::string _teamName)
+    public: InitMsg(int _uNum, std::string _teamName)
     {
-      this->playerNumber = _playerNum;
+      this->uNum = _uNum;
       this->teamName = _teamName;
     }
     /// \brief Player Number
-    public: int playerNumber;
+    public: int uNum;
     /// \brief Team name
     public: std::string teamName;
   };
@@ -201,11 +201,14 @@ class Effector: public SocketParser
   /// \brief Data Structure used to store joints effector values.
   public: std::map<std::string, double> jointEffectors;
 
+  /// \brief List of agents to add to world model and game state
+  public: std::vector<InitMsg> agentsToAdd;
+
+  /// \brief List of agents to remove from world model and game state
+  public: std::vector<InitMsg> agentsToRemove;
+
   /// \brief data structure used for scene information.
   private: std::vector<SceneMsg> sceneEffectors;
-
-  /// \brief data structure used for init information.
-  private: std::vector<InitMsg> initEffectors;
 
   /// \brief data structure used for beam information.
   private: std::vector<BeamMsg> beamEffectors;
