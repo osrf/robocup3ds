@@ -15,9 +15,9 @@
  *
  */
 
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <iostream>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include "robocup3ds/EffectorParser.hh"
 
 //////////////////////////////////////////////////
@@ -89,12 +89,22 @@ void EffectorParser::ParseMessage(const std::string &_msg)
   // use parse_sexp() from s-expression library
   exp = parse_sexp(linebuf, 36000);
 
-  if (exp == NULL)
+  if (!exp)
+  {
+    std::cerr << "The message is empty" << std::endl;
     return;
-  else if (exp->list == NULL)
+  }
+  else if (!exp->list)
+  {
+    std::cerr << "The message is empty" << std::endl;
     return;
-  else if (exp->list->next == NULL)
+  }
+  else if (!exp->list->next)
+  {
+    std::cerr << "The message is empty" << std::endl;
     return;
+  }
+
   sexp_t* ptr = exp->list->next;
 
   while (ptr != NULL)
@@ -121,13 +131,17 @@ void EffectorParser::ParseSexp(sexp_t *_exp)
     }
     else
     {
-      std::cerr << "Not in s-expression message format. the format: (value ....)" << std::endl;
+      std::cerr <<
+          "Not in s-expression message format. the format: (value ....)"
+          << std::endl;
       return;
     }
   }
   else
   {
-    std::cerr << "Not an s-expression message. Not begin with a parenthesis" << std::endl;
+    std::cerr <<
+        "Not an s-expression message. Not begin with a parenthesis"
+        << std::endl;
     return;
   }
 
@@ -295,8 +309,8 @@ bool EffectorParser::GetBeamInformation(double &_x, double &_y, double &_z)
 }
 
 //////////////////////////////////////////////////
-bool EffectorParser::GetJointEffector(
-    std::string _jointName, double &_targetSpeed)
+bool EffectorParser::GetJointEffector(const std::string &_jointName,
+    double &_targetSpeed)
 {
   std::map<std::string, double>::const_iterator it =
       this->jointEffectors.find(_jointName);
@@ -306,9 +320,4 @@ bool EffectorParser::GetJointEffector(
   _targetSpeed = this->jointEffectors.find(_jointName)->second;
 
   return true;
-}
-
-//////////////////////////////////////////////////
-EffectorParser::~EffectorParser()
-{
 }

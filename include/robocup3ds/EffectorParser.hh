@@ -18,16 +18,21 @@
 #ifndef _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_
 #define _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_
 
-#include <sstream>
 #include <cstring>
 #include <map>
+#include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <memory>
+#include "robocup3ds/SocketParser.hh"
 #include "../../src/sexpLibrary/sexp.h"
 #include "../../src/sexpLibrary/sexp_ops.h"
-#include "robocup3ds/SocketParser.hh"
 
+/// \brief This is a Effector class. It implemented Parse() method
+/// inherited from SocketParser class. Parse() method has been used
+/// to receive messages from the socket.Retrieving effectors values
+/// from received messages have been implemented using s-expression
+/// library.
 class EffectorParser: public SocketParser
 {
   /// \brief SceneMsg class contains information of scene message.
@@ -36,7 +41,7 @@ class EffectorParser: public SocketParser
     /// \brief Constructor.
     /// \param[in] _robotType robot type in Scene message.
     /// \param[in] _rsgAddress rsg file address.
-    public: SceneMsg(int _robotType, std::string _rsgAddress)
+    public: SceneMsg(const int _robotType, const std::string &_rsgAddress)
     {
       this->robotType = _robotType;
       this->rsgAddress = _rsgAddress;
@@ -72,7 +77,7 @@ class EffectorParser: public SocketParser
     /// \brief Class constructor.
     /// \param[in] _playerNum Player number.
     /// \param[in] _teamName Team name.
-    public: InitMsg(int _playerNum, std::string _teamName)
+    public: InitMsg(const int _playerNum, const std::string &_teamName)
     {
       this->playerNumber = _playerNum;
       this->teamName = _teamName;
@@ -87,7 +92,7 @@ class EffectorParser: public SocketParser
   public: EffectorParser();
 
   /// \brief Class destructor.
-  public: virtual ~EffectorParser();
+  public: virtual ~EffectorParser() = default;
 
   /// \brief Used to read incoming message received by socket.
   /// \param[in] _socket, Socket of the client should be assigned by server.
@@ -95,7 +100,7 @@ class EffectorParser: public SocketParser
   public: bool Parse(const int _socket);
 
   /// \brief Update obtained effectors values and
-  //  then save in empty data structures.
+  ///  then save in empty data structures.
   public: void Update();
 
   /// \brief Interface to access to scene information in data structure.
@@ -113,11 +118,12 @@ class EffectorParser: public SocketParser
   public: bool GetInitInformation(std::string &_teamName, int &_playerNumber);
 
   /// \brief Interface for accessing to Beam information.
-  /// \param[out] _x, _y, _z The Cartesian position of beaming in the field
+  /// \param[out] _x Beaming position on x axis of the field
+  /// \param[out] _y Beaming position on y axis of the field
+  /// \param[out] _z Beaming position on z axis of the field
   /// \return True when the Beam information exists in data structure or false
   /// otherwise.
-  public: bool GetBeamInformation(double &_x, double &_y,
-      double &_z);
+  public: bool GetBeamInformation(double &_x, double &_y, double &_z);
 
   /// \brief Interface for accessing to joint effectors.
   /// \param[in] _jointName, The joint name.
@@ -147,7 +153,7 @@ class EffectorParser: public SocketParser
   /// \param[out] _targetSpeed target angular speed as joint's effector value.
   /// \return True when the joint effector exists in data structure or false
   /// otherwise.
-  public: bool GetJointEffector(std::string _jointName, double &_targetSpeed);
+  public: bool GetJointEffector(const std::string &_jointName, double &_targetSpeed);
 
   /// \brief Used in server class constructor as a callback function.
   /// \param[in] _socket the socket used for the server client communication.
@@ -156,6 +162,7 @@ class EffectorParser: public SocketParser
   /// \brief Used in server class constructor.
   /// \param[in] the socket used for for server client communication.
   public: void OnDisconnection(const int /*_socket*/);
+
   /// \brief Main procedure of extracting information
   /// in pile of S-expressions using the expression library.
   /// \param[in] _msg S-expression messages.
@@ -179,7 +186,7 @@ class EffectorParser: public SocketParser
 
   /// \brief Used to parse the joints effector value in S-expression messages.
   /// \param[in] _exp Pointer to a S-expression.
-  private: void ParseHingeJoint(sexp_t *exp);
+  private: void ParseHingeJoint(sexp_t *_exp);
 
   /// \brief Socket assigned in OnConnection().
   public: int socketID;
@@ -196,6 +203,8 @@ class EffectorParser: public SocketParser
   public: std::stringstream message;
 
   /// \brief Data Structure used to store joints effector values.
+  /// here, the key of the map is the Joints names which its descriptions
+  /// can be found in the GetJointEffector() description.
   public: std::map<std::string, double> jointEffectors;
 
   /// \brief Maximum size of each message received.
