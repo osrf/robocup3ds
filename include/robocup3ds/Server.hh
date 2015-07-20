@@ -71,8 +71,14 @@ class RCPServer
   /// \param[in] _parser Parser in charge of reading incoming data from
   /// the sockets.
   /// \param[in] _connectCb Callback to be executed on new client connections.
+  ///   \param[in] _socket Socket associated to the new connection.
+  /// \param[in] _obj1 Instance containing the member function callback for
+  /// new connections.
   /// \param[in] _disconnectCb Callback to be executed when an existing client
   /// is disconnected.
+  ///   \param[in] _socket Socket associated to the new disconnection.
+  /// \param[in] _obj2 Instance containing the member function callback for
+  /// new disconnections.
   public: template<typename C>
   RCPServer(const int _port,
          const std::shared_ptr<SocketParser> &_parser,
