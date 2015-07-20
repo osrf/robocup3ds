@@ -18,7 +18,13 @@
 #ifndef _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 #define _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_
 
-/// \brief
+/// \brief Interface class designed to interact with the Server class. The
+/// Server constructor accepts a SocketParser instance as an argument in its
+/// constructor. Users of the Server class will have to create its own parsers
+/// to be able to read data from the sockets. Users are the only ones that know
+/// how to read and interpret the data sent through the sockets. The server will
+/// call the Parse() method of the derived parser class that the users will
+/// write.
 class SocketParser
 {
   /// \brief Constructor.
