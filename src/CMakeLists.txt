@@ -1,9 +1,11 @@
 set (sources
   Robocup3dsPlugin.cc
+  Server.cc
 )
 
 set (gtest_sources
   Robocup3dsPlugin_TEST.cc
+  Server_TEST.cc
 )
 
 # make below target specific?
@@ -17,6 +19,11 @@ link_directories(
 )
 
 robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources})
+
+target_link_libraries(${PROJECT_NAME_LOWER}Plugin
+  ${GAZEBO_LIBRARIES}
+)
+
 robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
 
 robocup3ds_build_tests(${gtest_sources})

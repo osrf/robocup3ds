@@ -15,6 +15,7 @@ macro (robocup3ds_build_tests)
       )
 
     target_link_libraries(${BINARY_NAME}
+      ${PROJECT_NAME_LOWER}Plugin
       libgtest.a
       libgtest_main.a
       pthread
