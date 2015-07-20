@@ -31,7 +31,9 @@ RCPServer::~RCPServer()
 {
   this->enabled = false;
   if (this->threadReception.joinable())
-  { this->threadReception.join(); }
+  {
+    this->threadReception.join();
+  }
 }
 
 //////////////////////////////////////////////////
@@ -63,7 +65,10 @@ bool RCPServer::Send(const int _socket, const char *_data, const size_t _len)
   for (size_t i = 1; i < this->pollSockets.size(); ++i)
   {
     if (this->pollSockets.at(i).fd == _socket)
-    { found = true; }
+    {
+      found = true;
+      break;
+    }
   }
 
   if (!found)
