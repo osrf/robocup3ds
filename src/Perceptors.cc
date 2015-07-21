@@ -31,6 +31,7 @@
 
 using namespace ignition;
 
+int          Perceptor::updateVisualFreq  = 3;
 bool         Perceptor::useNoise          = true;
 const double Perceptor::kHearDist         = 50.0;
 // const int    Perceptor::kBufferSize       = 8000;
@@ -94,6 +95,12 @@ std::vector <ignition::math::Plane<double> > &Perceptor::GetViewFrustum()
 }
 
 /////////////////////////////////////////////////
+bool Perceptor::UpdatePerception() const
+{
+  return this->gameState->GetCycleCounter() % Perceptor::updateVisualFreq == 0;
+}
+
+/////////////////////////////////////////////////
 void Perceptor::Update()
 {
   for (auto &team : this->gameState->teams)
@@ -101,33 +108,35 @@ void Perceptor::Update()
     for (auto &agent : team->members)
     {
       this->SetG2LMat(agent);
-
-      // update line info
-      agent.percept.fieldLines.clear();
-      for (auto &fieldLine : SoccerField::FieldLines)
+      if (this->UpdatePerception())
       {
-        this->UpdateLine(agent, fieldLine);
-      }
-
-      // update landmark info
-      agent.percept.landMarks.clear();
-      for (auto &kv : SoccerField::LandMarks)
-      {
-        this->UpdateLandmark(agent, kv.first, kv.second);
-      }
-
-      // update ball info
-      this->UpdateLandmark(agent, "B", this->gameState->GetBall());
-
-      // update position and messages of other agents
-      agent.percept.otherAgentBodyMap.clear();
-      for (auto &otherTeam : this->gameState->teams)
-      {
-        for (auto &otherAgent : otherTeam->members)
+        // update line info
+        agent.percept.fieldLines.clear();
+        for (auto &fieldLine : SoccerField::FieldLines)
         {
-          if (otherAgent.uNum != agent.uNum ||
-              otherAgent.team->name != agent.team->name)
-          { this->UpdateOtherAgent(agent, otherAgent); }
+          this->UpdateLine(agent, fieldLine);
+        }
+
+        // update landmark info
+        agent.percept.landMarks.clear();
+        for (auto &kv : SoccerField::LandMarks)
+        {
+          this->UpdateLandmark(agent, kv.first, kv.second);
+        }
+
+        // update ball info
+        this->UpdateLandmark(agent, "B", this->gameState->GetBall());
+
+        // update position and messages of other agents
+        agent.percept.otherAgentBodyMap.clear();
+        for (auto &otherTeam : this->gameState->teams)
+        {
+          for (auto &otherAgent : otherTeam->members)
+          {
+            if (otherAgent.uNum != agent.uNum ||
+                otherAgent.team->name != agent.team->name)
+            { this->UpdateOtherAgent(agent, otherAgent); }
+          }
         }
       }
 
@@ -238,46 +247,62 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
 int Perceptor::Serialize(const Agent &_agent, char *_string,
                          const int _size) const
 {
-  if (_size < 4000)
-  { return 0; }
-
   int cx = 0;
 
-  // write out perception info
-  cx += snprintf(_string + cx, _size - cx, "(See");
-
-  // write out landmark info
-  for (auto &kv : _agent.percept.landMarks)
+  if (this->UpdatePerception())
   {
-    cx += SerializePoint(kv.first.c_str(), kv.second, _string + cx, _size - cx);
-  }
+    // write out perception info
+    cx += snprintf(_string + cx, _size - cx, "(See");
 
-  // write out other agent body parts
-  for (auto &kv : _agent.percept.otherAgentBodyMap)
-  {
-    // agentNum = kv.first.first;
-    // agentTeam = kv.first.second;
-    cx += snprintf(_string + cx, _size - cx, " (P (team %s) (id %d)",
-                   kv.first.second.c_str(), kv.first.first);
-    for (auto &kv2 : kv.second)
+    // write out landmark info
+    for (auto &kv : _agent.percept.landMarks)
     {
-      cx += SerializePoint(kv2.first.c_str(),
-                           kv2.second, _string + cx, _size - cx);
+      cx += SerializePoint(kv.first.c_str(), kv.second,
+                           _string + cx, _size - cx);
     }
+
+    // write out other agent body parts
+    for (auto &kv : _agent.percept.otherAgentBodyMap)
+    {
+      // agentNum = kv.first.first;
+      // agentTeam = kv.first.second;
+      cx += snprintf(_string + cx, _size - cx, " (P (team %s) (id %d)",
+                     kv.first.second.c_str(), kv.first.first);
+      for (auto &kv2 : kv.second)
+      {
+        cx += SerializePoint(kv2.first.c_str(),
+                             kv2.second, _string + cx, _size - cx);
+      }
+      cx += snprintf(_string + cx, _size - cx, ")");
+    }
+
+    // write out fieldlines
+    for (auto &fieldLine : _agent.percept.fieldLines)
+    {
+      cx += snprintf(_string + cx, _size - cx,
+                     " (L (pol %.2f %.2f %.2f) (pol %.2f %.2f %.2f))",
+                     fieldLine[0].X(), fieldLine[0].Y(), fieldLine[0].Z(),
+                     fieldLine[1].X(), fieldLine[1].Y(), fieldLine[1].Z());
+    }
+
+    // finish writing out perception info
     cx += snprintf(_string + cx, _size - cx, ")");
   }
 
-  // write out fieldlines
-  for (auto &fieldLine : _agent.percept.fieldLines)
+  // write hear info
+  if (_agent.percept.hear.self)
   {
-    cx += snprintf(_string + cx, _size - cx,
-                   " (L (pol %.2f %.2f %.2f) (pol %.2f %.2f %.2f))",
-                   fieldLine[0].X(), fieldLine[0].Y(), fieldLine[0].Z(),
-                   fieldLine[1].X(), fieldLine[1].Y(), fieldLine[1].Z());
+    cx += snprintf(_string + cx, _size - cx, "(hear %.2f self %s)",
+                   _agent.percept.hear.gameTime,
+                   _agent.percept.hear.msg.c_str());
   }
-
-  // finish writing out perception info
-  cx += snprintf(_string + cx, _size - cx, ")");
+  else
+  {
+    cx += snprintf(_string + cx, _size - cx, "(hear %.2f %.2f %s)",
+                   _agent.percept.hear.gameTime,
+                   _agent.percept.hear.yaw,
+                   _agent.percept.hear.msg.c_str());
+  }
 
   // write body joint angle info
   for (auto &kv : _agent.percept.hingeJoints)

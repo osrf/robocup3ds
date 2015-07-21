@@ -18,8 +18,10 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <netinet/in.h>
+#include <map>
 #include <memory>
 #include <gazebo/gazebo.hh>
+#include <gazebo/physics/Collision.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/World.hh>
@@ -40,7 +42,8 @@ using namespace gazebo;
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
 /////////////////////////////////////////////////
-Robocup3dsPlugin::Robocup3dsPlugin()
+Robocup3dsPlugin::Robocup3dsPlugin():
+  lastUpdateTime(-GameState::counterCycleTime)
 {
   this->server = new RCPServer();
   this->effector = new Effector(this->gameState);
@@ -81,9 +84,18 @@ void Robocup3dsPlugin::Init()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 {
+  // checks if enough time has elapsed to update gameState and send out
+  // information
+  if (this->world->GetSimTime().Double() - this->lastUpdateTime <
+      GameState::counterCycleTime)
+  {
+    return;
+  }
+
   this->UpdateEffector();
   this->UpdateGameState();
   this->UpdatePerceptor();
+  this->lastUpdateTime = this->world->GetSimTime().Double();
 }
 
 /////////////////////////////////////////////////
@@ -92,7 +104,7 @@ void Robocup3dsPlugin::UpdateEffector()
   // update effector
   this->effector->Update();
 
-  // create new model and insert it into world
+  // insert models into world that need to be inserted
   for (auto &agentInfo : this->effector->agentsToAdd)
   {
     std::string agentName = std::to_string(agentInfo.uNum) + "_" +
@@ -125,8 +137,57 @@ void Robocup3dsPlugin::UpdateEffector()
 }
 
 /////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateBallContactHistory()
+{
+  std::map<std::string, Team::Side> teamSide;
+  for (auto &team : this->gameState->teams)
+  {
+    teamSide[team->name] = team->side;
+  }
+  int uNum;
+  std::string teamName;
+
+  const auto &ball = this->world->GetModel("ball_model");
+  const auto &ballPose = ball->GetWorldPose();
+  const auto &ballLink = ball->GetLink("ball_link");
+  for (auto &collision : ballLink->GetCollisions())
+  {
+    const auto &model = collision->GetModel();
+    // make sure that model belongs to an agent
+    if (model && Agent::CheckAgentName(model->GetName(), uNum, teamName))
+    {
+      const auto &lastBallContact = gameState->GetLastBallContact();
+
+      // only update the last ball contact if contact by same agent
+      // has occurred less than a certain time interval ago, otherwise
+      // add new ball contact to history
+      if (lastBallContact
+          && lastBallContact->uNum == uNum
+          && lastBallContact->side == teamSide[teamName]
+          && gameState->GetGameTime() - lastBallContact->contactTime
+          < GameState::ballContactInterval)
+      {
+        lastBallContact->contactTime = gameState->GetGameTime();
+      }
+      else
+      {
+        std::shared_ptr<GameState::BallContact> ballContact(
+          new GameState::BallContact(uNum, teamSide[teamName],
+                                     gameState->GetGameTime(),
+                                     G2I(ballPose.pos)));
+        gameState->ballContactHistory.push_back(ballContact);
+      }
+      break;
+    }
+  }
+}
+
+/////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateGameState()
 {
+  // sync gameState time and gaezbo world time
+  this->gameState->SetGameTime(this->world->GetSimTime().Double());
+
   // use models in gazebo world to update agents and perception info
   for (auto &team : this->gameState->teams)
   {
@@ -135,14 +196,14 @@ void Robocup3dsPlugin::UpdateGameState()
       // set agent pose in gameState
       if (agent.updatePose)
       { continue; }
-      physics::ModelPtr model = this->world->GetModel(agent.GetName());
+      const auto &model = this->world->GetModel(agent.GetName());
       auto &modelPose = model->GetWorldPose();
       agent.pos = G2I(modelPose.pos);
       agent.rot = G2I(modelPose.rot);
     }
   }
   // find ball in gazebo world and use it to update gameState
-  physics::ModelPtr ball = this->world->GetModel("ball");
+  const auto &ball = this->world->GetModel("ball_model");
   auto &ballPose = ball->GetWorldPose();
   if (!this->gameState->updateBallPose)
   {
@@ -150,6 +211,9 @@ void Robocup3dsPlugin::UpdateGameState()
     this->gameState->SetBallVel(G2I(ball->GetWorldLinearVel()));
     this->gameState->SetBallAngVel(G2I(ball->GetWorldAngularVel()));
   }
+
+  // update ball contact history
+  this->UpdateBallContactHistory();
 
   // update game state
   this->gameState->Update();
@@ -161,7 +225,7 @@ void Robocup3dsPlugin::UpdateGameState()
     {
       if (!agent.updatePose)
       { continue; }
-      physics::ModelPtr model = this->world->GetModel(agent.GetName());
+      const auto &model = this->world->GetModel(agent.GetName());
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
       model->SetWorldPose(I2G(pose));
       agent.updatePose = false;
@@ -187,7 +251,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
   {
     for (auto &agent : team->members)
     {
-      physics::ModelPtr model = this->world->GetModel(agent.GetName());
+      const auto &model = this->world->GetModel(agent.GetName());
 
       // update agent's camera pose
       auto &cameraPose = model->GetLink(NaoRobot::cameraLinkName)->
@@ -210,7 +274,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
       }
 
       // update agent's percept gyro rate
-      auto torsoLink = model->GetLink(NaoRobot::torsoLinkName);
+      const auto &torsoLink = model->GetLink(NaoRobot::torsoLinkName);
       agent.percept.gyroRate = G2I(torsoLink->GetWorldAngularVel());
 
       // update agent's percept acceleration

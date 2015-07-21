@@ -225,6 +225,27 @@ class Agent
     return std::to_string(this->uNum) + "_" + this->team->name;
   }
 
+  /// \brief Checks if agent name is valid
+  /// \param[in] _agentName Agent name string to check
+  /// \param[out] _uNum uNum parsed from agent name
+  /// \param[out] _teamName Name of team parsed from agent name
+  /// \return True if agent name is valid
+  public: static bool CheckAgentName(const std::string &_agentName,
+    int &_uNum, std::string &_teamName)
+  {
+    try
+    {
+      size_t sepIndex = _agentName.find_first_of("_");
+      _uNum = std::stoi(_agentName.substr(0, sepIndex));
+      _teamName = _agentName.substr(0, sepIndex + 1);
+      return true;
+    }
+    catch (const std::exception &exc)
+    {
+      return false;
+    }
+  }
+
   /// \brief Flag whether player is goalkeeper
   public: bool IsGoalKeeper()
   {

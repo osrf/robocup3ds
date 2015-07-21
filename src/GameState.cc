@@ -78,6 +78,7 @@ bool   GameState::restrictVision = true;
 const double GameState::counterCycleTime = 0.02;
 const double GameState::dropBallRadiusMargin = 0.5;
 const double GameState::beamNoise = 0.1;
+const double GameState::ballContactInterval = 0.1;
 
 /////////////////////////////////////////////////
 GameState::GameState():

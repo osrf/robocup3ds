@@ -49,6 +49,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// gazebo world
   private: void UpdateEffector();
 
+  /// \brief Check if ball is colliding with any player model
+  private: void UpdateBallContactHistory();
+
   /// \brief Sync the gameState with the gazebo world
   private: void UpdateGameState();
 
@@ -80,8 +83,12 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Pointer to buffer for sending messages to server;
   private: char* buffer;
 
+  /// \brief Gazebo simulation time when last update occurred
+  private: double lastUpdateTime;
+
   /// \brief Size of buffer in bytes
   private: static const int kBufferSize = 16384;
+
 };
 
 #endif

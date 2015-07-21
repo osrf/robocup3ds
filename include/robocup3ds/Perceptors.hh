@@ -47,6 +47,11 @@ class Perceptor
   /// \brief Method used to get view frustum
   public: std::vector <ignition::math::Plane<double>> &GetViewFrustum();
 
+  /// \brief Set the transformation matrix from global to local
+  /// coordinates for an agent
+  /// \param[in] _agent Agent object
+  public: void SetG2LMat(const Agent &_agent);
+
   /// \brief Function to update all relevant agents perception info
   public: void Update();
 
@@ -101,16 +106,20 @@ class Perceptor
   private: ignition::math::Vector3<double>
     addNoise(const ignition::math::Vector3<double> &_pt) const;
 
-  /// \brief Set the transformation matrix from global to local
-  /// coordinates for an agent
-  /// \param[in] _agent Agent object
-  public: void SetG2LMat(const Agent &_agent);
+  /// \brief Indicates whether current cycle requires updating perception and
+  /// sending to server
+  /// \return True if current cycle is right cycle to update perception
+  private: bool UpdatePerception() const;
 
   /// \Brief Size of buffer used to store message sent to server
   // public: static const int kBufferSize;
 
   /// \brief Distance of message where it still can be heard
   public: static const double kHearDist;
+
+  /// \brief Frequency at which we update the visualization
+  /// (every x gamestate cycles)
+  public: static int updateVisualFreq;
 
   /// \brief Flag whether to add noise to observations or not
   public: static bool useNoise;

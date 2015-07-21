@@ -35,7 +35,7 @@ KickOffState::KickOffState(const std::string &_name,
 void KickOffState::Initialize()
 {
   this->gameState->touchBallKickoff = NULL;
-  this->gameState->ballContactHistory.clear();
+  this->gameState->ClearBallContactHistory();
   for (auto &team : this->gameState->teams)
   {
     team->canScore = false;

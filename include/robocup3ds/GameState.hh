@@ -564,8 +564,13 @@ class GameState
   /// \brief Safety margin when beaming players during dropball
   public: static const double dropBallRadiusMargin;
 
-  /// \ brief Noise added to beams
+  /// \brief Noise added to beams
   public: static const double beamNoise;
+
+  /// \brief If less than ballContactInterval time has passed since the last
+  /// ball contact by the same agent, then it will not count as a new ball
+  /// contact (the time of the last ball contact is update instead)
+  public: static const double ballContactInterval;
 
   /// \brief Pointer to configuration variables
   public: static std::shared_ptr<std::map<const std::string,

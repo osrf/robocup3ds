@@ -39,6 +39,7 @@ class PerceptorTest : public ::testing::Test
     {
       this->gameState = new GameState();
       this->perceptor = new Perceptor(gameState);
+      this->perceptor->updateVisualFreq = 1;
     }
 
   protected:
@@ -334,7 +335,7 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
   perceptor->SetG2LMat(agent1);
   agent2.cameraPos.Set(1, 1, 0);
   agent2.selfBodyMap["HEAD"] = agent2.cameraPos +
-    math::Vector3<double>(0, 0, 1);
+                               math::Vector3<double>(0, 0, 1);
   agent2.selfBodyMap["BODY"] = agent2.cameraPos;
   AgentId agent2Id(1, "red");
 
