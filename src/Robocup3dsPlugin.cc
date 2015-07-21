@@ -199,7 +199,7 @@ void Robocup3dsPlugin::UpdateGameState()
       if (agent.updatePose || agent.status == Agent::Status::STOPPED)
       { continue; }
       const auto &model = this->world->GetModel(agent.GetName());
-      auto &modelPose = model->GetWorldPose();
+      const auto &modelPose = model->GetWorldPose();
       agent.pos = G2I(modelPose.pos);
       agent.rot = G2I(modelPose.rot);
     }
@@ -227,7 +227,7 @@ void Robocup3dsPlugin::UpdateGameState()
     for (auto &agent : team->members)
     {
       const auto &model = this->world->GetModel(agent.GetName());
-      auto &modelPose = model->GetWorldPose();
+      const auto &modelPose = model->GetWorldPose();
 
       // if agent is in STOPPED state but somehow the model drifts from its
       // gamestate position, it gets moved back
