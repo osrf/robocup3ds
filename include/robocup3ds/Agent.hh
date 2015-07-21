@@ -253,9 +253,6 @@ class Agent
     return this->uNum == 1;
   }
 
-  /// \brief Flag whether to delete agent model from gazebo world
-  public: bool deleteModel;
-
   /// \brief Agent socket id
   public: int socketID;
 

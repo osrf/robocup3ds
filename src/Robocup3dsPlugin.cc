@@ -196,7 +196,7 @@ void Robocup3dsPlugin::UpdateGameState()
     for (auto &agent : team->members)
     {
       // set agent pose in gameState
-      if (agent.updatePose)
+      if (agent.updatePose || agent.status == Agent::Status::STOPPED)
       { continue; }
       const auto &model = this->world->GetModel(agent.GetName());
       auto &modelPose = model->GetWorldPose();
@@ -226,23 +226,32 @@ void Robocup3dsPlugin::UpdateGameState()
   {
     for (auto &agent : team->members)
     {
-      if (!agent.updatePose)
-      { continue; }
       const auto &model = this->world->GetModel(agent.GetName());
+      auto &modelPose = model->GetWorldPose();
+
+      // if agent is in STOPPED state but somehow the model drifts from its
+      // gamestate position, it gets moved back
+      bool correctModelDrift = agent.status == Agent::Status::STOPPED
+                               && agent.pos.Distance(G2I(modelPose.pos))
+                               > NaoRobot::torsoHeight;
+
+      if (!agent.updatePose && !correctModelDrift)
+      { continue; }
+
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
       model->SetWorldPose(I2G(pose));
       agent.updatePose = false;
 
-      if (agent.status == Agent::Status::STOPPED
-          && agent.prevStatus == Agent::Status::RELEASED)
+      if ((agent.status == Agent::Status::STOPPED
+           && agent.prevStatus == Agent::Status::RELEASED)
+          || correctModelDrift)
       {
-        // reset joint angles, velocity, and acceleration to zero,
-        // restrict movement
-      }
-      else if (agent.status == Agent::Status::RELEASED
-               && agent.prevStatus == Agent::Status::STOPPED)
-      {
-        // allow joints to move again
+        // reset joint angles, velocity, and acceleration to zero
+        model->ResetPhysicsStates();
+        for (const auto &joint : model->GetJoints())
+        {
+          joint->Reset();
+        }
       }
     }
   }
