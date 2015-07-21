@@ -123,7 +123,7 @@ void Robocup3dsPlugin::UpdateEffector()
   }
 
   // set joint velocities of agent model
-  for (auto &team : this->gameState->teams)
+  for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
     {
@@ -142,7 +142,7 @@ void Robocup3dsPlugin::UpdateEffector()
 void Robocup3dsPlugin::UpdateBallContactHistory()
 {
   std::map<std::string, Team::Side> teamSide;
-  for (auto &team : this->gameState->teams)
+  for (const auto &team : this->gameState->teams)
   {
     teamSide[team->name] = team->side;
   }
@@ -152,7 +152,7 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
   const auto &ball = this->world->GetModel("ball_model");
   const auto &ballPose = ball->GetWorldPose();
   const auto &ballLink = ball->GetLink("ball_link");
-  for (auto &collision : ballLink->GetCollisions())
+  for (const auto &collision : ballLink->GetCollisions())
   {
     const auto &model = collision->GetModel();
     // make sure that model belongs to an agent
@@ -191,7 +191,7 @@ void Robocup3dsPlugin::UpdateGameState()
   this->gameState->SetGameTime(this->world->GetSimTime().Double());
 
   // use models in gazebo world to update agents and perception info
-  for (auto &team : this->gameState->teams)
+  for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
     {
@@ -204,6 +204,7 @@ void Robocup3dsPlugin::UpdateGameState()
       agent.rot = G2I(modelPose.rot);
     }
   }
+
   // find ball in gazebo world and use it to update gameState
   const auto &ball = this->world->GetModel("ball_model");
   auto &ballPose = ball->GetWorldPose();
@@ -221,7 +222,7 @@ void Robocup3dsPlugin::UpdateGameState()
   this->gameState->Update();
 
   // use gameState agents pose to update gazebo world agent pose
-  for (auto &team : this->gameState->teams)
+  for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
     {
@@ -245,6 +246,7 @@ void Robocup3dsPlugin::UpdateGameState()
       }
     }
   }
+
   // use gameState ball to update gazebo world ball
   if (this->gameState->updateBallPose)
   {
@@ -261,7 +263,7 @@ void Robocup3dsPlugin::UpdateGameState()
 void Robocup3dsPlugin::UpdatePerceptor()
 {
   // update perception related info using gazebo world model
-  for (auto &team : this->gameState->teams)
+  for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
     {
@@ -310,7 +312,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
   this->perceptor->Update();
 
   // send messages to server
-  for (auto &team : this->gameState->teams)
+  for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
     {
