@@ -47,11 +47,7 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   gameState(std::make_shared<GameState>()),
   effector(std::make_shared<Effector>(this->gameState.get())),
   perceptor(std::make_shared<Perceptor>(this->gameState.get())),
-  server(std::make_shared<RCPServer>(Robocup3dsPlugin::kPort, this->effector,
-                                     &Effector::OnConnection,
-                                     this->effector.get(),
-                                     &Effector::OnDisconnection,
-                                     this->effector.get())),
+  server(std::make_shared<RCPServer>(Robocup3dsPlugin::kPort, this->effector)),
   lastUpdateTime(-GameState::counterCycleTime)
 {
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];

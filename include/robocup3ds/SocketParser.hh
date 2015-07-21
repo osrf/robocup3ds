@@ -37,6 +37,14 @@ class SocketParser
   /// \param[in] _socket Socket to read.
   /// \return True when data was succesfully parsed or false otherwise.
   public: virtual bool Parse(const int _socket) = 0;
+
+  /// \brief Callback function when new connection is created
+  /// \param[in] _socket Socket to read.
+  public: virtual void OnConnection(const int _socket) = 0;
+
+  /// \brief Callback function when existing connection is disconnected
+  /// \param[in] _socket Socket to read.
+  public: virtual void OnDisconnection(const int _socket) = 0;
 };
 
 #endif /* _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_ */
