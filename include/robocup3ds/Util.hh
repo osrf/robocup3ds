@@ -50,8 +50,8 @@ gazebo::math::Quaternion I2G(const ignition::math::Quaternion<double> _q)
 /// \return Ignition math Quaternion
 ignition::math::Quaternion<double> G2I(const gazebo::math::Quaternion _q)
 {
-  auto temp = _q.GetAsEuler();
-  return ignition::math::Quaternion<double>(temp[0], temp[1], temp[2]);
+  auto qEuler = _q.GetAsEuler();
+  return ignition::math::Quaternion<double>(qEuler[0], qEuler[1], qEuler[2]);
 }
 
 /// \brief Converts from ignition math Pose to gazebo math Pose

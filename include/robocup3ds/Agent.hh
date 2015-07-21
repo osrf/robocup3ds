@@ -27,6 +27,13 @@
 
 class Agent;
 
+/// \brief Typedef for map of agent's body parts and positions
+typedef std::map<std::string, ignition::math::Vector3<double>>
+  AgentBodyMap;
+
+/// \brief Typedef for uNum, teamName pairs for identifying agents
+typedef std::pair<int, std::string> AgentId;
+
 /// \brief Team class for GameState
 class Team
 {
@@ -83,13 +90,6 @@ class Team
   /// \brief Can score goal or not
   public: bool canScore;
 };
-
-/// \brief Typedef for map of agent's body parts and positions
-typedef std::map<std::string, ignition::math::Vector3<double>>
-  AgentBodyMap;
-
-/// \brief Typedef for uNum, teamName pairs for identifying agents
-typedef std::pair<int, std::string> AgentId;
 
 /// \brief Container that contains info for hear perceptor
 class AgentHear
@@ -175,12 +175,12 @@ class AgentActions
 /// \brief Agent class for GameState
 class Agent
 {
-  /// \brief Enum for the agent status
+  /// \brief Enum for the agent status and whether movement is allowed
   public: enum class Status
   {
-    /// \brief Agent is not allowed to move
+    /// \brief Flag to release Agent joints
     RELEASED,
-    /// \brief Agent is allowed to move
+    /// \brief Flag to reset Agent joints to default and make stiff
     STOPPED
   };
 
@@ -193,6 +193,7 @@ class Agent
   {
     this->socketID = -1;
     this->status = Status::RELEASED;
+    this->prevStatus = this->status;
     this->updatePose = false;
     this->inPenaltyBox = false;
     this->timeImmoblized = 0;
@@ -266,6 +267,9 @@ class Agent
 
   /// \brief Agent status
   public: Status status;
+
+  /// \brief Agent status in prev cycle
+  public: Status prevStatus;
 
   /// \brief Agent position
   public: ignition::math::Vector3<double> pos;

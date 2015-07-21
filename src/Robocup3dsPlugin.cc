@@ -127,6 +127,8 @@ void Robocup3dsPlugin::UpdateEffector()
   {
     for (auto &agent : team->members)
     {
+      if (agent.status == Agent::Status::STOPPED)
+      { continue; }
       auto model = this->world->GetModel(agent.GetName());
       for (auto &kv : agent.action.jointEffectors)
       {
@@ -229,6 +231,18 @@ void Robocup3dsPlugin::UpdateGameState()
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
       model->SetWorldPose(I2G(pose));
       agent.updatePose = false;
+
+      if (agent.status == Agent::Status::STOPPED
+          && agent.prevStatus == Agent::Status::RELEASED)
+      {
+        // reset joint angles, velocity, and acceleration to zero,
+        // restrict movement
+      }
+      else if (agent.status == Agent::Status::RELEASED
+               && agent.prevStatus == Agent::Status::STOPPED)
+      {
+        // allow joints to move again
+      }
     }
   }
   // use gameState ball to update gazebo world ball

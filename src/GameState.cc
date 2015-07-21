@@ -246,6 +246,7 @@ void GameState::ReleasePlayers()
   {
     for (auto &agent : team->members)
     {
+      agent.prevStatus = agent.status;
       agent.status = Agent::Status::RELEASED;
     }
   }
@@ -258,6 +259,7 @@ void GameState::StopPlayers()
   {
     for (auto &agent : team->members)
     {
+      agent.prevStatus = agent.status;
       agent.status = Agent::Status::STOPPED;
     }
   }

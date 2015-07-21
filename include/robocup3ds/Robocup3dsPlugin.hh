@@ -88,7 +88,6 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Size of buffer in bytes
   private: static const int kBufferSize = 16384;
-
 };
 
 #endif
