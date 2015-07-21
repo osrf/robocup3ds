@@ -68,17 +68,17 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Pointer to sdf
   private: sdf::ElementPtr sdf;
 
-  /// \brief Pointer to server
-  private: RCPServer *server;
-
   /// \brief Pointer to GameState object
-  private: GameState *gameState;
-
-  /// \brief Pointer to Perceptor object
-  private: Perceptor *perceptor;
+  private: std::shared_ptr<GameState> gameState;
 
   /// \brief Pointer to Effector object;
-  private: Effector *effector;
+  private: std::shared_ptr<Effector> effector;
+
+  /// \brief Pointer to Perceptor object
+  private: std::shared_ptr<Perceptor> perceptor;
+
+  /// \brief Pointer to server
+  private: std::shared_ptr<RCPServer> server;
 
   /// \brief Pointer to buffer for sending messages to server;
   private: char* buffer;
@@ -88,6 +88,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Size of buffer in bytes
   private: static const int kBufferSize = 16384;
+
+  /// \brief Port to use
+  private: static const int kPort = 3100;
 };
 
 #endif

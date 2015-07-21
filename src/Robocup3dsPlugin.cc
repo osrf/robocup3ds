@@ -35,6 +35,7 @@
 #include "robocup3ds/Perceptors.hh"
 #include "robocup3ds/Robocup3dsPlugin.hh"
 #include "robocup3ds/Server.hh"
+#include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/Util.hh"
 
 using namespace gazebo;
@@ -43,24 +44,23 @@ GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::Robocup3dsPlugin():
+  gameState(std::make_shared<GameState>()),
+  effector(std::make_shared<Effector>(this->gameState.get())),
+  perceptor(std::make_shared<Perceptor>(this->gameState.get())),
+  server(std::make_shared<RCPServer>(Robocup3dsPlugin::kPort, this->effector,
+                                     &Effector::OnConnection,
+                                     this->effector.get(),
+                                     &Effector::OnDisconnection,
+                                     this->effector.get())),
   lastUpdateTime(-GameState::counterCycleTime)
 {
-  this->server = new RCPServer();
-  this->effector = new Effector(this->gameState);
-  this->gameState = new GameState();
-  this->perceptor = new Perceptor(this->gameState);
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
-
   this->server->Start();
 }
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::~Robocup3dsPlugin()
 {
-  delete this->server;
-  delete this->effector;
-  delete this->gameState;
-  delete this->perceptor;
   delete[] this->buffer;
 }
 
