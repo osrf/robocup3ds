@@ -4,7 +4,7 @@ Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/
 
 
 set (sources
-  EffectorParser.cc
+  Effector.cc
   Robocup3dsPlugin.cc
   Server.cc
 )

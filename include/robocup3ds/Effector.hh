@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_
-#define _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_EFFECTOR_HH_
+#define _GAZEBO_ROBOCUP3DS_EFFECTOR_HH_
 
 #include <cstring>
 #include <map>
@@ -33,7 +33,7 @@
 /// to receive messages from the socket.Retrieving effectors values
 /// from received messages have been implemented using s-expression
 /// library.
-class EffectorParser: public SocketParser
+class Effector: public SocketParser
 {
   /// \brief SceneMsg class contains information of scene message.
   class SceneMsg
@@ -89,10 +89,10 @@ class EffectorParser: public SocketParser
   };
 
   /// \brief Class constructor.
-  public: EffectorParser();
+  public: Effector();
 
   /// \brief Class destructor.
-  public: virtual ~EffectorParser() = default;
+  public: virtual ~Effector() = default;
 
   /// \brief Used to read incoming message received by socket.
   /// \param[in] _socket, Socket of the client should be assigned by server.
@@ -230,4 +230,4 @@ class EffectorParser: public SocketParser
   private: mutable std::mutex mutex;
 
 };
-#endif /* _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_ */
+#endif /* _GAZEBO_ROBOCUP3DS_EFFECTOR_HH_ */

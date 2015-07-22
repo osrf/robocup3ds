@@ -21,9 +21,10 @@
 #include <mutex>
 #include <thread>
 #include "gtest/gtest.h"
+
+#include "../include/robocup3ds/Effector.hh"
 #include "robocup3ds/Server.hh"
 #include "robocup3ds/SocketParser.hh"
-#include "robocup3ds/EffectorParser.hh"
 
 /// \brief This test uses s-expression messages belong to a sample RoboCup
 /// agent communication.
@@ -104,7 +105,7 @@ void receiverClient(const int _port)
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
   cv.notify_one();
 
-  auto parser = std::make_shared<EffectorParser>();
+  auto parser = std::make_shared<Effector>();
 
   // Test whether parser receives whole s-expression messages
   // from client socket or not
@@ -176,12 +177,12 @@ void receiverClient(const int _port)
 TEST(Server, Parser)
 {
   // create parser object
-  auto parser = std::make_shared <EffectorParser>();
+  auto parser = std::make_shared <Effector>();
 
   // create server object with parser object as input
   RCPServer server(kPort, parser,
-      &EffectorParser::OnConnection, parser.get(),
-      &EffectorParser::OnDisconnection, parser.get());
+      &Effector::OnConnection, parser.get(),
+      &Effector::OnDisconnection, parser.get());
 
 
   server.Start();

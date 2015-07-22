@@ -19,10 +19,10 @@
 #include <netinet/in.h>
 #include <mutex>
 #include <sys/socket.h>
-#include "robocup3ds/EffectorParser.hh"
+#include "robocup3ds/Effector.hh"
 
 //////////////////////////////////////////////////
-EffectorParser::EffectorParser()
+Effector::Effector()
 {
   //Initialize global variables
   this->socketID = 0;
@@ -30,7 +30,7 @@ EffectorParser::EffectorParser()
 }
 
 //////////////////////////////////////////////////
-bool EffectorParser::Parse(int _socket)
+bool Effector::Parse(int _socket)
 {
   char buffer[this->kBufferSize];
 
@@ -83,7 +83,7 @@ bool EffectorParser::Parse(int _socket)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::ParseMessage(const std::string &_msg)
+void Effector::ParseMessage(const std::string &_msg)
 {
   char linebuf[36000];
   sexp_t *exp;
@@ -128,7 +128,7 @@ void EffectorParser::ParseMessage(const std::string &_msg)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::ParseSexp(sexp_t *_exp)
+void Effector::ParseSexp(sexp_t *_exp)
 {
   // Extract the first element of a s-expression
   char *v;
@@ -186,7 +186,7 @@ void EffectorParser::ParseSexp(sexp_t *_exp)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::ParseHingeJoint(sexp_t *_exp)
+void Effector::ParseHingeJoint(sexp_t *_exp)
 {
   std::string name;
   double effector;
@@ -199,7 +199,7 @@ void EffectorParser::ParseHingeJoint(sexp_t *_exp)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::ParseScene(sexp_t *_exp)
+void Effector::ParseScene(sexp_t *_exp)
 {
   int type = 0;
   std::string address;
@@ -211,7 +211,7 @@ void EffectorParser::ParseScene(sexp_t *_exp)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::ParseBeam(sexp_t *_exp)
+void Effector::ParseBeam(sexp_t *_exp)
 {
   double x, y, z = 0;
 
@@ -225,7 +225,7 @@ void EffectorParser::ParseBeam(sexp_t *_exp)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::ParseInit(sexp_t *_exp)
+void Effector::ParseInit(sexp_t *_exp)
 {
   int playerNum = 0;
 
@@ -253,14 +253,14 @@ void EffectorParser::ParseInit(sexp_t *_exp)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::OnConnection(const int _socket)
+void Effector::OnConnection(const int _socket)
 {
   this->socketID = _socket;
   this->newConnectionDetected = true;
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::OnDisconnection(const int _socket)
+void Effector::OnDisconnection(const int _socket)
 {
   // If the socket belongs to an initialized agent, remove that agent
   if(this->socketIDAgentMap.find(_socket) != this->socketIDAgentMap.end())
@@ -276,7 +276,7 @@ void EffectorParser::OnDisconnection(const int _socket)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::Update(int _socket)
+void Effector::Update(int _socket)
 {
   // clear data structures
   this->beamEffectors.clear();
@@ -343,7 +343,7 @@ void EffectorParser::Update(int _socket)
 }
 
 //////////////////////////////////////////////////
-bool EffectorParser::GetSceneInformation(std::string &_msg, int &_robotType)
+bool Effector::GetSceneInformation(std::string &_msg, int &_robotType)
 {
   if (!this->sceneEffectors.empty())
   {
@@ -355,7 +355,7 @@ bool EffectorParser::GetSceneInformation(std::string &_msg, int &_robotType)
 }
 
 //////////////////////////////////////////////////
-bool EffectorParser::GetInitInformation(std::string &_teamName,
+bool Effector::GetInitInformation(std::string &_teamName,
     int &_playerNumber)
 {
   if (!this->initEffectors.empty())
@@ -368,7 +368,7 @@ bool EffectorParser::GetInitInformation(std::string &_teamName,
 }
 
 //////////////////////////////////////////////////
-bool EffectorParser::GetBeamInformation(double &_x, double &_y, double &_z)
+bool Effector::GetBeamInformation(double &_x, double &_y, double &_z)
 {
   if (!this->initEffectors.empty())
   {
@@ -382,7 +382,7 @@ bool EffectorParser::GetBeamInformation(double &_x, double &_y, double &_z)
 }
 
 //////////////////////////////////////////////////
-bool EffectorParser::GetJointEffector(const std::string &_jointName,
+bool Effector::GetJointEffector(const std::string &_jointName,
     double &_targetSpeed)
 {
   std::map<std::string, double>::const_iterator it =
