@@ -15,9 +15,9 @@
  *
  */
 
-#include <netdb.h>
 #include <chrono>
 #include <condition_variable>
+#include <netdb.h>
 #include <mutex>
 #include <string>
 #include <thread>
