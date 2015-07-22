@@ -117,10 +117,16 @@ bool createClient(const int _port, int &_socket)
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   servaddr.sin_port = htons(_port);
 
-  if (connect(_socket, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
+  const int kMaxConnections = 5;
+  int tries = 0;
+  while (connect(_socket, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
   {
+    tries++;
     std::cerr << "createClient::connect() error" << std::endl;
-    return false;
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    if (tries == kMaxConnections)
+      return false;
   }
 
   return true;
@@ -208,6 +214,7 @@ TEST(RCPServer, NewClient)
     &TrivialSocketParser::OnDisconnection, parser.get());
 
   server.Start();
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   std::thread clientThread(&senderClient, kPort);
 
   // Wait some time until the client sends the request.
@@ -247,6 +254,7 @@ TEST(RCPServer, Send)
     &TrivialSocketParser::OnDisconnection, parser.get());
 
   server.Start();
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   std::thread clientThread(&receiverClient, kPort + 1);
 
   // Wait some time until the client sends the request.
