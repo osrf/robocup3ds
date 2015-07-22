@@ -18,6 +18,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <netinet/in.h>
+#include <cstdlib>
 #include <map>
 #include <memory>
 #include <gazebo/gazebo.hh>
@@ -35,10 +36,14 @@
 #include "robocup3ds/Perceptors.hh"
 #include "robocup3ds/Robocup3dsPlugin.hh"
 #include "robocup3ds/Server.hh"
+#include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/Util.hh"
 
 using namespace gazebo;
+
+const int Robocup3dsPlugin::kBufferSize = 16384;
+const int Robocup3dsPlugin::kPort       = 3100;
 
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
@@ -126,7 +131,7 @@ void Robocup3dsPlugin::UpdateEffector()
     {
       if (agent.status == Agent::Status::STOPPED)
       { continue; }
-      auto model = this->world->GetModel(agent.GetName());
+      const auto &model = this->world->GetModel(agent.GetName());
       for (auto &kv : agent.action.jointEffectors)
       {
         model->GetJoint(kv.first)->SetVelocity(0, kv.second);
@@ -146,9 +151,9 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
   int uNum;
   std::string teamName;
 
-  const auto &ball = this->world->GetModel("ball_model");
+  const auto &ball = this->world->GetModel(SoccerField::ballName);
   const auto &ballPose = ball->GetWorldPose();
-  const auto &ballLink = ball->GetLink("ball_link");
+  const auto &ballLink = ball->GetLink(SoccerField::ballLinkName);
   for (const auto &collision : ballLink->GetCollisions())
   {
     const auto &model = collision->GetModel();
@@ -203,7 +208,7 @@ void Robocup3dsPlugin::UpdateGameState()
   }
 
   // find ball in gazebo world and use it to update gameState
-  const auto &ball = this->world->GetModel("ball_model");
+  const auto &ball = this->world->GetModel(SoccerField::ballName);
   auto &ballPose = ball->GetWorldPose();
   if (!this->gameState->updateBallPose)
   {

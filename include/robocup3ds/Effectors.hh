@@ -217,7 +217,7 @@ class Effector: public SocketParser
   private: GameState *const gameState;
 
   /// \brief Maximum size of each message received.
-  private: static const int kBufferSize = 16384;
+  private: static const int kBufferSize;
 };
 
 #endif /* _GAZEBO_ROBOCUP3DS_EFFECTOR_HH_ */

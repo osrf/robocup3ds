@@ -135,6 +135,10 @@ namespace SoccerField
     {"G2L", ignition::math::Vector3<double>(-15, -1.05, 0.8)},
     {"G2R", ignition::math::Vector3<double>(15, -1.05, 0.8)}
   };
+
+  static const std::string ballName = "soccer_ball";
+
+  static const std::string ballLinkName = "soccer_ball_link";
 }
 
 #endif

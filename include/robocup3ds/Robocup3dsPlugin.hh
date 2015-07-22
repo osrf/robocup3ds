@@ -87,10 +87,10 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: double lastUpdateTime;
 
   /// \brief Size of buffer in bytes
-  private: static const int kBufferSize = 16384;
+  private: static const int kBufferSize;
 
   /// \brief Port to use
-  private: static const int kPort = 3100;
+  private: static const int kPort;
 };
 
 #endif

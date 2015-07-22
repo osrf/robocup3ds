@@ -28,6 +28,8 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Nao.hh"
 
+const int Effector::kBufferSize = 16384;
+
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
   newConnectionDetected(false),
