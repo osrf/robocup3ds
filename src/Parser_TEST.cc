@@ -113,9 +113,6 @@ void receiverClient(const int _port)
   // Test s-expression messages received by Parse()
   EXPECT_EQ(parser->message.str(), content);
 
-  // Perform information retrieving procedure and update data structures.
-  parser->Update();
-
   // Test Beam effector values
   std::string sceneAddress;
   int rType;

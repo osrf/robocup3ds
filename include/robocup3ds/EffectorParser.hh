@@ -99,9 +99,11 @@ class EffectorParser: public SocketParser
   /// \return True when success or false otherwise.
   public: bool Parse(const int _socket);
 
-  /// \brief Update obtained effectors values and
-  ///  then save in empty data structures.
-  public: void Update();
+  /// \brief Update obtained effectors values using s-expression library, and
+  /// save them in empty data structures. It finds the agent belongs
+  /// to the socket_ID then it updates agent's effectors in Agent Class.
+  /// \param[in]  _socket. Socket assigned in Parse().
+  public: void Update(int _socket);
 
   /// \brief Interface to access to scene information in data structure.
   /// \param[out] _rsgAddress RSG file address in computer belongs to the robot.
@@ -161,7 +163,7 @@ class EffectorParser: public SocketParser
 
   /// \brief Used in server class constructor.
   /// \param[in] the socket used for for server client communication.
-  public: void OnDisconnection(const int /*_socket*/);
+  public: void OnDisconnection(const int _socket);
 
   /// \brief Main procedure of extracting information
   /// in pile of S-expressions using the expression library.
@@ -202,6 +204,11 @@ class EffectorParser: public SocketParser
   /// \brief Message received by socket and Parse().
   public: std::stringstream message;
 
+  /// \brief Data Structure used to store Message received by sockets.
+  /// Here, the key of the map is the Socket IDs which is assigned in
+  /// OnConnection()
+  public: std::map<int, InitMsg> socketIDAgentMap;
+
   /// \brief Data Structure used to store joints effector values.
   /// here, the key of the map is the Joints names which its descriptions
   /// can be found in the GetJointEffector() description.
@@ -218,6 +225,9 @@ class EffectorParser: public SocketParser
 
   /// \brief data structure used for beam information.
   private: std::vector<BeamMsg> beamEffectors;
+
+  /// \brief Protect concurrent access.
+  private: mutable std::mutex mutex;
 
 };
 #endif /* _GAZEBO_ROBOCUP3DS_EFFECTORPARSER_HH_ */

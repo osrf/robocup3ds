@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <netinet/in.h>
+#include <mutex>
 #include <sys/socket.h>
 #include "robocup3ds/EffectorParser.hh"
 
@@ -24,7 +25,7 @@
 EffectorParser::EffectorParser()
 {
   //Initialize global variables
-  this->socketID=0;
+  this->socketID = 0;
   this->message.str("");
 }
 
@@ -52,6 +53,9 @@ bool EffectorParser::Parse(int _socket)
   memcpy(&n, buffer, 4);
   totalBytes = ntohl(n);
 
+  //Avoiding race condition
+  std::lock_guard<std::mutex> lock(this->mutex);
+
   // Read the message using the size of actual s-expression message.
   while (bytesRead < totalBytes)
   {
@@ -67,8 +71,13 @@ bool EffectorParser::Parse(int _socket)
 
   // Clear the message
   this->message.str("");
+
   // Store the received s-expression messages
   this->message << std::string(buffer);
+
+  // Perform information retrieving procedure and update data structures.
+  // Also find the Agent belong to the socket in order to update its containers.
+  Update(_socket);
 
   return true;
 }
@@ -251,13 +260,23 @@ void EffectorParser::OnConnection(const int _socket)
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::OnDisconnection(const int /*_socket*/)
+void EffectorParser::OnDisconnection(const int _socket)
 {
+  // If the socket belongs to an initialized agent, remove that agent
+  if(this->socketIDAgentMap.find(_socket) != this->socketIDAgentMap.end())
+  {
+    /* uncomment after integration
+      gameState->RemoveAgent(
+        this->socketIDAgentMap.find(_socket)->second.playerNumber,
+        this->socketIDAgentMap.find(_socket)->second.teamName);
+    */
+  }
+
   this->newDisconnectionDetected = true;
 }
 
 //////////////////////////////////////////////////
-void EffectorParser::Update()
+void EffectorParser::Update(int _socket)
 {
   // clear data structures
   this->beamEffectors.clear();
@@ -267,6 +286,59 @@ void EffectorParser::Update()
 
   // Update Effectors using message received by Parse()
   ParseMessage(this->message.str());
+
+  int playerNumber;
+  std::string teamName;
+
+  // If init message received, and the agent belongs to that message had not been
+  // initialized then initialize that agent
+  if ( this->GetInitInformation(teamName, playerNumber)
+      && socketIDAgentMap.find(_socket) == socketIDAgentMap.end())
+  {
+    // Add this agent and its socket to the Map to store the initialized agents
+    this->socketIDAgentMap.insert(
+        std::map <int, InitMsg> ::value_type(_socket, initEffectors.front()));
+
+    // gameState->AddAgent(playerNumber,teamName); uncomment after integration
+  }
+
+
+  // If the agent has been already initialized check update its effector
+  if(this->socketIDAgentMap.find(_socket) != this->socketIDAgentMap.end())
+  {
+    // Retrieve the team name and player number for the agent belongs to the socket
+    playerNumber = this->socketIDAgentMap.find(_socket)->second.playerNumber;
+    teamName = this->socketIDAgentMap.find(_socket)->second.teamName;
+
+    // update joints effector of the agent in GameState
+
+    /* Uncomment after merging with game State
+     for (const auto &team : gameState->teams)
+    {
+      if (team->name == teamname)
+      {
+        for ( auto &agent : team->members)
+        {
+          if (agent.uNum == playerNumber)
+          {
+            agent.action=this->jointEffectors;
+          }
+        }
+      }
+    }
+    */
+
+    // Update beam information for the agent
+
+    double x, y, z;
+
+    if (this->GetBeamInformation(x, y, z ))
+    {
+      // Uncomment after merging with game State
+      //gameState->BeamAgent(playerNumber, teamName , x , y, z);
+    }
+  }
+
 }
 
 //////////////////////////////////////////////////
