@@ -299,7 +299,8 @@ void EffectorParser::Update(int _socket)
     this->socketIDAgentMap.insert(
         std::map <int, InitMsg> ::value_type(_socket, initEffectors.front()));
 
-    // gameState->AddAgent(playerNumber,teamName); uncomment after integration
+    //  add the agent to the Gamestate (uncomment after integration)
+    // gameState->AddAgent(playerNumber,teamName);
   }
 
 

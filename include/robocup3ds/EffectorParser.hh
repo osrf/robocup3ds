@@ -25,8 +25,8 @@
 #include <string>
 #include <vector>
 #include "robocup3ds/SocketParser.hh"
-#include "../../src/sexpLibrary/sexp.h"
-#include "../../src/sexpLibrary/sexp_ops.h"
+#include "../../lib/sexpLibrary/sexp.h"
+#include "../../lib/sexpLibrary/sexp_ops.h"
 
 /// \brief This is a Effector class. It implemented Parse() method
 /// inherited from SocketParser class. Parse() method has been used

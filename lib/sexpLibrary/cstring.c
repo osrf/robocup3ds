@@ -35,28 +35,30 @@ LA-CC-04-094
 @endcond
 **/
 /**
- * Implementation of stuff in cstring.h to make ron happy 
+ * Implementation of stuff in cstring.h to make ron happy
  */
-#include "cstring.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "cstring.h"
 #include "sexp_memory.h"
 #include "sexp.h"
 
 /**
- * growth size for cstrings -- default is 8k.  use sgrowsize() to adjust. 
+ * growth size for cstrings -- default is 8k.  use sgrowsize() to adjust.
  */
 static size_t cstring_growsize = 8192;
 
-void sgrowsize(size_t s) {
-  if (s < 1) 
-    return;
+void sgrowsize(size_t s)
+{
+  if (s < 1)
+  { return; }
 
   cstring_growsize = s;
 }
 
-CSTRING *snew(size_t s) {
+CSTRING *snew(size_t s)
+{
   CSTRING *cs;
 
 #ifdef __cplusplus
@@ -64,7 +66,8 @@ CSTRING *snew(size_t s) {
 #else
   cs = sexp_malloc(sizeof(CSTRING));
 #endif
-  if (cs == NULL) {
+  if (cs == NULL)
+  {
     sexp_errno = SEXP_ERR_MEMORY;
     return NULL;
   }
@@ -73,12 +76,13 @@ CSTRING *snew(size_t s) {
   cs->curlen = 0;
 
 #ifdef __cplusplus
-  cs->base = (char *)sexp_calloc(sizeof(char),s);
+  cs->base = (char *)sexp_calloc(sizeof(char), s);
 #else
-  cs->base = sexp_calloc(sizeof(char),s);
+  cs->base = sexp_calloc(sizeof(char), s);
 #endif
-  if (cs->base == NULL) {
-    sexp_free(cs,sizeof(CSTRING));
+  if (cs->base == NULL)
+  {
+    sexp_free(cs, sizeof(CSTRING));
     sexp_errno = SEXP_ERR_MEMORY;
     return NULL;
   }
@@ -86,38 +90,43 @@ CSTRING *snew(size_t s) {
   return cs;
 }
 
-CSTRING *sadd(CSTRING *s, char *a) {
+CSTRING *sadd(CSTRING *s, char *a)
+{
   int alen;
   char *newbase;
 
   /* no string, so bail */
-  if (s == NULL) {
+  if (s == NULL)
+  {
     return NULL;
   }
 
   /* nothing to add, return s */
-  if (a  == NULL) {
+  if (a  == NULL)
+  {
     return s;
   }
 
   alen = strlen(a);
 
-  if (s->curlen + alen >= s->len) {
+  if (s->curlen + alen >= s->len)
+  {
 #ifdef __cplusplus
     newbase = (char *)sexp_realloc(s->base,
-                                   s->len+cstring_growsize+alen,
+                                   s->len + cstring_growsize + alen,
                                    s->len);
 #else
     newbase = sexp_realloc(s->base,
-                           s->len+cstring_growsize+alen,
+                           s->len + cstring_growsize + alen,
                            s->len);
 #endif
-    
+
     /* do NOT destroy s anymore.  if realloc fails, the original data is
        still valid, so just report the error to sexp_errno and return NULL.
     */
-    if (newbase == NULL) {
-      sexp_errno = SEXP_ERR_MEMORY;      
+    if (newbase == NULL)
+    {
+      sexp_errno = SEXP_ERR_MEMORY;
       return NULL;
     }
 
@@ -125,39 +134,43 @@ CSTRING *sadd(CSTRING *s, char *a) {
     s->base = newbase;
   }
 
-  memcpy(&s->base[s->curlen],a,alen);
+  memcpy(&s->base[s->curlen], a, alen);
   s->curlen += alen;
   s->base[s->curlen] = 0;
   return s;
 }
 
-CSTRING *saddch(CSTRING *s, char a) {
+CSTRING *saddch(CSTRING *s, char a)
+{
   char *newbase;
 
-  if (s == NULL) {
+  if (s == NULL)
+  {
     return NULL;
   }
 
-  if (s->curlen + 1 >= s->len) {
+  if (s->curlen + 1 >= s->len)
+  {
 #ifdef __cplusplus
     newbase = (char *)sexp_realloc(s->base,
-                                   s->len+cstring_growsize+1,
+                                   s->len + cstring_growsize + 1,
                                    s->len);
 #else
     newbase = sexp_realloc(s->base,
-                           s->len+cstring_growsize+1,
+                           s->len + cstring_growsize + 1,
                            s->len);
 #endif
 
     /* do NOT destroy s anymore.  if realloc fails, the original data is
        still valid, so just report the error to sexp_errno and return NULL.
     */
-    if (newbase == NULL) {
-      sexp_errno = SEXP_ERR_MEMORY;      
+    if (newbase == NULL)
+    {
+      sexp_errno = SEXP_ERR_MEMORY;
       return NULL;
     }
 
-    s->len += cstring_growsize+1;
+    s->len += cstring_growsize + 1;
     s->base = newbase;
   }
 
@@ -167,54 +180,61 @@ CSTRING *saddch(CSTRING *s, char a) {
   return s;
 }
 
-CSTRING *strim(CSTRING *s) {
+CSTRING *strim(CSTRING *s)
+{
   char *newbase;
 
-  if (s == NULL) {
+  if (s == NULL)
+  {
     return NULL;
   }
 
   /* no trimming necessary? */
-  if (s->len == s->curlen+1) {
+  if (s->len == s->curlen + 1)
+  {
     return s;
   }
 
 #ifdef __cplusplus
   newbase = (char *)sexp_realloc(s->base,
-                                 s->curlen+1,
+                                 s->curlen + 1,
                                  s->len);
 #else
   newbase = sexp_realloc(s->base,
-                         s->curlen+1,
+                         s->curlen + 1,
                          s->len);
 #endif
 
   /* do NOT destroy s anymore.  if realloc fails, the original data is
      still valid, so just report the error to sexp_errno and return NULL.
   */
-  if (newbase == NULL) {
-    sexp_errno = SEXP_ERR_MEMORY;      
+  if (newbase == NULL)
+  {
+    sexp_errno = SEXP_ERR_MEMORY;
     return NULL;
   }
 
-  s->len = s->curlen+1;
+  s->len = s->curlen + 1;
   s->base = newbase;
 
   return s;
 }
 
-char *toCharPtr(CSTRING *s) {
-  if (s == NULL) return NULL;
+char *toCharPtr(CSTRING *s)
+{
+  if (s == NULL) { return NULL; }
   return s->base;
 }
 
-void sempty(CSTRING *s) {
-  if (s == NULL) return;
+void sempty(CSTRING *s)
+{
+  if (s == NULL) { return; }
   s->curlen = 0;
 }
 
-void sdestroy(CSTRING *s) {
-  if (s == NULL) return;
-  sexp_free(s->base,s->len);
-  sexp_free(s,sizeof(CSTRING));
+void sdestroy(CSTRING *s)
+{
+  if (s == NULL) { return; }
+  sexp_free(s->base, s->len);
+  sexp_free(s, sizeof(CSTRING));
 }
