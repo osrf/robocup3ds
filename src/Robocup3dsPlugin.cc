@@ -50,8 +50,9 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   server(std::make_shared<RCPServer>(Robocup3dsPlugin::kPort, this->effector)),
   lastUpdateTime(-GameState::counterCycleTime)
 {
-  this->buffer = new char[Robocup3dsPlugin::kBufferSize];
+  GameState::useCounterForGameTime = false;
   this->server->Start();
+  this->buffer = new char[Robocup3dsPlugin::kBufferSize];
 }
 
 /////////////////////////////////////////////////

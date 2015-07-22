@@ -906,6 +906,12 @@ void GameState::Initialize()
 ////////////////////////////////////////////////
 bool GameState::AddAgent(const int _uNum, const std::string &_teamName)
 {
+  if (this->currentState->GetName() != "BeforeKickOff")
+  {
+    // std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
+    return false;
+  }
+
   int uNum = _uNum;
   // std::cout << "adding agent: " << uNum << " teamName: "
   // << teamName << std::endl;

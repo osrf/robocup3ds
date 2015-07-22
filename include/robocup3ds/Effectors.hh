@@ -158,7 +158,7 @@ class Effector: public SocketParser
 
   /// \brief Used in server class constructor.
   /// \param[in] the socket used for for server client communication.
-  public: void OnDisconnection(const int /*_socket*/);
+  public: void OnDisconnection(const int _socket);
   /// \brief Main procedure of extracting information
   /// in pile of S-expressions using the expression library.
   /// \param[in] _msg S-expression messages.
