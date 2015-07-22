@@ -10,7 +10,7 @@ set (sources
 )
 
 set (gtest_sources
-  Parser_TEST.cc
+  Effector_TEST.cc
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
 )
