@@ -51,13 +51,13 @@ class Perceptor
   public: void Update();
 
   /// \brief Helper function to update line info
-  /// \Param[in] _agent Agent object whose perception is updated
+  /// \Param[out] _agent Agent object whose perception is updated
   /// \Param[in] _line Line object
   public: void UpdateLine(Agent &_agent,
     const ignition::math::Line3<double> &_line) const;
 
   /// \brief Function to update landmark info
-  /// \Param[in] _agent Agent object whose perception is updated
+  /// \Param[out] _agent Agent object whose perception is updated
   /// \Param[in] _landmarkname Name of landmark
   /// \Param[in] _landmark Position of landmark
   public: void UpdateLandmark(Agent &_agent,
@@ -65,13 +65,13 @@ class Perceptor
                 const ignition::math::Vector3<double> &_landmark) const;
 
   /// \brief Function to update positions of other agents
-  /// \Param[in] _agent Agent whose perception we are updating
+  /// \Param[out] _agent Agent whose perception we are updating
   /// \Param[in] _otherAgent Other agent whose position is updated
   public: void UpdateOtherAgent(Agent &_agent,
     const Agent &_otherAgent) const;
 
   /// \brief Function to update message that agent hears
-  /// \Param[in] _agent Agent whose perception we are updating
+  /// \Param[out] _agent Agent whose perception we are updating
   public: void UpdateAgentHear(Agent &_agent) const;
 
   /// \brief Function to add noise to all observations
