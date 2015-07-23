@@ -42,8 +42,10 @@
 
 using namespace gazebo;
 
+int Robocup3dsPlugin::clientPort        = 3100;
+int Robocup3dsPlugin::monitorPort       = 3200;
+bool Robocup3dsPlugin::syncMode         = false;
 const int Robocup3dsPlugin::kBufferSize = 16384;
-const int Robocup3dsPlugin::kPort       = 3100;
 
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
@@ -52,11 +54,11 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   gameState(std::make_shared<GameState>()),
   effector(std::make_shared<Effector>(this->gameState.get())),
   perceptor(std::make_shared<Perceptor>(this->gameState.get())),
-  server(std::make_shared<RCPServer>(Robocup3dsPlugin::kPort, this->effector)),
+  clientServer(std::make_shared<RCPServer>(Robocup3dsPlugin::clientPort,
+    this->effector)),
   lastUpdateTime(-GameState::counterCycleTime)
 {
-  GameState::useCounterForGameTime = false;
-  this->server->Start();
+  this->clientServer->Start();
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
 }
 

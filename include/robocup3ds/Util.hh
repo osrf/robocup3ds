@@ -20,6 +20,8 @@
 
 #include <gazebo/gazebo.hh>
 #include <ignition/math.hh>
+#include <map>
+#include <string>
 
 /// \brief Converts from ignition math Vector3 to gazebo math Vector3
 /// \param[in] _pt Ignition math Vector3
@@ -68,6 +70,50 @@ gazebo::math::Pose I2G(const ignition::math::Pose3<double> _p)
 ignition::math::Pose3<double> G2I(const gazebo::math::Pose _p)
 {
   return ignition::math::Pose3<double>(G2I(_p.pos), G2I(_p.rot));
+}
+
+/// \brief Helper function for loading gameState configuration variables
+/// \param[in] _config Map of configuration variables
+/// \param[in] _key Key to look for in map
+/// \param[out] _value Value to return
+/// \return True if loading of parameter is successful
+bool LoadConfigParameter(
+  const std::map<std::string, std::string> &_config,
+  const std::string &_key,
+  double &_value)
+{
+  try
+  {
+    _value = std::stod(_config.at(_key));
+  }
+  catch (const std::exception &exc)
+  {
+    std::cerr << exc.what();
+    return false;
+  }
+  return true;
+}
+
+/// \brief Helper function for loading gameState configuration variables
+/// \param[in] _config Map of configuration variables
+/// \param[in] _key Key to look for in map
+/// \param[out] _boolValue Value to return
+/// \return True if loading of parameter is successful
+bool LoadConfigParameterBool(
+  const std::map<std::string, std::string> &_config,
+  const std::string &_key,
+  bool &_boolValue)
+{
+  try
+  {
+    _boolValue = _config.at(_key) != "false";
+  }
+  catch (const std::exception &exc)
+  {
+    std::cerr << exc.what();
+    return false;
+  }
+  return true;
 }
 
 #endif

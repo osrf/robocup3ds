@@ -35,6 +35,7 @@ class PerceptorTest : public ::testing::Test
 {
   protected: virtual void SetUp()
     {
+    GameState::useCounterForGameTime = true;
     this->gameState = std::make_shared<GameState>();
     this->perceptor = std::make_shared<Perceptor>(this->gameState.get());
     }

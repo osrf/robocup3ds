@@ -389,24 +389,6 @@ class GameState
   /// \return True when _i is smaller than _j
   private: static bool SortDist(const AgentDist &_i, const AgentDist &_j);
 
-  /// \brief Helper function for loading gameState configuration variables
-  /// \param[in] _config Map of configuration variables
-  /// \param[in] _key Key to look for in map
-  /// \param[out] _value Value to return
-  /// \return True if loading of parameter is successful
-  private: bool LoadConfigParameter(
-    const std::map<std::string, std::string> &_config,
-    const std::string &_key, double &_value) const;
-
-  /// \brief Helper function for loading gameState configuration variables
-  /// \param[in] _config Map of configuration variables
-  /// \param[in] _key Key to look for in map
-  /// \param[out] _boolValue Value to return
-  /// \return True if loading of parameter is successful
-  private: bool LoadConfigParameterBool(
-    const std::map<std::string, std::string> &_config,
-    const std::string &_key, bool &_boolValue) const;
-
   /// \brief beforeKickOffState playmode
   public: std::shared_ptr<states::BeforeKickOffState> beforeKickOffState;
 
@@ -571,10 +553,6 @@ class GameState
   /// ball contact by the same agent, then it will not count as a new ball
   /// contact (the time of the last ball contact is update instead)
   public: static const double ballContactInterval;
-
-  /// \brief Pointer to configuration variables
-  public: static std::shared_ptr<std::map<const std::string,
-    const std::string>> config;
 
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;

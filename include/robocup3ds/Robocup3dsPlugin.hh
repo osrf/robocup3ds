@@ -59,6 +59,16 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// information sent to agents
   private: void UpdatePerceptor();
 
+  /// \brief Port used for connecting client agents
+  public: static int clientPort;
+
+  /// \brief Port used for connecting monitors
+  public: static int monitorPort;
+
+  /// \brief Flag whether to enable sync mode, with this enable, the plugin
+  /// trys to update as fast as possible
+  public: static bool syncMode;
+
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
@@ -77,8 +87,8 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Pointer to Perceptor object
   private: std::shared_ptr<Perceptor> perceptor;
 
-  /// \brief Pointer to server
-  private: std::shared_ptr<RCPServer> server;
+  /// \brief Pointer to server for clients
+  private: std::shared_ptr<RCPServer> clientServer;
 
   /// \brief Pointer to buffer for sending messages to server;
   private: char* buffer;
@@ -88,9 +98,6 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Size of buffer in bytes
   private: static const int kBufferSize;
-
-  /// \brief Port to use
-  private: static const int kPort;
 };
 
 #endif

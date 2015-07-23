@@ -44,7 +44,10 @@ using namespace states;
 class GameStateTest_basic : public ::testing::Test
 {
   protected:
-    virtual void SetUp() {}
+    virtual void SetUp()
+    {
+      GameState::useCounterForGameTime = true;
+    }
 
   protected:
     virtual void TearDown() {}
@@ -376,6 +379,7 @@ class GameStateTest_fullTeams : public GameStateTest_basic
   protected:
     virtual void SetUp()
     {
+      GameState::useCounterForGameTime = true;
       GameStateTest_basic::SetUp();
       for (int i = 0; i < 2; ++i)
       {
@@ -579,7 +583,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
     gameState.ClearBallContactHistory();
     EXPECT_FALSE(gameState.GetLastBallContact());
     EXPECT_EQ(gameState.GetLastSideTouchedBall(),
-      Team::Side::NEITHER);
+              Team::Side::NEITHER);
   }
 }
 
@@ -1372,7 +1376,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
   {
     Agent &ourAgent = gameState.teams.at(i)->members.at(0);
     Agent &theirAgent = gameState.teams.at(
-                                     (i + 1) % 2)->members.at(0);
+                          (i + 1) % 2)->members.at(0);
 
     resetPositionsForKickOff();
     gameState.SetCurrent(states.at(i));
