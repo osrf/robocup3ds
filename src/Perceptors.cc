@@ -290,13 +290,13 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   }
 
   // write hear info
-  if (_agent.percept.hear.self)
+  if (_agent.percept.hear.isValid && _agent.percept.hear.self)
   {
     cx += snprintf(_string + cx, _size - cx, "(hear %.2f self %s)",
                    _agent.percept.hear.gameTime,
                    _agent.percept.hear.msg.c_str());
   }
-  else
+  else if (_agent.percept.hear.isValid)
   {
     cx += snprintf(_string + cx, _size - cx, "(hear %.2f %.2f %s)",
                    _agent.percept.hear.gameTime,

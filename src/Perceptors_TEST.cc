@@ -460,7 +460,7 @@ TEST_F(PerceptorTest, Percepter_Update)
 /// \Brief Test whether the Serialize() function works
 TEST_F(PerceptorTest, Percepter_Serialize)
 {
-  string teamNames[2] = {"blue", "red"};
+  string teamNames[2] = {"red", "blue"};
   for (int i = 0; i < 2; ++i)
   {
     for (int j = 0; j < 11; ++j)
@@ -477,6 +477,10 @@ TEST_F(PerceptorTest, Percepter_Serialize)
     }
   }
   GameState::restrictVision = true;
+  gameState->say.agentId = std::make_pair(1, "blue");
+  gameState->say.pos.Set(5.0, 1.0, GameState::beamHeight);
+  gameState->say.msg = "hello";
+  gameState->say.isValid = true;
   perceptor->useNoise = false;
   GameState::HFov = 90;
   GameState::VFov = 90;
@@ -488,22 +492,24 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   perceptor->SetG2LMat(redAgent);
   perceptor->Update();
 
-  char testString[8000];
+  char testString[16384];
   int cx;
 
   // currently takes around 1.2 milliseconds to finish for all 22 agents
   for (int i = 0; i < 1000; ++i)
-  { cx = perceptor->Serialize(redAgent, testString, 8000); }
+  { cx = perceptor->Serialize(redAgent, testString, sizeof(testString)); }
+  cout << testString << endl;
 
   // check that certain names are there in string
   EXPECT_TRUE(strstr(testString, "joint1"));
   EXPECT_TRUE(strstr(testString, "joint2"));
   EXPECT_TRUE(strstr(testString, "HEAD"));
   EXPECT_TRUE(strstr(testString, "BODY"));
+  EXPECT_TRUE(strstr(testString, "hear"));
 
   // check that parenthesis are balanced
   int paren = 0;
-  for (int i = 0; i < 8000; ++i)
+  for (size_t i = 0; i < sizeof(testString); ++i)
   {
     if (testString[i] == '\0')
     { break; }
