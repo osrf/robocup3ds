@@ -32,6 +32,7 @@ const int Effector::kBufferSize = 16384;
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
   currAgent(NULL),
+  currSocketId(-1),
   gameState(_gameState)
 {
   // Initialize global variables
@@ -299,8 +300,8 @@ void Effector::Update()
   for (auto kv = this->socketIDMessageMap.begin();
        kv != this->socketIDMessageMap.end();)
   {
-    this->currAgent = NULL;
     this->currSocketId = kv->first;
+    this->currAgent = NULL;
     for (const auto &team : this->gameState->teams)
     {
       for (auto &agent : team->members)
