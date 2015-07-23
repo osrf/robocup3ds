@@ -24,7 +24,9 @@
 /// to be able to read data from the sockets. Users are the only ones that know
 /// how to read and interpret the data sent through the sockets. The server will
 /// call the Parse() method of the derived parser class that the users will
-/// write.
+/// write. The server will call the OnConnection() method when it receives a
+/// new connection through a socket, and similarly call the OnDisconnection()
+/// method when the connection is lost.
 class SocketParser
 {
   /// \brief Constructor.
