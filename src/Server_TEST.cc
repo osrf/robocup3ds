@@ -195,9 +195,7 @@ TEST(RCPServer, Disabled)
   reset();
 
   auto parser = std::make_shared<TrivialSocketParser>();
-  RCPServer server(kPort, parser,
-    &TrivialSocketParser::OnConnection, parser.get(),
-    &TrivialSocketParser::OnDisconnection, parser.get());
+  RCPServer server(kPort, parser);
   EXPECT_FALSE(server.Send(-1, content.c_str(), content.size() + 1));
 }
 
@@ -209,9 +207,7 @@ TEST(RCPServer, NewClient)
   EXPECT_FALSE(newConnectionDetected);
 
   auto parser = std::make_shared<TrivialSocketParser>();
-  RCPServer server(kPort, parser,
-    &TrivialSocketParser::OnConnection, parser.get(),
-    &TrivialSocketParser::OnDisconnection, parser.get());
+  RCPServer server(kPort, parser);
 
   server.Start();
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -249,9 +245,7 @@ TEST(RCPServer, Send)
   reset();
 
   auto parser = std::make_shared<TrivialSocketParser>();
-  RCPServer server(kPort + 1, parser,
-    &TrivialSocketParser::OnConnection, parser.get(),
-    &TrivialSocketParser::OnDisconnection, parser.get());
+  RCPServer server(kPort + 1, parser);
 
   server.Start();
   std::this_thread::sleep_for(std::chrono::milliseconds(50));

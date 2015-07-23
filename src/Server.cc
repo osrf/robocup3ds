@@ -24,6 +24,8 @@
 #include <cstring>
 #include <iostream>
 #include <mutex>
+
+#include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/Server.hh"
 
 //////////////////////////////////////////////////
@@ -210,7 +212,7 @@ void RCPServer::DispatchRequestOnMasterSocket()
   this->pollSockets.push_back(newSocketPollItem);
 
   // Call connectCb().
-  this->connectionCb(newSocketFd);
+  this->parser->OnConnection(newSocketFd);
 }
 
 //////////////////////////////////////////////////
@@ -228,7 +230,7 @@ void RCPServer::DispatchRequestOnClientSocket()
         int socket = this->pollSockets.at(i).fd;
 
         // Call disconnectCb().
-        this->disconnectionCb(this->pollSockets.at(i).fd);
+        this->parser->OnDisconnection(this->pollSockets.at(i).fd);
 
         // Remove the client from the list used by poll.
         close(socket);
