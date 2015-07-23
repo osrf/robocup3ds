@@ -27,6 +27,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+
 #include "robocup3ds/SocketParser.hh"
 
 /// \brief RCPServer class that will accept TCP sockets from external clients
@@ -79,20 +80,12 @@ class RCPServer
   ///   \param[in] _socket Socket associated to the new disconnection.
   /// \param[in] _obj2 Instance containing the member function callback for
   /// new disconnections.
-  public: template<typename C>
-  RCPServer(const int _port,
-         const std::shared_ptr<SocketParser> &_parser,
-         void(C::*_connectCb)(const int _socket), C *_obj1,
-         void(C::*_disconnectCb)(const int _socket), C *_obj2)
+  public: RCPServer(const int _port, const std::shared_ptr<SocketParser> &_parser)
   : port(_port),
     masterSocket(-1),
     parser(_parser),
     enabled(false)
-  {
-    this->connectionCb = std::bind(_connectCb, _obj1, std::placeholders::_1);
-    this->disconnectionCb =
-      std::bind(_disconnectCb, _obj2, std::placeholders::_1);
-  }
+  {}
 
   /// \brief Simple constructor for testing purposes
   public: RCPServer() {}
@@ -151,12 +144,6 @@ class RCPServer
 
   /// \brief Thread in charge of receiving and handling incoming messages.
   private: std::thread threadReception;
-
-  /// \brief New connections callback.
-  private: std::function<void(const int _socket)> connectionCb;
-
-  /// \brief New disconections callback.
-  private: std::function<void(const int _socket)> disconnectionCb;
 };
 
 #endif /* _GAZEBO_ROBOCUP3DS_SERVER_HH_ */
