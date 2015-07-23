@@ -65,7 +65,7 @@ class Team
   }
 
   /// \brief Equality operator for teams
-  /// \param[in] _team Tean compared against
+  /// \param[in] _team Team compared against
   /// \return True if they are equal
   public: bool operator==(const Team &_team)
   {
@@ -178,9 +178,9 @@ class Agent
   /// \brief Enum for the agent status and whether movement is allowed
   public: enum class Status
   {
-    /// \brief Flag to release Agent joints
+    /// \brief Agent is not allowed to move
     RELEASED,
-    /// \brief Flag to reset Agent joints to default and make stiff
+    /// \brief Agent is allowed to move
     STOPPED
   };
 
@@ -198,7 +198,7 @@ class Agent
     this->prevStatus = this->status;
     this->updatePose = false;
     this->inPenaltyBox = false;
-    this->timeImmoblized = 0;
+    this->timeImmobilized = 0;
     this->timeFallen = 0;
   }
 
@@ -302,7 +302,7 @@ class Agent
   public: bool inPenaltyBox;
 
   /// \brief Stores time the agent has not moved
-  public: double timeImmoblized;
+  public: double timeImmobilized;
 
   /// \brief Stores time the agent has fallen
   public: double timeFallen;

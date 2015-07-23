@@ -33,21 +33,19 @@ using namespace ignition;
 
 int          Perceptor::updateVisualFreq  = 3;
 bool         Perceptor::useNoise          = true;
+const double Perceptor::kDistNoiseScale   = 0.01;
 const double Perceptor::kHearDist         = 50.0;
-// const int    Perceptor::kBufferSize       = 8000;
 
-math::Vector3<double> Perceptor::fixedNoise(
+const math::Vector3<double> Perceptor::kFixedNoise(
   math::Rand::DblUniform(-0.005, 0.005),
   math::Rand::DblUniform(-0.005, 0.005),
   math::Rand::DblUniform(-0.005, 0.005));
-
-math::Vector3<double> Perceptor::dNoiseSigma(0.0965, 0.1225, 0.1480);
+const math::Vector3<double> Perceptor::kNoiseSigma(0.0965, 0.1225, 0.1480);
 
 /////////////////////////////////////////////////
 Perceptor::Perceptor(GameState *const _gameState):
   gameState(_gameState)
 {
-  // this->buffer = std::make_shared<char>(Perceptor::bufferSize);
   this->SetViewFrustum();
 }
 
@@ -61,14 +59,10 @@ void Perceptor::SetViewFrustum()
   double VFov = RAD(std::min(180.0, std::max(0.0, GameState::VFov)));
 
   math::Vector3<double> origin = math::Vector3<double>::Zero;
-  math::Vector3<double> upperRight(1.0, -tan(HFov / 2),
-                                   tan(VFov / 2));
-  math::Vector3<double> upperLeft(1.0, tan(HFov / 2),
-                                  tan(VFov / 2));
-  math::Vector3<double> lowerRight(1.0, -tan(HFov / 2),
-                                   -tan(VFov / 2));
-  math::Vector3<double> lowerLeft(1.0, tan(HFov / 2),
-                                  -tan(VFov / 2));
+  math::Vector3<double> upperRight(1.0, -tan(HFov / 2), tan(VFov / 2));
+  math::Vector3<double> upperLeft(1.0, tan(HFov / 2), tan(VFov / 2));
+  math::Vector3<double> lowerRight(1.0, -tan(HFov / 2), -tan(VFov / 2));
+  math::Vector3<double> lowerLeft(1.0, tan(HFov / 2), -tan(VFov / 2));
 
   this->viewFrustum.clear();
   // forward facing plane (normal pointing down x-axis)
@@ -377,12 +371,13 @@ ignition::math::Vector3<double> Perceptor::addNoise(
   }
 
   math::Vector3<double> newPt(
-    _pt.X() + Perceptor::fixedNoise.X() +
-    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.X()) * _pt.X() * 0.01,
-    _pt.Y() + Perceptor::fixedNoise.Y() +
-    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.Y()),
-    _pt.Z() + Perceptor::fixedNoise.Z() +
-    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.Z()));
+    _pt.X() + Perceptor::kFixedNoise.X() +
+    math::Rand::DblNormal(0, Perceptor::kNoiseSigma.X())
+    * _pt.X() * Perceptor::kDistNoiseScale,
+    _pt.Y() + Perceptor::kFixedNoise.Y() +
+    math::Rand::DblNormal(0, Perceptor::kNoiseSigma.Y()),
+    _pt.Z() + Perceptor::kFixedNoise.Z() +
+    math::Rand::DblNormal(0, Perceptor::kNoiseSigma.Z()));
 
   // truncation should be done when serializing the messages?
   // newPt.Set(round(newPt.X() * 100.0) / 100.0,

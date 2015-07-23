@@ -45,6 +45,7 @@ class Perceptor
   public: void SetViewFrustum();
 
   /// \brief Method used to get view frustum
+  /// \return A vector of planes of the view frustum
   public: std::vector <ignition::math::Plane<double>> &GetViewFrustum();
 
   /// \brief Set the transformation matrix from global to local
@@ -117,6 +118,9 @@ class Perceptor
   /// \brief Distance of message where it still can be heard
   public: static const double kHearDist;
 
+  /// \brief Multiplier for the distance noise
+  public: static const double kDistNoiseScale;
+
   /// \brief Frequency at which we update the visualization
   /// (every x gamestate cycles)
   public: static int updateVisualFreq;
@@ -125,19 +129,13 @@ class Perceptor
   public: static bool useNoise;
 
   /// \brief A constant noise that is added to all observations
-  private: static ignition::math::Vector3<double> fixedNoise;
+  private: static const ignition::math::Vector3<double> kFixedNoise;
 
   /// \brief Sigma for dynamic noise that is added to all observations
-  private: static ignition::math::Vector3<double> dNoiseSigma;
+  private: static const ignition::math::Vector3<double> kNoiseSigma;
 
   /// \brief Pointer to GameState object
   private: GameState *const gameState;
-
-  /// \brief Pointer to Server object
-  // private: RCPServer *const server;
-
-  /// \brief Buffer used to store data sent to server
-  // private: std::shared_ptr<char> buffer;
 
   /// \brief 4x4 transformation to go from global to local coordinates
   private: ignition::math::Matrix4<double> G2LMat;

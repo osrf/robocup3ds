@@ -7,7 +7,6 @@ set (sources
   Geometry.cc
   Effector.cc
   Perceptors.cc
-  Server.cc
   states/BeforeKickOffState.cc
   states/CornerKickState.cc
   states/FreeKickState.cc
@@ -20,15 +19,16 @@ set (sources
   states/State.cc
   GameState.cc
   Robocup3dsPlugin.cc
+  Server.cc
 )
 
 set (gtest_sources
   Effector_TEST.cc
   Robocup3dsPlugin_TEST.cc
-  GameState_TEST.cc
+  Server_TEST.cc
   Perceptors_TEST.cc
   Geometry_TEST.cc
-  Server_TEST.cc
+  GameState_TEST.cc
 )
 
 # make below target specific?

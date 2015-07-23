@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+#include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/states/State.hh"
 
@@ -26,8 +27,9 @@ using namespace states;
 
 /////////////////////////////////////////////////
 State::State(const std::string &_name,
-             GameState *const _gameState):
+             GameState *const _gameState, const Team::Side _side):
   name(_name),
+  side(_side),
   gameState(_gameState),
   prevState(nullptr),
   initBallPos(math::Vector3<double>(-999, -999, -999))

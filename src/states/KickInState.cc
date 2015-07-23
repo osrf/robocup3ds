@@ -26,8 +26,9 @@ using namespace states;
 
 /////////////////////////////////////////////////
 KickInState::KickInState(const std::string &_name,
-                         GameState *const _gameState)
-  : State(_name, _gameState)
+                         GameState *const _gameState,
+                         const Team::Side _side):
+  State(_name, _gameState, _side)
 {
 }
 
@@ -52,10 +53,7 @@ void KickInState::Update()
     this->Initialize();
   }
   // The right team is not allowed to be close to the ball.
-  if (this->name == "KickInLeft")
-  { this->gameState->DropBallImpl(Team::Side::LEFT); }
-  else
-  { this->gameState->DropBallImpl(Team::Side::RIGHT); }
+  this->gameState->DropBallImpl(this->side);
   State::Update();
 
   // After some time, go to play mode.

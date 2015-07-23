@@ -26,8 +26,9 @@ using namespace states;
 
 /////////////////////////////////////////////////
 CornerKickState::CornerKickState(const std::string &_name,
-                                 GameState *const _gameState):
-  State(_name, _gameState)
+                                 GameState *const _gameState,
+                                 const Team::Side _side):
+  State(_name, _gameState, _side)
 {
 }
 
@@ -52,11 +53,7 @@ void CornerKickState::Update()
   }
 
   // The right team is not allowed to be close to the ball.
-  if (this->name == "CornerKickLeft")
-  { this->gameState->DropBallImpl(Team::Side::LEFT); }
-  else
-  { this->gameState->DropBallImpl(Team::Side::RIGHT); }
-  State::Update();
+  this->gameState->DropBallImpl(this->side);
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickIn)

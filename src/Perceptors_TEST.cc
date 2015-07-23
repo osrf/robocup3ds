@@ -29,21 +29,17 @@
 #include "robocup3ds/SoccerField.hh"
 
 using namespace ignition;
-using namespace std;
 
 /// \brief This test fixture sets up a gameState object and perceptor object
 class PerceptorTest : public ::testing::Test
 {
-  protected:
-    virtual void SetUp()
+  protected: virtual void SetUp()
     {
-      this->gameState = new GameState();
-      this->perceptor = new Perceptor(gameState);
-      this->perceptor->updateVisualFreq = 1;
+    this->gameState = std::make_shared<GameState>();
+    this->perceptor = std::make_shared<Perceptor>(this->gameState.get());
     }
 
-  protected:
-    virtual bool UpdateLine_Test(Agent &_agent,
+  protected: virtual bool UpdateLine_Test(Agent &_agent,
                                  const math::Line3<double> &_line,
                                  math::Line3<double> &_testLine)
     {
@@ -60,8 +56,7 @@ class PerceptorTest : public ::testing::Test
       return true;
     }
 
-  protected:
-    virtual bool UpdateLandmark_Test(Agent &_agent,
+  protected: virtual bool UpdateLandmark_Test(Agent &_agent,
                                      const math::Vector3<double> &_landmark,
                                      math::Vector3<double> &_testLandmark)
     {
@@ -76,17 +71,9 @@ class PerceptorTest : public ::testing::Test
       return true;
     }
 
-  protected:
-    virtual void TearDown()
-    {
-      delete this->perceptor;
-      delete this->gameState;
-    }
-
-  protected:
-    GameState *gameState;
-  protected:
-    Perceptor *perceptor;
+  protected: virtual void TearDown() {}
+  protected: std::shared_ptr<GameState> gameState;
+  protected: std::shared_ptr<Perceptor> perceptor;
 };
 
 /// \brief Test whether Perceptor constructor and destructor works
@@ -410,7 +397,7 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
 /// \Brief Test whether the Update() function works
 TEST_F(PerceptorTest, Percepter_Update)
 {
-  string teamNames[2] = {"blue", "red"};
+  std::string teamNames[2] = {"blue", "red"};
   for (int i = 0; i < 2; ++i)
   {
     for (int j = 0; j < 11; ++j)
@@ -460,7 +447,7 @@ TEST_F(PerceptorTest, Percepter_Update)
 /// \Brief Test whether the Serialize() function works
 TEST_F(PerceptorTest, Percepter_Serialize)
 {
-  string teamNames[2] = {"red", "blue"};
+  std::string teamNames[2] = {"red", "blue"};
   for (int i = 0; i < 2; ++i)
   {
     for (int j = 0; j < 11; ++j)
@@ -498,7 +485,7 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   // currently takes around 1.2 milliseconds to finish for all 22 agents
   for (int i = 0; i < 1000; ++i)
   { cx = perceptor->Serialize(redAgent, testString, sizeof(testString)); }
-  cout << testString << endl;
+  std::cout << testString << std::endl;
 
   // check that certain names are there in string
   EXPECT_TRUE(strstr(testString, "joint1"));
