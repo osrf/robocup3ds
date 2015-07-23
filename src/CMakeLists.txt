@@ -5,7 +5,7 @@ Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/
 
 set (sources
   Geometry.cc
-  Effectors.cc
+  Effector.cc
   Perceptors.cc
   Server.cc
   states/BeforeKickOffState.cc
@@ -23,7 +23,7 @@ set (sources
 )
 
 set (gtest_sources
-  Effectors_TEST.cc
+  Effector_TEST.cc
   Robocup3dsPlugin_TEST.cc
   GameState_TEST.cc
   Perceptors_TEST.cc

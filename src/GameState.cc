@@ -904,7 +904,8 @@ void GameState::Initialize()
 }
 
 ////////////////////////////////////////////////
-bool GameState::AddAgent(const int _uNum, const std::string &_teamName)
+bool GameState::AddAgent(const int _uNum, const std::string &_teamName,
+                         const int _socketID)
 {
   if (this->currentState->GetName() != "BeforeKickOff")
   {
@@ -987,7 +988,7 @@ bool GameState::AddAgent(const int _uNum, const std::string &_teamName)
     // << std::endl;
     return false;
   }
-  teamToAdd->members.push_back(Agent(uNum, teamToAdd));
+  teamToAdd->members.push_back(Agent(uNum, teamToAdd, _socketID));
   return true;
 }
 

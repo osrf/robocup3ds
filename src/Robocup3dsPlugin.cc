@@ -30,7 +30,7 @@
 #include <string>
 #include <sdf/sdf.hh>
 
-#include "robocup3ds/Effectors.hh"
+#include "robocup3ds/Effector.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Nao.hh"
 #include "robocup3ds/Perceptors.hh"
@@ -109,18 +109,18 @@ void Robocup3dsPlugin::UpdateEffector()
   // insert models into world that need to be inserted
   for (auto &agentInfo : this->effector->agentsToAdd)
   {
-    std::string agentName = std::to_string(agentInfo.uNum) + "_" +
-                            agentInfo.teamName;
+    std::string agentName = std::to_string(agentInfo.first) + "_" +
+                            agentInfo.second;
     this->world->InsertModelFile("model://nao");
-    auto model = this->world->GetModel(NaoRobot::defaultModelName);
+    const auto &model = this->world->GetModel(NaoRobot::defaultModelName);
     model->SetName(agentName);
   }
 
   // remove models that need to be removed from world
   for (auto &agentInfo : this->effector->agentsToRemove)
   {
-    std::string agentName = std::to_string(agentInfo.uNum) + "_" +
-                            agentInfo.teamName;
+    std::string agentName = std::to_string(agentInfo.first) + "_" +
+                            agentInfo.second;
     this->world->RemoveModel(agentName);
   }
 

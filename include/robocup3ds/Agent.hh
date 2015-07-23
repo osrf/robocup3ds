@@ -187,11 +187,13 @@ class Agent
   /// \brief Constructor for Agent object
   /// \param[in] _uNum unique identifier for agent
   /// \param[in] _team pointer to team agent is on
-  public: Agent(const int _uNum, const std::shared_ptr<Team> &_team):
+  /// \param[in] _socketID Socket ID for agent
+  public: Agent(const int _uNum, const std::shared_ptr<Team> &_team,
+    const int _socketID = -1):
     uNum(_uNum),
     team(_team)
   {
-    this->socketID = -1;
+    this->socketID = _socketID;
     this->status = Status::RELEASED;
     this->prevStatus = this->status;
     this->updatePose = false;

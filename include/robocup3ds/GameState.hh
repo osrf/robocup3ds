@@ -309,8 +309,10 @@ class GameState
   /// \brief Add agent to game state
   /// \param[in] _uNum Agent number
   /// \param[in] _teamName Agent name
+  /// \param[in] _socketID SocketID associated with agent
   /// \return True when adding agent is successful
-  public: bool AddAgent(const int _uNum, const std::string &_teamName);
+  public: bool AddAgent(const int _uNum, const std::string &_teamName,
+    const int _socketID = -1);
 
   /// \brief Remove agent from game state
   /// \param[in] _uNum Agent number
