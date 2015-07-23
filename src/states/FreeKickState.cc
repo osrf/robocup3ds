@@ -25,8 +25,9 @@ using namespace states;
 
 /////////////////////////////////////////////////
 FreeKickState::FreeKickState(const std::string &_name,
-                             GameState *const _gameState)
-  : State(_name, _gameState)
+                             GameState *const _gameState,
+                             const Team::Side _side):
+  State(_name, _gameState, _side)
 {
 }
 
@@ -51,10 +52,7 @@ void FreeKickState::Update()
   }
 
   // The right team is not allowed to be close to the ball.
-  if (this->name == "FreeKickLeft")
-  { this->gameState->DropBallImpl(Team::Side::LEFT); }
-  else
-  { this->gameState->DropBallImpl(Team::Side::RIGHT); }
+  this->gameState->DropBallImpl(this->side);
   State::Update();
 
   // After some time, go to play mode.

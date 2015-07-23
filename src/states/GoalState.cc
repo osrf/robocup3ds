@@ -25,8 +25,9 @@ using namespace states;
 
 /////////////////////////////////////////////////
 GoalState::GoalState(const std::string &_name,
-                     GameState *const _gameState)
-  : State(_name, _gameState)
+                     GameState *const _gameState,
+                     const Team::Side _side):
+  State(_name, _gameState, _side)
 {
   this->validGoal = false;
 }
@@ -39,10 +40,7 @@ void GoalState::Initialize()
   // Register the left team goal.
   for (auto &team : this->gameState->teams)
   {
-    if ((team->side == Team::Side::LEFT
-         && this->name == "GoalLeft")
-        || (team->side == Team::Side::RIGHT
-            && this->name == "GoalRight"))
+    if (team->side == this->side)
     {
       if (team->canScore)
       {
@@ -67,7 +65,7 @@ void GoalState::Update()
   // Afer some time, go to right team kick off mode.
   if (this->GetElapsedTime() >= GameState::SecondsGoalPause || !validGoal)
   {
-    if (this->name == "GoalLeft")
+    if (this->side == Team::Side::LEFT)
     { this->gameState->SetCurrent(this->gameState->kickOffRightState); }
     else
     { this->gameState->SetCurrent(this->gameState->kickOffLeftState); }
