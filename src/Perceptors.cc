@@ -30,15 +30,15 @@
 
 using namespace ignition;
 
-bool Perceptor::useNoise = true;
-const double Perceptor::kHearDist = 50.0;
+bool Perceptor::useNoise                = true;
+const double Perceptor::kHearDist       = 50.0;
+const double Perceptor::kDistNoiseScale = 0.01;
 
-math::Vector3<double> Perceptor::fixedNoise(
+const math::Vector3<double> Perceptor::kFixedNoise(
   math::Rand::DblUniform(-0.005, 0.005),
   math::Rand::DblUniform(-0.005, 0.005),
   math::Rand::DblUniform(-0.005, 0.005));
-
-math::Vector3<double> Perceptor::dNoiseSigma(0.0965, 0.1225, 0.1480);
+const math::Vector3<double> Perceptor::kNoiseSigma(0.0965, 0.1225, 0.1480);
 
 /////////////////////////////////////////////////
 Perceptor::Perceptor(GameState *_gameState):
@@ -57,14 +57,10 @@ void Perceptor::SetViewFrustum()
   double VFov = RAD(std::min(180.0, std::max(0.0, GameState::VFov)));
 
   math::Vector3<double> origin = math::Vector3<double>::Zero;
-  math::Vector3<double> upperRight(1.0, -tan(HFov / 2),
-                                   tan(VFov / 2));
-  math::Vector3<double> upperLeft(1.0, tan(HFov / 2),
-                                  tan(VFov / 2));
-  math::Vector3<double> lowerRight(1.0, -tan(HFov / 2),
-                                   -tan(VFov / 2));
-  math::Vector3<double> lowerLeft(1.0, tan(HFov / 2),
-                                  -tan(VFov / 2));
+  math::Vector3<double> upperRight(1.0, -tan(HFov / 2), tan(VFov / 2));
+  math::Vector3<double> upperLeft(1.0, tan(HFov / 2), tan(VFov / 2));
+  math::Vector3<double> lowerRight(1.0, -tan(HFov / 2), -tan(VFov / 2));
+  math::Vector3<double> lowerLeft(1.0, tan(HFov / 2), -tan(VFov / 2));
 
   this->viewFrustum.clear();
   // forward facing plane (normal pointing down x-axis)
@@ -200,7 +196,7 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
     }
 
     AgentId otherAgentId(_otherAgent.uNum,
-                                    _otherAgent.team->name);
+                         _otherAgent.team->name);
     _agent.percept.otherAgentBodyMap[otherAgentId][kv.first] =
       addNoise(Geometry::CartToPolar(_otherAgentPart));
   }
@@ -241,12 +237,13 @@ Perceptor::addNoise(const ignition::math::Vector3<double> &_pt) const
   }
 
   math::Vector3<double> newPt(
-    _pt.X() + Perceptor::fixedNoise.X() +
-    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.X()) * _pt.X() * 0.01,
-    _pt.Y() + Perceptor::fixedNoise.Y() +
-    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.Y()),
-    _pt.Z() + Perceptor::fixedNoise.Z() +
-    math::Rand::DblNormal(0, Perceptor::dNoiseSigma.Z()));
+    _pt.X() + Perceptor::kFixedNoise.X() +
+    math::Rand::DblNormal(0, Perceptor::kNoiseSigma.X())
+    * _pt.X() * Perceptor::kDistNoiseScale,
+    _pt.Y() + Perceptor::kFixedNoise.Y() +
+    math::Rand::DblNormal(0, Perceptor::kNoiseSigma.Y()),
+    _pt.Z() + Perceptor::kFixedNoise.Z() +
+    math::Rand::DblNormal(0, Perceptor::kNoiseSigma.Z()));
 
   // truncation should be done when serializing the messages?
   // newPt.Set(round(newPt.X() * 100.0) / 100.0,

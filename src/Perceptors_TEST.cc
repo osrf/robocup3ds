@@ -29,63 +29,51 @@
 #include "robocup3ds/SoccerField.hh"
 
 using namespace ignition;
-using namespace std;
 
 /// \brief This test fixture sets up a gameState object and perceptor object
 class PerceptorTest : public ::testing::Test
 {
-  protected:
-    virtual void SetUp()
-    {
-      this->gameState = new GameState();
-      this->perceptor = new Perceptor(gameState);
-    }
+  protected: virtual void SetUp()
+  {
+    this->gameState = std::make_shared<GameState>();
+    this->perceptor = std::make_shared<Perceptor>(this->gameState.get());
+  }
 
-  protected:
-    virtual bool UpdateLine_Test(Agent &_agent,
+  protected: virtual bool UpdateLine_Test(Agent &_agent,
                                  const math::Line3<double> &_line,
                                  math::Line3<double> &_testLine)
+  {
+    this->perceptor->SetG2LMat(_agent);
+    _agent.percept.fieldLines.clear();
+    this->perceptor->UpdateLine(_agent, _line);
+    if (_agent.percept.fieldLines.size() == 0)
     {
-      this->perceptor->SetG2LMat(_agent);
-      _agent.percept.fieldLines.clear();
-      this->perceptor->UpdateLine(_agent, _line);
-      if (_agent.percept.fieldLines.size() == 0)
-      {
-        return false;
-      }
-      _testLine.Set(
-        Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[0]),
-        Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[1]));
-      return true;
+      return false;
     }
+    _testLine.Set(
+      Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[0]),
+      Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[1]));
+    return true;
+  }
 
-  protected:
-    virtual bool UpdateLandmark_Test(Agent &_agent,
+  protected: virtual bool UpdateLandmark_Test(Agent &_agent,
                                      const math::Vector3<double> &_landmark,
                                      math::Vector3<double> &_testLandmark)
+  {
+    this->perceptor->SetG2LMat(_agent);
+    _agent.percept.landMarks.clear();
+    this->perceptor->UpdateLandmark(_agent, "test", _landmark);
+    if (_agent.percept.landMarks.empty())
     {
-      this->perceptor->SetG2LMat(_agent);
-      _agent.percept.landMarks.clear();
-      this->perceptor->UpdateLandmark(_agent, "test", _landmark);
-      if (_agent.percept.landMarks.empty())
-      {
-        return false;
-      }
-      _testLandmark = Geometry::PolarToCart(_agent.percept.landMarks["test"]);
-      return true;
+      return false;
     }
+    _testLandmark = Geometry::PolarToCart(_agent.percept.landMarks["test"]);
+    return true;
+  }
 
-  protected:
-    virtual void TearDown()
-    {
-      delete this->perceptor;
-      delete this->gameState;
-    }
-
-  protected:
-    GameState *gameState;
-  protected:
-    Perceptor *perceptor;
+  protected: virtual void TearDown() {}
+  protected: std::shared_ptr<GameState> gameState;
+  protected: std::shared_ptr<Perceptor> perceptor;
 };
 
 /// \brief Test whether Perceptor constructor and destructor works
@@ -407,7 +395,7 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
 /// \Brief Test whether the Update() function works
 TEST_F(PerceptorTest, Percepter_Update)
 {
-  string teamNames[2] = {"blue", "red"};
+  std::string teamNames[2] = {"blue", "red"};
   for (int i = 0; i < 2; ++i)
   {
     for (int j = 0; j < 11; ++j)
