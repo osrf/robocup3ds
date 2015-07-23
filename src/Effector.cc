@@ -201,13 +201,13 @@ void Effector::ParseHingeJoint(sexp_t *_exp)
 //////////////////////////////////////////////////
 // void Effector::ParseScene(sexp_t *_exp)
 // {
-  // int type = 0;
-  // std::string address;
+// int type = 0;
+// std::string address;
 
-  // address = _exp->list->next->val;
-  // type = atof(_exp->list->next->next->val);
+// address = _exp->list->next->val;
+// type = atof(_exp->list->next->next->val);
 
-  // this->sceneEffectors.push_back(SceneMsg(type, address));
+// this->sceneEffectors.push_back(SceneMsg(type, address));
 // }
 
 //////////////////////////////////////////////////
@@ -227,13 +227,14 @@ void Effector::ParseBeam(sexp_t *_exp)
   yaw = atof(_exp->list->next->next->next->val);
 
   this->gameState->BeamAgent(this->currAgent->uNum,
-    this->currAgent->team->name, x, y, yaw);
+                             this->currAgent->team->name, x, y, yaw);
 }
 
 //////////////////////////////////////////////////
 void Effector::ParseInit(sexp_t *_exp)
 {
-  // this is the case where we already have an agent, then no need for init
+  // this is the case where we already have an agent in gameState,
+  // then no need for init
   if (this->currAgent)
   {
     return;
@@ -279,7 +280,7 @@ void Effector::OnConnection(const int _socket)
 void Effector::OnDisconnection(const int _socket)
 {
   if (this->socketIDMessageMap.find(_socket) !=
-    this->socketIDMessageMap.end())
+      this->socketIDMessageMap.end())
   {
     std::lock_guard<std::mutex> lock(this->mutex);
     this->socketIDMessageMap[_socket] = "__del__";
@@ -313,10 +314,9 @@ void Effector::Update()
 
     if (kv->second == "__del__")
     {
-      if (this->currAgent)
+      if (this->currAgent && this->gameState->RemoveAgent(this->currAgent->uNum,
+          this->currAgent->team->name))
       {
-        this->gameState->RemoveAgent(this->currAgent->uNum,
-                                     this->currAgent->team->name);
         this->agentsToRemove.push_back(this->currAgent->GetAgentID());
       }
       this->socketIDMessageMap.erase(kv++);
