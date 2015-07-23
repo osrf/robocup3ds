@@ -29,6 +29,15 @@
 #include "robocup3ds/Server.hh"
 
 //////////////////////////////////////////////////
+RCPServer::RCPServer(const int _port, const std::shared_ptr<SocketParser>
+                     &_parser):
+  port(_port),
+  masterSocket(-1),
+  parser(_parser),
+  enabled(false)
+{}
+
+//////////////////////////////////////////////////
 RCPServer::~RCPServer()
 {
   this->enabled = false;
