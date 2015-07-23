@@ -119,4 +119,5 @@ class Effector: public SocketParser
   /// \brief Pointer to gameState object
   private: GameState *const gameState;
 };
+
 #endif /* _GAZEBO_ROBOCUP3DS_EFFECTOR_HH_ */

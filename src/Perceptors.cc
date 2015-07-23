@@ -255,20 +255,20 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
     cx += snprintf(_string + cx, _size - cx, "(See");
 
     // write out landmark info
-    for (auto &kv : _agent.percept.landMarks)
+    for (const auto &kv : _agent.percept.landMarks)
     {
       cx += SerializePoint(kv.first.c_str(), kv.second,
                            _string + cx, _size - cx);
     }
 
     // write out other agent body parts
-    for (auto &kv : _agent.percept.otherAgentBodyMap)
+    for (const auto &kv : _agent.percept.otherAgentBodyMap)
     {
       // agentNum = kv.first.first;
       // agentTeam = kv.first.second;
       cx += snprintf(_string + cx, _size - cx, " (P (team %s) (id %d)",
                      kv.first.second.c_str(), kv.first.first);
-      for (auto &kv2 : kv.second)
+      for (const auto &kv2 : kv.second)
       {
         cx += SerializePoint(kv2.first.c_str(),
                              kv2.second, _string + cx, _size - cx);
@@ -277,7 +277,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
     }
 
     // write out fieldlines
-    for (auto &fieldLine : _agent.percept.fieldLines)
+    for (const auto &fieldLine : _agent.percept.fieldLines)
     {
       cx += snprintf(_string + cx, _size - cx,
                      " (L (pol %.2f %.2f %.2f) (pol %.2f %.2f %.2f))",
@@ -305,7 +305,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   }
 
   // write body joint angle info
-  for (auto &kv : _agent.percept.hingeJoints)
+  for (const auto &kv : _agent.percept.hingeJoints)
   {
     cx += snprintf(_string + cx, _size - cx, " (HJ (n %s) (ax %.2f))",
                    kv.first.c_str(), kv.second);
