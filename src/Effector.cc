@@ -328,4 +328,7 @@ void Effector::Update()
       ++kv;
     }
   }
+
+  this->currSocketId = -1;
+  this->currAgent = NULL;
 }
