@@ -12,11 +12,12 @@ set (sources
   states/State.cc
   GameState.cc
   Robocup3dsPlugin.cc
+  Server.cc
 )
 
 set (gtest_sources
   Robocup3dsPlugin_TEST.cc
-  GameState_TEST.cc
+  Server_TEST.cc
 )
 
 # make below target specific?

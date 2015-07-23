@@ -2373,7 +2373,7 @@ class NestingState(object):
 
 def CheckForNonStandardConstructs(filename, clean_lines, linenum,
                                   nesting_state, error):
-  r"""Logs an error if we see certain non-ANSI constructs ignored by gcc-2.
+  """Logs an error if we see certain non-ANSI constructs ignored by gcc-2.
 
   Complain about several constructs which gcc-2 accepts, but which are
   not standard C++.  Warning about these in lint is one way to ease the
