@@ -93,7 +93,6 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
   {
     return;
   }
-
   this->UpdateEffector();
   this->UpdateGameState();
   this->UpdatePerceptor();
