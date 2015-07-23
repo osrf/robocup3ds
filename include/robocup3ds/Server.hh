@@ -80,8 +80,9 @@ class RCPServer
   /// \param[in] _socket Socket associated to the new disconnection.
   /// \param[in] _obj2 Instance containing the member function callback for
   /// new disconnections.
-  public: RCPServer(const int _port, const std::shared_ptr<SocketParser> &_parser)
-  : port(_port),
+  public: RCPServer(const int _port, const std::shared_ptr<SocketParser>
+    &_parser):
+    port(_port),
     masterSocket(-1),
     parser(_parser),
     enabled(false)
