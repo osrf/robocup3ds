@@ -22,6 +22,8 @@
 #include <memory>
 #include <string>
 
+#include "robocup3ds/Agent.hh"
+
 class GameState;
 
 namespace states
@@ -33,7 +35,8 @@ namespace states
     /// \param[in] _name Name of the state.
     /// \param[out] _gameState Reference to the GameState.
     public: State(const std::string &_name,
-                  GameState *const _gameState);
+                  GameState *const _gameState,
+                  const Team::Side _side = Team::Side::NEITHER);
 
     /// \brief Initialize the state. Called once after a pause duration after
     /// entering state.
@@ -64,6 +67,9 @@ namespace states
 
     /// \brief Name of the state.
     public: const std::string name;
+
+    /// \brief Side that this state belongs to
+    public: const Team::Side side;
 
     /// \brief Pointer to access full game information.
     public: GameState *const gameState;

@@ -50,7 +50,8 @@ namespace states
 /// the players and ball. Also, check for collisions in simulation world model
 /// and update ballContactHistory member variable if necessary
 /// 2) Call the Effector object's Update() method
-/// 3) Call the Update() method
+/// 3) Call the Update() method, which updates the playmode and check/deal
+/// with rule violations
 /// 4) Call the Perceptor object's Update() method
 /// 5) If the GameState object modifies the pose of any of the players and or
 /// ball (by checking the updatePose flag), update the simulation world model
@@ -85,11 +86,10 @@ class GameState
     /// \param[in] _normalLevel Normal message logging level
     /// \param[in] _errorLevel Error messages above this level will be printed
     public: Logger(const GameState *const _gameState,
-      const int _normalLevel,
-                    const int _errorLevel):
-        gameState(_gameState),
-        normalLevel(_normalLevel),
-        errorLevel(_errorLevel)
+      const int _normalLevel, const int _errorLevel):
+      gameState(_gameState),
+      normalLevel(_normalLevel),
+      errorLevel(_errorLevel)
     {}
 
     /// \brief Print normal messages plus some game information
@@ -162,8 +162,6 @@ class GameState
     public: std::string teamName;
   };
 
-  // methods and constructors
-
   /// \brief Constructor.
   public: GameState();
 
@@ -194,10 +192,10 @@ class GameState
   /// \brief Set the current game state. If the new state is the same than
   /// the current one, the operation does not have any effect.
   /// \param[in] _newState New state to replace current state
-  /// \param[in] _resetStage When new state is the same as current state,
+  /// \param[in] _resetState When new state is the same as current state,
   /// setting this flag to true will reset the state
   public: void SetCurrent(const std::shared_ptr<states::State> &_newState,
-    const bool _resetStage = false);
+    const bool _resetState = false);
 
   /// \brief Drops the ball at its current position and move all players away
   /// by the free kick radius. If the ball is off the field, it is brought
@@ -322,15 +320,13 @@ class GameState
 
   /// \brief Beam the agent if the play mode allows it
   /// \param[in] _uNum Agent number
-  /// \param[in] _teamName Agent name
+  /// \param[in] _teamName Team name
   /// \param[in] _x X position of agent
   /// \param[in] _y Y position of agent
   /// \param[in] _rot Yaw of agent
-  /// \return Flag whether removing agent is successful
+  /// \return Flag whether beaming agent is successful
   public: bool BeamAgent(const int _uNum, const std::string &_teamName,
                          const double _x, const double _y, const double _rot);
-
-  // Getter and setter methods
 
   /// \brief Get the game's half.
   /// \return if the game is in the first half or if is in the second.
@@ -340,11 +336,11 @@ class GameState
   /// \param[in] _newHalf Set the current half
   public: void SetHalf(const Half _newHalf);
 
-  /// \brief Get the elapsed time since beginning of half.
+  /// \brief Get the elapsed time in seconds since beginning of half.
   /// \return The elapsed game time
   public: double GetElapsedGameTime() const;
 
-  /// \brief Get the elapsed time since last cycle.
+  /// \brief Get the elapsed time in seconds since last cycle.
   /// \return The elapsed game time since last cycle
   public: double GetElapsedCycleGameTime() const;
 
@@ -353,9 +349,11 @@ class GameState
   public: void SetGameTime(const double _gameTime);
 
   /// \brief Get the game time.
+  /// \return Current game time
   public: double GetGameTime() const;
 
   /// \brief Get the game time when play starts
+  /// \return Time when game started
   public: double GetStartGameTime() const;
 
   /// \brief Set the game time when play starts
@@ -367,9 +365,11 @@ class GameState
   public: void SetCycleCounter(const int _cycleCounter);
 
   /// \brief Get the cycle counter
+  /// \return Current cycle count
   public: int GetCycleCounter() const;
 
   /// \brief Get the current state
+  /// \return Shared_ptr to current state
   public: std::shared_ptr<states::State> GetCurrentState() const;
 
   /// \brief Get the side of the team who last touched the ball.
@@ -407,8 +407,6 @@ class GameState
     const std::map<std::string, std::string> &_config,
     const std::string &_key, bool &_boolValue) const;
 
-  // member and class variables
-
   /// \brief beforeKickOffState playmode
   public: std::shared_ptr<states::BeforeKickOffState> beforeKickOffState;
 
@@ -418,7 +416,7 @@ class GameState
   /// \brief kickOffRightState playmode
   public: std::shared_ptr<states::KickOffState> kickOffRightState;
 
-  /// \brief playState playmode
+  /// \brief playOnState playmode
   public: std::shared_ptr<states::PlayOnState> playOnState;
 
   /// \brief kickInLeftState playmode
@@ -557,7 +555,7 @@ class GameState
   /// \brief Safety margin when beaming players during dropball
   public: static const double dropBallRadiusMargin;
 
-  /// \ brief Noise added to beams
+  /// \brief Noise added to beams
   public: static const double beamNoise;
 
   /// \brief Pointer to configuration variables

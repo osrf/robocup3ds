@@ -28,8 +28,9 @@ using namespace ignition;
 
 /////////////////////////////////////////////////
 GoalKickState::GoalKickState(const std::string &_name,
-                             GameState *const _gameState)
-  : State(_name, _gameState)
+                             GameState *const _gameState,
+                             const Team::Side _side):
+  State(_name, _gameState, _side)
 {
 }
 
@@ -54,17 +55,15 @@ void GoalKickState::Update()
     this->Initialize();
   }
 
+  this->gameState->DropBallImpl(this->side);
+  this->gameState->CheckGoalKickIllegalDefense(this->side);
   math::Box penaltyBox;
-  if (this->name == "GoalKickLeft")
+  if (this->side == Team::Side::LEFT)
   {
-    this->gameState->DropBallImpl(Team::Side::LEFT);
-    this->gameState->CheckGoalKickIllegalDefense(Team::Side::LEFT);
     penaltyBox = SoccerField::PenaltyBoxLeft;
   }
   else
   {
-    this->gameState->DropBallImpl(Team::Side::RIGHT);
-    this->gameState->CheckGoalKickIllegalDefense(Team::Side::RIGHT);
     penaltyBox = SoccerField::PenaltyBoxRight;
   }
   State::Update();

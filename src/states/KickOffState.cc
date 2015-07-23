@@ -26,8 +26,9 @@ using namespace states;
 
 /////////////////////////////////////////////////
 KickOffState::KickOffState(const std::string &_name,
-                           GameState *const _gameState)
-  : State(_name, _gameState)
+                           GameState *const _gameState,
+                           const Team::Side _side):
+  State(_name, _gameState, _side)
 {
 }
 
@@ -54,10 +55,7 @@ void KickOffState::Update()
   }
 
   // check for agents that violate sides
-  if (this->name == "KickOffLeft")
-  { gameState->CheckOffSidesOnKickOff(Team::Side::LEFT); }
-  else
-  { gameState->CheckOffSidesOnKickOff(Team::Side::RIGHT); }
+  gameState->CheckOffSidesOnKickOff(this->side);
   State::Update();
 
   // After some time, go to play mode.

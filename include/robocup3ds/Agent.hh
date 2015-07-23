@@ -57,7 +57,7 @@ class Team
   }
 
   /// \brief Equality operator for teams
-  /// \param[in] _team Tean compared against
+  /// \param[in] _team Team compared against
   /// \return True if they are equal
   public: bool operator==(const Team &_team)
   {
@@ -107,7 +107,7 @@ class Agent
     this->status = Status::RELEASED;
     this->updatePose = false;
     this->inPenaltyBox = false;
-    this->timeImmoblized = 0;
+    this->timeImmobilized = 0;
     this->timeFallen = 0;
   }
 
@@ -117,6 +117,11 @@ class Agent
   public: bool operator==(const Agent &_agent)
   {
     return this == &_agent;
+  }
+
+  /// \brief Flag whether player is goalkeeper
+  public: bool IsGoalKeeper() {
+    return this->uNum == 1;
   }
 
   /// \brief Agent unique id
@@ -148,15 +153,11 @@ class Agent
   public: bool inPenaltyBox;
 
   /// \brief Stores time the agent has not moved
-  public: double timeImmoblized;
+  public: double timeImmobilized;
 
   /// \brief Stores time the agent has fallen
   public: double timeFallen;
 
-  /// \brief Flag whether player is goalkeeper
-  public: bool IsGoalKeeper() {
-    return this->uNum == 1;
-  }
 };
 
 #endif

@@ -31,7 +31,8 @@ namespace states
   {
     // Documentation inherited
     public: GoalKickState(const std::string &_name,
-                          GameState *const _gameState);
+                          GameState *const _gameState,
+                          const Team::Side _side);
 
     // Documentation inherited
     public: virtual void Initialize();
