@@ -3,6 +3,7 @@ set(TEST_TYPE "INTEGRATION")
 set(tests
   physics.cc
   run_agent.cc
+  TestAgent.cc
 )
 
 link_directories(${PROJECT_BINARY_DIR}/test)

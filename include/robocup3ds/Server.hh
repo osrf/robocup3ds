@@ -37,11 +37,11 @@
 /// server and the new client.
 ///
 ///  ---------    Master socket
-/// |      |<------------------ New client requests
-/// |      |
+/// |         |<------------------ New client requests
+/// |         |
 /// |RCPServer|   Client1 socket
-/// |      |<-----------------> Client1 data exchange
-/// |      |   ClientN socket
+/// |         |<-----------------> Client1 data exchange
+/// |         |   ClientN socket
 ///  --------- <-----------------> ClientN data exchange
 ///
 ///  The RCPServer API allows to send a message to a specific socket (client).
