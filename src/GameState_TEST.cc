@@ -113,11 +113,6 @@ TEST_F(GameStateTest_basic, GameState_LoadConfiguration)
 /// \brief Test for adding teams and agents
 TEST_F(GameStateTest_basic, GameState_add_teams_agents)
 {
-  // cannot add agent in incorrect play mode
-  gameState.SetCurrent(gameState.playOnState);
-  EXPECT_FALSE(gameState.AddAgent(0, "red"));
-  gameState.SetCurrent(gameState.beforeKickOffState);
-
   // make sure that agents with bad unums or teams cannot be added
   for (int i = 0; i < 3; ++i)
   {
@@ -1275,9 +1270,7 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
 
   // check immobility and fallen for non-goalie
   gameState.SetCycleCounter(0);
-  gameState.SetCurrent(gameState.beforeKickOffState);
   gameState.AddAgent(2, "blue");
-  gameState.SetCurrent(gameState.playOnState);
   Agent &agent2 = gameState.teams.at(0)->members.at(1);
   agent2.pos = agent2.prevPos = pos;
   while (gameState.GetGameTime() < GameState::immobilityTimeLimit)

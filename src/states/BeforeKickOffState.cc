@@ -41,18 +41,17 @@ void BeforeKickOffState::Initialize()
 /////////////////////////////////////////////////
 void BeforeKickOffState::Update()
 {
-  // resets getElapsedGameTime() back to zero
-  this->gameState->SetStartGameTime(this->gameState->GetGameTime());
-
   if (!this->hasInitialized)
   {
     this->Initialize();
   }
-
   if (this->gameState->GetBall() != SoccerField::BallCenterPosition)
   {
     this->gameState->MoveBallToCenter();
   }
+
+  // resets getElapsedGameTime() back to zero
+  this->gameState->SetStartGameTime(this->gameState->GetGameTime());
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff)

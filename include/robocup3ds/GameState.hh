@@ -296,21 +296,11 @@ class GameState
   public: void SetBallAngVel(const ignition::math::Vector3<double>
                              &_ballAngVel);
 
-  /// \brief Get the linear velocity of the ball
-  /// \return Ball linear velocity
-  public: ignition::math::Vector3<double> GetBallVel() const;
-
-  /// \brief Get the angular velocity of the ball
-  /// \return Ball angular velocity
-  public: ignition::math::Vector3<double> GetBallAngVel() const;
-
   /// \brief Add agent to game state
   /// \param[in] _uNum Agent number
   /// \param[in] _teamName Agent name
-  /// \param[in] _socketID SocketID associated with agent
   /// \return True when adding agent is successful
-  public: bool AddAgent(const int _uNum, const std::string &_teamName,
-    const int _socketID = -1);
+  public: bool AddAgent(const int _uNum, const std::string &_teamName);
 
   /// \brief Remove agent from game state
   /// \param[in] _uNum Agent number
@@ -566,11 +556,6 @@ class GameState
 
   /// \brief Noise added to beams
   public: static const double beamNoise;
-
-  /// \brief If less than ballContactInterval time has passed since the last
-  /// ball contact by the same agent, then it will not count as a new ball
-  /// contact (the time of the last ball contact is update instead)
-  public: static const double ballContactInterval;
 
   /// \brief Pointer to configuration variables
   public: static std::shared_ptr<std::map<const std::string,

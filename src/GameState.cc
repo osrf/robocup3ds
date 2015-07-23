@@ -24,7 +24,6 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Agent.hh"
 #include "robocup3ds/Geometry.hh"
-#include "robocup3ds/Nao.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
 #include "robocup3ds/states/CornerKickState.hh"
@@ -65,7 +64,7 @@ double GameState::SecondsKickOff = 15;
 bool   GameState::useCounterForGameTime = true;
 int    GameState::playerLimit = 11;
 int    GameState::penaltyBoxLimit = 3;
-double GameState::beamHeight = NaoRobot::torsoHeight + 0.05;
+double GameState::beamHeight = SoccerField::RobotPoseHeight + 0.05;
 double GameState::crowdingEnableRadius = 0.8;
 double GameState::innerCrowdingRadius = 0.4;
 double GameState::outerCrowdingRadius = 1.0;
@@ -78,7 +77,6 @@ bool   GameState::restrictVision = true;
 const double GameState::counterCycleTime = 0.02;
 const double GameState::dropBallRadiusMargin = 0.5;
 const double GameState::beamNoise = 0.1;
-const double GameState::ballContactInterval = 0.1;
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -121,11 +119,9 @@ GameState::GameState():
 {
   this->SetCurrent(beforeKickOffState);
   this->teams.push_back(std::make_shared<Team>(
-                          "_empty_team", Team::Side::LEFT, 0,
-                          GameState::playerLimit));
+      "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
   this->teams.push_back(std::make_shared<Team>(
-                          "_empty_team", Team::Side::RIGHT, 0,
-                          GameState::playerLimit));
+      "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
 }
 
 /////////////////////////////////////////////////
@@ -255,7 +251,6 @@ void GameState::ReleasePlayers()
   {
     for (auto &agent : team->members)
     {
-      agent.prevStatus = agent.status;
       agent.status = Agent::Status::RELEASED;
     }
   }
@@ -268,7 +263,6 @@ void GameState::StopPlayers()
   {
     for (auto &agent : team->members)
     {
-      agent.prevStatus = agent.status;
       agent.status = Agent::Status::STOPPED;
     }
   }
@@ -637,7 +631,7 @@ void GameState::CheckImmobility()
         agent.timeImmobilized = 0;
       }
 
-      if (agent.pos.Z() < NaoRobot::torsoHeight * 0.5)
+      if (agent.pos.Z() < SoccerField::RobotPoseHeight * 0.5)
       {
         agent.timeFallen += this->GetElapsedCycleGameTime();
       }
@@ -893,18 +887,6 @@ void GameState::SetBallAngVel(const math::Vector3<double> &_ballAngVel)
   this->updateBallPose = true;
 }
 
-/////////////////////////////////////////////////
-ignition::math::Vector3<double> GameState::GetBallVel() const
-{
-  return this->ballVel;
-}
-
-/////////////////////////////////////////////////
-ignition::math::Vector3<double> GameState::GetBallAngVel() const
-{
-  return this->ballAngVel;
-}
-
 ////////////////////////////////////////////////
 void GameState::Initialize()
 {
@@ -913,15 +895,8 @@ void GameState::Initialize()
 }
 
 ////////////////////////////////////////////////
-bool GameState::AddAgent(const int _uNum, const std::string &_teamName,
-                         const int _socketID)
+bool GameState::AddAgent(const int _uNum, const std::string &_teamName)
 {
-  if (this->currentState->GetName() != "BeforeKickOff")
-  {
-    // std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
-    return false;
-  }
-
   int uNum = _uNum;
   // std::cout << "adding agent: " << uNum << " teamName: "
   // << teamName << std::endl;
@@ -997,7 +972,7 @@ bool GameState::AddAgent(const int _uNum, const std::string &_teamName,
     // << std::endl;
     return false;
   }
-  teamToAdd->members.push_back(Agent(uNum, teamToAdd, _socketID));
+  teamToAdd->members.push_back(Agent(uNum, teamToAdd));
   return true;
 }
 

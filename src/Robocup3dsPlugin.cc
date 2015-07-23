@@ -287,14 +287,14 @@ void Robocup3dsPlugin::UpdatePerceptor()
       agent.cameraRot = G2I(cameraPose.rot);
 
       // update agent's self body map
-      for (auto &kv : NaoRobot::bodyPartMap)
+      for (const auto &kv : NaoRobot::bodyPartMap)
       {
         agent.selfBodyMap[kv.first] =
           G2I(model->GetLink(kv.second)->GetWorldPose().pos);
       }
 
       // update agent's percept joints angles
-      for (auto &kv : NaoRobot::hingeJointPerceptorMap)
+      for (const auto &kv : NaoRobot::hingeJointPerceptorMap)
       {
         agent.percept.hingeJoints[kv.first] =
           model->GetJoint(kv.second)->GetAngle(0).Degree();
@@ -325,7 +325,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
   // send messages to server
   for (const auto &team : this->gameState->teams)
   {
-    for (auto &agent : team->members)
+    for (const auto &agent : team->members)
     {
       int cx = perceptor->Serialize(agent, &(this->buffer[4]),
                                     Robocup3dsPlugin::kBufferSize - 4);

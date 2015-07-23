@@ -1,11 +1,5 @@
-
-set(PARSER_SOURCE ../lib/sexpLibrary/parser.c ../lib/sexpLibrary/sexp.c ../lib/sexpLibrary/event_temp.c ../lib/sexpLibrary/sexp_ops.c ../lib/sexpLibrary/cstring.c ../lib/sexpLibrary/faststack.c)
-Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/sexpLibrary/faststack.h ../lib/sexpLibrary/sexp_errors.h ../lib/sexpLibrary/sexp_ops.h )
-
-
 set (sources
   Geometry.cc
-  Effector.cc
   Perceptors.cc
   states/BeforeKickOffState.cc
   states/CornerKickState.cc
@@ -23,7 +17,6 @@ set (sources
 )
 
 set (gtest_sources
-  Effector_TEST.cc
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
   Perceptors_TEST.cc
@@ -41,13 +34,11 @@ link_directories(
   ${GAZEBO_LIBRARY_DIRS}
 )
 
-robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources} ${PARSER_SOURCE} ${HEADER_SOURCE})
+robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources})
 robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
 
 target_link_libraries(${PROJECT_NAME_LOWER}Plugin
-  gazebo_sensors
   gazebo_common
-  ${IGNITION-MATH_LIBRARIES}
 )
 
 robocup3ds_build_tests(${gtest_sources})

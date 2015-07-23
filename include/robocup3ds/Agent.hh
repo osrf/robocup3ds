@@ -27,13 +27,6 @@
 
 class Agent;
 
-/// \brief Typedef for map of agent's body parts and positions
-typedef std::map<std::string, ignition::math::Vector3<double>>
-  AgentBodyMap;
-
-/// \brief Typedef for uNum, teamName pairs for identifying agents
-typedef std::pair<int, std::string> AgentId;
-
 /// \brief Team class for GameState
 class Team
 {
@@ -91,6 +84,13 @@ class Team
   public: bool canScore;
 };
 
+/// \brief Typedef for map of agent's body parts and positions
+typedef std::map<std::string, ignition::math::Vector3<double> >
+  AgentBodyMap;
+
+/// \brief Typedef for uNum, teamName pairs for identifying agents
+typedef std::pair<int, std::string> AgentId;
+
 /// \brief Container that contains info for hear perceptor
 class AgentHear
 {
@@ -128,54 +128,26 @@ class AgentPerceptions
     this->fieldLines.reserve(21);
   }
 
-  /// \brief Map of landmarks that have been transformed to agent's cood
+  /// \Brief Map of landmarks that have been transformed to agent's cood
   /// frame
-  public: std::map<std::string, ignition::math::Vector3<double>> landMarks;
+  public: std::map<std::string, ignition::math::Vector3<double> > landMarks;
 
-  /// \brief Vector of lines that have been transformed to agent's cood
+  /// \Brief Vector of lines that have been transformed to agent's cood
   /// frame
-  public: std::vector<ignition::math::Line3<double>> fieldLines;
+  public: std::vector<ignition::math::Line3<double> > fieldLines;
 
-  /// \brief Map of agent's perceptions of other agent's body parts
+  /// \Brief Map of agent's perceptions of other agent's body parts
   /// Implemented as a nested map
   public: std::map<AgentId, AgentBodyMap> otherAgentBodyMap;
 
-  /// \brief Hear perceptor
+  /// \Brief Hear perceptor
   public: AgentHear hear;
-
-  /// \brief Map of hinge joints and their angles
-  public: std::map<std::string, double> hingeJoints;
-
-  /// \brief Gyro information of torso
-  public: ignition::math::Vector3<double> gyroRate;
-
-  /// \brief Acceleration of torso
-  public: ignition::math::Vector3<double> accel;
-
-  /// \brief Force information for left foot of nao
-  public: std::pair<ignition::math::Vector3<double>,
-  ignition::math::Vector3<double>> leftFootFR;
-
-  /// \brief Force information for right foot of nao
-  public: std::pair<ignition::math::Vector3<double>,
-  ignition::math::Vector3<double>> rightFootFR;
-};
-
-/// \brief This class serves as an container for the information by the
-/// the agent
-class AgentActions
-{
-  /// \brief Constructor
-  public: AgentActions() {}
-
-  /// \brief Stores the velocity and angle information
-  public: std::map<std::string, double> jointEffectors;
 };
 
 /// \brief Agent class for GameState
 class Agent
 {
-  /// \brief Enum for the agent status and whether movement is allowed
+  /// \brief Enum for the agent status
   public: enum class Status
   {
     /// \brief Agent is not allowed to move
@@ -187,15 +159,13 @@ class Agent
   /// \brief Constructor for Agent object
   /// \param[in] _uNum unique identifier for agent
   /// \param[in] _team pointer to team agent is on
-  /// \param[in] _socketID Socket ID for agent
-  public: Agent(const int _uNum, const std::shared_ptr<Team> &_team,
-    const int _socketID = -1):
+  public: Agent(const int _uNum, const std::shared_ptr<Team> &_team):
     uNum(_uNum),
     team(_team)
   {
-    this->socketID = _socketID;
+    this->pos.Set(0, 0, 0);
+    this->prevPos.Set(0, 0, 0);
     this->status = Status::RELEASED;
-    this->prevStatus = this->status;
     this->updatePose = false;
     this->inPenaltyBox = false;
     this->timeImmobilized = 0;
@@ -210,53 +180,10 @@ class Agent
     return this == &_agent;
   }
 
-  /// \brief Return AgentId of agent
-  /// \return AgentId, a pair of unum and team name
-  public: AgentId GetAgentID() const
-  {
-    if (!this->team)
-      return std::make_pair(this->uNum, "");
-    return std::make_pair(this->uNum, this->team->name);
-  }
-
-  /// \brief Return name of agent
-  /// \return A String that is composed of unum and team name
-  public: std::string GetName() const
-  {
-    if (!this->team)
-      return std::to_string(this->uNum);
-    return std::to_string(this->uNum) + "_" + this->team->name;
-  }
-
-  /// \brief Checks if agent name is valid
-  /// \param[in] _agentName Agent name string to check
-  /// \param[out] _uNum uNum parsed from agent name
-  /// \param[out] _teamName Name of team parsed from agent name
-  /// \return True if agent name is valid
-  public: static bool CheckAgentName(const std::string &_agentName,
-    int &_uNum, std::string &_teamName)
-  {
-    try
-    {
-      size_t sepIndex = _agentName.find_first_of("_");
-      _uNum = std::stoi(_agentName.substr(0, sepIndex));
-      _teamName = _agentName.substr(0, sepIndex + 1);
-      return true;
-    }
-    catch (const std::exception &exc)
-    {
-      return false;
-    }
-  }
-
   /// \brief Flag whether player is goalkeeper
-  public: bool IsGoalKeeper()
-  {
+  public: bool IsGoalKeeper() {
     return this->uNum == 1;
   }
-
-  /// \brief Agent socket id
-  public: int socketID;
 
   /// \brief Agent unique id
   public: int uNum;
@@ -267,23 +194,17 @@ class Agent
   /// \brief Agent status
   public: Status status;
 
-  /// \brief Agent status in prev cycle
-  public: Status prevStatus;
-
   /// \brief Agent position
   public: ignition::math::Vector3<double> pos;
 
   /// \brief Agent position in previous cycle
   public: ignition::math::Vector3<double> prevPos;
 
-  /// \brief Agent orientation
-  public: ignition::math::Quaternion<double> rot;
-
   /// \brief Agent camera orientation
   public: ignition::math::Quaternion<double> cameraRot;
 
-  /// \brief Agent camera position
-  public: ignition::math::Vector3<double> cameraPos;
+  /// \brief Agent orientation
+  public: ignition::math::Quaternion<double> rot;
 
   /// \brief Flag whether to update agent pose in world to match
   /// gamestate.
@@ -295,9 +216,6 @@ class Agent
   /// \brief Container for an agent's perceptions
   public: AgentPerceptions percept;
 
-  /// \brief Container for agent's effector actions
-  public: AgentActions action;
-
   /// \brief Flag whether agent is in penalty box
   public: bool inPenaltyBox;
 
@@ -306,6 +224,7 @@ class Agent
 
   /// \brief Stores time the agent has fallen
   public: double timeFallen;
+
 };
 
 /// \brief Container that contains info for say effector

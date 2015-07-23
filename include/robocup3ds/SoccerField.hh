@@ -37,6 +37,7 @@ namespace SoccerField
   static const double HalfGoalWidth = GoalWidth * 0.5;
   static const double GoalDepth = 0.6;
   static const double GoalHeight = 0.8;
+  static const double RobotPoseHeight = 0.35;
   static const double BallRadius = 0.042;
   static const double OutofBoundsTol = BallRadius;
   static const double PenaltyBoxWidth = 3.9;
@@ -135,10 +136,6 @@ namespace SoccerField
     {"G2L", ignition::math::Vector3<double>(-15, -1.05, 0.8)},
     {"G2R", ignition::math::Vector3<double>(15, -1.05, 0.8)}
   };
-
-  static const std::string ballName = "soccer_ball";
-
-  static const std::string ballLinkName = "soccer_ball_link";
 }
 
 #endif
