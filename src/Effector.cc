@@ -325,7 +325,7 @@ void Effector::Update()
     else
     {
       ParseMessage(kv->second);
-      kv++;
+      ++kv;
     }
   }
 }
