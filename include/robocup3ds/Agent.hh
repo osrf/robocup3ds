@@ -224,7 +224,6 @@ class Agent
 
   /// \brief Stores time the agent has fallen
   public: double timeFallen;
-
 };
 
 /// \brief Container that contains info for say effector
