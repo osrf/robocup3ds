@@ -57,36 +57,21 @@
 /// the socket the correct amount of bytes. An object of type SocketParser
 /// should be passed in as an argument to the RCPServer constructor.
 ///
-/// Two callbacks are also needed in the class constructor. These callbacks
-/// will be executed when a new client is connected or disconnected.
+/// SocketParser will also need to implement two callback methods, namely
+/// OnConnection() and OnDisconnection(), which are called when a client
+/// connects and disconnects from a socket respectively.
 ///
-/// This is an example of how to instantitate a RCPServer class:
+/// This is an example of how to instantiate a RCPServer class:
 /// auto parser = std::make_shared<TrivialSocketParser>();
-//  gazebo::RCPServer server(kPort, parser,
-//    &TrivialSocketParser::OnConnection, parser.get(),
-//    &TrivialSocketParser::OnDisconnection, parser.get());
+//  gazebo::RCPServer server(kPort, parser);
 class RCPServer
 {
   /// \brief Constructor.
   /// \param[in] _port TCP port for incoming connections.
   /// \param[in] _parser Parser in charge of reading incoming data from
   /// the sockets.
-  /// \param[in] _connectCb Callback to be executed on new client connections.
-  /// \param[in] _socket Socket associated to the new connection.
-  /// \param[in] _obj1 Instance containing the member function callback for
-  /// new connections.
-  /// \param[in] _disconnectCb Callback to be executed when an existing client
-  /// is disconnected.
-  /// \param[in] _socket Socket associated to the new disconnection.
-  /// \param[in] _obj2 Instance containing the member function callback for
-  /// new disconnections.
   public: RCPServer(const int _port, const std::shared_ptr<SocketParser>
-    &_parser):
-    port(_port),
-    masterSocket(-1),
-    parser(_parser),
-    enabled(false)
-  {}
+    &_parser);
 
   /// \brief Simple constructor for testing purposes
   public: RCPServer() {}
