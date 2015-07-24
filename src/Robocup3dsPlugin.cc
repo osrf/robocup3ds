@@ -391,7 +391,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
   // send messages to server
   for (const auto &team : this->gameState->teams)
   {
-    for (auto &agent : team->members)
+    for (const auto &agent : team->members)
     {
       int cx = perceptor->Serialize(agent, &(this->buffer[4]),
                                     Robocup3dsPlugin::kBufferSize - 4);
