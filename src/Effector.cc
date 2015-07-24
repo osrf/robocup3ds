@@ -40,6 +40,7 @@ Effector::Effector(GameState *const _gameState):
   this->sexpBuffer = new char[Effector::kBufferSize];
 }
 
+//////////////////////////////////////////////////
 Effector::~Effector()
 {
   delete[] this->buffer;
