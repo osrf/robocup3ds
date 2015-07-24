@@ -137,8 +137,8 @@ class GameState
     /// \param[in] _contactTime time when ball was touched
     /// \param[in] _contactPos position where ball was touched
     public: BallContact(const int _uNum, const Team::Side _side,
-                          const double _contactTime,
-                          const ignition::math::Vector3<double> &_contactPos):
+                        const double _contactTime,
+                        const ignition::math::Vector3<double> &_contactPos):
       uNum(_uNum),
       side(_side),
       contactTime(_contactTime),
@@ -256,8 +256,7 @@ class GameState
   /// \param[out] _agent Reference to agent object
   public: void MoveOffSideAgent(Agent &_agent) const;
 
-  /// \brief Check if the first half or the game ends, also update
-  /// elapsed time.
+  /// \brief Check if the first half or the game ends, also update elapsed time.
   public: void CheckTiming();
 
   /// \brief Check the ball's position looking for goals or out of bounds.
@@ -521,7 +520,7 @@ class GameState
   /// \brief Radius where not allowed team cannot approach ball
   public: static double dropBallRadius;
 
-  /// \brief Every cycle counts as [counterCycleTime] of 
+  /// \brief Every cycle counts as [counterCycleTime] of
   /// game time (for `fake simulations)
   public: static bool useCounterForGameTime;
 
