@@ -170,9 +170,9 @@ void Effector::ParseSexp(sexp_t *_exp)
   }
 
   // Decide based on the type of effector message
-  if (!strcmp(v, "scene"))
+  if (!strcmp(v, "syn ") && this->currAgent)
   {
-    // this->ParseScene(_exp);
+    this->currAgent->syn = true;
   }
   else if (!strcmp(v, "beam"))
   {
@@ -282,7 +282,7 @@ void Effector::ParseInit(sexp_t *_exp)
 void Effector::OnConnection(const int _socket)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
-  this->socketIDMessageMap[_socket] = "__uninit__";
+  this->socketIDMessageMap[_socket] = "__empty__";
 }
 
 //////////////////////////////////////////////////
@@ -332,9 +332,14 @@ void Effector::Update()
       }
       this->socketIDMessageMap.erase(kv++);
     }
+    else if (kv->second == "__empty__")
+    {
+      ++kv;
+    }
     else
     {
       this->ParseMessage(kv->second);
+      this->socketIDMessageMap[kv->first] = "__empty__";
       ++kv;
     }
   }
@@ -364,9 +369,14 @@ void MonitorEffector::Update()
     {
       this->socketIDMessageMap.erase(kv++);
     }
+    else if (kv->second == "__empty__")
+    {
+      ++kv;
+    }
     else
     {
       this->ParseMessage(kv->second);
+      this->socketIDMessageMap[kv->first] = "__empty__";
       ++kv;
     }
   }

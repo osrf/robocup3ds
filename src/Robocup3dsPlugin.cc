@@ -90,9 +90,6 @@ void Robocup3dsPlugin::LoadConfiguration(
 void Robocup3dsPlugin::Load(physics::WorldPtr _world,
                             sdf::ElementPtr _sdf)
 {
-  // Connect to the update event.
-  this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-                             boost::bind(&Robocup3dsPlugin::Update, this, _1));
   this->world = _world;
   this->sdf = _sdf;
 
@@ -121,6 +118,20 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   this->gameState->LoadConfiguration(config);
   this->LoadConfiguration(config);
 
+  // Connect to the update event.
+  if (!Robocup3dsPlugin::syncMode)
+  {
+    this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+                               boost::bind(&Robocup3dsPlugin::Update,
+                                           this, _1));
+  }
+  else
+  {
+    this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+                               boost::bind(&Robocup3dsPlugin::UpdateSync,
+                                           this, _1));
+  }
+
   if (this->clientServer->GetPort() != Robocup3dsPlugin::clientPort)
   { this->clientServer->SetPort(Robocup3dsPlugin::clientPort); }
   if (this->monitorServer->GetPort() != Robocup3dsPlugin::monitorPort)
@@ -145,11 +156,46 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
   {
     return;
   }
+
   this->UpdateEffector();
   this->UpdateMonitorEffector();
   this->UpdateGameState();
   this->UpdatePerceptor();
   this->lastUpdateTime = this->world->GetSimTime().Double();
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
+{
+  bool unsyncedAgent = true;
+  while (unsyncedAgent)
+  {
+    this->UpdateEffector();
+    for (const auto &team : this->gameState->teams)
+    {
+      for (const auto &agent : team->members)
+      {
+        if (!agent.syn)
+        {
+          continue;
+        }
+      }
+    }
+    unsyncedAgent = false;
+  }
+
+  this->UpdateMonitorEffector();
+  this->UpdateGameState();
+  this->UpdatePerceptor();
+  this->lastUpdateTime = this->world->GetSimTime().Double();
+
+  for (const auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      agent.syn = false;
+    }
+  }
 }
 
 /////////////////////////////////////////////////

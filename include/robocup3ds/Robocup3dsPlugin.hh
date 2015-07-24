@@ -48,6 +48,10 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \param[in] _info Information used in the update event.
   public: void Update(const gazebo::common::UpdateInfo &_info);
 
+  /// \brief Update the robocup simulation state in sync mode
+  /// \param[in] _info Information used in the update event.
+  public: void UpdateSync(const gazebo::common::UpdateInfo &_info);
+
   /// \brief Function for loading robocupPlugin configuration variables
   /// \param[in] _config Map of configuration variables
   private: void LoadConfiguration(
