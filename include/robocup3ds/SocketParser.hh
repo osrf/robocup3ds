@@ -24,7 +24,9 @@
 /// to be able to read data from the sockets. Users are the only ones that know
 /// how to read and interpret the data sent through the sockets. The server will
 /// call the Parse() method of the derived parser class that the users will
-/// write.
+/// write. The server will call the OnConnection() method when it receives a
+/// new connection through a socket, and similarly call the OnDisconnection()
+/// method when the connection is lost.
 class SocketParser
 {
   /// \brief Constructor.
@@ -37,6 +39,14 @@ class SocketParser
   /// \param[in] _socket Socket to read.
   /// \return True when data was succesfully parsed or false otherwise.
   public: virtual bool Parse(const int _socket) = 0;
+
+  /// \brief Callback function when new connection is created
+  /// \param[in] _socket Socket to read.
+  public: virtual void OnConnection(const int _socket) = 0;
+
+  /// \brief Callback function when existing connection is disconnected
+  /// \param[in] _socket Socket to read.
+  public: virtual void OnDisconnection(const int _socket) = 0;
 };
 
 #endif /* _GAZEBO_ROBOCUP3DS_SOCKETPARSER_HH_ */

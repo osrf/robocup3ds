@@ -4,7 +4,20 @@ Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/
 
 
 set (sources
+  Geometry.cc
   Effector.cc
+  Perceptors.cc
+  states/BeforeKickOffState.cc
+  states/CornerKickState.cc
+  states/FreeKickState.cc
+  states/GameOverState.cc
+  states/GoalKickState.cc
+  states/GoalState.cc
+  states/KickInState.cc
+  states/KickOffState.cc
+  states/PlayOnState.cc
+  states/State.cc
+  GameState.cc
   Robocup3dsPlugin.cc
   Server.cc
 )
@@ -13,6 +26,9 @@ set (gtest_sources
   Effector_TEST.cc
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
+  Perceptors_TEST.cc
+  Geometry_TEST.cc
+  GameState_TEST.cc
 )
 
 # make below target specific?
@@ -26,11 +42,12 @@ link_directories(
 )
 
 robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources} ${PARSER_SOURCE} ${HEADER_SOURCE})
+robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
 
 target_link_libraries(${PROJECT_NAME_LOWER}Plugin
-  ${GAZEBO_LIBRARIES}
+  gazebo_sensors
+  gazebo_common
+  ${IGNITION-MATH_LIBRARIES}
 )
-
-robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
 
 robocup3ds_build_tests(${gtest_sources})

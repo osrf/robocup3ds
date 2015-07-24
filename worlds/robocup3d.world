@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<sdf version="1.4">
+<sdf version="1.5">
   <world name="default">
 
     <physics type="ode">
@@ -42,14 +42,12 @@
     <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://robocup_3Dsim_ball</uri>
-      <name>soccer_ball</name>
     </include>
 
     <!-- Load the plugin for Razer Hydra -->
     <!--<plugin name="hydra" filename="libHydraPlugin.so"></plugin>-->
 
-    <plugin name="game_controller" filename="librobocup3dsPlugin.so">
-      <ball>soccer_ball</ball>
-    </plugin>
+    <plugin name="r" filename="librobocup3dsPlugin.so">
+  </plugin>
   </world>
 </sdf>

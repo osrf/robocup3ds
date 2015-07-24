@@ -15,33 +15,53 @@
  *
  */
 
-#include <iostream>
 #include <netinet/in.h>
-#include <mutex>
 #include <sys/socket.h>
+#include <iostream>
+#include <map>
+#include <mutex>
+#include <string>
+
+#include "robocup3ds/Agent.hh"
+#include "robocup3ds/Nao.hh"
+#include "robocup3ds/GameState.hh"
 #include "robocup3ds/Effector.hh"
 
+const int Effector::kBufferSize = 16384;
+
 //////////////////////////////////////////////////
-Effector::Effector()
+Effector::Effector(GameState *const _gameState):
+  currAgent(NULL),
+  currSocketId(-1),
+  gameState(_gameState)
 {
-  //Initialize global variables
-  this->socketID = 0;
-  this->message.str("");
+  // Initialize global variables
+  this->buffer = new char[Effector::kBufferSize];
+  this->sexpBuffer = new char[Effector::kBufferSize];
+}
+
+Effector::~Effector()
+{
+  delete[] this->buffer;
+  delete[] this->sexpBuffer;
 }
 
 //////////////////////////////////////////////////
 bool Effector::Parse(int _socket)
 {
-  char buffer[this->kBufferSize];
+  // for some reason onConnection has not been called so return false
+  if (this->socketIDMessageMap.find(_socket) == this->socketIDMessageMap.end())
+  {
+    return false;
+  }
 
-  bzero(buffer, sizeof(buffer));
+  bzero(this->buffer, sizeof(this->buffer));
 
   int bytesRead = 0;
-
   int totalBytes;
 
   // Used to read the size of the message in little-endian format
-  int endianSize = recv(_socket, buffer, 4, 0);
+  int endianSize = recv(_socket, this->buffer, 4, 0);
 
   if (endianSize < 1)
   {
@@ -50,16 +70,14 @@ bool Effector::Parse(int _socket)
 
   // Calculate size of the s-expression messages
   uint32_t n;
-  memcpy(&n, buffer, 4);
+  memcpy(&n, this->buffer, 4);
   totalBytes = ntohl(n);
-
-  //Avoiding race condition
-  std::lock_guard<std::mutex> lock(this->mutex);
 
   // Read the message using the size of actual s-expression message.
   while (bytesRead < totalBytes)
   {
-    int result = recv(_socket, buffer + bytesRead, totalBytes - bytesRead, 0);
+    int result = recv(_socket, this->buffer + bytesRead,
+                      totalBytes - bytesRead, 0);
 
     if (result < 1)
     {
@@ -69,34 +87,23 @@ bool Effector::Parse(int _socket)
     bytesRead += result;
   }
 
-  // Clear the message
-  this->message.str("");
-
-  // Store the received s-expression messages
-  this->message << std::string(buffer);
-
-  // Perform information retrieving procedure and update data structures.
-  // Also find the Agent belong to the socket in order to update its containers.
-  Update(_socket);
-
+  // Avoiding race condition
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->socketIDMessageMap[_socket] = std::string(buffer);
   return true;
 }
 
 //////////////////////////////////////////////////
 void Effector::ParseMessage(const std::string &_msg)
 {
-  char linebuf[36000];
   sexp_t *exp;
 
-  std::stringstream s_expression;
-
   // Create a s-expression message using the received pile of s-expressions
-  s_expression << "(msg " << _msg << ")";
-
-  strcpy(linebuf, s_expression.str().c_str());
+  snprintf(this->sexpBuffer, Effector::kBufferSize, "(msg %s)",
+           _msg.c_str());
 
   // use parse_sexp() from s-expression library
-  exp = parse_sexp(linebuf, 36000);
+  exp = parse_sexp(this->sexpBuffer, _msg.length() + 6);
 
   if (!exp)
   {
@@ -114,12 +121,12 @@ void Effector::ParseMessage(const std::string &_msg)
     return;
   }
 
-  sexp_t* ptr = exp->list->next;
+  sexp_t *ptr = exp->list->next;
 
   while (ptr != NULL)
   {
     if (ptr->ty == SEXP_LIST)
-      ParseSexp(ptr);
+    { ParseSexp(ptr); }
 
     ptr = ptr->next;
   }
@@ -141,24 +148,23 @@ void Effector::ParseSexp(sexp_t *_exp)
     else
     {
       std::cerr <<
-          "Not in s-expression message format. the format: (value ....)"
-          << std::endl;
+                "Not in s-expression message format. the format: (value ....)"
+                << std::endl;
       return;
     }
   }
   else
   {
     std::cerr <<
-        "Not an s-expression message. Not begin with a parenthesis"
-        << std::endl;
+              "Not an s-expression message. Not begin with a parenthesis"
+              << std::endl;
     return;
   }
-
 
   // Decide based on the type of effector message
   if (!strcmp(v, "scene"))
   {
-    this->ParseScene(_exp);
+    // this->ParseScene(_exp);
   }
   else if (!strcmp(v, "beam"))
   {
@@ -168,70 +174,78 @@ void Effector::ParseSexp(sexp_t *_exp)
   {
     this->ParseInit(_exp);
   }
-  else if (!strcmp(v, "he1") || !strcmp(v, "he2") || !strcmp(v, "lle1")
-    || !strcmp(v, "rle1") || !strcmp(v, "lle2") || !strcmp(v, "rle2")
-    || !strcmp(v, "lle3") || !strcmp(v, "rle3") || !strcmp(v, "lle4")
-    || !strcmp(v, "rle4") || !strcmp(v, "lle5") || !strcmp(v, "rle5")
-    || !strcmp(v, "lle6") || !strcmp(v, "rle6") || !strcmp(v, "lae1")
-    || !strcmp(v, "rae1") || !strcmp(v, "lae2") || !strcmp(v, "rae2")
-    || !strcmp(v, "lae3") || !strcmp(v, "rae3") || !strcmp(v, "lae4")
-    || !strcmp(v, "rae4"))
+  else if (NaoRobot::hingeJointEffectorMap.find(std::string(v))
+           != NaoRobot::hingeJointEffectorMap.end())
   {
     ParseHingeJoint(_exp);
   }
   else
   {
-    std::cerr << "Unknown Message : " <<v<< std::endl;
+    std::cerr << "Unknown Message : " << v << std::endl;
   }
 }
 
 //////////////////////////////////////////////////
 void Effector::ParseHingeJoint(sexp_t *_exp)
 {
-  std::string name;
-  double effector;
+  if (!this->currAgent)
+  {
+    return;
+  }
 
-  name =_exp->list->val;
-  effector = atof(_exp->list->next->val);
+  std::string jointName = _exp->list->val;
+  double angle = atof(_exp->list->next->val);
 
-  this->jointEffectors.insert(
-      std::map <std::string, double> ::value_type(name, effector));
+  this->currAgent->action.jointEffectors[jointName] = angle;
 }
 
 //////////////////////////////////////////////////
-void Effector::ParseScene(sexp_t *_exp)
-{
-  int type = 0;
-  std::string address;
+// void Effector::ParseScene(sexp_t *_exp)
+// {
+// int type = 0;
+// std::string address;
 
-  address =_exp->list->next->val;
-  type = atof(_exp->list->next->next->val);
+// address = _exp->list->next->val;
+// type = atof(_exp->list->next->next->val);
 
-  this->sceneEffectors.push_back(SceneMsg(type, address));
-}
+// this->sceneEffectors.push_back(SceneMsg(type, address));
+// }
 
 //////////////////////////////////////////////////
 void Effector::ParseBeam(sexp_t *_exp)
 {
-  double x, y, z = 0;
+  if (!this->currAgent)
+  {
+    return;
+  }
+
+  double x, y, yaw = 0;
 
   x = atof(_exp->list->next->val);
 
   y = atof(_exp->list->next->next->val);
 
-  z = atof(_exp->list->next->next->next->val);
+  yaw = atof(_exp->list->next->next->next->val);
 
-  this->beamEffectors.push_back(BeamMsg(x, y, z));
+  this->gameState->BeamAgent(this->currAgent->uNum,
+                             this->currAgent->team->name, x, y, yaw);
 }
 
 //////////////////////////////////////////////////
 void Effector::ParseInit(sexp_t *_exp)
 {
+  // this is the case where we already have an agent in gameState,
+  // then no need for init
+  if (this->currAgent)
+  {
+    return;
+  }
+
   int playerNum = 0;
 
-  std::string teamName= "";
+  std::string teamName = "";
 
-  sexp_t* ptr = _exp->list->next;
+  sexp_t *ptr = _exp->list->next;
 
   while (ptr != NULL)
   {
@@ -243,154 +257,78 @@ void Effector::ParseInit(sexp_t *_exp)
       }
       if (!strcmp(ptr->list->val, "teamname"))
       {
-        teamName= ptr->list->next->val;
+        teamName = ptr->list->next->val;
       }
     }
     ptr = ptr->next;
   }
 
-  this->initEffectors.push_back(InitMsg(playerNum, teamName));
+  if (this->gameState->AddAgent(playerNum, teamName, this->currSocketId))
+  {
+    AgentId agentId(playerNum, teamName);
+    this->agentsToAdd.push_back(agentId);
+  }
 }
 
 //////////////////////////////////////////////////
 void Effector::OnConnection(const int _socket)
 {
-  this->socketID = _socket;
-  this->newConnectionDetected = true;
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->socketIDMessageMap[_socket] = "__init__";
 }
 
 //////////////////////////////////////////////////
 void Effector::OnDisconnection(const int _socket)
 {
-  // If the socket belongs to an initialized agent, remove that agent
-  if(this->socketIDAgentMap.find(_socket) != this->socketIDAgentMap.end())
+  if (this->socketIDMessageMap.find(_socket) !=
+      this->socketIDMessageMap.end())
   {
-    /* uncomment after integration
-      gameState->RemoveAgent(
-        this->socketIDAgentMap.find(_socket)->second.playerNumber,
-        this->socketIDAgentMap.find(_socket)->second.teamName);
-    */
+    std::lock_guard<std::mutex> lock(this->mutex);
+    this->socketIDMessageMap[_socket] = "__del__";
   }
-
-  this->newDisconnectionDetected = true;
 }
 
 //////////////////////////////////////////////////
-void Effector::Update(int _socket)
+void Effector::Update()
 {
   // clear data structures
-  this->beamEffectors.clear();
-  this->initEffectors.clear();
-  this->sceneEffectors.clear();
-  this->jointEffectors.clear();
+  this->agentsToAdd.clear();
+  this->agentsToRemove.clear();
 
   // Update Effectors using message received by Parse()
-  ParseMessage(this->message.str());
-
-  int playerNumber;
-  std::string teamName;
-
-  // If init message received, and the agent belongs to that message had not been
-  // initialized then initialize that agent
-  if ( this->GetInitInformation(teamName, playerNumber)
-      && socketIDAgentMap.find(_socket) == socketIDAgentMap.end())
+  std::lock_guard<std::mutex> lock(this->mutex);
+  for (auto kv = this->socketIDMessageMap.begin();
+       kv != this->socketIDMessageMap.end();)
   {
-    // Add this agent and its socket to the Map to store the initialized agents
-    this->socketIDAgentMap.insert(
-        std::map <int, InitMsg> ::value_type(_socket, initEffectors.front()));
-
-    //  add the agent to the Gamestate (uncomment after integration)
-    // gameState->AddAgent(playerNumber,teamName);
-  }
-
-
-  // If the agent has been already initialized check update its effector
-  if(this->socketIDAgentMap.find(_socket) != this->socketIDAgentMap.end())
-  {
-    // Retrieve the team name and player number for the agent belongs to the socket
-    playerNumber = this->socketIDAgentMap.find(_socket)->second.playerNumber;
-    teamName = this->socketIDAgentMap.find(_socket)->second.teamName;
-
-    // update joints effector of the agent in GameState
-
-    /* Uncomment after merging with game State
-     for (const auto &team : gameState->teams)
+    this->currSocketId = kv->first;
+    this->currAgent = NULL;
+    for (const auto &team : this->gameState->teams)
     {
-      if (team->name == teamname)
+      for (auto &agent : team->members)
       {
-        for ( auto &agent : team->members)
+        if (this->currSocketId == agent.socketID)
         {
-          if (agent.uNum == playerNumber)
-          {
-            agent.action=this->jointEffectors;
-          }
+          this->currAgent = &agent;
         }
       }
     }
-    */
 
-    // Update beam information for the agent
-
-    double x, y, z;
-
-    if (this->GetBeamInformation(x, y, z ))
+    if (kv->second == "__del__")
     {
-      // Uncomment after merging with game State
-      //gameState->BeamAgent(playerNumber, teamName , x , y, z);
+      if (this->currAgent && this->gameState->RemoveAgent(this->currAgent->uNum,
+          this->currAgent->team->name))
+      {
+        this->agentsToRemove.push_back(this->currAgent->GetAgentID());
+      }
+      this->socketIDMessageMap.erase(kv++);
+    }
+    else
+    {
+      ParseMessage(kv->second);
+      ++kv;
     }
   }
 
-}
-
-//////////////////////////////////////////////////
-bool Effector::GetSceneInformation(std::string &_msg, int &_robotType)
-{
-  if (!this->sceneEffectors.empty())
-  {
-    _msg = this->sceneEffectors.front().rsgAddress;
-    _robotType = this->sceneEffectors.front().robotType;
-    return true;
-  }
-  return false;
-}
-
-//////////////////////////////////////////////////
-bool Effector::GetInitInformation(std::string &_teamName,
-    int &_playerNumber)
-{
-  if (!this->initEffectors.empty())
-  {
-    _teamName = this->initEffectors.front().teamName;
-    _playerNumber = this->initEffectors.front().playerNumber;
-    return true;
-  }
-  return false;
-}
-
-//////////////////////////////////////////////////
-bool Effector::GetBeamInformation(double &_x, double &_y, double &_z)
-{
-  if (!this->initEffectors.empty())
-  {
-    _x = this->beamEffectors.front().x;
-    _y = this->beamEffectors.front().y;
-    _z = this->beamEffectors.front().z;
-
-    return true;
-  }
-  return false;
-}
-
-//////////////////////////////////////////////////
-bool Effector::GetJointEffector(const std::string &_jointName,
-    double &_targetSpeed)
-{
-  std::map<std::string, double>::const_iterator it =
-      this->jointEffectors.find(_jointName);
-
-  if (it == this->jointEffectors.end()) return false;
-
-  _targetSpeed = this->jointEffectors.find(_jointName)->second;
-
-  return true;
+  this->currSocketId = -1;
+  this->currAgent = NULL;
 }
