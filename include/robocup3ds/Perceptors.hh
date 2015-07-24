@@ -39,7 +39,7 @@ class Perceptor
   public: Perceptor(GameState *const _gameState);
 
   /// \brief Destructor for Perceptor object
-  public: ~Perceptor();
+  public: ~Perceptor() = default;
 
   /// \brief Method used to set view frustum based on HFov, VFov
   public: void SetViewFrustum();
