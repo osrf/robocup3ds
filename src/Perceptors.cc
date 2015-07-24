@@ -48,9 +48,6 @@ Perceptor::Perceptor(GameState *_gameState):
 }
 
 /////////////////////////////////////////////////
-Perceptor::~Perceptor() {}
-
-/////////////////////////////////////////////////
 void Perceptor::SetViewFrustum()
 {
   double HFov = RAD(std::min(180.0, std::max(0.0, GameState::HFov)));

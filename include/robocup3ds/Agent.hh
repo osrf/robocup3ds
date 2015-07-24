@@ -128,13 +128,11 @@ class AgentPerceptions
     this->fieldLines.reserve(21);
   }
 
-  /// \Brief Map of landmarks that have been transformed to agent's cood
-  /// frame
-  public: std::map<std::string, ignition::math::Vector3<double> > landMarks;
+  /// \Brief Map of landmarks that have been transformed to agent's cood frame
+  public: std::map<std::string, ignition::math::Vector3<double>> landMarks;
 
-  /// \Brief Vector of lines that have been transformed to agent's cood
-  /// frame
-  public: std::vector<ignition::math::Line3<double> > fieldLines;
+  /// \Brief Vector of lines that have been transformed to agent's cood frame
+  public: std::vector<ignition::math::Line3<double>> fieldLines;
 
   /// \Brief Map of agent's perceptions of other agent's body parts
   /// Implemented as a nested map
@@ -175,13 +173,14 @@ class Agent
   /// \brief Equality operator for agents
   /// \param[in] _agent Agent compared against
   /// \return True if they are equal
-  public: bool operator==(const Agent &_agent)
+  public: bool operator==(const Agent &_agent) const
   {
     return this == &_agent;
   }
 
   /// \brief Flag whether player is goalkeeper
-  public: bool IsGoalKeeper() {
+  public: bool IsGoalKeeper() const
+  {
     return this->uNum == 1;
   }
 
@@ -203,11 +202,10 @@ class Agent
   /// \brief Agent camera orientation
   public: ignition::math::Quaternion<double> cameraRot;
 
-  /// \brief Agent orientation
+  /// \brief Agent orientation in radians
   public: ignition::math::Quaternion<double> rot;
 
-  /// \brief Flag whether to update agent pose in world to match
-  /// gamestate.
+  /// \brief Flag whether to update agent pose in world to match gamestate.
   public: bool updatePose;
 
   /// \brief Map of agent body parts in world coordinates
