@@ -26,6 +26,7 @@
 class RCPServer;
 class GameState;
 class Effector;
+class MonitorEffector;
 class Perceptor;
 
 class Robocup3dsPlugin : public gazebo::WorldPlugin
@@ -55,6 +56,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Update the effector, use collected joint information to update
   /// gazebo world
   private: void UpdateEffector();
+
+  /// \brief Update the monitor effector
+  private: void UpdateMonitorEffector();
 
   /// \brief Check if ball is colliding with any player model
   private: void UpdateBallContactHistory();
@@ -90,6 +94,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Pointer to Effector object;
   private: std::shared_ptr<Effector> effector;
+
+  /// \brief Pointer to Monitor Effector object;
+  private: std::shared_ptr<MonitorEffector> monitorEffector;
 
   /// \brief Pointer to Perceptor object
   private: std::shared_ptr<Perceptor> perceptor;

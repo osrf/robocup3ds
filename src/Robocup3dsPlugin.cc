@@ -53,13 +53,14 @@ GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 Robocup3dsPlugin::Robocup3dsPlugin():
   gameState(std::make_shared<GameState>()),
   effector(std::make_shared<Effector>(this->gameState.get())),
+  monitorEffector(std::make_shared<MonitorEffector>(this->gameState.get())),
   perceptor(std::make_shared<Perceptor>(this->gameState.get())),
   clientServer(std::make_shared<RCPServer>(
                  Robocup3dsPlugin::clientPort,
                  this->effector)),
   monitorServer(std::make_shared<RCPServer>(
                   Robocup3dsPlugin::monitorPort,
-                  this->effector)),
+                  this->monitorEffector)),
   lastUpdateTime(-GameState::counterCycleTime)
 {
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
@@ -119,6 +120,7 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
 
   this->gameState->LoadConfiguration(config);
   this->LoadConfiguration(config);
+
   if (this->clientServer->GetPort() != Robocup3dsPlugin::clientPort)
   { this->clientServer->SetPort(Robocup3dsPlugin::clientPort); }
   if (this->monitorServer->GetPort() != Robocup3dsPlugin::monitorPort)
@@ -144,6 +146,7 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
     return;
   }
   this->UpdateEffector();
+  this->UpdateMonitorEffector();
   this->UpdateGameState();
   this->UpdatePerceptor();
   this->lastUpdateTime = this->world->GetSimTime().Double();
@@ -189,6 +192,20 @@ void Robocup3dsPlugin::UpdateEffector()
   }
 }
 
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateMonitorEffector()
+{
+  // update monitor effector
+  this->monitorEffector->Update();
+
+  // remove models that need to be removed from world
+  for (auto &agentInfo : this->monitorEffector->agentsToRemove)
+  {
+    std::string agentName = std::to_string(agentInfo.first) + "_" +
+                            agentInfo.second;
+    this->world->RemoveModel(agentName);
+  }
+}
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateBallContactHistory()
 {

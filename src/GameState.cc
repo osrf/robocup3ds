@@ -120,7 +120,23 @@ GameState::GameState():
   half(Half::FIRST_HALF),
   cycleCounter(0)
 {
+  this->playModeNameMap[beforeKickOffState->name] = beforeKickOffState;
+  this->playModeNameMap[kickOffLeftState->name] = kickOffLeftState;
+  this->playModeNameMap[kickOffRightState->name] = kickOffRightState;
+  this->playModeNameMap[playOnState->name] = playOnState;
+  this->playModeNameMap[kickInLeftState->name] = kickInLeftState;
+  this->playModeNameMap[kickInRightState->name] = kickInRightState;
+  this->playModeNameMap[cornerKickLeftState->name] = cornerKickLeftState;
+  this->playModeNameMap[cornerKickRightState->name] = cornerKickRightState;
+  this->playModeNameMap[goalKickLeftState->name] = goalKickLeftState;
+  this->playModeNameMap[goalKickRightState->name] = goalKickRightState;
+  this->playModeNameMap[gameOverState->name] = gameOverState;
+  this->playModeNameMap[goalLeftState->name] = goalLeftState;
+  this->playModeNameMap[goalRightState->name] = goalRightState;
+  this->playModeNameMap[freeKickLeftState->name] = freeKickLeftState;
+  this->playModeNameMap[freeKickRightState->name] = freeKickRightState;
   this->SetCurrent(beforeKickOffState);
+
   this->teams.push_back(std::make_shared<Team>(
                           "_empty_team", Team::Side::LEFT, 0,
                           GameState::playerLimit));

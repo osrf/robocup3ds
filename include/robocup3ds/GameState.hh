@@ -433,6 +433,9 @@ class GameState
   /// \brief freeKickRightState playmode
   public: std::shared_ptr<states::FreeKickState> freeKickRightState;
 
+  /// \brief Map of playmode names and corresponding shared ptr
+  public: std::map<std::string, std::shared_ptr<states::State>> playModeNameMap;
+
   /// \brief Name of BeforeKickOff playmode
   public: static const std::string BeforeKickOff;
 
