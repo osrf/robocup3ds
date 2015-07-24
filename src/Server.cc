@@ -262,3 +262,15 @@ void RCPServer::DispatchRequestOnClientSocket()
     }
   }
 }
+
+//////////////////////////////////////////////////
+int RCPServer::GetPort() const
+{
+  return this->port;
+}
+
+//////////////////////////////////////////////////
+void RCPServer::SetPort(const int _port)
+{
+  this->port = _port;
+}

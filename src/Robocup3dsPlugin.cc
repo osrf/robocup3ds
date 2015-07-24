@@ -54,11 +54,14 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   gameState(std::make_shared<GameState>()),
   effector(std::make_shared<Effector>(this->gameState.get())),
   perceptor(std::make_shared<Perceptor>(this->gameState.get())),
-  clientServer(std::make_shared<RCPServer>(Robocup3dsPlugin::clientPort,
-    this->effector)),
+  clientServer(std::make_shared<RCPServer>(
+                 Robocup3dsPlugin::clientPort,
+                 this->effector)),
+  monitorServer(std::make_shared<RCPServer>(
+                  Robocup3dsPlugin::monitorPort,
+                  this->effector)),
   lastUpdateTime(-GameState::counterCycleTime)
 {
-  this->clientServer->Start();
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
 }
 
@@ -66,6 +69,20 @@ Robocup3dsPlugin::Robocup3dsPlugin():
 Robocup3dsPlugin::~Robocup3dsPlugin()
 {
   delete[] this->buffer;
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::LoadConfiguration(
+  const std::map<std::string, std::string> &_config) const
+{
+  double value;
+  bool boolValue;
+  if (LoadConfigParameter(_config, "robocup3dsplugin_monitorport", value))
+  { Robocup3dsPlugin::monitorPort = static_cast<int>(value); }
+  if (LoadConfigParameter(_config, "robocup3dsplugin_clientport", value))
+  { Robocup3dsPlugin::clientPort = static_cast<int>(value); }
+  if (LoadConfigParameterBool(_config, "robocup3dsplugin_syncmode", boolValue))
+  { Robocup3dsPlugin::syncMode = boolValue; }
 }
 
 /////////////////////////////////////////////////
@@ -77,6 +94,37 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
                              boost::bind(&Robocup3dsPlugin::Update, this, _1));
   this->world = _world;
   this->sdf = _sdf;
+
+  std::map<std::string, std::string> config;
+  std::string temp;
+  // todo: fix loading sdf elements
+  // gzerr << "has element: " << _sdf->HasElement("cma_stall") << std::endl;
+  // if (_sdf->HasElement("cma_stall"))
+  // {
+  //   gzerr << _sdf->Get<int>("cma_stall") << std::endl;
+  // }
+  // while (_sdf)
+  // {
+  //   _sdf = _sdf->GetNextElement("plugin_parameters");
+  //   gzerr << _sdf->GetName() << std::endl;
+  //   const auto &param = _sdf->GetValue();
+  //   gzerr << param << std::endl;
+  //   if (param)
+  //   {
+  //     param->Get(temp);
+  //     config[param->GetKey()] = temp;
+  //     gzerr << "loaded " << param->GetKey() << " : " << temp << std::endl;
+  //   }
+  // }
+
+  this->gameState->LoadConfiguration(config);
+  this->LoadConfiguration(config);
+  if (this->clientServer->GetPort() != Robocup3dsPlugin::clientPort)
+  { this->clientServer->SetPort(Robocup3dsPlugin::clientPort); }
+  if (this->monitorServer->GetPort() != Robocup3dsPlugin::monitorPort)
+  { this->monitorServer->SetPort(Robocup3dsPlugin::monitorPort); }
+  this->clientServer->Start();
+  this->monitorServer->Start();
 }
 
 /////////////////////////////////////////////////
@@ -335,7 +383,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
       this->buffer[1] = (_cx >>  8) & 0xff;
       this->buffer[2] = (_cx >> 16) & 0xff;
       this->buffer[3] = (_cx >> 24) & 0xff;
-      server->Send(agent.socketID, this->buffer, cx + 4);
+      this->clientServer->Send(agent.socketID, this->buffer, cx + 4);
     }
   }
 }

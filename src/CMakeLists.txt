@@ -4,9 +4,7 @@ Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/
 
 
 set (sources
-  Geometry.cc
   Effector.cc
-  Perceptors.cc
   states/BeforeKickOffState.cc
   states/CornerKickState.cc
   states/FreeKickState.cc
@@ -18,8 +16,11 @@ set (sources
   states/PlayOnState.cc
   states/State.cc
   GameState.cc
+  Geometry.cc
+  Perceptors.cc
   Robocup3dsPlugin.cc
   Server.cc
+  Util.cc
 )
 
 set (gtest_sources

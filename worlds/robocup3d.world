@@ -48,6 +48,6 @@
     <!--<plugin name="hydra" filename="libHydraPlugin.so"></plugin>-->
 
     <plugin name="r" filename="librobocup3dsPlugin.so">
-  </plugin>
+    </plugin>
   </world>
 </sdf>
