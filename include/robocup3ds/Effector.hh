@@ -87,10 +87,10 @@ class Effector: public SocketParser
   /// \param[in] _exp Pointer to a S-expression.
   protected: void ParseHingeJoint(sexp_t *_exp);
 
-  /// \brief data structure used for init information.
+  /// \brief List of agents to add to gazebo world this update cycle.
   public: std::vector<AgentId> agentsToAdd;
 
-  /// \brief data structure used for init information.
+  /// \brief List of agents to remove from gazebo world this update cycle.
   public: std::vector<AgentId> agentsToRemove;
 
   /// \brief Pointer to gameState object

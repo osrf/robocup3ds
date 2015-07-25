@@ -94,29 +94,29 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   this->sdf = _sdf;
 
   std::map<std::string, std::string> config;
-  std::string temp;
-  // todo: fix loading sdf elements
-  // gzerr << "has element: " << _sdf->HasElement("cma_stall") << std::endl;
-  // if (_sdf->HasElement("cma_stall"))
-  // {
-  //   gzerr << _sdf->Get<int>("cma_stall") << std::endl;
-  // }
-  // while (_sdf)
-  // {
-  //   _sdf = _sdf->GetNextElement("plugin_parameters");
-  //   gzerr << _sdf->GetName() << std::endl;
-  //   const auto &param = _sdf->GetValue();
-  //   gzerr << param << std::endl;
-  //   if (param)
-  //   {
-  //     param->Get(temp);
-  //     config[param->GetKey()] = temp;
-  //     gzerr << "loaded " << param->GetKey() << " : " << temp << std::endl;
-  //   }
-  // }
+  _sdf = _sdf->GetFirstElement();
+  while (_sdf)
+  {
+    // gzerr << "element name: " << _sdf->GetName() << std::endl;
+    const auto &param = _sdf->GetValue();
+    // gzerr << "param addr: " << param << std::endl;
+    if (param)
+    {
+      // gzerr << "kv: " << param->GetKey() << " : " <<
+      // param->GetAsString() << std::endl;
+      config[param->GetKey()] = param->GetAsString();
+    }
+    _sdf = _sdf->GetNextElement();
+  }
 
+  gzmsg << "************loading config**************" << std::endl;
   this->gameState->LoadConfiguration(config);
   this->LoadConfiguration(config);
+  gzmsg << "************finished loading************" << std::endl;
+
+  gzmsg << "client port: " << Robocup3dsPlugin::clientPort << std::endl;
+  gzmsg << "monitor port: " << Robocup3dsPlugin::monitorPort << std::endl;
+  gzmsg << "syncmode status: " << Robocup3dsPlugin::syncMode << std::endl;
 
   // Connect to the update event.
   if (!Robocup3dsPlugin::syncMode)
@@ -234,6 +234,7 @@ void Robocup3dsPlugin::UpdateEffector()
       {
         model->GetJoint(kv.first)->SetVelocity(0, kv.second);
       }
+      agent.action.jointEffectors.clear();
     }
   }
 }
