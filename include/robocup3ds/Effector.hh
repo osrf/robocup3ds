@@ -93,6 +93,9 @@ class Effector: public SocketParser
   /// \brief List of agents to remove from gazebo world this update cycle.
   public: std::vector<AgentId> agentsToRemove;
 
+  /// \brief Maximum size of each message received.
+  protected: static const int kBufferSize;
+
   /// \brief Pointer to gameState object
   protected: GameState *const gameState;
 
@@ -103,9 +106,6 @@ class Effector: public SocketParser
   /// Here, the key of the map is the Socket IDs which is assigned in
   /// OnConnection()
   protected: std::map<int, std::string> socketIDMessageMap;
-
-  /// \brief Maximum size of each message received.
-  protected: static const int kBufferSize;
 
   /// \brief Buffer for reading from socket
   protected: char *buffer;
