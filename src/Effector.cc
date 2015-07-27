@@ -91,6 +91,7 @@ bool Effector::Parse(int _socket)
   // Avoiding race condition
   std::lock_guard<std::mutex> lock(this->mutex);
   this->socketIDMessageMap[_socket] = std::string(buffer);
+  this->Update();
   return true;
 }
 
@@ -297,7 +298,7 @@ void Effector::Update()
   this->agentsToRemove.clear();
 
   // Update Effectors using message received by Parse()
-  std::lock_guard<std::mutex> lock(this->mutex);
+  // std::lock_guard<std::mutex> lock(this->mutex);
   for (auto kv = this->socketIDMessageMap.begin();
        kv != this->socketIDMessageMap.end();)
   {
