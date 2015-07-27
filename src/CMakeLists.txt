@@ -19,6 +19,7 @@ set (sources
   Robocup3dsPlugin.cc
   Server.cc
   Util.cc
+  ../test/integration/ClientAgent.cc
 )
 
 set (gtest_sources
