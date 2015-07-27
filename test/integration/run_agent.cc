@@ -16,7 +16,7 @@
 */
 
 #include <gtest/gtest.h>
-#include <chrono> 
+#include <chrono>
 #include <gazebo/physics/World.hh>
 #include <gazebo/test/ServerFixture.hh>
 #include <ignition/math.hh>
@@ -69,7 +69,9 @@ TEST_F(IntegrationTest_Immed, TestLoadConnectAgent)
   const auto &world = gazebo::physics::get_world("default");
 
   this->agent->Start();
-  std::this_thread::sleep_for(std::chrono::seconds(5));
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  EXPECT_TRUE(this->agent->running);
+  EXPECT_TRUE(this->agent->connected);
 }
 
 int main(int argc, char **argv)

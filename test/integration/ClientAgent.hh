@@ -56,6 +56,12 @@ class ClientAgent
   public: void Walk(const ignition::math::Vector3<double> &_start,
     const ignition::math::Vector3<double> &_end, const int _nSteps);
 
+  /// \brief Whether agent is running separate thread
+  public: bool running;
+
+  /// \brief Whether agent is connect to server
+  public: bool connected;
+
   /// \brief Address of server
   private: std::string serverAddr;
 
@@ -64,12 +70,6 @@ class ClientAgent
 
   /// \brief Port of server that the monitor connects to
   private: const int monitorPort;
-
-  /// \brief Whether agent is running separate thread
-  private: bool running;
-
-  /// \brief Whether agent is connect to server
-  private: bool connected;
 
   /// \brief thread in which agent is running
   private: std::thread thread;
