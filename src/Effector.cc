@@ -53,6 +53,16 @@ Effector::~Effector()
 //////////////////////////////////////////////////
 bool Effector::Parse(int _socket)
 {
+  {
+    std::lock_guard<std::mutex> lock(this->mutex);
+    // for some reason onConnection has not been called so return false
+    if (this->socketIDMessageMap.find(_socket) == this->socketIDMessageMap.end()
+        || this->socketIDMessageMap[_socket] == "__del__")
+    {
+      return false;
+    }
+  }
+
   bzero(this->buffer, sizeof(this->buffer));
 
   int bytesRead = 0;
@@ -87,16 +97,7 @@ bool Effector::Parse(int _socket)
 
   std::string msg(buffer);
 
-  // Avoiding race condition
   std::lock_guard<std::mutex> lock(this->mutex);
-
-  // for some reason onConnection has not been called so return false
-  if (this->socketIDMessageMap.find(_socket) == this->socketIDMessageMap.end()
-    || this->socketIDMessageMap[_socket] == "__del__")
-  {
-    return false;
-  }
-
   if (msg == "__empty__")
   { this->socketIDMessageMap[_socket] = msg; }
   else
