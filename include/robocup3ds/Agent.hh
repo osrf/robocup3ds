@@ -194,6 +194,7 @@ class Agent
     team(_team)
   {
     this->socketID = _socketID;
+    this->syn = false;
     this->status = Status::RELEASED;
     this->prevStatus = this->status;
     this->updatePose = false;
@@ -306,6 +307,9 @@ class Agent
 
   /// \brief Stores time the agent has fallen
   public: double timeFallen;
+
+  /// \brief Flag whether agent has finished syncing messages
+  public: bool syn;
 };
 
 /// \brief Container that contains info for say effector

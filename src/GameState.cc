@@ -35,6 +35,7 @@
 #include "robocup3ds/states/KickInState.hh"
 #include "robocup3ds/states/KickOffState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
+#include "robocup3ds/Util.hh"
 
 using namespace ignition;
 using namespace states;
@@ -62,7 +63,7 @@ double GameState::SecondsKickInPause = 1;
 double GameState::SecondsKickIn = 15;
 double GameState::SecondsBeforeKickOff = 5;
 double GameState::SecondsKickOff = 15;
-bool   GameState::useCounterForGameTime = true;
+bool   GameState::useCounterForGameTime = false;
 int    GameState::playerLimit = 11;
 int    GameState::penaltyBoxLimit = 3;
 double GameState::beamHeight = NaoRobot::torsoHeight + 0.05;
@@ -119,7 +120,23 @@ GameState::GameState():
   half(Half::FIRST_HALF),
   cycleCounter(0)
 {
+  this->playModeNameMap[beforeKickOffState->name] = beforeKickOffState;
+  this->playModeNameMap[kickOffLeftState->name] = kickOffLeftState;
+  this->playModeNameMap[kickOffRightState->name] = kickOffRightState;
+  this->playModeNameMap[playOnState->name] = playOnState;
+  this->playModeNameMap[kickInLeftState->name] = kickInLeftState;
+  this->playModeNameMap[kickInRightState->name] = kickInRightState;
+  this->playModeNameMap[cornerKickLeftState->name] = cornerKickLeftState;
+  this->playModeNameMap[cornerKickRightState->name] = cornerKickRightState;
+  this->playModeNameMap[goalKickLeftState->name] = goalKickLeftState;
+  this->playModeNameMap[goalKickRightState->name] = goalKickRightState;
+  this->playModeNameMap[gameOverState->name] = gameOverState;
+  this->playModeNameMap[goalLeftState->name] = goalLeftState;
+  this->playModeNameMap[goalRightState->name] = goalRightState;
+  this->playModeNameMap[freeKickLeftState->name] = freeKickLeftState;
+  this->playModeNameMap[freeKickRightState->name] = freeKickRightState;
   this->SetCurrent(beforeKickOffState);
+
   this->teams.push_back(std::make_shared<Team>(
                           "_empty_team", Team::Side::LEFT, 0,
                           GameState::playerLimit));
@@ -186,42 +203,6 @@ void GameState::LoadConfiguration(
   { GameState::VFov = value; }
   if (LoadConfigParameterBool(_config, "percept_restrictvision", boolValue))
   { GameState::restrictVision = boolValue; }
-}
-
-/////////////////////////////////////////////////
-bool GameState::LoadConfigParameter(
-  const std::map<std::string, std::string> &_config,
-  const std::string &_key,
-  double &_value) const
-{
-  try
-  {
-    _value = std::stod(_config.at(_key));
-  }
-  catch (const std::exception &exc)
-  {
-    std::cerr << exc.what();
-    return false;
-  }
-  return true;
-}
-
-/////////////////////////////////////////////////
-bool GameState::LoadConfigParameterBool(
-  const std::map<std::string, std::string> &_config,
-  const std::string &_key,
-  bool &_boolValue) const
-{
-  try
-  {
-    _boolValue = _config.at(_key) != "false";
-  }
-  catch (const std::exception &exc)
-  {
-    std::cerr << exc.what();
-    return false;
-  }
-  return true;
 }
 
 /////////////////////////////////////////////////

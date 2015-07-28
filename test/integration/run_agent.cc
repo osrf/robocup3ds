@@ -16,27 +16,62 @@
 */
 
 #include <gtest/gtest.h>
+#include <chrono>
 #include <gazebo/physics/World.hh>
 #include <gazebo/test/ServerFixture.hh>
 #include <ignition/math.hh>
+#include <memory>
 #include <string>
+#include <thread>
+
+#include "ClientAgent.hh"
 
 using namespace ignition;
 using namespace std;
 
-class IntegrationTest : public gazebo::ServerFixture
+class IntegrationTest_Basic : public gazebo::ServerFixture
 {
+  public:
+    const string worldPath =
+      "/home/jliang/Desktop/OSRF/gazebo_install/share/"
+      "gazebo-6.0/worlds/robocup3d.world";
 };
 
-/// \brief This tests whether loading the world plugin is successful or not
-TEST_F(IntegrationTest, TestLoadWorldPlugin)
+class IntegrationTest_Immed : public gazebo::ServerFixture
 {
-  const string worldPath = "/home/jliang/Desktop/OSRF/gazebo_install/share/"
-                      "gazebo-6.0/worlds/robocup3d.world";
+  public:
+    IntegrationTest_Immed():
+      agent(std::make_shared<ClientAgent>("127.0.0.1", 3100, 3200))
+    {}
 
+  public:
+    const string worldPath =
+      "/home/jliang/Desktop/OSRF/gazebo_install/share/"
+      "gazebo-6.0/worlds/robocup3d.world";
+
+  public:
+    std::shared_ptr<ClientAgent> agent;
+};
+
+
+/// \brief This tests whether loading the world plugin is successful or not
+TEST_F(IntegrationTest_Basic, TestLoadWorldPlugin)
+{
   this->Load(worldPath);
   const auto &world = gazebo::physics::get_world("default");
   EXPECT_TRUE(world != NULL);
+}
+
+/// \brief This tests whether agent can successfully connect or not
+TEST_F(IntegrationTest_Immed, TestLoadConnectAgent)
+{
+  this->Load(worldPath);
+  const auto &world = gazebo::physics::get_world("default");
+
+  this->agent->Start();
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  EXPECT_TRUE(this->agent->running);
+  EXPECT_TRUE(this->agent->connected);
 }
 
 int main(int argc, char **argv)

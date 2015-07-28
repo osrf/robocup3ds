@@ -23,14 +23,15 @@
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <mutex>
 
 #include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/Server.hh"
 
 //////////////////////////////////////////////////
-RCPServer::RCPServer(const int _port, const std::shared_ptr<SocketParser>
-                     &_parser):
+RCPServer::RCPServer(const int _port,
+                     const std::shared_ptr<SocketParser> &_parser):
   port(_port),
   masterSocket(-1),
   parser(_parser),
@@ -261,4 +262,16 @@ void RCPServer::DispatchRequestOnClientSocket()
       continue;
     }
   }
+}
+
+//////////////////////////////////////////////////
+int RCPServer::GetPort() const
+{
+  return this->port;
+}
+
+//////////////////////////////////////////////////
+void RCPServer::SetPort(const int _port)
+{
+  this->port = _port;
 }

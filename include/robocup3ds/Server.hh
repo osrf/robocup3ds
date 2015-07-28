@@ -37,11 +37,11 @@
 /// server and the new client.
 ///
 ///  ---------    Master socket
-/// |      |<------------------ New client requests
-/// |      |
+/// |         |<------------------ New client requests
+/// |         |
 /// |RCPServer|   Client1 socket
-/// |      |<-----------------> Client1 data exchange
-/// |      |   ClientN socket
+/// |         |<-----------------> Client1 data exchange
+/// |         |   ClientN socket
 ///  --------- <-----------------> ClientN data exchange
 ///
 ///  The RCPServer API allows to send a message to a specific socket (client).
@@ -70,8 +70,8 @@ class RCPServer
   /// \param[in] _port TCP port for incoming connections.
   /// \param[in] _parser Parser in charge of reading incoming data from
   /// the sockets.
-  public: RCPServer(const int _port, const std::shared_ptr<SocketParser>
-    &_parser);
+  public: RCPServer(const int _port,
+                    const std::shared_ptr<SocketParser> &_parser);
 
   /// \brief Simple constructor for testing purposes
   public: RCPServer() {}
@@ -88,6 +88,12 @@ class RCPServer
 
   /// \brief Enable the server.
   public: void Start();
+
+  /// \brief Get the port the server is using
+  public: int GetPort() const;
+
+  /// \brief Set the port the server is using
+  public: void SetPort(const int _port);
 
   /// \brief Task running in a different thread in charge of dispatching the
   /// new connections.

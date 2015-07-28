@@ -127,8 +127,8 @@ class GameState
     /// \param[in] _contactTime time when ball was touched
     /// \param[in] _contactPos position where ball was touched
     public: BallContact(const int _uNum, const Team::Side _side,
-                          const double _contactTime,
-                          const ignition::math::Vector3<double> &_contactPos):
+                        const double _contactTime,
+                        const ignition::math::Vector3<double> &_contactPos):
       uNum(_uNum),
       side(_side),
       contactTime(_contactTime),
@@ -246,8 +246,7 @@ class GameState
   /// \param[out] _agent Reference to agent object
   public: void MoveOffSideAgent(Agent &_agent) const;
 
-  /// \brief Check if the first half or the game ends, also update
-  /// elapsed time.
+  /// \brief Check if the first half or the game ends, also update elapsed time.
   public: void CheckTiming();
 
   /// \brief Check the ball's position looking for goals or out of bounds.
@@ -389,24 +388,6 @@ class GameState
   /// \return True when _i is smaller than _j
   private: static bool SortDist(const AgentDist &_i, const AgentDist &_j);
 
-  /// \brief Helper function for loading gameState configuration variables
-  /// \param[in] _config Map of configuration variables
-  /// \param[in] _key Key to look for in map
-  /// \param[out] _value Value to return
-  /// \return True if loading of parameter is successful
-  private: bool LoadConfigParameter(
-    const std::map<std::string, std::string> &_config,
-    const std::string &_key, double &_value) const;
-
-  /// \brief Helper function for loading gameState configuration variables
-  /// \param[in] _config Map of configuration variables
-  /// \param[in] _key Key to look for in map
-  /// \param[out] _boolValue Value to return
-  /// \return True if loading of parameter is successful
-  private: bool LoadConfigParameterBool(
-    const std::map<std::string, std::string> &_config,
-    const std::string &_key, bool &_boolValue) const;
-
   /// \brief beforeKickOffState playmode
   public: std::shared_ptr<states::BeforeKickOffState> beforeKickOffState;
 
@@ -451,6 +432,9 @@ class GameState
 
   /// \brief freeKickRightState playmode
   public: std::shared_ptr<states::FreeKickState> freeKickRightState;
+
+  /// \brief Map of playmode names and corresponding shared ptr
+  public: std::map<std::string, std::shared_ptr<states::State>> playModeNameMap;
 
   /// \brief Name of BeforeKickOff playmode
   public: static const std::string BeforeKickOff;
@@ -571,10 +555,6 @@ class GameState
   /// ball contact by the same agent, then it will not count as a new ball
   /// contact (the time of the last ball contact is update instead)
   public: static const double ballContactInterval;
-
-  /// \brief Pointer to configuration variables
-  public: static std::shared_ptr<std::map<const std::string,
-    const std::string>> config;
 
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;

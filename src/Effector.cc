@@ -18,6 +18,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <ignition/math.hh>
 #include <map>
 #include <mutex>
 #include <string>
@@ -27,13 +28,15 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Effector.hh"
 
+using namespace ignition;
+
 const int Effector::kBufferSize = 16384;
 
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
+  gameState(_gameState),
   currAgent(NULL),
-  currSocketId(-1),
-  gameState(_gameState)
+  currSocketId(-1)
 {
   // Initialize global variables
   this->buffer = new char[Effector::kBufferSize];
@@ -50,10 +53,14 @@ Effector::~Effector()
 //////////////////////////////////////////////////
 bool Effector::Parse(int _socket)
 {
-  // for some reason onConnection has not been called so return false
-  if (this->socketIDMessageMap.find(_socket) == this->socketIDMessageMap.end())
   {
-    return false;
+    std::lock_guard<std::mutex> lock(this->mutex);
+    // for some reason onConnection has not been called so return false
+    if (this->socketIDMessageMap.find(_socket) == this->socketIDMessageMap.end()
+        || this->socketIDMessageMap[_socket] == "__del__")
+    {
+      return false;
+    }
   }
 
   bzero(this->buffer, sizeof(this->buffer));
@@ -88,10 +95,14 @@ bool Effector::Parse(int _socket)
     bytesRead += result;
   }
 
-  // Avoiding race condition
+  std::string msg(buffer);
+
   std::lock_guard<std::mutex> lock(this->mutex);
-  this->socketIDMessageMap[_socket] = std::string(buffer);
-  this->Update();
+  if (msg == "__empty__")
+  { this->socketIDMessageMap[_socket] = msg; }
+  else
+  { this->socketIDMessageMap[_socket] += msg; }
+
   return true;
 }
 
@@ -109,17 +120,17 @@ void Effector::ParseMessage(const std::string &_msg)
 
   if (!exp)
   {
-    std::cerr << "The message is empty" << std::endl;
+    // std::cerr << "The message is empty" << std::endl;
     return;
   }
   else if (!exp->list)
   {
-    std::cerr << "The message is empty" << std::endl;
+    // std::cerr << "The message is empty" << std::endl;
     return;
   }
   else if (!exp->list->next)
   {
-    std::cerr << "The message is empty" << std::endl;
+    // std::cerr << "The message is empty" << std::endl;
     return;
   }
 
@@ -149,24 +160,24 @@ void Effector::ParseSexp(sexp_t *_exp)
     }
     else
     {
-      std::cerr <<
-                "Not in s-expression message format. the format: (value ....)"
-                << std::endl;
+      // std::cerr <<
+      //         "Not in s-expression message format. the format: (value ....)"
+      //           << std::endl;
       return;
     }
   }
   else
   {
-    std::cerr <<
-              "Not an s-expression message. Not begin with a parenthesis"
-              << std::endl;
+    // std::cerr <<
+    //           "Not an s-expression message. Not begin with a parenthesis"
+    //           << std::endl;
     return;
   }
 
   // Decide based on the type of effector message
-  if (!strcmp(v, "scene"))
+  if (!strcmp(v, "syn ") && this->currAgent)
   {
-    // this->ParseScene(_exp);
+    this->currAgent->syn = true;
   }
   else if (!strcmp(v, "beam"))
   {
@@ -179,11 +190,11 @@ void Effector::ParseSexp(sexp_t *_exp)
   else if (NaoRobot::hingeJointEffectorMap.find(std::string(v))
            != NaoRobot::hingeJointEffectorMap.end())
   {
-    ParseHingeJoint(_exp);
+    this->ParseHingeJoint(_exp);
   }
   else
   {
-    std::cerr << "Unknown Message : " << v << std::endl;
+    // std::cerr << "Unknown Message : " << v << std::endl;
   }
 }
 
@@ -196,9 +207,11 @@ void Effector::ParseHingeJoint(sexp_t *_exp)
   }
 
   std::string jointName = _exp->list->val;
-  double angle = atof(_exp->list->next->val);
-
-  this->currAgent->action.jointEffectors[jointName] = angle;
+  if (_exp->list->next)
+  {
+    double angle = atof(_exp->list->next->val);
+    this->currAgent->action.jointEffectors[jointName] = angle;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -221,16 +234,15 @@ void Effector::ParseBeam(sexp_t *_exp)
     return;
   }
 
-  double x, y, yaw = 0;
-
-  x = atof(_exp->list->next->val);
-
-  y = atof(_exp->list->next->next->val);
-
-  yaw = atof(_exp->list->next->next->next->val);
-
-  this->gameState->BeamAgent(this->currAgent->uNum,
-                             this->currAgent->team->name, x, y, yaw);
+  if (_exp->list->next && _exp->list->next->next
+      && _exp->list->next->next->next)
+  {
+    double x = atof(_exp->list->next->val);
+    double y = atof(_exp->list->next->next->val);
+    double yaw = atof(_exp->list->next->next->next->val);
+    this->gameState->BeamAgent(this->currAgent->uNum,
+                               this->currAgent->team->name, x, y, yaw);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -243,8 +255,7 @@ void Effector::ParseInit(sexp_t *_exp)
     return;
   }
 
-  int playerNum = 0;
-
+  int playerNum = -1;
   std::string teamName = "";
 
   sexp_t *ptr = _exp->list->next;
@@ -253,11 +264,11 @@ void Effector::ParseInit(sexp_t *_exp)
   {
     if (ptr->ty == SEXP_LIST)
     {
-      if (!strcmp(ptr->list->val, "unum"))
+      if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
       {
         playerNum = atof(ptr->list->next->val);
       }
-      if (!strcmp(ptr->list->val, "teamname"))
+      else if (!strcmp(ptr->list->val, "teamname") && ptr->list->next)
       {
         teamName = ptr->list->next->val;
       }
@@ -276,16 +287,16 @@ void Effector::ParseInit(sexp_t *_exp)
 void Effector::OnConnection(const int _socket)
 {
   std::lock_guard<std::mutex> lock(this->mutex);
-  this->socketIDMessageMap[_socket] = "__init__";
+  this->socketIDMessageMap[_socket] = "__empty__";
 }
 
 //////////////////////////////////////////////////
 void Effector::OnDisconnection(const int _socket)
 {
+  std::lock_guard<std::mutex> lock(this->mutex);
   if (this->socketIDMessageMap.find(_socket) !=
       this->socketIDMessageMap.end())
   {
-    std::lock_guard<std::mutex> lock(this->mutex);
     this->socketIDMessageMap[_socket] = "__del__";
   }
 }
@@ -296,24 +307,26 @@ void Effector::Update()
   // clear data structures
   this->agentsToAdd.clear();
   this->agentsToRemove.clear();
+  std::map <int, Agent *> socketIdAgentMap;
+
+  for (const auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      socketIdAgentMap[agent.socketID] = &agent;
+    }
+  }
+
+  std::lock_guard<std::mutex> lock(this->mutex);
 
   // Update Effectors using message received by Parse()
-  // std::lock_guard<std::mutex> lock(this->mutex);
   for (auto kv = this->socketIDMessageMap.begin();
        kv != this->socketIDMessageMap.end();)
   {
     this->currSocketId = kv->first;
     this->currAgent = NULL;
-    for (const auto &team : this->gameState->teams)
-    {
-      for (auto &agent : team->members)
-      {
-        if (this->currSocketId == agent.socketID)
-        {
-          this->currAgent = &agent;
-        }
-      }
-    }
+    if (socketIdAgentMap.find(this->currSocketId) != socketIdAgentMap.end())
+    { this->currAgent = socketIdAgentMap[this->currSocketId]; }
 
     if (kv->second == "__del__")
     {
@@ -324,13 +337,285 @@ void Effector::Update()
       }
       this->socketIDMessageMap.erase(kv++);
     }
+    else if (kv->second == "__empty__")
+    {
+      ++kv;
+    }
     else
     {
-      ParseMessage(kv->second);
+      this->ParseMessage(kv->second);
+      this->socketIDMessageMap[kv->first] = "__empty__";
       ++kv;
     }
   }
 
   this->currSocketId = -1;
   this->currAgent = NULL;
+}
+
+//////////////////////////////////////////////////
+MonitorEffector::MonitorEffector(GameState *const _gameState):
+  Effector(_gameState)
+{}
+
+//////////////////////////////////////////////////
+void MonitorEffector::Update()
+{
+  this->agentsToRemove.clear();
+  this->agentsToAdd.clear();
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  // Update Effectors using message received by Parse()
+  for (auto kv = this->socketIDMessageMap.begin();
+       kv != this->socketIDMessageMap.end();)
+  {
+    if (kv->second == "__del__")
+    {
+      this->socketIDMessageMap.erase(kv++);
+    }
+    else if (kv->second == "__empty__")
+    {
+      ++kv;
+    }
+    else
+    {
+      this->ParseMessage(kv->second);
+      this->socketIDMessageMap[kv->first] = "__empty__";
+      ++kv;
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void MonitorEffector::ParseSexp(sexp_t *_exp)
+{
+  // Extract the first element of a s-expression
+  char *v;
+  if (_exp->ty == SEXP_LIST)
+  {
+    if (_exp->list->ty == SEXP_VALUE)
+    {
+      v = _exp->list->val;
+    }
+    else
+    {
+      // std::cerr <<
+      //          "Not in s-expression message format. the format: (value ....)"
+      //           << std::endl;
+      return;
+    }
+  }
+  else
+  {
+    // std::cerr <<
+    //           "Not an s-expression message. Not begin with a parenthesis"
+    //           << std::endl;
+    return;
+  }
+
+  // Decide based on the type of effector message
+  if (!strcmp(v, "agent"))
+  {
+    this->ParseMoveAgent(_exp);
+  }
+  else if (!strcmp(v, "ball"))
+  {
+    this->ParseMoveBall(_exp);
+  }
+  else if (!strcmp(v, "playMode"))
+  {
+    this->ParsePlayMode(_exp);
+  }
+  else if (!strcmp(v, "kill"))
+  {
+    this->ParseRemoveAgent(_exp);
+  }
+  else
+  {
+    // std::cerr << "Unknown Message : " << v << std::endl;
+  }
+}
+
+//////////////////////////////////////////////////
+void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
+{
+  int uNum = -1;
+  std::string teamSide = "";
+  double x, y, z, yaw;
+  x = y = z = yaw = -1;
+  bool pMove = false;
+  bool pUNum = false;
+  bool pTeamS = false;
+
+  sexp_t *ptr = _exp->list->next;
+
+  while (ptr != NULL)
+  {
+    if (ptr->ty == SEXP_LIST)
+    {
+      if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
+      {
+        uNum = atof(ptr->list->next->val);
+        pUNum = true;
+      }
+      else if (!strcmp(ptr->list->val, "team") && ptr->list->next)
+      {
+        teamSide = ptr->list->next->val;
+        pTeamS = true;
+      }
+      else if (!strcmp(ptr->list->val, "pos") && ptr->list->next
+               && ptr->list->next->next && ptr->list->next->next->next)
+      {
+        x = atof(ptr->list->next->val);
+        y = atof(ptr->list->next->next->val);
+        z = atof(ptr->list->next->next->next->val);
+        pMove = false;
+      }
+      else if (!strcmp(ptr->list->val, "move") && ptr->list->next
+               && ptr->list->next->next && ptr->list->next->next->next
+               && ptr->list->next->next->next->next)
+      {
+        x = atof(ptr->list->next->val);
+        y = atof(ptr->list->next->next->val);
+        z = atof(ptr->list->next->next->next->val);
+        yaw = atof(ptr->list->next->next->next->next->val);
+        pMove = true;
+      }
+    }
+    ptr = ptr->next;
+  }
+
+  if (!pUNum || !pTeamS)
+  { return; }
+
+  if (uNum < 0 || uNum > 11)
+  { return; }
+
+  Team::Side side;
+  if (teamSide == "Right" || teamSide == "right")
+  { side = Team::Side::RIGHT; }
+  else if (teamSide == "Left" || teamSide == "left")
+  { side = Team::Side::LEFT; }
+  else
+  { return; }
+
+  auto newPos = math::Vector3<double>(x, y, z);
+  for (const auto &team : this->gameState->teams)
+  {
+    if (team->side != side)
+    { continue; }
+    for (auto &agent : team->members)
+    {
+      if (agent.uNum != uNum)
+      { continue; }
+      if (pMove)
+      {
+        auto newRot = math::Quaternion<double>(0, 0, yaw);
+        this->gameState->MoveAgent(agent, newPos, newRot);
+      }
+      else
+      {
+        this->gameState->MoveAgent(agent, newPos);
+      }
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void MonitorEffector::ParseMoveBall(sexp_t *_exp)
+{
+  double x, y, z;
+  double u, v, w;
+  sexp_t *ptr = _exp->list->next;
+
+  while (ptr != NULL)
+  {
+    if (ptr->ty == SEXP_LIST)
+    {
+      if (!strcmp(ptr->list->val, "pos") && ptr->list->next
+          && ptr->list->next->next && ptr->list->next->next->next)
+      {
+        x = atof(ptr->list->next->val);
+        y = atof(ptr->list->next->next->val);
+        z = atof(ptr->list->next->next->next->val);
+        this->gameState->MoveBall(math::Vector3<double>(x, y, z));
+      }
+      else if (!strcmp(ptr->list->val, "vel") && ptr->list->next
+               && ptr->list->next->next && ptr->list->next->next->next)
+      {
+        u = atof(ptr->list->next->val);
+        v = atof(ptr->list->next->next->val);
+        w = atof(ptr->list->next->next->next->val);
+        this->gameState->SetBallVel(math::Vector3<double>(u, v, w));
+      }
+    }
+    ptr = ptr->next;
+  }
+}
+
+//////////////////////////////////////////////////
+void MonitorEffector::ParsePlayMode(sexp_t *_exp)
+{
+  if (_exp->list->next)
+  {
+    std::string playMode = _exp->list->next->val;
+    if (this->gameState->playModeNameMap.find(playMode)
+        != this->gameState->playModeNameMap.end())
+    {
+      this->gameState->SetCurrent(this->gameState->playModeNameMap[playMode]);
+    }
+  }
+}
+
+//////////////////////////////////////////////////
+void MonitorEffector::ParseRemoveAgent(sexp_t *_exp)
+{
+  int uNum = -1;
+  std::string teamSide = "";
+  bool pUNum = false;
+  bool pTeamS = false;
+
+  sexp_t *ptr = _exp->list->next;
+  while (ptr != NULL)
+  {
+    if (ptr->ty == SEXP_LIST)
+    {
+      if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
+      {
+        uNum = atof(ptr->list->next->val);
+        pUNum = true;
+      }
+      else if (!strcmp(ptr->list->val, "team") && ptr->list->next)
+      {
+        teamSide = ptr->list->next->val;
+        pTeamS = true;
+      }
+    }
+    ptr = ptr->next;
+  }
+
+  if (!pUNum || !pTeamS)
+  { return; }
+
+  if (uNum < 0 || uNum > 11)
+  { return; }
+
+  Team::Side side;
+  if (teamSide == "Right" || teamSide == "right")
+  { side = Team::Side::RIGHT; }
+  else if (teamSide == "Left" || teamSide == "left")
+  { side = Team::Side::LEFT; }
+  else
+  { return; }
+
+  std::string teamName;
+  for (const auto &team : this->gameState->teams)
+  {
+    if (team->side == side)
+    { teamName = team->name; }
+  }
+
+  if (this->gameState->RemoveAgent(uNum, teamName))
+  { this->agentsToRemove.push_back(AgentId(uNum, teamName)); }
 }

@@ -42,8 +42,10 @@
 
 using namespace gazebo;
 
+int Robocup3dsPlugin::clientPort        = 3100;
+int Robocup3dsPlugin::monitorPort       = 3200;
+bool Robocup3dsPlugin::syncMode         = false;
 const int Robocup3dsPlugin::kBufferSize = 16384;
-const int Robocup3dsPlugin::kPort       = 3100;
 
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
@@ -51,12 +53,16 @@ GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 Robocup3dsPlugin::Robocup3dsPlugin():
   gameState(std::make_shared<GameState>()),
   effector(std::make_shared<Effector>(this->gameState.get())),
+  monitorEffector(std::make_shared<MonitorEffector>(this->gameState.get())),
   perceptor(std::make_shared<Perceptor>(this->gameState.get())),
-  server(std::make_shared<RCPServer>(Robocup3dsPlugin::kPort, this->effector)),
+  clientServer(std::make_shared<RCPServer>(
+                 Robocup3dsPlugin::clientPort,
+                 this->effector)),
+  monitorServer(std::make_shared<RCPServer>(
+                  Robocup3dsPlugin::monitorPort,
+                  this->monitorEffector)),
   lastUpdateTime(-GameState::counterCycleTime)
 {
-  GameState::useCounterForGameTime = false;
-  this->server->Start();
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
 }
 
@@ -67,14 +73,71 @@ Robocup3dsPlugin::~Robocup3dsPlugin()
 }
 
 /////////////////////////////////////////////////
+void Robocup3dsPlugin::LoadConfiguration(
+  const std::map<std::string, std::string> &_config) const
+{
+  double value;
+  bool boolValue;
+  if (LoadConfigParameter(_config, "robocup3dsplugin_monitorport", value))
+  { Robocup3dsPlugin::monitorPort = static_cast<int>(value); }
+  if (LoadConfigParameter(_config, "robocup3dsplugin_clientport", value))
+  { Robocup3dsPlugin::clientPort = static_cast<int>(value); }
+  if (LoadConfigParameterBool(_config, "robocup3dsplugin_syncmode", boolValue))
+  { Robocup3dsPlugin::syncMode = boolValue; }
+}
+
+/////////////////////////////////////////////////
 void Robocup3dsPlugin::Load(physics::WorldPtr _world,
                             sdf::ElementPtr _sdf)
 {
-  // Connect to the update event.
-  this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-                             boost::bind(&Robocup3dsPlugin::Update, this, _1));
   this->world = _world;
   this->sdf = _sdf;
+
+  std::map<std::string, std::string> config;
+  _sdf = _sdf->GetFirstElement();
+  while (_sdf)
+  {
+    // gzerr << "element name: " << _sdf->GetName() << std::endl;
+    const auto &param = _sdf->GetValue();
+    // gzerr << "param addr: " << param << std::endl;
+    if (param)
+    {
+      // gzerr << "kv: " << param->GetKey() << " : " <<
+      // param->GetAsString() << std::endl;
+      config[param->GetKey()] = param->GetAsString();
+    }
+    _sdf = _sdf->GetNextElement();
+  }
+
+  gzmsg << "************loading config**************" << std::endl;
+  this->gameState->LoadConfiguration(config);
+  this->LoadConfiguration(config);
+  gzmsg << "************finished loading************" << std::endl;
+
+  gzmsg << "client port: " << Robocup3dsPlugin::clientPort << std::endl;
+  gzmsg << "monitor port: " << Robocup3dsPlugin::monitorPort << std::endl;
+  gzmsg << "syncmode status: " << Robocup3dsPlugin::syncMode << std::endl;
+
+  // Connect to the update event.
+  if (!Robocup3dsPlugin::syncMode)
+  {
+    this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+                               boost::bind(&Robocup3dsPlugin::Update,
+                                           this, _1));
+  }
+  else
+  {
+    this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+                               boost::bind(&Robocup3dsPlugin::UpdateSync,
+                                           this, _1));
+  }
+
+  if (this->clientServer->GetPort() != Robocup3dsPlugin::clientPort)
+  { this->clientServer->SetPort(Robocup3dsPlugin::clientPort); }
+  if (this->monitorServer->GetPort() != Robocup3dsPlugin::monitorPort)
+  { this->monitorServer->SetPort(Robocup3dsPlugin::monitorPort); }
+  this->clientServer->Start();
+  this->monitorServer->Start();
 }
 
 /////////////////////////////////////////////////
@@ -95,9 +158,44 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
   }
 
   this->UpdateEffector();
+  this->UpdateMonitorEffector();
   this->UpdateGameState();
   this->UpdatePerceptor();
   this->lastUpdateTime = this->world->GetSimTime().Double();
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
+{
+  bool unsyncedAgent = true;
+  while (unsyncedAgent)
+  {
+    this->UpdateEffector();
+    for (const auto &team : this->gameState->teams)
+    {
+      for (const auto &agent : team->members)
+      {
+        if (!agent.syn)
+        {
+          continue;
+        }
+      }
+    }
+    unsyncedAgent = false;
+  }
+
+  this->UpdateMonitorEffector();
+  this->UpdateGameState();
+  this->UpdatePerceptor();
+  this->lastUpdateTime = this->world->GetSimTime().Double();
+
+  for (const auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      agent.syn = false;
+    }
+  }
 }
 
 /////////////////////////////////////////////////
@@ -136,10 +234,25 @@ void Robocup3dsPlugin::UpdateEffector()
       {
         model->GetJoint(kv.first)->SetVelocity(0, kv.second);
       }
+      agent.action.jointEffectors.clear();
     }
   }
 }
 
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateMonitorEffector()
+{
+  // update monitor effector
+  this->monitorEffector->Update();
+
+  // remove models that need to be removed from world
+  for (auto &agentInfo : this->monitorEffector->agentsToRemove)
+  {
+    std::string agentName = std::to_string(agentInfo.first) + "_" +
+                            agentInfo.second;
+    this->world->RemoveModel(agentName);
+  }
+}
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateBallContactHistory()
 {
@@ -325,7 +438,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
   // send messages to server
   for (const auto &team : this->gameState->teams)
   {
-    for (auto &agent : team->members)
+    for (const auto &agent : team->members)
     {
       int cx = perceptor->Serialize(agent, &(this->buffer[4]),
                                     Robocup3dsPlugin::kBufferSize - 4);
@@ -334,7 +447,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
       this->buffer[1] = (_cx >>  8) & 0xff;
       this->buffer[2] = (_cx >> 16) & 0xff;
       this->buffer[3] = (_cx >> 24) & 0xff;
-      server->Send(agent.socketID, this->buffer, cx + 4);
+      this->clientServer->Send(agent.socketID, this->buffer, cx + 4);
     }
   }
 }

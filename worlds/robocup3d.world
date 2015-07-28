@@ -47,7 +47,8 @@
     <!-- Load the plugin for Razer Hydra -->
     <!--<plugin name="hydra" filename="libHydraPlugin.so"></plugin>-->
 
-    <plugin name="r" filename="librobocup3dsPlugin.so">
-  </plugin>
+    <plugin name="robocup3dplugin" filename="librobocup3dsPlugin.so">
+      <robocup3dsplugin_syncmode>false</robocup3dsplugin_syncmode>
+    </plugin>
   </world>
 </sdf>

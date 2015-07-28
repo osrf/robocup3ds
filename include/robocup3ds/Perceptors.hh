@@ -39,7 +39,7 @@ class Perceptor
   public: Perceptor(GameState *const _gameState);
 
   /// \brief Destructor for Perceptor object
-  public: ~Perceptor();
+  public: ~Perceptor() = default;
 
   /// \brief Method used to set view frustum based on HFov, VFov
   public: void SetViewFrustum();
@@ -57,13 +57,13 @@ class Perceptor
   public: void Update();
 
   /// \brief Helper function to update line info
-  /// \param[in] _agent Agent object whose perception is updated
+  /// \param[out] _agent Agent object whose perception is updated
   /// \param[in] _line Line object
   public: void UpdateLine(Agent &_agent,
     const ignition::math::Line3<double> &_line) const;
 
   /// \brief Function to update landmark info
-  /// \param[in] _agent Agent object whose perception is updated
+  /// \param[out] _agent Agent object whose perception is updated
   /// \param[in] _landmarkname Name of landmark
   /// \param[in] _landmark Position of landmark
   public: void UpdateLandmark(Agent &_agent,
@@ -71,13 +71,13 @@ class Perceptor
                 const ignition::math::Vector3<double> &_landmark) const;
 
   /// \brief Function to update positions of other agents
-  /// \param[in] _agent Agent whose perception we are updating
+  /// \param[out] _agent Agent whose perception we are updating
   /// \param[in] _otherAgent Other agent whose position is updated
   public: void UpdateOtherAgent(Agent &_agent,
     const Agent &_otherAgent) const;
 
   /// \brief Function to update message that agent hears
-  /// \param[in] _agent Agent whose perception we are updating
+  /// \param[out] _agent Agent whose perception we are updating
   public: void UpdateAgentHear(Agent &_agent) const;
 
   /// \brief Function to send messages to server
