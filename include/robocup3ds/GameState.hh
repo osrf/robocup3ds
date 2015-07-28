@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_GAMESTATE_HH_
-#define _GAZEBO_GAMESTATE_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
+#define _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
 
 #include <ignition/math.hh>
 #include <map>
@@ -68,7 +68,7 @@ class GameState
   };
 
   /// \brief Struct for helping to sort agents by their distances,
-  /// used by CheckCrowding_helper only
+  /// used by CheckCrowding() only
   private: class AgentDist
   {
     /// \brief Pointer to agent object
@@ -90,7 +90,8 @@ class GameState
       gameState(_gameState),
       normalLevel(_normalLevel),
       errorLevel(_errorLevel)
-    {}
+    {
+    }
 
     /// \brief Print normal messages plus some game information
     /// \param[in] _message Normal message string
@@ -143,7 +144,8 @@ class GameState
       side(_side),
       contactTime(_contactTime),
       contactPos(_contactPos)
-    {}
+    {
+    }
 
     /// \brief Unum of agent who touched ball
     public: int uNum;

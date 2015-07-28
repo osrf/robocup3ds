@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_KICKIN_STATE_HH_
-#define _GAZEBO_KICKIN_STATE_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_KICKIN_STATE_HH_
+#define _GAZEBO_ROBOCUP3DS_KICKIN_STATE_HH_
 
 #include <string>
 
@@ -38,7 +38,7 @@ namespace states
     public: virtual void Initialize();
 
     // Documentation inherited
-    public: virtual void Update(); \
+    public: virtual void Update();
   };
 }
 

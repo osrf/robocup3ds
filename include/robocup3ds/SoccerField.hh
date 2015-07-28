@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_SOCCER_FIELD_PLUGIN_HH_
-#define _GAZEBO_SOCCER_FIELD_PLUGIN_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_SOCCERFIELD_HH_
+#define _GAZEBO_ROBOCUP3DS_SOCCERFIELD_HH_
 
 #include <ignition/math.hh>
 #include <map>
@@ -87,49 +87,6 @@ namespace SoccerField
   static const ignition::math::Box FieldRight(ignition::math::Vector3<double>
       (0, -SoccerField::HalfFieldWidth, 0), ignition::math::Vector3<double>
       (SoccerField::HalfFieldHeight, SoccerField::HalfFieldWidth, 0));
-
-  static const std::vector<Geometry::Line> FieldLines =
-  {
-    // middle lines
-    Geometry::Line(0, -10, 0, 10),
-    // ground lines
-    Geometry::Line(15, -10, 15, 10),
-    Geometry::Line(-15, -10, -15, 10),
-    // side lines
-    Geometry::Line(15, 10, -15, 10),
-    Geometry::Line(15, -10, -15, -10),
-    // penalty lines
-    Geometry::Line(13.2, 3, 13.2, -3),
-    Geometry::Line(13.2, 3, 15, 3),
-    Geometry::Line(13.2, -3, 15, -3),
-    Geometry::Line(-13.2, 3, -13.2, -3),
-    Geometry::Line(-13.2, 3, -15, 3),
-    Geometry::Line(-13.2, -3, -15, -3),
-    // center circle ring
-    Geometry::Line(2, 0, 1.618033989, 1.175570505),
-    Geometry::Line(1.618033989, 1.175570505, 0.618033989, 1.902113033),
-    Geometry::Line(0.618033989, 1.902113033, -0.618033989, 1.902113033),
-    Geometry::Line(-0.618033989, 1.902113033, -1.618033989, 1.175570505),
-    Geometry::Line(-1.618033989, 1.175570505, -2, 0),
-    Geometry::Line(-2, 0, -1.618033989, -1.175570505),
-    Geometry::Line(-1.618033989, -1.175570505, -0.618033989, -1.902113033),
-    Geometry::Line(-0.618033989, -1.902113033, 0.618033989, -1.902113033),
-    Geometry::Line(0.618033989, -1.902113033, 1.618033989, -1.175570505),
-    Geometry::Line(1.618033989, -1.175570505, 2, 0)
-  };
-
-  static const std::map<std::string, ignition::math::Vector3<double>>
-  LandMarks =
-  {
-    {"F1L", ignition::math::Vector3<double>(-15, 10, 0)},
-    {"F1R", ignition::math::Vector3<double>(15, 10, 0)},
-    {"F2R", ignition::math::Vector3<double>(15, -10, 0)},
-    {"F2L", ignition::math::Vector3<double>(-15, -10, 0)},
-    {"G1L", ignition::math::Vector3<double>(-15, 1.05, 0.8)},
-    {"G1R", ignition::math::Vector3<double>(15, 1.05, 0.8)},
-    {"G2L", ignition::math::Vector3<double>(-15, -1.05, 0.8)},
-    {"G2R", ignition::math::Vector3<double>(15, -1.05, 0.8)}
-  };
 }
 
 #endif

@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_AGENT_HH_
-#define _GAZEBO_AGENT_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_AGENT_HH_
+#define _GAZEBO_ROBOCUP3DS_AGENT_HH_
 
 #include <ignition/math.hh>
 #include <map>
@@ -89,9 +89,9 @@ class Agent
   /// \brief Enum for the agent status
   public: enum class Status
   {
-    /// \brief Agent is not allowed to move
-    RELEASED,
     /// \brief Agent is allowed to move
+    RELEASED,
+    /// \brief Agent is not allowed to move
     STOPPED
   };
 
@@ -120,7 +120,9 @@ class Agent
   }
 
   /// \brief Flag whether player is goalkeeper
-  public: bool IsGoalKeeper() {
+  /// \return True if player is goalkeeper
+  public: bool IsGoalKeeper()
+  {
     return this->uNum == 1;
   }
 
@@ -139,9 +141,6 @@ class Agent
   /// \brief Agent position in previous cycle
   public: ignition::math::Vector3<double> prevPos;
 
-  /// \brief Agent camera orientation
-  public: ignition::math::Quaternion<double> cameraRot;
-
   /// \brief Agent orientation
   public: ignition::math::Quaternion<double> rot;
 
@@ -152,10 +151,10 @@ class Agent
   /// \brief Flag whether agent is in penalty box
   public: bool inPenaltyBox;
 
-  /// \brief Stores time the agent has not moved
+  /// \brief Stores duration in seconds the agent has not moved
   public: double timeImmobilized;
 
-  /// \brief Stores time the agent has fallen
+  /// \brief Stores duration in seconds the agent has fallen
   public: double timeFallen;
 };
 
