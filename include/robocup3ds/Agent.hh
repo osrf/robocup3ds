@@ -25,14 +25,15 @@
 #include <vector>
 #include <string>
 
+#include "robocup3ds/SoccerField.hh"
+
 class Agent;
 
 /// \brief Typedef for map of agent's body parts and positions
-typedef std::map<std::string, ignition::math::Vector3<double>>
-  AgentBodyMap;
+using AgentBodyMap = std::map<std::string, ignition::math::Vector3<double>>;
 
 /// \brief Typedef for uNum, teamName pairs for identifying agents
-typedef std::pair<int, std::string> AgentId;
+using AgentId = std::pair<int, std::string>;
 
 /// \brief Team class for GameState
 class Team
@@ -125,7 +126,7 @@ class AgentPerceptions
   /// \brief AgentPerception constructor
   public: AgentPerceptions()
   {
-    this->fieldLines.reserve(21);
+    this->fieldLines.reserve(SoccerField::FieldLines.size());
   }
 
   /// \brief Map of landmarks that have been transformed to agent's cood
