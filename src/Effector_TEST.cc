@@ -32,12 +32,12 @@
 /// \brief This test uses s-expression messages belong to a sample RoboCup
 /// agent communication.
 const std::string message1 =
-    "(init (unum 1)(teamname sampleAgent))";
+  "(init (unum 1)(teamname sampleAgent))";
 
 const std::string message2 =
-    "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)""(he1 3.20802)"
-    "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
-    "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)";
+  "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)""(he1 3.20802)"
+  "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
+  "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)";
 
 /// \brief Constants and global variables.
 const int kPort = 6234;
@@ -91,7 +91,7 @@ bool createClient(const int _port, int &_socket)
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     if (tries == kMaxConnections)
-      return false;
+    { return false; }
   }
 
   return true;
@@ -104,12 +104,12 @@ void senderClient(const int _port)
 {
   int socket;
   if (!createClient(_port, socket))
-    return;
+  { return; }
 
-  //send the Init Message
+  // send the Init Message
   SendSomeData(message1, socket);
 
-  //send the Joints Effectors
+  // send the Joints Effectors
   SendSomeData(message2, socket);
 
   clientReady = true;
@@ -122,7 +122,7 @@ void senderClient(const int _port)
     std::unique_lock<std::mutex> lk(mutex);
     auto now = std::chrono::system_clock::now();
     if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
-        [](){return serverReady;}))
+    []() {return serverReady;}))
     {
       FAIL();
     }
@@ -153,7 +153,7 @@ TEST(RCPServer, Effector)
     std::unique_lock<std::mutex> lk(mutex);
     auto now = std::chrono::system_clock::now();
     if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
-        [](){return clientReady;}))
+    []() {return clientReady;}))
     {
       FAIL();
       return;
@@ -170,16 +170,19 @@ TEST(RCPServer, Effector)
   {
     for (auto &agent : team->members)
     {
-      EXPECT_EQ (agent.GetName(),"1_sampleAgent");
+      EXPECT_EQ(agent.GetName(), "1_sampleAgent");
 
-      EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("he1")->second, 3.20802);
-      EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("he2")->second, -1.80708);
-      EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("lae1")->second, -0.259697);
-      EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("rae1")->second, -0.259697);
+      EXPECT_DOUBLE_EQ(agent.action.jointEffectors.find("he1")->second,
+                       3.20802);
+      EXPECT_DOUBLE_EQ(agent.action.jointEffectors.find("he2")->second,
+                       -1.80708);
+      EXPECT_DOUBLE_EQ(agent.action.jointEffectors.find("lae1")->second,
+                       -0.259697);
+      EXPECT_DOUBLE_EQ(agent.action.jointEffectors.find("rae1")->second,
+                       -0.259697);
     }
   }
 
   if (clientThread.joinable())
-    clientThread.join();
-
+  { clientThread.join(); }
 }

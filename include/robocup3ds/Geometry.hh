@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_GEOMETRY_HH_
-#define _GAZEBO_GEOMETRY_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_GEOMETRY_HH_
+#define _GAZEBO_ROBOCUP3DS_GEOMETRY_HH_
 
 #include <ignition/math.hh>
 #include <vector>

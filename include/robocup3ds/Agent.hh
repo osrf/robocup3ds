@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_AGENT_HH_
-#define _GAZEBO_AGENT_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_AGENT_HH_
+#define _GAZEBO_ROBOCUP3DS_AGENT_HH_
 
 #include <ignition/math.hh>
 #include <map>
@@ -101,7 +101,8 @@ class AgentHear
     yaw(-1),
     self(false),
     isValid(false)
-  {}
+  {
+  }
 
   /// \brief Time when the message was sent
   public: double gameTime;
@@ -179,15 +180,15 @@ class Agent
   /// \brief Enum for the agent status and whether movement is allowed
   public: enum class Status
   {
-    /// \brief Agent is not allowed to move
-    RELEASED,
     /// \brief Agent is allowed to move
+    RELEASED,
+    /// \brief Agent is not allowed to move
     STOPPED
   };
 
   /// \brief Constructor for Agent object
-  /// \param[in] _uNum unique identifier for agent
-  /// \param[in] _team pointer to team agent is on
+  /// \param[in] _uNum Unique identifier for agent
+  /// \param[in] _team Pointer to team of the agent
   /// \param[in] _socketID Socket ID for agent
   public: Agent(const int _uNum, const std::shared_ptr<Team> &_team,
     const int _socketID = -1):
@@ -207,7 +208,7 @@ class Agent
   /// \brief Equality operator for agents
   /// \param[in] _agent Agent compared against
   /// \return True if they are equal
-  public: bool operator==(const Agent &_agent)
+  public: bool operator==(const Agent &_agent) const
   {
     return this == &_agent;
   }
@@ -252,6 +253,7 @@ class Agent
   }
 
   /// \brief Flag whether player is goalkeeper
+  /// \return True if player is goalkeeper
   public: bool IsGoalKeeper()
   {
     return this->uNum == 1;
@@ -278,17 +280,16 @@ class Agent
   /// \brief Agent position in previous cycle
   public: ignition::math::Vector3<double> prevPos;
 
-  /// \brief Agent orientation
+  /// \brief Agent orientation in radians
   public: ignition::math::Quaternion<double> rot;
 
-  /// \brief Agent camera orientation
+  /// \brief Agent camera orientation in radians
   public: ignition::math::Quaternion<double> cameraRot;
 
   /// \brief Agent camera position
   public: ignition::math::Vector3<double> cameraPos;
 
-  /// \brief Flag whether to update agent pose in world to match
-  /// gamestate.
+  /// \brief Flag whether to update agent pose in world to match gamestate.
   public: bool updatePose;
 
   /// \brief Map of agent body parts in world coordinates
@@ -303,10 +304,10 @@ class Agent
   /// \brief Flag whether agent is in penalty box
   public: bool inPenaltyBox;
 
-  /// \brief Stores time the agent has not moved
+  /// \brief Stores duration in seconds the agent has not moved
   public: double timeImmobilized;
 
-  /// \brief Stores time the agent has fallen
+  /// \brief Stores duration in seconds the agent has fallen
   public: double timeFallen;
 
   /// \brief Flag whether agent has finished syncing messages
@@ -320,7 +321,8 @@ class AgentSay
   public: AgentSay():
     agentId(std::make_pair(-1, "")),
     isValid(false)
-  {}
+  {
+  }
 
   /// \brief AgentId of agent who said message
   public: AgentId agentId;
@@ -336,7 +338,7 @@ class AgentSay
 };
 
 /// \brief Struct for helping to sort agents by their distances,
-/// used by CheckCrowding_helper only
+/// used by CheckCrowding only
 class AgentDist
 {
   /// \brief Pointer to agent object

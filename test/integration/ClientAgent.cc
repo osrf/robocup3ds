@@ -31,6 +31,9 @@ ClientAgent::ClientAgent(const std::string &_serverAddr, const int _port,
   serverAddr(_serverAddr),
   port(_port),
   monitorPort(_monitorPort),
+  monitorPort(_monitorPort),
+  socketID(-1),
+  monitorSocketID(-1),
   reConnects(5)
 {
 }
