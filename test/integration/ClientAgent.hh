@@ -18,7 +18,6 @@
 #ifndef _GAZEBO_INTEGRATION_TESTAGENT_HH_
 #define _GAZEBO_INTEGRATION_TESTAGENT_HH_
 
-#include <netdb.h>
 #include <string>
 #include <thread>
 #include <ignition/math.hh>
@@ -44,17 +43,32 @@ class ClientAgent
   public: void Update();
 
   /// \brief Connects agent to server
-  public: bool Connect();
+  private: bool Connect(const int &_port, int &_socketID);
 
   /// \brief Disconnects the agent from server
-  public: void Disconnect();
+  public: void Disconnect(const int &_port, int &_socketID);
 
   /// \brief Simulates the agent moving from one location to another
   /// \param[in] _start Starting position
   /// \param[in] _end Ending position
   /// \param[in] _nSteps Number of time steps to walk
-  public: void Walk(const ignition::math::Vector3<double> &_start,
+  private: void Walk(const ignition::math::Vector3<double> &_start,
     const ignition::math::Vector3<double> &_end, const int _nSteps);
+
+  /// \brief Writes to a client message to socket
+  /// \param[in] _msg Message to write
+  private: void PutMessage(const std::string &_msg);
+
+  /// \brief Writes a monitor message to socket
+  /// \param[in] _msg Message to write
+  private: void PutMonMessage(const std::string &_msg);
+
+  /// \brief Gets the message from the socket
+  /// \param[out] _msg String to write message to
+  private: bool GetMessage(std::string &_msg);
+
+  /// \brief Sends an init and beam message to server
+  private: void InitAndBeam();
 
   /// \brief Whether agent is running separate thread
   public: bool running;
@@ -70,6 +84,12 @@ class ClientAgent
 
   /// \brief Port of server that the monitor connects to
   private: const int monitorPort;
+
+  /// \brief Socket id of client
+  private: int socketID;
+
+  /// \brief Socket id of monitor
+  private: int monitorSocketID;
 
   /// \brief thread in which agent is running
   private: std::thread thread;

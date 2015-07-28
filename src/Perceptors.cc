@@ -27,6 +27,7 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Perceptors.hh"
 #include "robocup3ds/Server.hh"
+#include "robocup3ds/states/State.hh"
 #include "robocup3ds/SoccerField.hh"
 
 using namespace ignition;
@@ -239,6 +240,11 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
                          const int _size) const
 {
   int cx = 0;
+
+  // write out gamestate info
+  cx += snprintf(_string + cx, _size - cx, "(GS (t %.2f) (pm %s))",
+                 this->gameState->GetElapsedGameTime(true),
+                 this->gameState->GetCurrentState()->name.c_str());
 
   if (this->UpdatePerception())
   {

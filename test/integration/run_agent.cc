@@ -40,9 +40,19 @@ class IntegrationTest_Basic : public gazebo::ServerFixture
 class IntegrationTest_Immed : public gazebo::ServerFixture
 {
   public:
-    IntegrationTest_Immed():
-      agent(std::make_shared<ClientAgent>("127.0.0.1", 3100, 3200))
-    {}
+    virtual void SetUp()
+    {
+      this->Load(worldPath);
+      this->world = gazebo::physics::get_world("default");
+      this->agent = make_shared<ClientAgent>("127.0.0.1", 3100, 3200);
+    }
+
+  public:
+    virtual void TearDown()
+    {
+      this->agent.reset();
+      gazebo::ServerFixture::TearDown();
+    }
 
   public:
     const string worldPath =
@@ -50,7 +60,10 @@ class IntegrationTest_Immed : public gazebo::ServerFixture
       "gazebo-6.0/worlds/robocup3d.world";
 
   public:
-    std::shared_ptr<ClientAgent> agent;
+    shared_ptr<ClientAgent> agent;
+
+  public:
+    gazebo::physics::WorldPtr world;
 };
 
 
@@ -62,14 +75,12 @@ TEST_F(IntegrationTest_Basic, TestLoadWorldPlugin)
   EXPECT_TRUE(world != NULL);
 }
 
-/// \brief This tests whether agent can successfully connect or not
+/// \brief This tests whether agent can successfully connect, init, and do some
+/// beaming
 TEST_F(IntegrationTest_Immed, TestLoadConnectAgent)
 {
-  this->Load(worldPath);
-  const auto &world = gazebo::physics::get_world("default");
-
   this->agent->Start();
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
 }

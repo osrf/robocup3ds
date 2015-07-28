@@ -336,8 +336,10 @@ class GameState
   public: void SetHalf(const Half _newHalf);
 
   /// \brief Get the elapsed time in seconds since beginning of half.
+  /// \param[in] _beginning If true, will return elapsed time always since
+  /// first half
   /// \return The elapsed game time
-  public: double GetElapsedGameTime() const;
+  public: double GetElapsedGameTime(const bool _beginning = false) const;
 
   /// \brief Get the elapsed time in seconds since last cycle.
   /// \return The elapsed game time since last cycle

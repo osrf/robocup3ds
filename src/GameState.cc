@@ -85,31 +85,31 @@ const double GameState::ballContactInterval = 0.1;
 GameState::GameState():
   beforeKickOffState(std::make_shared<BeforeKickOffState>(BeforeKickOff, this)),
   kickOffLeftState(std::make_shared<KickOffState>(KickOffLeft, this,
-    Team::Side::LEFT)),
+                   Team::Side::LEFT)),
   kickOffRightState(std::make_shared<KickOffState>(KickOffRight, this,
-    Team::Side::RIGHT)),
+                    Team::Side::RIGHT)),
   playOnState(std::make_shared<PlayOnState>(PlayOn, this)),
   kickInLeftState(std::make_shared<KickInState>(KickInLeft, this,
-    Team::Side::LEFT)),
+                  Team::Side::LEFT)),
   kickInRightState(std::make_shared<KickInState>(KickInRight, this,
-    Team::Side::RIGHT)),
+                   Team::Side::RIGHT)),
   cornerKickLeftState(std::make_shared<CornerKickState>(
                         CornerKickLeft, this, Team::Side::LEFT)),
   cornerKickRightState(std::make_shared<CornerKickState>(
                          CornerKickRight, this, Team::Side::RIGHT)),
   goalKickLeftState(std::make_shared<GoalKickState>(GoalKickLeft, this,
-    Team::Side::LEFT)),
+                    Team::Side::LEFT)),
   goalKickRightState(std::make_shared<GoalKickState>(GoalKickRight, this,
-    Team::Side::RIGHT)),
+                     Team::Side::RIGHT)),
   gameOverState(std::make_shared<GameOverState>(GameOver, this)),
   goalLeftState(std::make_shared<GoalState>(GoalLeft, this,
-    Team::Side::LEFT)),
+                Team::Side::LEFT)),
   goalRightState(std::make_shared<GoalState>(GoalRight, this,
-    Team::Side::RIGHT)),
+                 Team::Side::RIGHT)),
   freeKickLeftState(std::make_shared<FreeKickState>(FreeKickLeft, this,
-    Team::Side::LEFT)),
+                    Team::Side::LEFT)),
   freeKickRightState(std::make_shared<FreeKickState>(FreeKickRight, this,
-    Team::Side::RIGHT)),
+                     Team::Side::RIGHT)),
   hasCurrentStateChanged(false),
   touchBallKickoff(nullptr),
   updateBallPose(false),
@@ -1048,9 +1048,15 @@ void GameState::SetHalf(const Half _newHalf)
 }
 
 ////////////////////////////////////////////////
-double GameState::GetElapsedGameTime() const
+double GameState::GetElapsedGameTime(const bool _beginning) const
 {
-  return this->gameTime - this->startGameTime;
+  if (_beginning && this->GetHalf() == Half::SECOND_HALF)
+  {
+    return (this->gameTime - this->startGameTime) +
+           GameState::SecondsEachHalf;
+  }
+  else
+  { return this->gameTime - this->startGameTime; }
 }
 
 ////////////////////////////////////////////////
