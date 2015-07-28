@@ -25,6 +25,8 @@
 #include <vector>
 #include <string>
 
+#include "robocup3ds/SoccerField.hh"
+
 class Agent;
 
 /// \brief Team class for GameState
@@ -85,11 +87,10 @@ class Team
 };
 
 /// \brief Typedef for map of agent's body parts and positions
-typedef std::map<std::string, ignition::math::Vector3<double> >
-  AgentBodyMap;
+using AgentBodyMap = std::map<std::string, ignition::math::Vector3<double>>;
 
 /// \brief Typedef for uNum, teamName pairs for identifying agents
-typedef std::pair<int, std::string> AgentId;
+using AgentId = std::pair<int, std::string>;
 
 /// \brief Container that contains info for hear perceptor
 class AgentHear
@@ -125,7 +126,7 @@ class AgentPerceptions
   /// \brief AgentPerception constructor
   public: AgentPerceptions()
   {
-    this->fieldLines.reserve(21);
+    this->fieldLines.reserve(SoccerField::FieldLines.size());
   }
 
   /// \Brief Map of landmarks that have been transformed to agent's cood frame
@@ -155,8 +156,8 @@ class Agent
   };
 
   /// \brief Constructor for Agent object
-  /// \param[in] _uNum unique identifier for agent
-  /// \param[in] _team pointer to team agent is on
+  /// \param[in] _uNum Unique identifier for agent
+  /// \param[in] _team Pointer to team of the agent
   public: Agent(const int _uNum, const std::shared_ptr<Team> &_team):
     uNum(_uNum),
     team(_team)
@@ -222,7 +223,6 @@ class Agent
 
   /// \brief Stores time the agent has fallen
   public: double timeFallen;
-
 };
 
 /// \brief Container that contains info for say effector

@@ -19,8 +19,6 @@
 #define _GAZEBO_PERCEPTORS_HH_
 
 #include <ignition/math.hh>
-#include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
