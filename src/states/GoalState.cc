@@ -62,7 +62,7 @@ void GoalState::Update()
   {
     this->Initialize();
   }
-  // Afer some time, go to right team kick off mode.
+  // Afer some time, go to kick off mode.
   if (this->GetElapsedTime() >= GameState::SecondsGoalPause || !validGoal)
   {
     if (this->side == Team::Side::LEFT)

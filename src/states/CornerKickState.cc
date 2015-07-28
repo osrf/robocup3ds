@@ -52,7 +52,6 @@ void CornerKickState::Update()
     this->Initialize();
   }
 
-  // The right team is not allowed to be close to the ball.
   this->gameState->DropBallImpl(this->side);
 
   // After some time, go to play mode.
