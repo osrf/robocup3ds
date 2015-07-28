@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_GAMESTATE_HH_
-#define _GAZEBO_GAMESTATE_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
+#define _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
 
 #include <ignition/math.hh>
 #include <map>
@@ -80,7 +80,8 @@ class GameState
       gameState(_gameState),
       normalLevel(_normalLevel),
       errorLevel(_errorLevel)
-    {}
+    {
+    }
 
     /// \brief Print normal messages plus some game information
     /// \param[in] _message Normal message string
@@ -133,7 +134,8 @@ class GameState
       side(_side),
       contactTime(_contactTime),
       contactPos(_contactPos)
-    {}
+    {
+    }
 
     /// \brief Unum of agent who touched ball
     public: int uNum;
@@ -570,8 +572,8 @@ class GameState
   /// transition from kick off to play on
   public: std::shared_ptr<BallContact> touchBallKickoff;
 
-  /// \brief All the teams.
-  public: std::vector <std::shared_ptr<Team> > teams;
+  /// \brief List of all the teams
+  public: std::vector <std::shared_ptr<Team>> teams;
 
   /// \brief Flag whether to update ball position in world to match game state.
   public: bool updateBallPose;
@@ -580,7 +582,7 @@ class GameState
   /// certain range
   public: AgentSay say;
 
-  /// \brief Position of ball
+  /// \brief Position of soccer ball
   private: ignition::math::Vector3<double> ballPos;
 
   /// \brief Angular velocity of soccer ball.

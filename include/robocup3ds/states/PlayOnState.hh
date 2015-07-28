@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_PLAY_STATE_HH_
-#define _GAZEBO_PLAY_STATE_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_PLAY_STATE_HH_
+#define _GAZEBO_ROBOCUP3DS_PLAY_STATE_HH_
 
 #include <string>
 
