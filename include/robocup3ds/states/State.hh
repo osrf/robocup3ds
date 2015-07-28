@@ -33,7 +33,8 @@ namespace states
   {
     /// \brief Class constructor.
     /// \param[in] _name Name of the state.
-    /// \param[out] _gameState Reference to the GameState.
+    /// \param[in] _gameState Reference to the GameState
+    /// \param[in] _side Side of state
     public: State(const std::string &_name,
                   GameState *const _gameState,
                   const Team::Side _side = Team::Side::NEITHER);
@@ -52,13 +53,16 @@ namespace states
     /// \brief Update the state.
     public: virtual void Update();
 
-    /// \brief Returns the name of the state.
+    /// \brief Returns the name of the state
+    /// \return Name of state
     public: std::string GetName() const;
 
-    /// \brief Returns true if an agent contacts ball since Initialize()
+    /// \brief Checks whether agent contacts ball since Initialize()
+    /// \return True if agent has contacted ball
     public: bool HasBallContactOccurred() const;
 
     /// \brief Time elapsed since we entered this game mode.
+    /// \return Seconds since current playmode begin
     public: double GetElapsedTime() const;
 
     // \brief Used to determine if ball contact has occurred since
