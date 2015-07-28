@@ -157,7 +157,6 @@ class Agent
 
   /// \brief Stores time the agent has fallen
   public: double timeFallen;
-
 };
 
 #endif
