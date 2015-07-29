@@ -358,10 +358,10 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
   EXPECT_EQ(rot, gameState.teams.at(0)->members.at(0).rot);
 
   pos.Set(7, 8, GameState::beamHeight);
-  rot.Euler(0, 0, 1.25);
+  rot.Euler(0, 0, RAD(50));
   for (int i = 0; i < 100; ++i)
   {
-    bool result = gameState.BeamAgent(1, "blue", 7, 8, 1.25);
+    bool result = gameState.BeamAgent(1, "blue", 7, 8, 50);
     EXPECT_TRUE(result);
     EXPECT_LE(agent.pos.Distance(pos), 0.15);
     EXPECT_LE(fabs(agent.rot.Euler().Z() - rot.Euler().Z()), 0.1);
