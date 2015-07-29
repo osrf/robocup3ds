@@ -22,7 +22,6 @@
 #include <mutex>
 #include <thread>
 #include "gtest/gtest.h"
-
 #include "robocup3ds/Effector.hh"
 #include "robocup3ds/Server.hh"
 #include "robocup3ds/SocketParser.hh"
@@ -31,25 +30,30 @@
 
 /// \brief This test uses s-expression messages belong to a sample RoboCup
 /// agent communication.
+
 const std::string message1 =
     "(init (unum 1)(teamname sampleAgent))";
 
 const std::string message2 =
-    "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)""(he1 3.20802)"
+    "(say Hello)"
+    "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)(he1 3.20802)"
     "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
-    "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)";
+    "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)"
+    ;
 
 /// \brief Constants and global variables.
 const int kPort = 6234;
 std::mutex mutex;
 std::condition_variable cv;
-bool clientReady = false;
+bool sendingFirstMessage = false;
+bool sendingSecondMessage = false;
 bool serverReady = false;
 
 //////////////////////////////////////////////////
 /// \brief Send data and its size in little-endian format to a socket.
+/// \param[in] _content The message to be sending to the socket.
 /// \param[in] _client_socket Socket for sending/receiving data.
-void SendSomeData(std::string _content, int _client_socket)
+void SendSomeData(const std::string &_content, int _client_socket)
 {
   // Add little-endian, Message size.
   char mBuffer[16384];
@@ -106,27 +110,30 @@ void senderClient(const int _port)
   if (!createClient(_port, socket))
     return;
 
-  //send the Init Message
+  //send the first message including Init Message
   SendSomeData(message1, socket);
 
-  //send the Joints Effectors
-  SendSomeData(message2, socket);
+  // wait to be sure that the message has already been sent
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-  clientReady = true;
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  sendingFirstMessage = true;
   cv.notify_one();
 
-  // Wait some time until the server checks results.
+
+  // Wait some time until the server checks results of the first message.
   {
     std::unique_lock<std::mutex> lk(mutex);
-    auto now = std::chrono::system_clock::now();
-    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
-        [](){return serverReady;}))
-    {
-      FAIL();
-    }
+    cv.wait(lk,[]{return serverReady;});
   }
+
+  //send the second message including joints effectors
+  SendSomeData(message2, socket);
+
+  // wait to be sure that the second message has already been sent
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+  sendingSecondMessage = true;
+  cv.notify_one();
 
   close(socket);
 }
@@ -146,32 +153,51 @@ TEST(RCPServer, Effector)
 
   server.Start();
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
   std::thread clientThread(&senderClient, kPort);
 
-  // Wait some time until the client sends the request.
+  // Wait until the client sends the firstMessage.
   {
     std::unique_lock<std::mutex> lk(mutex);
-    auto now = std::chrono::system_clock::now();
-    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
-        [](){return clientReady;}))
-    {
-      FAIL();
-      return;
-    }
+    cv.wait( lk, []{return sendingFirstMessage;});
   }
 
-  serverReady = true;
-  cv.notify_one();
+  // Extracts effector information and updates Agent's state
+  effector -> Update();
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-  // check the effector information updated in Agent
+  // Check the extracted effector information
   for (const auto &team : gameState->teams)
   {
     for (auto &agent : team->members)
     {
+      // Check the Agent information extracted from Init message
       EXPECT_EQ (agent.GetName(),"1_sampleAgent");
+    }
+  }
 
+  // The server is ready to recieve the second message
+  serverReady = true;
+  cv.notify_one();
+
+  // Wait some time until the client sends the send Message.
+  {
+    std::unique_lock<std::mutex> lk(mutex);
+    cv.wait( lk, []{return sendingSecondMessage;});
+  }
+
+  // Update the agent state by the information extracted from second message
+  effector -> Update();
+
+  // Check the joint effector values and say message
+  for (const auto &team : gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      // check if the agent recived the say message or not
+      EXPECT_TRUE (gameState->say.isValid);
+      std::cout << "Agent said: " << gameState->say.msg << std::endl;
+
+      // check if the joints effector values
       EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("he1")->second, 3.20802);
       EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("he2")->second, -1.80708);
       EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("lae1")->second, -0.259697);

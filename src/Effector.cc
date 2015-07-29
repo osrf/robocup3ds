@@ -102,7 +102,7 @@ bool Effector::Parse(int _socket)
   { this->socketIDMessageMap[_socket] = msg; }
   else
   { this->socketIDMessageMap[_socket] += msg; }
-
+  //this->Update();
   return true;
 }
 
@@ -187,6 +187,10 @@ void Effector::ParseSexp(sexp_t *_exp)
   {
     this->ParseInit(_exp);
   }
+  else if (!strcmp(v, "say"))
+  {
+    this->ParseSay(_exp);
+  }
   else if (NaoRobot::hingeJointEffectorMap.find(std::string(v))
            != NaoRobot::hingeJointEffectorMap.end())
   {
@@ -243,6 +247,52 @@ void Effector::ParseBeam(sexp_t *_exp)
     this->gameState->BeamAgent(this->currAgent->uNum,
                                this->currAgent->team->name, x, y, yaw);
   }
+}
+
+//////////////////////////////////////////////////
+void Effector::ParseSay(sexp_t *_exp)
+{
+  if (!this->currAgent)
+  {
+    return;
+  }
+
+  // Accept the say message that does not contains the white space
+  // characters and S-expression phrases
+  if (_exp->list->next && !_exp->list->next->next)
+  {
+    std::string message = _exp->list->next->val;
+
+    int size = message.length();
+
+    // Accept only say message less than 20 characters
+    if (size <= 20)
+    {
+      bool acceptFlag = true;
+
+      for (int i = 0; i < size; i++)
+      {
+        int asciiVal= static_cast<int>( message[i]);
+
+        // Accept only printing characters
+        if ( asciiVal <= 32 || asciiVal >= 127 )
+        {
+          acceptFlag = false;
+        }
+
+      }
+
+      // Update the say message container
+      if(acceptFlag)
+      {
+        gameState->say.isValid=true;
+        gameState->say.msg = message;
+      }
+
+    }
+
+  }
+
 }
 
 //////////////////////////////////////////////////
@@ -351,6 +401,7 @@ void Effector::Update()
 
   this->currSocketId = -1;
   this->currAgent = NULL;
+
 }
 
 //////////////////////////////////////////////////
