@@ -894,13 +894,13 @@ void GameState::Initialize()
 }
 
 ////////////////////////////////////////////////
-bool GameState::AddAgent(const int _uNum, const std::string &_teamName,
+Agent* GameState::AddAgent(const int _uNum, const std::string &_teamName,
                          const int _socketID)
 {
   if (this->currentState->GetName() != "BeforeKickOff")
   {
     // std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
-    return false;
+    return nullptr;
   }
 
   int uNum = _uNum;
@@ -910,7 +910,7 @@ bool GameState::AddAgent(const int _uNum, const std::string &_teamName,
   {
     // std::cout << "uNum " << uNum << " is invalid, cannot add agent to team "
     // << teamName << "!" << std::endl;
-    return false;
+    return nullptr;
   }
   std::shared_ptr<Team> teamToAdd(nullptr);
   for (auto &team : this->teams)
@@ -937,7 +937,7 @@ bool GameState::AddAgent(const int _uNum, const std::string &_teamName,
     // std::cout << uNum << " " << teamName.c_str() << std::endl;
     // std::cout << "There already are two teams, cannot add agent into
     // new team!" << std::endl;
-    return false;
+    return nullptr;
   }
 
   // code below never reached
@@ -958,7 +958,7 @@ bool GameState::AddAgent(const int _uNum, const std::string &_teamName,
     {
       // std::cout << "Already have an agent with this unum: " << uNum <<
       // ", cannot add agent to team!" << std::endl;
-      return false;
+      return nullptr;
     }
   }
   if (uNum == 0)
@@ -976,10 +976,10 @@ bool GameState::AddAgent(const int _uNum, const std::string &_teamName,
   {
     // std::cout << "No free uNums avaliable, cannot add agent to team!"
     // << std::endl;
-    return false;
+    return nullptr;
   }
   teamToAdd->members.push_back(Agent(uNum, teamToAdd, _socketID));
-  return true;
+  return &teamToAdd->members.back();
 }
 
 
@@ -1025,7 +1025,7 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
       {
         if (agent.uNum == _uNum)
         {
-          this->MoveAgentNoisy(agent, _x, _y, _rot);
+        this->MoveAgentNoisy(agent, _x, _y, RAD(_rot));
           return true;
         }
       }

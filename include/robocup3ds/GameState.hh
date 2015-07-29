@@ -306,11 +306,11 @@ class GameState
   public: ignition::math::Vector3<double> GetBallAngVel() const;
 
   /// \brief Add agent to game state
-  /// \param[in] _uNum Agent number
+  /// \param[out] _uNum Agent number assigned
   /// \param[in] _teamName Agent name
   /// \param[in] _socketID SocketID associated with agent
-  /// \return True when adding agent is successful
-  public: bool AddAgent(const int _uNum, const std::string &_teamName,
+  /// \return Pointer to the agent object created
+  public: Agent* AddAgent(const int _uNum, const std::string &_teamName,
     const int _socketID = -1);
 
   /// \brief Remove agent from game state

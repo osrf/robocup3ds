@@ -75,21 +75,12 @@ void ClientAgent::Update()
 
   std::cout << "client has connected!" << std::endl;
 
-  std::this_thread::sleep_for(
+  while (this->running)
+  {
+    std::this_thread::sleep_for(
       std::chrono::milliseconds(kThreadSleepTime));
-
-  this->InitAndBeam();
-
-  // while (this->running)
-  // {
-  //   std::this_thread::sleep_for(
-  //     std::chrono::milliseconds(kThreadSleepTime));
-  //   this->InitAndBeam();
-
-  //   std::string msg;
-  //   this->GetMessage(msg);
-  //   std::cout << msg << std::endl;
-  // }
+    this->InitAndBeam();
+  }
 }
 
 //////////////////////////////////////////////////
@@ -125,17 +116,20 @@ void ClientAgent::InitAndBeam()
   if (!init)
   {
     msg = "(init (unum 0) (teamname red))(beam 1 1 90)";
-    this->PutMessage(msg);
-    init = true;
+    if (this->PutMessage(msg))
+    {
+      init = true;
+      std::cout << "client sent init msg!" << std::endl;
+    }
   }
 }
 
 
-void ClientAgent::PutMessage(const std::string &_msg)
+bool ClientAgent::PutMessage(const std::string &_msg)
 {
   if (_msg.empty() || !this->connected)
   {
-    return;
+    return false;
   }
 
   // prefix the message with it's payload length
@@ -145,15 +139,18 @@ void ClientAgent::PutMessage(const std::string &_msg)
   if (static_cast<ssize_t>(str.size()) != write(this->socketID, str.data(),
       str.size()))
   {
-    std::cout << "could not put entire message: " + _msg << std::endl;
+    std::cerr << "could not put entire message: " + _msg << std::endl;
+    return false;
   }
+
+  return true;
 }
 
-void ClientAgent::PutMonMessage(const std::string &_msg)
+bool ClientAgent::PutMonMessage(const std::string &_msg)
 {
   if (_msg.empty() || !this->connected)
   {
-    return;
+    return false;
   }
 
   // prefix the message with it's payload length
@@ -163,8 +160,11 @@ void ClientAgent::PutMonMessage(const std::string &_msg)
   if (static_cast<ssize_t>(str.size()) != write(this->monitorSocketID,
       str.data(), str.size()))
   {
-    std::cout << "could not put entire monitor message: " + _msg << std::endl;
+    std::cerr << "could not put entire monitor message: " + _msg << std::endl;
+    return false;
   }
+
+  return true;
 }
 
 bool ClientAgent::GetMessage(std::string &_msg)

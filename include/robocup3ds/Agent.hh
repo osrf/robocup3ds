@@ -197,6 +197,7 @@ class Agent
   {
     this->socketID = _socketID;
     this->syn = false;
+    this->inSimWorld = false;
     this->status = Status::RELEASED;
     this->prevStatus = this->status;
     this->updatePose = false;
@@ -312,6 +313,10 @@ class Agent
 
   /// \brief Flag whether agent has finished syncing messages
   public: bool syn;
+
+  /// \brief Flag whether the agent has been successfully load into gazebo
+  /// simulation world
+  public: bool inSimWorld;
 };
 
 /// \brief Container that contains info for say effector

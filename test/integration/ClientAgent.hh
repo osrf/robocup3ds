@@ -18,6 +18,7 @@
 #ifndef _GAZEBO_INTEGRATION_TESTAGENT_HH_
 #define _GAZEBO_INTEGRATION_TESTAGENT_HH_
 
+#include <atomic>
 #include <string>
 #include <thread>
 #include <ignition/math.hh>
@@ -57,11 +58,13 @@ class ClientAgent
 
   /// \brief Writes to a client message to socket
   /// \param[in] _msg Message to write
-  private: void PutMessage(const std::string &_msg);
+  /// \return True if message is successfully written
+  private: bool PutMessage(const std::string &_msg);
 
   /// \brief Writes a monitor message to socket
   /// \param[in] _msg Message to write
-  private: void PutMonMessage(const std::string &_msg);
+  /// \return True if message is successfully written
+  private: bool PutMonMessage(const std::string &_msg);
 
   /// \brief Gets the message from the socket
   /// \param[out] _msg String to write message to
@@ -71,10 +74,10 @@ class ClientAgent
   private: void InitAndBeam();
 
   /// \brief Whether agent is running separate thread
-  public: bool running;
+  public: std::atomic<bool> running;
 
   /// \brief Whether agent is connect to server
-  public: bool connected;
+  public: std::atomic<bool> connected;
 
   /// \brief Address of server
   private: std::string serverAddr;

@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 #include <gazebo/gazebo.hh>
+#include <sdf/sdf.hh>
 
 class RCPServer;
 class GameState;
@@ -92,6 +93,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Pointer to sdf
   private: sdf::ElementPtr sdf;
+
+  /// \brief Pointer to nao sdf;
+  private: sdf::ElementPtr naoSdf;
 
   /// \brief Pointer to GameState object
   private: std::shared_ptr<GameState> gameState;
