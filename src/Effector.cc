@@ -102,7 +102,6 @@ bool Effector::Parse(int _socket)
   { this->socketIDMessageMap[_socket] = msg; }
   else
   { this->socketIDMessageMap[_socket] += msg; }
-  //this->Update();
   return true;
 }
 
@@ -272,27 +271,22 @@ void Effector::ParseSay(sexp_t *_exp)
 
       for (int i = 0; i < size; i++)
       {
-        int asciiVal= static_cast<int>( message[i]);
-
+        int asciiVal= static_cast<int>(message[i]);
         // Accept only printing characters
         if ( asciiVal <= 32 || asciiVal >= 127 )
         {
           acceptFlag = false;
         }
-
       }
 
       // Update the say message container
-      if(acceptFlag)
+      if (acceptFlag)
       {
-        gameState->say.isValid=true;
+        gameState->say.isValid = true;
         gameState->say.msg = message;
       }
-
     }
-
   }
-
 }
 
 //////////////////////////////////////////////////
@@ -401,7 +395,6 @@ void Effector::Update()
 
   this->currSocketId = -1;
   this->currAgent = NULL;
-
 }
 
 //////////////////////////////////////////////////

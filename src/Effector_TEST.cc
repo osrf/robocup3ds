@@ -38,8 +38,7 @@ const std::string message2 =
     "(say Hello)"
     "(he2 -1.80708)(lle1 0)(rle1 0)(lle2 0)(rle2 0)(he1 3.20802)"
     "(lle3 0)(rle3 0)(lle4 0)(rle4 0)(lle5 0)(rle5 0)(lle6 0)(rle6 0)"
-    "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)"
-    ;
+    "(lae1 -0.259697)(rae1 -0.259697)(lae2 0)(rae2 0)(lae3 0)(rae3 0)";
 
 /// \brief Constants and global variables.
 const int kPort = 6234;
@@ -110,10 +109,10 @@ void senderClient(const int _port)
   if (!createClient(_port, socket))
     return;
 
-  //send the first message including Init Message
+  // Send the first message including Init Message
   SendSomeData(message1, socket);
 
-  // wait to be sure that the message has already been sent
+  // Wait until the message has been sent
   std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
   sendingFirstMessage = true;
@@ -123,10 +122,10 @@ void senderClient(const int _port)
   // Wait some time until the server checks results of the first message.
   {
     std::unique_lock<std::mutex> lk(mutex);
-    cv.wait(lk,[]{return serverReady;});
+    cv.wait(lk, []{return serverReady;});
   }
 
-  //send the second message including joints effectors
+  // Send the second message including joints effectors
   SendSomeData(message2, socket);
 
   // wait to be sure that the second message has already been sent
@@ -171,7 +170,7 @@ TEST(RCPServer, Effector)
     for (auto &agent : team->members)
     {
       // Check the Agent information extracted from Init message
-      EXPECT_EQ (agent.GetName(),"1_sampleAgent");
+      EXPECT_EQ(agent.GetName(), "1_sampleAgent");
     }
   }
 
@@ -194,18 +193,21 @@ TEST(RCPServer, Effector)
     for (auto &agent : team->members)
     {
       // check if the agent recived the say message or not
-      EXPECT_TRUE (gameState->say.isValid);
+      EXPECT_TRUE(gameState->say.isValid);
       std::cout << "Agent said: " << gameState->say.msg << std::endl;
 
       // check if the joints effector values
-      EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("he1")->second, 3.20802);
-      EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("he2")->second, -1.80708);
-      EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("lae1")->second, -0.259697);
-      EXPECT_DOUBLE_EQ (agent.action.jointEffectors.find("rae1")->second, -0.259697);
+      EXPECT_DOUBLE_EQ(
+          agent.action.jointEffectors.find("he1")->second, 3.20802);
+      EXPECT_DOUBLE_EQ(
+          agent.action.jointEffectors.find("he2")->second, -1.80708);
+      EXPECT_DOUBLE_EQ(
+          agent.action.jointEffectors.find("lae1")->second, -0.259697);
+      EXPECT_DOUBLE_EQ(
+          agent.action.jointEffectors.find("rae1")->second, -0.259697);
     }
   }
 
   if (clientThread.joinable())
     clientThread.join();
-
 }
