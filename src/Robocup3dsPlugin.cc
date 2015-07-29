@@ -216,19 +216,17 @@ void Robocup3dsPlugin::UpdateEffector()
   this->effector->Update();
 
   // insert models into world that need to be inserted
-  for (auto &agentInfo : this->effector->agentsToAdd)
+  for (const auto &agentName : this->effector->agentsToAdd)
   {
-    const std::string agentName = std::to_string(agentInfo.first) + "_" +
-                                  agentInfo.second;
     sdf::ElementPtr modelRootNode(new sdf::Element());
     modelRootNode->Copy(this->naoSdf);
     const auto &nameAttribute =
       modelRootNode->GetElement("model")->GetAttribute("name");
     nameAttribute->SetFromString(agentName);
-    // gzmsg << "name of model: " <<
-    //       modelRootNode->GetElement("model")->
-    //       GetAttribute("name")->GetAsString()
-    //       << std::endl;
+    gzmsg << "adding following model: " <<
+          modelRootNode->GetElement("model")->
+          GetAttribute("name")->GetAsString()
+          << std::endl;
     sdf::SDF modelSDF;
     modelSDF.Root(modelRootNode);
 
@@ -238,10 +236,8 @@ void Robocup3dsPlugin::UpdateEffector()
   }
 
   // remove models that need to be removed from world
-  for (auto &agentInfo : this->effector->agentsToRemove)
+  for (const auto &agentName : this->effector->agentsToRemove)
   {
-    std::string agentName = std::to_string(agentInfo.first) + "_" +
-                            agentInfo.second;
     this->world->RemoveModel(agentName);
   }
 
@@ -270,10 +266,8 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
   this->monitorEffector->Update();
 
   // remove models that need to be removed from world
-  for (auto &agentInfo : this->monitorEffector->agentsToRemove)
+  for (const auto &agentName : this->monitorEffector->agentsToRemove)
   {
-    std::string agentName = std::to_string(agentInfo.first) + "_" +
-                            agentInfo.second;
     this->world->RemoveModel(agentName);
   }
 }
@@ -285,7 +279,8 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
   {
     teamSide[team->name] = team->side;
   }
-  int uNum; std::string teamName;
+  int uNum;
+  std::string teamName;
 
   const auto &ball = this->world->GetModel(SoccerField::ballName);
   const auto &ballPose = ball->GetWorldPose();
@@ -325,6 +320,8 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateGameState()
 {
+  // gzmsg << "UpdateGameState()" << std::endl;
+
   // sync gameState time and gaezbo world time
   this->gameState->SetGameTime(this->world->GetSimTime().Double());
 
@@ -334,7 +331,9 @@ void Robocup3dsPlugin::UpdateGameState()
     for (auto &agent : team->members)
     {
       const auto &model = this->world->GetModel(agent.GetName());
-      agent.inSimWorld = model.get();
+      if (model && !agent.inSimWorld)
+      { agent.inSimWorld = true; }
+
       // set agent pose in gameState
       if (agent.updatePose || agent.status == Agent::Status::STOPPED
           || !agent.inSimWorld)

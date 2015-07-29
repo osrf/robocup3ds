@@ -89,9 +89,9 @@ namespace NaoRobot
     {"raj4", "RElbowYaw"}
   };
 
-  static const std::string cameraLinkName = "CameraTop_joint";
+  static const std::string cameraLinkName = "Head";
 
-  static const std::string torsoLinkName = "torso";
+  static const std::string torsoLinkName = "base_link";
 
   static const std::string leftFootLinkName = "l_sole";
 

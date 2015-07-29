@@ -232,6 +232,17 @@ class Agent
     return std::to_string(this->uNum) + "_" + this->team->name;
   }
 
+  /// \brief Return name of agent
+  /// \param[in] _uNum uNum of agent
+  /// \param[in] _teamname Teamname of agent
+  /// \return A String that is composed of unum and team name
+  public: static std::string GetName(const int uNum,
+    const std::string &_teamName)
+  {
+    return std::to_string(uNum) + "_" + _teamName;
+  }
+
+
   /// \brief Checks if agent name is valid
   /// \param[in] _agentName Agent name string to check
   /// \param[out] _uNum uNum parsed from agent name

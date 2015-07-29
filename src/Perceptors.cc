@@ -133,6 +133,9 @@ void Perceptor::Update()
       this->UpdateAgentHear(agent);
     }
   }
+
+  // after processing say, set it to false
+  this->gameState->say.isValid = false;
 }
 
 /////////////////////////////////////////////////

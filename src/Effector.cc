@@ -332,7 +332,7 @@ void Effector::ParseInit(sexp_t *_exp)
   if (this->currAgent)
   {
     std::cerr << "added: " << this->currAgent->GetName() << std::endl;
-    this->agentsToAdd.push_back(this->currAgent->GetAgentID());
+    this->agentsToAdd.push_back(this->currAgent->GetName());
   }
 }
 
@@ -388,7 +388,7 @@ void Effector::Update()
       if (this->currAgent && this->gameState->RemoveAgent(this->currAgent->uNum,
           this->currAgent->team->name))
       {
-        this->agentsToRemove.push_back(this->currAgent->GetAgentID());
+        this->agentsToRemove.push_back(this->currAgent->GetName());
       }
       this->socketIDMessageMap.erase(kv++);
     }
@@ -672,5 +672,5 @@ void MonitorEffector::ParseRemoveAgent(sexp_t *_exp)
   }
 
   if (this->gameState->RemoveAgent(uNum, teamName))
-  { this->agentsToRemove.push_back(AgentId(uNum, teamName)); }
+  { this->agentsToRemove.push_back(Agent::GetName(uNum, teamName)); }
 }

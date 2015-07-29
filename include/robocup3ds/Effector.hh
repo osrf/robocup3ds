@@ -92,11 +92,11 @@ class Effector: public SocketParser
   /// \param[in] _exp Pointer to a S-expression.
   protected: void ParseHingeJoint(sexp_t *_exp);
 
-  /// \brief List of agents to add to gazebo world this update cycle.
-  public: std::vector<AgentId> agentsToAdd;
+  /// \brief List of agent names to add to gazebo world this update cycle.
+  public: std::vector<std::string> agentsToAdd;
 
-  /// \brief List of agents to remove from gazebo world this update cycle.
-  public: std::vector<AgentId> agentsToRemove;
+  /// \brief List of agent names to remove from gazebo world this update cycle.
+  public: std::vector<std::string> agentsToRemove;
 
   /// \brief Maximum size of each message received.
   protected: static const int kBufferSize;
