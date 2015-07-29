@@ -83,6 +83,11 @@ class Effector: public SocketParser
   /// \param[in] _exp Pointer to a S-expression.
   protected: void ParseInit(sexp_t *_exp);
 
+  /// \brief Used to retrieve information from Say message. Accept the
+  /// say Message which consist of at most 20 ASCII printing characters
+  /// \param[in] _exp Pointer to a S-expression.
+  protected: void ParseSay(sexp_t *_exp);
+
   /// \brief Used to parse the joints effector value in S-expression messages.
   /// \param[in] _exp Pointer to a S-expression.
   protected: void ParseHingeJoint(sexp_t *_exp);
