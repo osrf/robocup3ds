@@ -90,8 +90,12 @@ void ClientAgent::Update()
     this->PutMessage("(syn)");
     if (this->GetMessage(receivedMsg))
     {
-      std::cerr << std::endl;
-      std::cerr << receivedMsg << std::endl;
+      // std::cerr << std::endl;
+      // std::cerr << receivedMsg << std::endl;
+    }
+    else
+    {
+      std::cerr << "error receiving msg!" << std::endl;
     }
   }
 }

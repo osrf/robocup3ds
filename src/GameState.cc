@@ -499,7 +499,7 @@ void GameState::CheckIllegalDefense()
           if (agent.IsGoalKeeper())
           {
             double bestDist = -1;
-            Agent *bestAgent = NULL;
+            Agent *bestAgent = nullptr;
             for (auto &nonGoalieAgent : team->members)
             {
               if (nonGoalieAgent.IsGoalKeeper())
@@ -669,7 +669,7 @@ void GameState::CheckDoubleTouch()
       && this->touchBallKickoff->side == firstContact->side
       && this->touchBallKickoff->uNum == firstContact->uNum)
   {
-    if (this->currentState->prevState->GetName() == "KickOffLeft")
+    if (this->currentState->prevState->side == Team::Side::LEFT)
     {
       this->SetCurrent(kickOffRightState);
     }

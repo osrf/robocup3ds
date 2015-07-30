@@ -15,6 +15,7 @@
  *
 */
 #include <string>
+#include <gazebo/gazebo.hh>
 
 #include "robocup3ds/Agent.hh"
 #include "robocup3ds/GameState.hh"
@@ -38,6 +39,7 @@ void GoalState::Initialize()
   this->validGoal = true;
 
   // Register the left team goal.
+  gzmsg << "ball in goal, current score:" << std::endl;
   for (auto &team : this->gameState->teams)
   {
     if (team->side == this->side)
@@ -50,6 +52,7 @@ void GoalState::Initialize()
       {
         this->validGoal = false;
       }
+      gzmsg << team->name << ": " << team->score << std::endl;
     }
   }
   State::Initialize();

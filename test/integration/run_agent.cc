@@ -33,8 +33,7 @@ using namespace std;
 // {
 //   public:
 //     const string worldPath =
-//       "/home/jliang/Desktop/OSRF/gazebo_install/share/"
-//       "gazebo-6.0/worlds/robocup3d.world";
+//       "./worlds/robocup3d.world";
 // };
 
 class IntegrationTest_Immed : public gazebo::ServerFixture
@@ -56,8 +55,7 @@ class IntegrationTest_Immed : public gazebo::ServerFixture
 
   public:
     const string worldPath =
-      "/home/jliang/Desktop/OSRF/gazebo_install/share/"
-      "gazebo-6.0/worlds/robocup3d.world";
+      "./worlds/robocup3d.world";
 
   public:
     shared_ptr<ClientAgent> agent;
