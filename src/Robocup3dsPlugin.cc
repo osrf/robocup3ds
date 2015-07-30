@@ -26,6 +26,7 @@
 #include <gazebo/physics/Collision.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
+#include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/physics/World.hh>
 #include <ignition/math.hh>
 #include <string>
@@ -131,12 +132,14 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                boost::bind(&Robocup3dsPlugin::Update,
                                            this, _1));
+    // this->world->GetPhysicsEngine()->SetRealTimeUpdateRate(0.004);
   }
   else
   {
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                boost::bind(&Robocup3dsPlugin::UpdateSync,
                                            this, _1));
+    this->world->GetPhysicsEngine()->SetRealTimeUpdateRate(0);
   }
 
   // start server
@@ -178,26 +181,23 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
 {
-  this->UpdateGameState();
-  this->UpdatePerceptor();
-  this->UpdateMonitorEffector();
-
-  bool unsyncedAgent = true;
-  while (unsyncedAgent)
+  this->UpdateEffector();
+  for (const auto &team : this->gameState->teams)
   {
-    this->UpdateEffector();
-    for (const auto &team : this->gameState->teams)
+    for (const auto &agent : team->members)
     {
-      for (const auto &agent : team->members)
+      if (!agent.syn)
       {
-        if (!agent.syn)
-        {
-          continue;
-        }
+        return;
       }
     }
-    unsyncedAgent = false;
   }
+  this->UpdateMonitorEffector();
+  this->UpdateGameState();
+  this->UpdatePerceptor();
+  // gzerr << "updatesync() called at " << this->world->GetSimTime().Double()
+  //       << std::endl;
+  this->lastUpdateTime = this->world->GetSimTime().Double();
   for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
@@ -205,8 +205,6 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
       agent.syn = false;
     }
   }
-
-  this->lastUpdateTime = this->world->GetSimTime().Double();
 }
 
 /////////////////////////////////////////////////

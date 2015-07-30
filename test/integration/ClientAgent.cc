@@ -87,11 +87,12 @@ void ClientAgent::Update()
   while (this->running)
   {
     this->Wait();
-    // if (this->GetMessage(receivedMsg))
-    // {
-    //   std::cerr << std::endl;
-    //   std::cerr << receivedMsg << std::endl;
-    // }
+    this->PutMessage("(syn)");
+    if (this->GetMessage(receivedMsg))
+    {
+      std::cerr << std::endl;
+      std::cerr << receivedMsg << std::endl;
+    }
   }
 }
 
@@ -128,7 +129,7 @@ void ClientAgent::InitAndBeam()
 
   if (!init)
   {
-    msg = "(init (unum 0) (teamname red))(beam 1 1 90)";
+    msg = "(init (unum 0) (teamname red)) (beam 1 1 90) (syn)";
     if (this->PutMessage(msg))
     {
       init = true;

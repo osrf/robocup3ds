@@ -84,7 +84,7 @@ TEST_F(IntegrationTest_Immed, TestLoadConnectAgent)
 
   std::this_thread::sleep_for(std::chrono::milliseconds(300));
   this->agent->Start();
-  std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+  std::this_thread::sleep_for(std::chrono::milliseconds(300000));
 
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);

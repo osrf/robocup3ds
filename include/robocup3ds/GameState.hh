@@ -546,6 +546,9 @@ class GameState
   /// \brief Flag whether to restrict field of view
   public: static bool restrictVision;
 
+  /// \brief Flag whether to output groundtruth information during perception
+  public: static bool groundTruthInfo;
+
   /// \brief How long in game time is each cycle
   public: static const double counterCycleTime;
 

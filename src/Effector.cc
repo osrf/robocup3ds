@@ -181,6 +181,7 @@ void Effector::ParseSexp(sexp_t *_exp)
   // Decide based on the type of effector message
   if (!strcmp(v, "syn") && this->currAgent)
   {
+    // std::cerr << "(syn) parsed" << std::endl;
     this->currAgent->syn = true;
   }
   else if (!strcmp(v, "beam"))

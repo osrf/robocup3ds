@@ -76,6 +76,7 @@ double GameState::dropBallRadius = 2;
 double GameState::HFov = 120;
 double GameState::VFov = 120;
 bool   GameState::restrictVision = true;
+bool   GameState::groundTruthInfo = false;
 const double GameState::counterCycleTime = 0.02;
 const double GameState::dropBallRadiusMargin = 0.5;
 const double GameState::beamNoise = 0.1;
@@ -203,6 +204,8 @@ void GameState::LoadConfiguration(
   { GameState::VFov = value; }
   if (LoadConfigParameterBool(_config, "percept_restrictvision", boolValue))
   { GameState::restrictVision = boolValue; }
+  if (LoadConfigParameterBool(_config, "percept_groundtruthinfo", boolValue))
+  { GameState::groundTruthInfo = boolValue; }
 }
 
 /////////////////////////////////////////////////

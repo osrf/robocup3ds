@@ -335,6 +335,18 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
                  _agent.percept.rightFootFR.second.Y(),
                  _agent.percept.rightFootFR.second.Z());
 
+  // write out ground truth information
+  if (GameState::groundTruthInfo)
+  {
+    const auto &ballPos = this->gameState->GetBall();
+    cx += snprintf(_string + cx, _size - cx,
+                   "(mypos %.2f %.2f %.2f) (myorien %.2f)"
+                   " (ballpos %.2f %.2f %.2f)",
+                   _agent.pos.X(), _agent.pos.Y(), _agent.pos.Z(),
+                   DEG(_agent.rot.Euler().Z()),
+                   ballPos.X(), ballPos.Y(), ballPos.Z());
+  }
+
   return cx;
 }
 
