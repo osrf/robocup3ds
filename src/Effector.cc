@@ -105,8 +105,8 @@ bool Effector::Parse(int _socket)
     this->socketIDMessageMap[_socket]
       = this->socketIDMessageMap[_socket] + msg;
   }
-  std::cerr << "socket id and msg: " << _socket << std::endl;
-  std::cerr << this->socketIDMessageMap[_socket] << std::endl;
+  // std::cerr << "socket id and msg: " << _socket << std::endl;
+  // std::cerr << this->socketIDMessageMap[_socket] << std::endl;
   return true;
 }
 
@@ -250,8 +250,8 @@ void Effector::ParseBeam(sexp_t *_exp)
     double yaw = atof(_exp->list->next->next->next->val);
     this->gameState->BeamAgent(this->currAgent->uNum,
                                this->currAgent->team->name, x, y, yaw);
-    std::cerr << "beamed to " << this->currAgent->pos << ", " <<
-              this->currAgent->rot.Euler() << std::endl;
+    // std::cerr << "beamed to " << this->currAgent->pos << ", " <<
+    //           this->currAgent->rot.Euler() << std::endl;
   }
 }
 
@@ -331,7 +331,7 @@ void Effector::ParseInit(sexp_t *_exp)
                       playerNum, teamName, this->currSocketId);
   if (this->currAgent)
   {
-    std::cerr << "added: " << this->currAgent->GetName() << std::endl;
+    // std::cerr << "added: " << this->currAgent->GetName() << std::endl;
     this->agentsToAdd.push_back(this->currAgent->GetName());
   }
 }
@@ -339,7 +339,7 @@ void Effector::ParseInit(sexp_t *_exp)
 //////////////////////////////////////////////////
 void Effector::OnConnection(const int _socket)
 {
-  std::cerr << "socket " << _socket << " connected!" << std::endl;
+  // std::cerr << "socket " << _socket << " connected!" << std::endl;
   std::lock_guard<std::mutex> lock(this->mutex);
   this->socketIDMessageMap[_socket] = "__empty__";
 }
@@ -347,7 +347,7 @@ void Effector::OnConnection(const int _socket)
 //////////////////////////////////////////////////
 void Effector::OnDisconnection(const int _socket)
 {
-  std::cerr << "socket " << _socket << " disconnected!" << std::endl;
+  // std::cerr << "socket " << _socket << " disconnected!" << std::endl;
   std::lock_guard<std::mutex> lock(this->mutex);
   if (this->socketIDMessageMap.find(_socket) !=
       this->socketIDMessageMap.end())

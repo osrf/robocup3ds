@@ -74,7 +74,7 @@ bool LoadConfigParameter(
     // gzerr << exc.what() << std::endl;
     return false;
   }
-  gzmsg << "loaded param " << _key << " : " << _value << std::endl;
+  gzmsg << "KEY: " << _key << " VALUE: " << _value << std::endl;
   return true;
 }
 
@@ -104,6 +104,6 @@ bool LoadConfigParameterBool(
     // gzerr << exc.what() << std::endl;
     return false;
   }
-  gzmsg << "KEY: " << _key << "\tVALUE: " << _boolValue << std::endl;
+  gzmsg << "KEY: " << _key << " VALUE: " << _boolValue << std::endl;
   return true;
 }

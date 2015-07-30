@@ -271,6 +271,8 @@ void GameState::SetCurrent(const std::shared_ptr<State> &_newState,
     this->currentState = _newState;
     this->currentState->Preinitialize();
     this->hasCurrentStateChanged = true;
+    gzmsg << "(" << this->gameTime <<
+          ") playmode changed to " << this->currentState->name << std::endl;
   }
 }
 
@@ -336,6 +338,7 @@ void GameState::CheckTiming()
 
     // End of the first half
     this->startGameTime = this->gameTime;
+    gzmsg << "first half over, switching to second half" << std::endl;
     this->SetHalf(Half::SECOND_HALF);
     this->SetCurrent(kickOffRightState);
   }
@@ -632,6 +635,8 @@ void GameState::CheckImmobility()
       if (agent.timeImmobilized >= kScale * GameState::immobilityTimeLimit
           || agent.timeFallen >= kScale * GameState::fallenTimeLimit)
       {
+        gzmsg << "agent " << agent.GetName() << " moved to side because it has"
+              " remained fallen or immobile too long!" << std::endl;
         agent.timeImmobilized = 0;
         agent.timeFallen = 0;
         this->MoveAgentToSide(agent);
@@ -815,6 +820,8 @@ math::Vector3<double> GameState::GetBall()
 void GameState::MoveBallToCenter()
 {
   this->ballPos = SoccerField::BallCenterPosition;
+  this->ballVel = math::Vector3<double>(0, 0, 0);
+  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -827,6 +834,8 @@ void GameState::MoveBallForGoalKick()
     newX = -newX;
   }
   this->ballPos = math::Vector3<double>(newX, 0, SoccerField::BallRadius);
+  this->ballVel = math::Vector3<double>(0, 0, 0);
+  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -839,6 +848,8 @@ void GameState::MoveBallToCorner()
                     (fabs(ballPos.Y()) / ballPos.Y()) *
                     SoccerField::HalfFieldHeight,
                     SoccerField::BallRadius);
+  this->ballVel = math::Vector3<double>(0, 0, 0);
+  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -850,6 +861,8 @@ void GameState::MoveBallInBounds()
   double newY = std::max(std::min(SoccerField::HalfFieldHeight, ballPos.Y()),
                          -SoccerField::HalfFieldHeight);
   this->ballPos.Set(newX, newY, SoccerField::BallRadius);
+  this->ballVel = math::Vector3<double>(0, 0, 0);
+  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -857,6 +870,8 @@ void GameState::MoveBallInBounds()
 void GameState::MoveBall(const math::Vector3<double> &_ballPos)
 {
   this->ballPos = _ballPos;
+  this->ballVel = math::Vector3<double>(0, 0, 0);
+  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -894,8 +909,8 @@ void GameState::Initialize()
 }
 
 ////////////////////////////////////////////////
-Agent* GameState::AddAgent(const int _uNum, const std::string &_teamName,
-                         const int _socketID)
+Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
+                           const int _socketID)
 {
   if (this->currentState->GetName() != "BeforeKickOff")
   {
@@ -1025,7 +1040,7 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
       {
         if (agent.uNum == _uNum)
         {
-        this->MoveAgentNoisy(agent, _x, _y, RAD(_rot));
+          this->MoveAgentNoisy(agent, _x, _y, RAD(_rot));
           return true;
         }
       }

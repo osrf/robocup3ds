@@ -63,6 +63,11 @@ void ClientAgent::Start()
   std::cout << "client running!" << std::endl;
 }
 
+void ClientAgent::Wait(const int _time)
+{
+  std::this_thread::sleep_for(std::chrono::milliseconds(_time));
+}
+
 //////////////////////////////////////////////////
 void ClientAgent::Update()
 {
@@ -75,11 +80,18 @@ void ClientAgent::Update()
 
   std::cout << "client has connected!" << std::endl;
 
+  this->Wait();
+  this->InitAndBeam();
+
+  std::string receivedMsg;
   while (this->running)
   {
-    std::this_thread::sleep_for(
-      std::chrono::milliseconds(kThreadSleepTime));
-    this->InitAndBeam();
+    this->Wait();
+    // if (this->GetMessage(receivedMsg))
+    // {
+    //   std::cerr << std::endl;
+    //   std::cerr << receivedMsg << std::endl;
+    // }
   }
 }
 
@@ -103,11 +115,12 @@ bool ClientAgent::Connect(const int &_port, int &_socketID)
     this->reConnects--;
     std::cerr << "cannot connect to server, "
               << this->reConnects << " tries left!" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(kThreadSleepTime));
+    this->Wait();
     return false;
   }
 }
 
+//////////////////////////////////////////////////
 void ClientAgent::InitAndBeam()
 {
   static bool init = false;
@@ -124,7 +137,7 @@ void ClientAgent::InitAndBeam()
   }
 }
 
-
+//////////////////////////////////////////////////
 bool ClientAgent::PutMessage(const std::string &_msg)
 {
   if (_msg.empty() || !this->connected)
@@ -146,6 +159,7 @@ bool ClientAgent::PutMessage(const std::string &_msg)
   return true;
 }
 
+//////////////////////////////////////////////////
 bool ClientAgent::PutMonMessage(const std::string &_msg)
 {
   if (_msg.empty() || !this->connected)
@@ -167,6 +181,7 @@ bool ClientAgent::PutMonMessage(const std::string &_msg)
   return true;
 }
 
+//////////////////////////////////////////////////
 bool ClientAgent::GetMessage(std::string &_msg)
 {
   static char buffer[16 * 1024];

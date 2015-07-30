@@ -73,6 +73,10 @@ class ClientAgent
   /// \brief Sends an init and beam message to server
   private: void InitAndBeam();
 
+  /// \brief Sleep for a certain amount of time, by default kThreadSleepTime;
+  /// \param[in] Time to sleep in milliseconds
+  private: void Wait(const int _time = kThreadSleepTime);
+
   /// \brief Whether agent is running separate thread
   public: std::atomic<bool> running;
 

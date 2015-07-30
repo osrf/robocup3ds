@@ -163,7 +163,7 @@ void RCPServer::RunReceptionTask()
   masterFd.events = POLLIN;
   this->pollSockets.push_back(masterFd);
 
-  std::cerr << "RCPServer::RunReceptionTask() is running" << std::endl;
+  // std::cerr << "RCPServer::RunReceptionTask() is running" << std::endl;
   while (this->enabled)
   {
     // Block until we receive a datagram from the network

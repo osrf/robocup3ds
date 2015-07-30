@@ -34,7 +34,6 @@ BeforeKickOffState::BeforeKickOffState(const std::string &_name,
 /////////////////////////////////////////////////
 void BeforeKickOffState::Initialize()
 {
-  this->gameState->StopPlayers();
   State::Initialize();
 }
 
@@ -49,6 +48,7 @@ void BeforeKickOffState::Update()
     this->Initialize();
   }
 
+  this->gameState->StopPlayers();
   if (this->gameState->GetBall() != SoccerField::BallCenterPosition)
   {
     this->gameState->MoveBallToCenter();

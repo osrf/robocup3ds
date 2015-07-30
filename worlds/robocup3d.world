@@ -3,7 +3,7 @@
   <world name="default">
 
     <physics type="ode">
-      <max_step_size>0.004</max_step_size>
+      <max_step_size>0.001</max_step_size>
     </physics>
 
     <!-- Remove the grid -->
@@ -49,6 +49,10 @@
 
     <plugin name="robocup3dplugin" filename="librobocup3dsPlugin.so">
       <robocup3dsplugin_syncmode>false</robocup3dsplugin_syncmode>
+      <gamestate_immobilitytimelimit>7</gamestate_immobilitytimelimit>
+      <gamestate_fallentimelimit>5</gamestate_fallentimelimit>
+      <gamestate_secondskickoff>5</gamestate_secondskickoff>
+      <gamestate_secondseachhalf>20</gamestate_secondseachhalf>
     </plugin>
   </world>
 </sdf>

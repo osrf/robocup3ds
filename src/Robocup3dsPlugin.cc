@@ -223,10 +223,10 @@ void Robocup3dsPlugin::UpdateEffector()
     const auto &nameAttribute =
       modelRootNode->GetElement("model")->GetAttribute("name");
     nameAttribute->SetFromString(agentName);
-    gzmsg << "adding following model: " <<
-          modelRootNode->GetElement("model")->
-          GetAttribute("name")->GetAsString()
-          << std::endl;
+    // gzmsg << "adding following model: " <<
+    //       modelRootNode->GetElement("model")->
+    //       GetAttribute("name")->GetAsString()
+    //       << std::endl;
     sdf::SDF modelSDF;
     modelSDF.Root(modelRootNode);
 
@@ -369,31 +369,30 @@ void Robocup3dsPlugin::UpdateGameState()
       { continue; }
 
       const auto &model = this->world->GetModel(agent.GetName());
-      const auto &modelPose = model->GetWorldPose();
 
       // if agent is in STOPPED state but somehow the model drifts from its
       // gamestate position, it gets moved back
-      bool correctModelDrift = agent.status == Agent::Status::STOPPED
-                               && agent.pos.Distance(G2I(modelPose.pos))
-                               > NaoRobot::torsoHeight;
+      // const auto &modelPose = model->GetWorldPose();
+      // bool correctModelDrift = agent.status == Agent::Status::STOPPED
+      //                          && agent.pos.Distance(G2I(modelPose.pos))
+      //                          > NaoRobot::torsoHeight;
 
-      if (!agent.updatePose && !correctModelDrift)
+      if (!agent.updatePose && agent.status != Agent::Status::STOPPED)
       { continue; }
 
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
       model->SetWorldPose(I2G(pose));
       agent.updatePose = false;
 
-      if ((agent.status == Agent::Status::STOPPED
-           && agent.prevStatus == Agent::Status::RELEASED)
-          || correctModelDrift)
+      if (agent.status == Agent::Status::STOPPED)
       {
         // reset joint angles, velocity, and acceleration to zero
+        // gzmsg << "resetting model!" << std::endl;
         model->ResetPhysicsStates();
-        for (const auto &joint : model->GetJoints())
-        {
-          joint->Reset();
-        }
+        // for (const auto &joint : model->GetJoints())
+        // {
+        //   joint->Reset();
+        // }
       }
     }
   }
