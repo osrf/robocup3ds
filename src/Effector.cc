@@ -34,9 +34,9 @@ const int Effector::kBufferSize = 16384;
 
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
-  gameState(_gameState),
-  currAgent(NULL),
-  currSocketId(-1)
+      gameState(_gameState),
+      currAgent(NULL),
+      currSocketId(-1)
 {
   // Initialize global variables
   this->buffer = new char[Effector::kBufferSize];
@@ -85,7 +85,7 @@ bool Effector::Parse(int _socket)
   while (bytesRead < totalBytes)
   {
     int result = recv(_socket, this->buffer + bytesRead,
-                      totalBytes - bytesRead, 0);
+        totalBytes - bytesRead, 0);
 
     if (result < 1)
     {
@@ -103,10 +103,10 @@ bool Effector::Parse(int _socket)
   else
   {
     this->socketIDMessageMap[_socket]
-      = this->socketIDMessageMap[_socket] + msg;
+                             = this->socketIDMessageMap[_socket] + msg;
   }
-  // std::cerr << "socket id and msg: " << _socket << std::endl;
-  // std::cerr << this->socketIDMessageMap[_socket] << std::endl;
+  //std::cerr << "socket id and msg: " << _socket << std::endl;
+  //std::cerr << this->socketIDMessageMap[_socket] << std::endl;
   return true;
 }
 
@@ -117,7 +117,7 @@ void Effector::ParseMessage(const std::string &_msg)
 
   // Create a s-expression message using the received pile of s-expressions
   snprintf(this->sexpBuffer, Effector::kBufferSize, "(msg %s)",
-           _msg.c_str());
+      _msg.c_str());
 
   // use parse_sexp() from s-expression library
   exp = parse_sexp(this->sexpBuffer, _msg.length() + 6);
@@ -192,12 +192,16 @@ void Effector::ParseSexp(sexp_t *_exp)
   {
     this->ParseInit(_exp);
   }
+  else if (!strcmp(v, "scene"))
+  {
+    this->ParseScene(_exp);
+  }
   else if (!strcmp(v, "say"))
   {
     this->ParseSay(_exp);
   }
   else if (NaoRobot::hingeJointEffectorMap.find(std::string(v))
-           != NaoRobot::hingeJointEffectorMap.end())
+      != NaoRobot::hingeJointEffectorMap.end())
   {
     this->ParseHingeJoint(_exp);
   }
@@ -223,17 +227,24 @@ void Effector::ParseHingeJoint(sexp_t *_exp)
   }
 }
 
-//////////////////////////////////////////////////
-// void Effector::ParseScene(sexp_t *_exp)
-// {
-// int type = 0;
-// std::string address;
+////////////////////////////////////////////////
+void Effector::ParseScene(sexp_t *_exp)
+{
+  // int type = 0;
+  std::string address;
 
-// address = _exp->list->next->val;
-// type = atof(_exp->list->next->next->val);
+  address = _exp->list->next->val;
+  // type = atof(_exp->list->next->next->val);
 
-// this->sceneEffectors.push_back(SceneMsg(type, address));
-// }
+  this->currAgent = this->gameState->AddAgent(
+      1, "initilized" , this->currSocketId);
+
+  if (this->currAgent)
+  {
+    //std::cerr << "Initlized agent added: " << this->currAgent->GetName() << std::endl;
+    this->agentsToAdd.push_back(this->currAgent->GetName());
+  }
+}
 
 //////////////////////////////////////////////////
 void Effector::ParseBeam(sexp_t *_exp)
@@ -250,9 +261,9 @@ void Effector::ParseBeam(sexp_t *_exp)
     double y = atof(_exp->list->next->next->val);
     double yaw = atof(_exp->list->next->next->next->val);
     this->gameState->BeamAgent(this->currAgent->uNum,
-                               this->currAgent->team->name, x, y, yaw);
-    // std::cerr << "beamed to " << this->currAgent->pos << ", " <<
-    //           this->currAgent->rot.Euler() << std::endl;
+        this->currAgent->team->name, x, y, yaw);
+
+    // std::cerr << "beamed to " << x << ", " << y << ", " << yaw << std::endl;
   }
 }
 
@@ -302,7 +313,6 @@ void Effector::ParseInit(sexp_t *_exp)
 {
   // this is the case where we already have an agent in gameState,
   // then no need for init
-  if (this->currAgent)
   {
     return;
   }
@@ -329,7 +339,7 @@ void Effector::ParseInit(sexp_t *_exp)
   }
 
   this->currAgent = this->gameState->AddAgent(
-                      playerNum, teamName, this->currSocketId);
+      playerNum, teamName, this->currSocketId);
   if (this->currAgent)
   {
     // std::cerr << "added: " << this->currAgent->GetName() << std::endl;
@@ -377,7 +387,7 @@ void Effector::Update()
 
   // Update Effectors using message received by Parse()
   for (auto kv = this->socketIDMessageMap.begin();
-       kv != this->socketIDMessageMap.end();)
+      kv != this->socketIDMessageMap.end();)
   {
     this->currSocketId = kv->first;
     this->currAgent = NULL;
@@ -411,7 +421,7 @@ void Effector::Update()
 
 //////////////////////////////////////////////////
 MonitorEffector::MonitorEffector(GameState *const _gameState):
-  Effector(_gameState)
+      Effector(_gameState)
 {}
 
 //////////////////////////////////////////////////
@@ -424,7 +434,7 @@ void MonitorEffector::Update()
 
   // Update Effectors using message received by Parse()
   for (auto kv = this->socketIDMessageMap.begin();
-       kv != this->socketIDMessageMap.end();)
+      kv != this->socketIDMessageMap.end();)
   {
     if (kv->second == "__del__")
     {
@@ -521,7 +531,7 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
         pTeamS = true;
       }
       else if (!strcmp(ptr->list->val, "pos") && ptr->list->next
-               && ptr->list->next->next && ptr->list->next->next->next)
+          && ptr->list->next->next && ptr->list->next->next->next)
       {
         x = atof(ptr->list->next->val);
         y = atof(ptr->list->next->next->val);
@@ -529,8 +539,8 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
         pMove = false;
       }
       else if (!strcmp(ptr->list->val, "move") && ptr->list->next
-               && ptr->list->next->next && ptr->list->next->next->next
-               && ptr->list->next->next->next->next)
+          && ptr->list->next->next && ptr->list->next->next->next
+          && ptr->list->next->next->next->next)
       {
         x = atof(ptr->list->next->val);
         y = atof(ptr->list->next->next->val);
@@ -598,7 +608,7 @@ void MonitorEffector::ParseMoveBall(sexp_t *_exp)
         this->gameState->MoveBall(math::Vector3<double>(x, y, z));
       }
       else if (!strcmp(ptr->list->val, "vel") && ptr->list->next
-               && ptr->list->next->next && ptr->list->next->next->next)
+          && ptr->list->next->next && ptr->list->next->next->next)
       {
         u = atof(ptr->list->next->val);
         v = atof(ptr->list->next->next->val);

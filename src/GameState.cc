@@ -915,11 +915,13 @@ void GameState::Initialize()
 Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
                            const int _socketID)
 {
-  if (this->currentState->GetName() != "BeforeKickOff")
-  {
-    // std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
-    return nullptr;
-  }
+  std::cerr << "add agent is called" << std::endl;
+
+//  if (this->currentState->GetName() != "BeforeKickOff")
+//  {
+//    std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
+//    return nullptr;
+//  }
 
   int uNum = _uNum;
   // std::cout << "adding agent: " << uNum << " teamName: "

@@ -250,7 +250,10 @@ void Robocup3dsPlugin::UpdateEffector()
 
       for (auto &kv : agent.action.jointEffectors)
       {
-        model->GetJoint(kv.first)->SetVelocity(0, kv.second);
+        std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
+            std::string(kv.first))->second;
+        //std::cerr << "Joint: "<< naoJointName <<": "<< kv.second << std::endl;
+        model->GetJoint(naoJointName)->SetVelocity(0, kv.second);
       }
       agent.action.jointEffectors.clear();
     }
