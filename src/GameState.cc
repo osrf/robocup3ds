@@ -772,6 +772,9 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
   _agent.pos.Set(_x + offsetX, _y + offsetY, GameState::beamHeight);
   _agent.rot.Euler(0, 0, _yaw + offsetYaw);
   _agent.updatePose = true;
+  // std::cerr << "MoveAgentNoisy to X:" << _agent.pos.X() <<
+  //    " to Y:" << _agent.pos.Y() << " to Z:"
+  //      << _agent.pos.Z() << std::endl;
 }
 
 void GameState::MoveAgent(Agent &_agent, const math::Vector3<double> &_pos,
@@ -915,13 +918,11 @@ void GameState::Initialize()
 Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
                            const int _socketID)
 {
-  std::cerr << "add agent is called" << std::endl;
-
-//  if (this->currentState->GetName() != "BeforeKickOff")
-//  {
-//    std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
-//    return nullptr;
-//  }
+  if (this->currentState->GetName() != "BeforeKickOff")
+  {
+    std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
+    // return nullptr;
+  }
 
   int uNum = _uNum;
   // std::cout << "adding agent: " << uNum << " teamName: "
@@ -1034,8 +1035,8 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
       && this->currentState->GetName() != "GoalKickLeft"
       && this->currentState->GetName() != "GoalKickRight")
   {
-    // std::cout << "Incorrect play mode, unable to beam agent!" << std::endl;
-    return false;
+    std::cout << "Incorrect play mode, unable to beam agent!" << std::endl;
+//    return false;
   }
   for (const auto &team : this->teams)
   {

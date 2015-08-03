@@ -22,7 +22,6 @@
 #include <map>
 #include <mutex>
 #include <string>
-
 #include "robocup3ds/Agent.hh"
 #include "robocup3ds/Nao.hh"
 #include "robocup3ds/GameState.hh"
@@ -105,8 +104,8 @@ bool Effector::Parse(int _socket)
     this->socketIDMessageMap[_socket]
                              = this->socketIDMessageMap[_socket] + msg;
   }
-  //std::cerr << "socket id and msg: " << _socket << std::endl;
-  //std::cerr << this->socketIDMessageMap[_socket] << std::endl;
+  // std::cerr << "socket id and msg: " << _socket << std::endl;
+  // std::cerr << this->socketIDMessageMap[_socket] << std::endl;
   return true;
 }
 
@@ -230,20 +229,18 @@ void Effector::ParseHingeJoint(sexp_t *_exp)
 ////////////////////////////////////////////////
 void Effector::ParseScene(sexp_t *_exp)
 {
-  // int type = 0;
+  // this is the case where we already have an agent in gameState,
+  // then no need to use the Scene message
+  if (this->currAgent)
+  {
+    return;
+  }
+
   std::string address;
 
   address = _exp->list->next->val;
-  // type = atof(_exp->list->next->next->val);
 
-  this->currAgent = this->gameState->AddAgent(
-      1, "initilized" , this->currSocketId);
-
-  if (this->currAgent)
-  {
-    //std::cerr << "Initlized agent added: " << this->currAgent->GetName() << std::endl;
-    this->agentsToAdd.push_back(this->currAgent->GetName());
-  }
+  this->sceneMessagesSocketIDs.push_back(this->currSocketId);
 }
 
 //////////////////////////////////////////////////
@@ -263,7 +260,7 @@ void Effector::ParseBeam(sexp_t *_exp)
     this->gameState->BeamAgent(this->currAgent->uNum,
         this->currAgent->team->name, x, y, yaw);
 
-    // std::cerr << "beamed to " << x << ", " << y << ", " << yaw << std::endl;
+    // std::cerr << "beamed to " << x << "," << y << "," << yaw << std::endl;
   }
 }
 
@@ -313,6 +310,7 @@ void Effector::ParseInit(sexp_t *_exp)
 {
   // this is the case where we already have an agent in gameState,
   // then no need for init
+  if (this->currAgent)
   {
     return;
   }
@@ -373,6 +371,7 @@ void Effector::Update()
   // clear data structures
   this->agentsToAdd.clear();
   this->agentsToRemove.clear();
+  this->sceneMessagesSocketIDs.clear();
   std::map <int, Agent *> socketIdAgentMap;
 
   for (const auto &team : this->gameState->teams)
