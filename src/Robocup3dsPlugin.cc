@@ -68,6 +68,7 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   lastUpdateTime(-GameState::counterCycleTime)
 {
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
+  gzmsg << "Starting Robocup Plugin for Gazebo" << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -181,6 +182,7 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
 {
+  this->world->SetPaused(true);
   this->UpdateEffector();
   for (const auto &team : this->gameState->teams)
   {
@@ -192,12 +194,8 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
       }
     }
   }
-  this->UpdateMonitorEffector();
-  this->UpdateGameState();
-  this->UpdatePerceptor();
-  // gzerr << "updatesync() called at " << this->world->GetSimTime().Double()
-  //       << std::endl;
-  this->lastUpdateTime = this->world->GetSimTime().Double();
+
+  this->world->SetPaused(false);
   for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
@@ -205,6 +203,13 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
       agent.syn = false;
     }
   }
+
+  this->UpdateMonitorEffector();
+  this->UpdateGameState();
+  this->UpdatePerceptor();
+  // gzerr << "updatesync() called at " << this->world->GetSimTime().Double()
+  //       << std::endl;
+  this->lastUpdateTime = this->world->GetSimTime().Double();
 }
 
 /////////////////////////////////////////////////
@@ -221,10 +226,6 @@ void Robocup3dsPlugin::UpdateEffector()
     const auto &nameAttribute =
       modelRootNode->GetElement("model")->GetAttribute("name");
     nameAttribute->SetFromString(agentName);
-    // gzmsg << "adding following model: " <<
-    //       modelRootNode->GetElement("model")->
-    //       GetAttribute("name")->GetAsString()
-    //       << std::endl;
     sdf::SDF modelSDF;
     modelSDF.Root(modelRootNode);
 
@@ -330,7 +331,11 @@ void Robocup3dsPlugin::UpdateGameState()
     {
       const auto &model = this->world->GetModel(agent.GetName());
       if (model && !agent.inSimWorld)
-      { agent.inSimWorld = true; }
+      {
+        agent.inSimWorld = true;
+        gzmsg << "agent added to game world: " <<
+              model->GetName() << std::endl;
+      }
 
       // set agent pose in gameState
       if (agent.updatePose || agent.status == Agent::Status::STOPPED

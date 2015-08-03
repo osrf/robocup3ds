@@ -442,6 +442,7 @@ void GameState::CheckGoalKickIllegalDefense(const Team::Side _teamAllowed)
       {
         if (penaltyBox.Contains(agent.pos))
         {
+          gzmsg << "CheckGoalKickIllegalDefense() violation" << std::endl;
           this->MoveAgentToSide(agent);
         }
       }
@@ -517,12 +518,14 @@ void GameState::CheckIllegalDefense()
             }
             if (bestAgent)
             {
+              gzmsg << "CheckIllegalDefense() violation" << std::endl;
               this->MoveAgentToSide(*bestAgent);
             }
             agent.inPenaltyBox = true;
           }
           else
           {
+            gzmsg << "CheckIllegalDefense() violation" << std::endl;
             this->MoveAgentToSide(agent);
           }
         }
@@ -584,6 +587,7 @@ exitLoop:
           }
           else
           {
+            gzmsg << "CheckCrowding() violation" << std::endl;
             this->MoveAgentToSide(*agentDist.agent);
           }
         }
@@ -600,6 +604,7 @@ exitLoop:
           }
           else
           {
+            gzmsg << "CheckCrowding() violation" << std::endl;
             this->MoveAgentToSide(*agentDist.agent);
           }
         }
@@ -638,10 +643,9 @@ void GameState::CheckImmobility()
       if (agent.timeImmobilized >= kScale * GameState::immobilityTimeLimit
           || agent.timeFallen >= kScale * GameState::fallenTimeLimit)
       {
-        gzmsg << "agent " << agent.GetName() << " moved to side because it has"
-              " remained fallen or immobile too long!" << std::endl;
         agent.timeImmobilized = 0;
         agent.timeFallen = 0;
+        gzmsg << "CheckImmobility() violation" << std::endl;
         this->MoveAgentToSide(agent);
       }
       agent.prevPos = agent.pos;
@@ -669,6 +673,7 @@ void GameState::CheckDoubleTouch()
       && this->touchBallKickoff->side == firstContact->side
       && this->touchBallKickoff->uNum == firstContact->uNum)
   {
+    gzmsg << "CheckDoubleTouch() violation" << std::endl;
     if (this->currentState->prevState->side == Team::Side::LEFT)
     {
       this->SetCurrent(kickOffRightState);
@@ -726,6 +731,7 @@ void GameState::CheckOffSidesOnKickOff(const Team::Side _kickingSide)
                                          SoccerField::CenterCircleRadius))
       {
         // move them to side of field for now
+        gzmsg << "CheckOffSidesOnKickOff() violation" << std::endl;
         this->MoveOffSideAgent(agent);
 
         // if on defending team, cannot cross line and go inside circle.
@@ -735,6 +741,7 @@ void GameState::CheckOffSidesOnKickOff(const Team::Side _kickingSide)
                 < SoccerField::CenterCircleRadius))
       {
         // move them to side of field for now
+        gzmsg << "CheckOffSidesOnKickOff() violation" << std::endl;
         this->MoveOffSideAgent(agent);
       }
     }

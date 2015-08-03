@@ -204,6 +204,7 @@ class Agent
     this->inPenaltyBox = false;
     this->timeImmobilized = 0;
     this->timeFallen = 0;
+    this->pos.Set(0, SoccerField::HalfFieldHeight, 1);
   }
 
   /// \brief Equality operator for agents

@@ -17,36 +17,55 @@
 
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <ignition/math.hh>
+#include <mutex>
 #include <string>
+#include <utility>
 
 #include "ClientAgent.hh"
+
+using namespace ignition;
 
 const int ClientAgent::kThreadSleepTime = 20;
 
 //////////////////////////////////////////////////
 ClientAgent::ClientAgent(const std::string &_serverAddr, const int _port,
-                         const int _monitorPort):
+                         const int _monitorPort,
+                         const int _uNum, const std::string &_teamName):
   running(false),
   connected(false),
+  uNum(_uNum),
+  teamName(_teamName),
   serverAddr(_serverAddr),
   port(_port),
   monitorPort(_monitorPort),
   socketID(-1),
   monitorSocketID(-1),
-  reConnects(5)
+  reConnects(6),
+  cycleCounter(0)
 {
 }
 
 //////////////////////////////////////////////////
 ClientAgent::~ClientAgent()
 {
-  this->running = false;
-  while (!this->thread.joinable())
+  if (this->running)
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(kThreadSleepTime));
+    while (!this->thread.joinable())
+    {
+      this->Wait();
+    }
+    this->running = false;
+    this->thread.join();
   }
-  this->thread.join();
   std::cout << "client shutting down!" << std::endl;
+}
+
+//////////////////////////////////////////////////
+void ClientAgent::Wait(const int _msec)
+{
+  std::this_thread::sleep_for(std::chrono::milliseconds(_msec));
 }
 
 //////////////////////////////////////////////////
@@ -63,40 +82,78 @@ void ClientAgent::Start()
   std::cout << "client running!" << std::endl;
 }
 
-void ClientAgent::Wait(const int _time)
-{
-  std::this_thread::sleep_for(std::chrono::milliseconds(_time));
-}
-
 //////////////////////////////////////////////////
 void ClientAgent::Update()
 {
   while (this->reConnects >= 0 && !this->connected)
   {
-    this->connected = this->Connect(this->port, this->socketID);
+    this->connected = this->Connect(this->port, this->socketID) &&
+                      this->Connect(this->monitorPort, this->monitorSocketID);
   }
   if (!this->connected)
   { return; }
 
   std::cout << "client has connected!" << std::endl;
 
-  this->Wait();
-  this->InitAndBeam();
-
+  size_t currActionIndex = 0;
+  size_t currMsgIndex = 0;
   std::string receivedMsg;
   while (this->running)
   {
     this->Wait();
-    this->PutMessage("(syn)");
-    if (this->GetMessage(receivedMsg))
+    receivedMsg.clear();
+
+    if (this->cycleCounter > 0)
     {
-      // std::cerr << std::endl;
-      // std::cerr << receivedMsg << std::endl;
+      bool succ = this->GetMessage(receivedMsg);
+      // std::cerr << "succ: " << succ << std::endl;
+      if (succ)
+      {
+        std::lock_guard<std::mutex> lock(this->mutex);
+        this->allMsgs.push_back(receivedMsg);
+      }
+      else
+      {
+        std::cerr << "error receiving msg!" << std::endl;
+      }
+    }
+
+    if (currActionIndex == this->actionResponses.size())
+    {
+      continue;
+    }
+
+    auto &ar = this->actionResponses[currActionIndex];
+    ar.status = ActionResponse::Status::CURRENT;
+
+    bool succ1 = this->PutMessage(ar.msgToSend[currMsgIndex] + " (syn)");
+    bool succ2 = this->PutMonMessage(ar.monitorMsgToSend[currMsgIndex] +
+                                     " (syn)");
+    // std::cerr << succ1 << " " << succ2 << std::endl;
+    if (succ1 && succ2)
+    {
+      std::cerr << "client has sent the following action: " +
+                ar.actionName << std::endl;
+      currMsgIndex++;
     }
     else
     {
-      std::cerr << "error receiving msg!" << std::endl;
+      std::cerr << "error sending msg, retrying!" << std::endl;
     }
+
+    std::lock_guard<std::mutex> lock(this->mutex);
+    if (receivedMsg.size() > 0)
+    {
+      ar.msgReceived.push_back(receivedMsg);
+    }
+
+    if (currMsgIndex == ar.msgToSend.size())
+    {
+      currActionIndex++;
+      currMsgIndex = 0;
+      ar.status = ActionResponse::Status::FINISHED;
+    }
+    this->cycleCounter++;
   }
 }
 
@@ -105,6 +162,7 @@ bool ClientAgent::Connect(const int &_port, int &_socketID)
 {
   struct sockaddr_in servaddr;
   _socketID = socket(AF_INET, SOCK_STREAM, 0);
+  fcntl(_socketID, F_SETFL, O_NONBLOCK);
 
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
@@ -126,20 +184,95 @@ bool ClientAgent::Connect(const int &_port, int &_socketID)
 }
 
 //////////////////////////////////////////////////
-void ClientAgent::InitAndBeam()
+void ClientAgent::InitAndBeam(const double _x,
+                              const double _y, const double _yaw)
 {
-  static bool init = false;
-  std::string msg;
+  const auto msg = "(init (unum " + std::to_string(this->uNum)
+                   + ") (teamname " + this->teamName + ")) (beam "
+                   + std::to_string(_x)
+                   + " " + std::to_string(_y) + " "
+                   + std::to_string(_yaw) + ")";
 
-  if (!init)
+  ActionResponse ar("InitAndBeam_" + std::to_string(this->cycleCounter));
+  ar.msgToSend.push_back(msg);
+  ar.monitorMsgToSend.push_back("");
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->actionResponses.push_back(ar);
+}
+
+void ClientAgent::Walk(const math::Vector3<double> &_start,
+                       const math::Vector3<double> &_end, const int _nSteps)
+{
+  for (int i = 0; i <= _nSteps; ++i)
   {
-    msg = "(init (unum 0) (teamname red)) (beam 1 1 90) (syn)";
-    if (this->PutMessage(msg))
-    {
-      init = true;
-      std::cout << "client sent init msg!" << std::endl;
-    }
+    auto pt = _start + ((_end - _start) * (i / _nSteps));
+    const auto msg = "(agent (unum " + std::to_string(this->uNum) +  ") (team "
+                     + this->teamName + ") (pos " + std::to_string(pt.X()) +
+                     " " + std::to_string(pt.Y()) +
+                     " " + std::to_string(pt.Z()) + "))";
+
+    ActionResponse ar("Walk_" + std::to_string(this->cycleCounter));
+    ar.msgToSend.push_back("");
+    ar.monitorMsgToSend.push_back(msg);
+
+    std::lock_guard<std::mutex> lock(this->mutex);
+    this->actionResponses.push_back(ar);
   }
+}
+
+void ClientAgent::ChangePlayMode(const std::string &_playMode)
+{
+  const auto msg = "(playMode " + _playMode + ")";
+
+  ActionResponse ar("PlayMode_" + std::to_string(this->cycleCounter));
+  ar.msgToSend.push_back("");
+  ar.monitorMsgToSend.push_back(msg);
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->actionResponses.push_back(ar);
+}
+
+void ClientAgent::MoveBall(const math::Vector3<double> &_pos)
+{
+  const auto msg = "(ball (pos " + std::to_string(_pos.X()) +
+                   " " + std::to_string(_pos.Y()) +
+                   " " + std::to_string(_pos.Z()) + "))";
+
+  ActionResponse ar("MoveBall_" + std::to_string(this->cycleCounter));
+  ar.msgToSend.push_back("");
+  ar.monitorMsgToSend.push_back(msg);
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->actionResponses.push_back(ar);
+}
+
+void ClientAgent::MoveAgent(const math::Vector3<double> &_pos)
+{
+  const auto msg = "(agent (unum " + std::to_string(this->uNum) +  ") (team "
+                   + this->teamName + ") (pos " + std::to_string(_pos.X()) +
+                   " " + std::to_string(_pos.Y()) +
+                   " " + std::to_string(_pos.Z()) + "))";
+
+  ActionResponse ar("MoveAgent_" + std::to_string(this->cycleCounter));
+  ar.msgToSend.push_back("");
+  ar.monitorMsgToSend.push_back(msg);
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->actionResponses.push_back(ar);
+}
+
+void ClientAgent::RemoveAgent()
+{
+  const auto msg = "(kill (unum " + std::to_string(this->uNum) +  ") (team "
+                   + this->teamName + "))";
+
+  ActionResponse ar("KillAgent_" + std::to_string(this->cycleCounter));
+  ar.msgToSend.push_back("");
+  ar.monitorMsgToSend.push_back(msg);
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+  this->actionResponses.push_back(ar);
 }
 
 //////////////////////////////////////////////////
@@ -199,6 +332,8 @@ bool ClientAgent::GetMessage(std::string &_msg)
                           sizeof(unsigned int) - bytesRead);
     if (readResult < 0)
     { continue; }
+    if (readResult == 0)
+    { return false; }
     // if (readResult == 0)
     // {
     //   // [patmac] Kill ourselves if we disconnect from the server
@@ -224,7 +359,7 @@ bool ClientAgent::GetMessage(std::string &_msg)
   if (sizeof(unsigned int) + msgLen > sizeof(buffer))
   {
     std::cerr << "too long message; aborting" << std::endl;
-    abort();
+    return false;
   }
 
   // read remaining message segments

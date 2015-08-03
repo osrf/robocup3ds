@@ -277,9 +277,9 @@ void Effector::ParseSay(sexp_t *_exp)
     {
       bool acceptFlag = true;
 
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < size; ++i)
       {
-        int asciiVal= static_cast<int>(message[i]);
+        const int asciiVal = static_cast<int>(message[i]);
         // Accept only printing characters
         if ( asciiVal <= 32 || asciiVal >= 127 )
         {
