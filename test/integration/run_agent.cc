@@ -99,7 +99,7 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
 
   EXPECT_GT(this->agent->allMsgs.size(), 0u);
   const auto &lastMsg = this->agent->allMsgs.back();
-  std::cerr << lastMsg << std::endl;
+  cerr << lastMsg << endl;
   EXPECT_NE(lastMsg.find("GS"), string::npos);
   EXPECT_NE(lastMsg.find("BeforeKickOff"), string::npos);
   EXPECT_NE(lastMsg.find("myorien"), string::npos);
@@ -129,6 +129,7 @@ TEST_F(IntegrationTest, TestMonitor)
   { this->Wait(); }
 
   const auto &lastMsg = this->agent->allMsgs.back();
+  cerr << lastMsg << endl;
   EXPECT_NE(lastMsg.find("PlayOn"), string::npos);
 
   // test that MoveBall and MoveAgent works
@@ -152,8 +153,9 @@ TEST_F(IntegrationTest, TestMonitor)
     numMessages = this->agent->allMsgs.size();
   }
   this->agent->RemoveAgent();
-  size_t currMsgCount = this->agent->allMsgs.size() - 1;
-  while (this->agent->allMsgs.size() != currMsgCount)
+  size_t currMsgCount = numMessages;
+  while (this->agent->allMsgs.size() != currMsgCount ||
+         this->agent->allMsgs.size() == numMessages)
   {
     this->Wait();
     currMsgCount = this->agent->allMsgs.size();

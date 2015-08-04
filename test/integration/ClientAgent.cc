@@ -362,7 +362,7 @@ bool ClientAgent::SelectInput()
   fd_set readfds;
   struct timeval tv;
   tv.tv_sec = 0;
-  tv.tv_usec = 1000;
+  tv.tv_usec = 250000;
   FD_ZERO(&readfds);
   FD_SET(this->socketID, &readfds);
 
@@ -459,7 +459,7 @@ bool ClientAgent::GetMessage(std::string &_msg)
   (*offset) = 0;
 
   _msg = std::string(buffer + sizeof(unsigned int));
-
+  bzero(buffer, sizeof(buffer));
   // static std::string lastMsg = "";
   // if (msg.compare(lastMsg) == 0)
   // {
