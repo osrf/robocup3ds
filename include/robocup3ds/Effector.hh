@@ -98,6 +98,9 @@ class Effector: public SocketParser
   /// \brief List of agent names to remove from gazebo world this update cycle.
   public: std::vector<std::string> agentsToRemove;
 
+  /// \brief List of sockets that is received the Scene message.
+  public: std::vector<int> sceneMessagesSocketIDs;
+
   /// \brief Maximum size of each message received.
   protected: static const int kBufferSize;
 

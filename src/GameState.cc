@@ -779,6 +779,9 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
   _agent.pos.Set(_x + offsetX, _y + offsetY, GameState::beamHeight);
   _agent.rot.Euler(0, 0, _yaw + offsetYaw);
   _agent.updatePose = true;
+  // std::cerr << "MoveAgentNoisy to X:" << _agent.pos.X() <<
+  //    " to Y:" << _agent.pos.Y() << " to Z:"
+  //      << _agent.pos.Z() << std::endl;
 }
 
 void GameState::MoveAgent(Agent &_agent, const math::Vector3<double> &_pos,

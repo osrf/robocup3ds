@@ -241,7 +241,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
 {
   int cx = 0;
 
-  // write out gamestate info
+  // write out gamestate info and time
   int sl;
   int sr;
   for (const auto &team : this->gameState->teams)
@@ -324,12 +324,14 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   }
 
   // write out gyro info
-  cx += SerializePoint("GYR (n torso)", _agent.percept.gyroRate,
-                       _string + cx, _size - cx);
+  cx += snprintf(_string + cx, _size - cx, "(GYR (n torso) (rt %.2f %.2f %.2f))",
+      _agent.percept.gyroRate.X(), _agent.percept.gyroRate.Y(),
+      _agent.percept.gyroRate.Z());
 
   // write out acceleration info
-  cx += SerializePoint("ACC (n torso)", _agent.percept.accel,
-                       _string + cx, _size - cx);
+  cx += snprintf(_string + cx, _size - cx, "(ACC (n torso) (a %.2f %.2f %.2f))",
+      _agent.percept.accel.X(), _agent.percept.accel.Y(),
+      _agent.percept.accel.Z());
 
   // write force resistance information
   cx += snprintf(_string + cx, _size - cx,
