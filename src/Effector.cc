@@ -548,12 +548,8 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
   if (uNum < 0 || uNum > 11)
   { return; }
 
-  Team::Side side;
-  if (teamSide == "Right" || teamSide == "right")
-  { side = Team::Side::RIGHT; }
-  else if (teamSide == "Left" || teamSide == "left")
-  { side = Team::Side::LEFT; }
-  else
+  Team::Side side = Team::GetSideAsEnum(teamSide);
+  if (side == Team::Side::NEITHER)
   { return; }
 
   auto newPos = math::Vector3<double>(x, y, z);
@@ -657,12 +653,8 @@ void MonitorEffector::ParseRemoveAgent(sexp_t *_exp)
   if (uNum < 0 || uNum > 11)
   { return; }
 
-  Team::Side side;
-  if (teamSide == "Right" || teamSide == "right")
-  { side = Team::Side::RIGHT; }
-  else if (teamSide == "Left" || teamSide == "left")
-  { side = Team::Side::LEFT; }
-  else
+  Team::Side side = Team::GetSideAsEnum(teamSide);
+  if (side == Team::Side::NEITHER)
   { return; }
 
   std::string teamName;

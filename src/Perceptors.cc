@@ -242,9 +242,24 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   int cx = 0;
 
   // write out gamestate info
-  cx += snprintf(_string + cx, _size - cx, "(GS (t %.2f) (pm %s))",
+  int sl;
+  int sr;
+  for (const auto &team : this->gameState->teams)
+  {
+    if (team->side == Team::Side::LEFT)
+    { sl = team->score; }
+    if (team->side == Team::Side::RIGHT)
+    { sr = team->score; }
+  }
+  cx += snprintf(_string + cx, _size - cx,
+                 "(time (now %.2f)) (GS (unum %d) (team %s) "
+                 "(t %.2f) (pm %s) (sl %d) (sr %d))",
+                 this->gameState->GetGameTime(),
+                 _agent.uNum,
+                 Team::GetSideAsString(_agent.team->side).c_str(),
                  this->gameState->GetElapsedGameTime(true),
-                 this->gameState->GetCurrentState()->name.c_str());
+                 this->gameState->GetCurrentState()->name.c_str(),
+                 sl, sr);
 
   if (this->UpdatePerception())
   {
@@ -313,7 +328,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
                        _string + cx, _size - cx);
 
   // write out acceleration info
-  cx += SerializePoint("GYR (n ACC)", _agent.percept.accel,
+  cx += SerializePoint("ACC (n torso)", _agent.percept.accel,
                        _string + cx, _size - cx);
 
   // write force resistance information
@@ -340,7 +355,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   {
     const auto &ballPos = this->gameState->GetBall();
     cx += snprintf(_string + cx, _size - cx,
-                   "(mypos %.2f %.2f %.2f) (myorien %.2f)"
+                   " (mypos %.2f %.2f %.2f) (myorien %.2f)"
                    " (ballpos %.2f %.2f %.2f)",
                    _agent.pos.X(), _agent.pos.Y(), _agent.pos.Z(),
                    DEG(_agent.rot.Euler().Z()),

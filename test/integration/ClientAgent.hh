@@ -73,7 +73,8 @@ class ClientAgent
   /// \param[in] _monitorPort Port that server is listening for monitors
   public: ClientAgent(const std::string &_serverAddr,
     const int _port, const int _monitorPort,
-    const int _uNum, const std::string &_teamName);
+    const int _uNum, const std::string &_teamName,
+    const std::string _side);
 
   /// \brief ClientAgent destructor
   public: ~ClientAgent();
@@ -134,8 +135,12 @@ class ClientAgent
   /// \param[out] _msg String to write message to
   private: bool GetMessage(std::string &_msg);
 
+  /// \brief Tells us if socket is ready for reading
+  /// \return True if socket is ready
+  private: bool SelectInput();
+
   /// \brief Sleep for a certain amount of time, by default kThreadSleepTime;
-  /// \param[in] Time to sleep in milliseconds
+  /// \param[in] Time to sleep in microseconds
   private: void Wait(const int _msec = kThreadSleepTime);
 
   /// \brief Whether client is running separate thread
@@ -144,11 +149,17 @@ class ClientAgent
   /// \brief Whether client is connect to server
   public: std::atomic<bool> connected;
 
+  /// Number of cycles in update()
+  public: std::atomic<int> cycleCounter;
+
   /// \brief Unum of agent
-  public: int uNum;
+  public: const int uNum;
 
   /// \brief Team name of agent
-  public: std::string teamName;
+  public: const std::string teamName;
+
+  /// \brief Side of agent
+  public: const std::string side;
 
   /// \brief Vector of actions by client and responses by server
   public: std::vector<ActionResponse> actionResponses;
@@ -157,7 +168,7 @@ class ClientAgent
   public: std::vector<std::string> allMsgs;
 
   /// \brief Mutex for locking messages
-  private: mutable std::mutex mutex;
+  public: mutable std::mutex mutex;
 
   /// \brief Address of server
   private: std::string serverAddr;
@@ -180,11 +191,11 @@ class ClientAgent
   /// \brief Number of times left to try reconnecting
   private: int reConnects;
 
-  /// Number of cycles in update()
-  private: int cycleCounter;
-
-  /// \brief Time in milliseconds to sleep between reconnection
+  /// \brief Time in microseconds to sleep between reconnection
   private: static const int kThreadSleepTime;
+
+  /// \brief Specify whether to print out extra messages
+  private: const int verbose;
 };
 
 #endif

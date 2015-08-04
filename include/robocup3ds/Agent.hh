@@ -73,6 +73,32 @@ class Team
     return this == &_team;
   }
 
+  /// \brief Get the string version of side
+  /// \brief _side Enum version of side
+  /// \return String version of side
+  public: static std::string GetSideAsString(const Side _side)
+  {
+    if (_side == Side::LEFT)
+      return "left";
+    else if (_side == Side::RIGHT)
+      return "right";
+    else
+      return "neither";
+  }
+
+  /// \brief Get the enum version of side
+  /// \brief _side String version of side
+  /// \return Enum version of side
+  public: static Side GetSideAsEnum(const std::string &_side)
+  {
+    if (_side == "Right" || _side == "right")
+      return Side::RIGHT;
+    else if (_side == "Left" || _side == "left")
+      return Side::LEFT;
+    else
+      return Side::NEITHER;
+  }
+
   /// \brief Name of the team.
   public: std::string name;
 

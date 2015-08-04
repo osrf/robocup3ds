@@ -49,7 +49,9 @@ class IntegrationTest : public gazebo::ServerFixture
   public:
     virtual void SetUp()
     {
-      this->agent = make_shared<ClientAgent>("0.0.0.0", 3100, 3200, 1, "red");
+      this->agent = make_shared<ClientAgent>(
+                      "0.0.0.0", 3100, 3200, 1, "red", "left");
+      this->Wait();
     }
 
   public:
@@ -57,6 +59,7 @@ class IntegrationTest : public gazebo::ServerFixture
     {
       this->agent.reset();
       gazebo::ServerFixture::TearDown();
+      this->Wait();
     }
 
   public:
@@ -72,21 +75,21 @@ class IntegrationTest : public gazebo::ServerFixture
 
 
 /// \brief This tests whether loading the world plugin is successful or not
-// TEST_F(IntegrationTest, TestLoadWorldPlugin)
-// {
-//   this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
-//   SUCCEED();
-// }
+TEST_F(IntegrationTest, TestLoadWorldPlugin)
+{
+  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
+  this->Wait();
+  SUCCEED();
+}
 
 /// \brief This tests whether agent can successfully connect, init, and beam
 TEST_F(IntegrationTest, TestLoadConnectAgent)
 {
   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
-
   this->Wait();
-  this->agent->Start();
   this->agent->InitAndBeam(1, 1, 90);
-  this->Wait(1000);
+  this->agent->Start();
+  this->Wait();
 
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
@@ -112,23 +115,53 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
 /// \brief This tests whether monitor messages work
 TEST_F(IntegrationTest, TestMonitor)
 {
-  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
+  this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
   this->Wait();
+  this->agent->InitAndBeam(1, 1, 90);
   this->agent->ChangePlayMode("PlayOn");
   this->agent->Start();
   this->Wait();
 
+  // test game mode has successfully changed
   const auto &lastMsg = this->agent->allMsgs.back();
-  std::cerr << lastMsg << std::endl;
+  EXPECT_NE(lastMsg.find("PlayOn"), string::npos);
+
+  // test that MoveBall and MoveAgent works
+  this->agent->MoveBall(math::Vector3d(1.35, 5.69, 0.042));
+  this->agent->MoveAgent(math::Vector3d(-7.35, -11.69, 0.35));
+  this->Wait();
+  // const auto &lastMsg2 = this->agent->allMsgs.back();
+  // cerr << lastMsg2 << endl;
+
+  bool gd = false;
+  for (const auto &msg : this->agent->allMsgs)
+  {
+    if (msg.find("1.35 5.69 0.04") && msg.find("-7.35 -11.69 0.35"))
+    { gd = true; }
+  }
+  EXPECT_TRUE(gd);
+
+  size_t numMessages;
+  {
+    std::lock_guard<std::mutex> lock(this->agent->mutex);
+    numMessages = this->agent->allMsgs.size();
+  }
+  this->agent->RemoveAgent();
+  this->Wait();
+  size_t numMessages2 = this->agent->allMsgs.size();
+  EXPECT_EQ((numMessages + 2), numMessages2);
+  cerr << "num msgs before kill: " << numMessages
+       << " num msgs after kill: " << numMessages2 << endl;
 }
 
-// /// \brief This tests whether agent walk works
+/// \brief This tests whether agent walk works
 // TEST_F(IntegrationTest, TestWalk)
 // {
 //   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
 
 //   this->Wait();
 //   this->agent->InitAndBeam(0, 0, 0);
+//   this->agent->ChangePlayMode("PlayOn");
 //   this->agent->Walk(math::Vector3d(-5, -5, 0.35),
 //                     math::Vector3d(5, 5, 0.35), 100);
 //   this->agent->Start();

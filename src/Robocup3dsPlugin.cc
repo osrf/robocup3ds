@@ -238,6 +238,9 @@ void Robocup3dsPlugin::UpdateEffector()
   for (const auto &agentName : this->effector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
+    gzmsg << "(" << this->world->GetSimTime().Double() <<
+          ") agent removed from game world by client: " <<
+          agentName << std::endl;
   }
 
   // set joint velocities of agent model
@@ -268,6 +271,9 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
   for (const auto &agentName : this->monitorEffector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
+    gzmsg << "(" << this->world->GetSimTime().Double() <<
+          ") agent removed from game world by monitor: " <<
+          agentName << std::endl;
   }
 }
 /////////////////////////////////////////////////
@@ -319,7 +325,8 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateGameState()
 {
-  // gzmsg << "UpdateGameState()" << std::endl;
+  // gzmsg << "
+  // UpdateGameState()" << std::endl;
 
   // sync gameState time and gaezbo world time
   this->gameState->SetGameTime(this->world->GetSimTime().Double());
@@ -333,7 +340,8 @@ void Robocup3dsPlugin::UpdateGameState()
       if (model && !agent.inSimWorld)
       {
         agent.inSimWorld = true;
-        gzmsg << "agent added to game world: " <<
+        gzmsg << "(" << this->world->GetSimTime().Double() <<
+              ") agent added to game world: " <<
               model->GetName() << std::endl;
       }
 
@@ -437,7 +445,6 @@ void Robocup3dsPlugin::UpdatePerceptor()
         agent.selfBodyMap[kv.first] =
           G2I(model->GetLink(kv.second)->GetWorldPose().pos);
       }
-
       // update agent's percept joints angles
       for (auto &kv : NaoRobot::hingeJointPerceptorMap)
       {
