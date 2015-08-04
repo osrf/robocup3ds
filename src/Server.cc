@@ -23,8 +23,20 @@
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <mutex>
+
+#include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/Server.hh"
+
+//////////////////////////////////////////////////
+RCPServer::RCPServer(const int _port,
+                     const std::shared_ptr<SocketParser> &_parser):
+  port(_port),
+  masterSocket(-1),
+  parser(_parser),
+  enabled(false)
+{}
 
 //////////////////////////////////////////////////
 RCPServer::~RCPServer()
@@ -210,7 +222,7 @@ void RCPServer::DispatchRequestOnMasterSocket()
   this->pollSockets.push_back(newSocketPollItem);
 
   // Call connectCb().
-  this->connectionCb(newSocketFd);
+  this->parser->OnConnection(newSocketFd);
 }
 
 //////////////////////////////////////////////////
@@ -228,7 +240,7 @@ void RCPServer::DispatchRequestOnClientSocket()
         int socket = this->pollSockets.at(i).fd;
 
         // Call disconnectCb().
-        this->disconnectionCb(this->pollSockets.at(i).fd);
+        this->parser->OnDisconnection(this->pollSockets.at(i).fd);
 
         // Remove the client from the list used by poll.
         close(socket);
