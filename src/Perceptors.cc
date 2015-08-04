@@ -324,14 +324,15 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   }
 
   // write out gyro info
-  cx += snprintf(_string + cx, _size - cx, "(GYR (n torso) (rt %.2f %.2f %.2f))",
-      _agent.percept.gyroRate.X(), _agent.percept.gyroRate.Y(),
-      _agent.percept.gyroRate.Z());
+  cx += snprintf(_string + cx, _size - cx,
+                 "(GYR (n torso) (rt %.2f %.2f %.2f))",
+                 _agent.percept.gyroRate.X(), _agent.percept.gyroRate.Y(),
+                 _agent.percept.gyroRate.Z());
 
   // write out acceleration info
   cx += snprintf(_string + cx, _size - cx, "(ACC (n torso) (a %.2f %.2f %.2f))",
-      _agent.percept.accel.X(), _agent.percept.accel.Y(),
-      _agent.percept.accel.Z());
+                 _agent.percept.accel.X(), _agent.percept.accel.Y(),
+                 _agent.percept.accel.Z());
 
   // write force resistance information
   cx += snprintf(_string + cx, _size - cx,

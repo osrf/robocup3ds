@@ -255,8 +255,7 @@ void Robocup3dsPlugin::UpdateEffector()
       for (auto &kv : agent.action.jointEffectors)
       {
         std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
-            std::string(kv.first))->second;
-        //std::cerr << "Joint: "<< naoJointName <<": "<< kv.second << std::endl;
+                                     std::string(kv.first))->second;
         model->GetJoint(naoJointName)->SetVelocity(0, kv.second);
       }
       agent.action.jointEffectors.clear();
@@ -396,9 +395,6 @@ void Robocup3dsPlugin::UpdateGameState()
         continue;
       }
 
-      //std::cerr << "Agent Pos is Updated: X:" << agent.pos.X()
-      //    << "Y:" << agent.pos.Y() << "Z:" << agent.pos.Z() << std::endl;
-
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
       model->SetWorldPose(I2G(pose));
       agent.updatePose = false;
@@ -434,23 +430,13 @@ void Robocup3dsPlugin::UpdatePerceptor()
   // update send information to the agent that sends the Scene message
   for (const auto &socketId : this->effector->sceneMessagesSocketIDs)
   {
-
-
-    std::ostringstream stringStream;
-     stringStream << "(time (now " << this->gameState->GetElapsedGameTime(true)
-         << "))";
-    std::string sampleSenseMsg= stringStream.str();
-    char mBuffer[16384];
-    const char *out = reinterpret_cast<const char *> (sampleSenseMsg.c_str());
-    snprintf(mBuffer + 4, sizeof(mBuffer) - 4, "%s", out);
-    unsigned int len = strlen(out);
-    unsigned int netlen = htonl(len);
-    memcpy(mBuffer, &netlen, 4);
-
-    // std::cerr << "Reply Scene" << sampleSenseMsg << std::endl;
-    this->clientServer->Send(socketId, mBuffer, sampleSenseMsg.size() + 4);
+    int len = snprintf(this->buffer + 4, sizeof(mBuffer) - 4,
+                       "(time (now %.2f))",
+                       this->gameState->GetGameTime());
+    unsigned int netlen = htonl(static_cast<unsigned int>(len));
+    memcpy(this->buffer, &netlen, 4);
+    this->clientServer->Send(socketId, this->buffer, len + 4);
   }
-
 
   // update perception related info using gazebo world model
   for (const auto &team : this->gameState->teams)

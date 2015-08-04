@@ -74,7 +74,7 @@ class ClientAgent
   public: ClientAgent(const std::string &_serverAddr,
     const int _port, const int _monitorPort,
     const int _uNum, const std::string &_teamName,
-    const std::string _side);
+    const std::string &_side);
 
   /// \brief ClientAgent destructor
   public: ~ClientAgent();

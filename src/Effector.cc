@@ -236,9 +236,8 @@ void Effector::ParseScene(sexp_t *_exp)
     return;
   }
 
-  std::string address;
-
-  address = _exp->list->next->val;
+  // std::string address;
+  // address = _exp->list->next->val;
 
   this->sceneMessagesSocketIDs.push_back(this->currSocketId);
 }

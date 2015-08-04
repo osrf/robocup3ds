@@ -161,7 +161,7 @@ TEST_F(IntegrationTest, TestMonitor)
     currMsgCount = this->agent->allMsgs.size();
   }
   SUCCEED();
-  // EXPECT_LE(numMessages2 - numMessages, 3u);
+  // EXPECT_LE(currMsgCount - numMessages, 3u);
   cerr << "num msgs before kill: " << numMessages
        << " num msgs after kill: " << currMsgCount << endl;
 }
