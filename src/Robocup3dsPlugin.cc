@@ -430,7 +430,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
   // update send information to the agent that sends the Scene message
   for (const auto &socketId : this->effector->sceneMessagesSocketIDs)
   {
-    int len = snprintf(this->buffer + 4, sizeof(mBuffer) - 4,
+    int len = snprintf(this->buffer + 4, Robocup3dsPlugin::kBufferSize - 4,
                        "(time (now %.2f))",
                        this->gameState->GetGameTime());
     unsigned int netlen = htonl(static_cast<unsigned int>(len));
