@@ -15,6 +15,7 @@
  *
 */
 
+
 #include <gtest/gtest.h>
 #include <chrono>
 #include <gazebo/physics/World.hh>
@@ -29,33 +30,43 @@
 using namespace ignition;
 using namespace std;
 
-// class IntegrationTest_Basic : public gazebo::ServerFixture
-// {
-//   public:
-//     const string worldPath =
-//       "./worlds/robocup3d.world";
-// };
-
-class IntegrationTest_Immed : public gazebo::ServerFixture
+class IntegrationTest : public gazebo::ServerFixture
 {
+  public:
+    void Wait(const int _msec = 500)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(_msec));
+    }
+
+  public:
+    void LoadWorld(const string &_path)
+    {
+      this->Load(_path);
+      this->world = gazebo::physics::get_world("default");
+      EXPECT_TRUE(this->world != NULL);
+    }
+
   public:
     virtual void SetUp()
     {
-      this->Load(worldPath);
-      this->world = gazebo::physics::get_world("default");
-      this->agent = make_shared<ClientAgent>("0.0.0.0", 3100, 3200);
+      cerr << "Setting Up Test" << endl;
+      this->agent = make_shared<ClientAgent>(
+                      "0.0.0.0", 3100, 3200, 1, "red", "left");
+      this->Wait();
     }
 
   public:
     virtual void TearDown()
     {
+      cerr << "Tearing Down Test" << endl;
       this->agent.reset();
       gazebo::ServerFixture::TearDown();
+      this->Wait();
     }
 
   public:
-    const string worldPath =
-      "./worlds/robocup3d.world";
+    const string testPath =
+      "/home/jliang/Desktop/OSRF/robocup3ds/test/integration/";
 
   public:
     shared_ptr<ClientAgent> agent;
@@ -66,27 +77,111 @@ class IntegrationTest_Immed : public gazebo::ServerFixture
 
 
 /// \brief This tests whether loading the world plugin is successful or not
-// TEST_F(IntegrationTest_Basic, TestLoadWorldPlugin)
-// {
-//   this->Load(worldPath);
-//   const auto &world = gazebo::physics::get_world("default");
-//   EXPECT_TRUE(world != NULL);
-// }
-
-/// \brief This tests whether agent can successfully connect, init, and do some
-/// beaming
-TEST_F(IntegrationTest_Immed, TestLoadConnectAgent)
+TEST_F(IntegrationTest, TestLoadWorldPlugin)
 {
-  const auto &world = gazebo::physics::get_world("default");
-  EXPECT_TRUE(world != NULL);
+  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
+  SUCCEED();
+}
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+/// \brief This tests whether agent can successfully connect, init, and beam
+TEST_F(IntegrationTest, TestLoadConnectAgent)
+{
+  this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
+  this->Wait();
+  this->agent->InitAndBeam(1, 1, 90);
   this->agent->Start();
-  std::this_thread::sleep_for(std::chrono::milliseconds(300000));
+
+  while (this->agent->allMsgs.size() == 0u)
+  { this->Wait(); }
 
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
+
+  EXPECT_GT(this->agent->allMsgs.size(), 0u);
+  const auto &lastMsg = this->agent->allMsgs.back();
+  cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("GS"), string::npos);
+  EXPECT_NE(lastMsg.find("BeforeKickOff"), string::npos);
+  EXPECT_NE(lastMsg.find("myorien"), string::npos);
+  EXPECT_NE(lastMsg.find("mypos"), string::npos);
+  EXPECT_NE(lastMsg.find("ballpos"), string::npos);
+
+  bool see = false;
+  for (const auto &msg : this->agent->allMsgs)
+  {
+    if (msg.find("See"))
+    { see = true; }
+  }
+  EXPECT_TRUE(see);
 }
+
+/// \brief This tests whether monitor messages work
+TEST_F(IntegrationTest, TestMonitor)
+{
+  this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
+  this->Wait();
+  this->agent->InitAndBeam(1, 1, 90);
+  this->agent->ChangePlayMode("PlayOn");
+  this->agent->Start();
+
+  // test game mode has successfully changed
+  while (this->agent->allMsgs.size() == 0u)
+  { this->Wait(); }
+
+  const auto &lastMsg = this->agent->allMsgs.back();
+  cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("PlayOn"), string::npos);
+
+  // test that MoveBall and MoveAgent works
+  this->agent->MoveBall(math::Vector3d(1.35, 5.69, 0.042));
+  this->agent->MoveAgent(math::Vector3d(-7.35, -11.69, 0.35));
+  this->Wait();
+  // const auto &lastMsg2 = this->agent->allMsgs.back();
+  // cerr << lastMsg2 << endl;
+
+  bool gd = false;
+  for (const auto &msg : this->agent->allMsgs)
+  {
+    if (msg.find("1.35 5.69 0.04") && msg.find("-7.35 -11.69 0.35"))
+    { gd = true; }
+  }
+  EXPECT_TRUE(gd);
+
+  size_t numMessages;
+  {
+    std::lock_guard<std::mutex> lock(this->agent->mutex);
+    numMessages = this->agent->allMsgs.size();
+  }
+  this->agent->RemoveAgent();
+  size_t currMsgCount = numMessages;
+  while (this->agent->allMsgs.size() != currMsgCount ||
+         this->agent->allMsgs.size() == numMessages)
+  {
+    this->Wait();
+    currMsgCount = this->agent->allMsgs.size();
+  }
+  SUCCEED();
+  // EXPECT_LE(currMsgCount - numMessages, 3u);
+  cerr << "num msgs before kill: " << numMessages
+       << " num msgs after kill: " << currMsgCount << endl;
+}
+
+/// \brief This tests whether agent walk works
+// TEST_F(IntegrationTest, TestWalk)
+// {
+//   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
+
+//   this->Wait();
+//   this->agent->InitAndBeam(0, 0, 0);
+//   this->agent->ChangePlayMode("PlayOn");
+//   this->agent->Walk(math::Vector3d(-5, -5, 0.35),
+//                     math::Vector3d(5, 5, 0.35), 100);
+//   this->agent->Start();
+//   this->Wait(2500);
+
+//   const auto &lastMsg = this->agent->allMsgs.back();
+//   std::cerr << lastMsg << std::endl;
+// }
 
 int main(int argc, char **argv)
 {

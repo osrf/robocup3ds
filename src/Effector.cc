@@ -236,9 +236,8 @@ void Effector::ParseScene(sexp_t *_exp)
     return;
   }
 
-  std::string address;
-
-  address = _exp->list->next->val;
+  // std::string address;
+  // address = _exp->list->next->val;
 
   this->sceneMessagesSocketIDs.push_back(this->currSocketId);
 }
@@ -285,9 +284,9 @@ void Effector::ParseSay(sexp_t *_exp)
     {
       bool acceptFlag = true;
 
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < size; ++i)
       {
-        int asciiVal= static_cast<int>(message[i]);
+        const int asciiVal = static_cast<int>(message[i]);
         // Accept only printing characters
         if ( asciiVal <= 32 || asciiVal >= 127 )
         {
@@ -557,12 +556,8 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
   if (uNum < 0 || uNum > 11)
   { return; }
 
-  Team::Side side;
-  if (teamSide == "Right" || teamSide == "right")
-  { side = Team::Side::RIGHT; }
-  else if (teamSide == "Left" || teamSide == "left")
-  { side = Team::Side::LEFT; }
-  else
+  Team::Side side = Team::GetSideAsEnum(teamSide);
+  if (side == Team::Side::NEITHER)
   { return; }
 
   auto newPos = math::Vector3<double>(x, y, z);
@@ -666,12 +661,8 @@ void MonitorEffector::ParseRemoveAgent(sexp_t *_exp)
   if (uNum < 0 || uNum > 11)
   { return; }
 
-  Team::Side side;
-  if (teamSide == "Right" || teamSide == "right")
-  { side = Team::Side::RIGHT; }
-  else if (teamSide == "Left" || teamSide == "left")
-  { side = Team::Side::LEFT; }
-  else
+  Team::Side side = Team::GetSideAsEnum(teamSide);
+  if (side == Team::Side::NEITHER)
   { return; }
 
   std::string teamName;

@@ -63,7 +63,7 @@ namespace states
 
     /// \brief Time elapsed since we entered this game mode.
     /// \return Seconds since current playmode begin
-    public: double GetElapsedTime() const;
+    public: virtual double GetElapsedTime() const;
 
     // \brief Used to determine if ball contact has occurred since
     /// Initialize()

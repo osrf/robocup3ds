@@ -19,9 +19,49 @@
 #define _GAZEBO_INTEGRATION_TESTAGENT_HH_
 
 #include <atomic>
+#include <ignition/math.hh>
+#include <mutex>
 #include <string>
 #include <thread>
-#include <ignition/math.hh>
+#include <utility>
+#include <vector>
+
+
+/// \brief Class for storing agent actions and responses from server
+class ActionResponse
+{
+  /// \brief Status of current action
+  public: enum class Status
+  {
+    /// \brief Not yet processed
+    NOTSTARTED,
+    /// \brief Currently being processed
+    CURRENT,
+    /// \brief Finished processing
+    FINISHED
+  };
+
+  /// \brief Constructor
+  /// \param[in] _actionName Name of action
+  public: ActionResponse(const std::string &_actionName):
+    status(Status::NOTSTARTED),
+    actionName(_actionName) {}
+
+  /// \brief Vector of messages to send to server
+  public: std::vector<std::string> msgToSend;
+
+  /// \brief Vector of monitor messages to send to server
+  public: std::vector<std::string> monitorMsgToSend;
+
+  /// \brief Vector of messages received
+  public: std::vector<std::string> msgReceived;
+
+  /// \brief Status of current message
+  Status status;
+
+  /// \brief Name of action
+  std::string actionName;
+};
 
 /// \brief Class for a simple client agent to connect to the robocupplugin
 /// server
@@ -32,7 +72,9 @@ class ClientAgent
   /// \param[in] _port Port of that server is running on
   /// \param[in] _monitorPort Port that server is listening for monitors
   public: ClientAgent(const std::string &_serverAddr,
-    const int _port, const int _monitorPort);
+    const int _port, const int _monitorPort,
+    const int _uNum, const std::string &_teamName,
+    const std::string &_side);
 
   /// \brief ClientAgent destructor
   public: ~ClientAgent();
@@ -49,12 +91,35 @@ class ClientAgent
   /// \brief Disconnects the agent from server
   public: void Disconnect(const int &_port, int &_socketID);
 
+  /// \brief Adds a init and beam message to actionResponses
+  /// \param[in] _x X position in meters
+  /// \param[in] _y Y position in meters
+  /// \param[in] _yaw Yaw in degrees
+  /// \return True if action is successful
+  public: void InitAndBeam(const double _x,
+    const double _y, const double _yaw);
+
   /// \brief Simulates the agent moving from one location to another
   /// \param[in] _start Starting position
   /// \param[in] _end Ending position
   /// \param[in] _nSteps Number of time steps to walk
-  private: void Walk(const ignition::math::Vector3<double> &_start,
+  public: void Walk(const ignition::math::Vector3<double> &_start,
     const ignition::math::Vector3<double> &_end, const int _nSteps);
+
+  /// \brief Sends a change playmode monitor message
+  /// \param[in] _playMode New playmode to change to
+  public: void ChangePlayMode(const std::string & _playMode);
+
+  /// \brief Sends a change move ball monitor message
+  /// \param[in] _pos New position to move ball to
+  public: void MoveBall(const ignition::math::Vector3<double> &_pos);
+
+  /// \brief Sends a change move agent monitor message
+  /// \param[in] _pos New position to move agent to
+  public: void MoveAgent(const ignition::math::Vector3<double> &_pos);
+
+  /// \brief Sends a monitor message to remove agent
+  public: void RemoveAgent();
 
   /// \brief Writes to a client message to socket
   /// \param[in] _msg Message to write
@@ -70,18 +135,40 @@ class ClientAgent
   /// \param[out] _msg String to write message to
   private: bool GetMessage(std::string &_msg);
 
-  /// \brief Sends an init and beam message to server
-  private: void InitAndBeam();
+  /// \brief Tells us if socket is ready for reading
+  /// \return True if socket is ready
+  private: bool SelectInput();
 
   /// \brief Sleep for a certain amount of time, by default kThreadSleepTime;
-  /// \param[in] Time to sleep in milliseconds
-  private: void Wait(const int _time = kThreadSleepTime);
+  /// \param[in] Time to sleep in microseconds
+  private: void Wait(const int _msec = kThreadSleepTime);
 
-  /// \brief Whether agent is running separate thread
+  /// \brief Whether client is running separate thread
   public: std::atomic<bool> running;
 
-  /// \brief Whether agent is connect to server
+  /// \brief Whether client is connect to server
   public: std::atomic<bool> connected;
+
+  /// Number of cycles in update()
+  public: std::atomic<int> cycleCounter;
+
+  /// \brief Unum of agent
+  public: const int uNum;
+
+  /// \brief Team name of agent
+  public: const std::string teamName;
+
+  /// \brief Side of agent
+  public: const std::string side;
+
+  /// \brief Vector of actions by client and responses by server
+  public: std::vector<ActionResponse> actionResponses;
+
+  /// \brief Vector of all the messages received by client from server
+  public: std::vector<std::string> allMsgs;
+
+  /// \brief Mutex for locking messages
+  public: mutable std::mutex mutex;
 
   /// \brief Address of server
   private: std::string serverAddr;
@@ -104,8 +191,11 @@ class ClientAgent
   /// \brief Number of times left to try reconnecting
   private: int reConnects;
 
-  /// \brief Time in milliseconds to sleep between reconnection
+  /// \brief Time in microseconds to sleep between reconnection
   private: static const int kThreadSleepTime;
+
+  /// \brief Specify whether to print out extra messages
+  private: const int verbose;
 };
 
 #endif

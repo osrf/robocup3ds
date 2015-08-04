@@ -40,13 +40,22 @@ void BeforeKickOffState::Initialize()
 /////////////////////////////////////////////////
 void BeforeKickOffState::Update()
 {
-  // resets getElapsedGameTime() back to zero
-  this->gameState->SetStartGameTime(this->gameState->GetGameTime());
-
   if (!this->hasInitialized)
   {
     this->Initialize();
   }
+
+  bool agentOnField = false;
+  for (const auto &team : this->gameState->teams)
+  {
+    if (team->members.size() > 0u)
+    { agentOnField = true; }
+  }
+  if (!agentOnField)
+  { this->initTime = this->gameState->GetGameTime(); }
+
+  // resets getElapsedGameTime() back to zero
+  this->gameState->SetStartGameTime(this->gameState->GetGameTime());
 
   this->gameState->StopPlayers();
   if (this->gameState->GetBall() != SoccerField::BallCenterPosition)
