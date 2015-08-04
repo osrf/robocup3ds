@@ -84,11 +84,17 @@ void Robocup3dsPlugin::LoadConfiguration(
   double value;
   bool boolValue;
   if (LoadConfigParameter(_config, "robocup3dsplugin_monitorport", value))
-  { Robocup3dsPlugin::monitorPort = static_cast<int>(value); }
+  {
+    Robocup3dsPlugin::monitorPort = static_cast<int>(value);
+  }
   if (LoadConfigParameter(_config, "robocup3dsplugin_clientport", value))
-  { Robocup3dsPlugin::clientPort = static_cast<int>(value); }
+  {
+    Robocup3dsPlugin::clientPort = static_cast<int>(value);
+  }
   if (LoadConfigParameterBool(_config, "robocup3dsplugin_syncmode", boolValue))
-  { Robocup3dsPlugin::syncMode = boolValue; }
+  {
+    Robocup3dsPlugin::syncMode = boolValue;
+  }
 }
 
 /////////////////////////////////////////////////
@@ -145,9 +151,13 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
 
   // start server
   if (this->clientServer->GetPort() != Robocup3dsPlugin::clientPort)
-  { this->clientServer->SetPort(Robocup3dsPlugin::clientPort); }
+  {
+    this->clientServer->SetPort(Robocup3dsPlugin::clientPort);
+  }
   if (this->monitorServer->GetPort() != Robocup3dsPlugin::monitorPort)
-  { this->monitorServer->SetPort(Robocup3dsPlugin::monitorPort); }
+  {
+    this->monitorServer->SetPort(Robocup3dsPlugin::monitorPort);
+  }
   this->clientServer->Start();
   this->monitorServer->Start();
 }
@@ -250,7 +260,9 @@ void Robocup3dsPlugin::UpdateEffector()
     {
       const auto &model = this->world->GetModel(agent.GetName());
       if (agent.status == Agent::Status::STOPPED || !agent.inSimWorld)
-      { continue; }
+      {
+        continue;
+      }
 
       for (auto &kv : agent.action.jointEffectors)
       {
@@ -350,7 +362,9 @@ void Robocup3dsPlugin::UpdateGameState()
       // set agent pose in gameState
       if (agent.updatePose || agent.status == Agent::Status::STOPPED
           || !agent.inSimWorld)
-      { continue; }
+      {
+        continue;
+      }
       const auto &modelPose = model->GetWorldPose();
       agent.pos = G2I(modelPose.pos);
       agent.rot = G2I(modelPose.rot);
@@ -379,7 +393,9 @@ void Robocup3dsPlugin::UpdateGameState()
     for (auto &agent : team->members)
     {
       if (!agent.inSimWorld)
-      { continue; }
+      {
+        continue;
+      }
 
       const auto &model = this->world->GetModel(agent.GetName());
 
@@ -444,7 +460,9 @@ void Robocup3dsPlugin::UpdatePerceptor()
     for (auto &agent : team->members)
     {
       if (!agent.inSimWorld)
-      { continue; }
+      {
+        continue;
+      }
 
       const auto &model = this->world->GetModel(agent.GetName());
 
@@ -495,7 +513,9 @@ void Robocup3dsPlugin::UpdatePerceptor()
     for (const auto &agent : team->members)
     {
       if (!agent.inSimWorld)
-      { continue; }
+      {
+        continue;
+      }
 
       int cx = perceptor->Serialize(agent, &(this->buffer[4]),
                                     Robocup3dsPlugin::kBufferSize - 4);

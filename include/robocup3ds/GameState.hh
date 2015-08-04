@@ -297,21 +297,11 @@ class GameState
   public: void SetBallAngVel(const ignition::math::Vector3<double>
                              &_ballAngVel);
 
-  /// \brief Get the linear velocity of the ball
-  /// \return Ball linear velocity
-  public: ignition::math::Vector3<double> GetBallVel() const;
-
-  /// \brief Get the angular velocity of the ball
-  /// \return Ball angular velocity
-  public: ignition::math::Vector3<double> GetBallAngVel() const;
-
   /// \brief Add agent to game state
-  /// \param[out] _uNum Agent number assigned
+  /// \param[in] _uNum Agent number
   /// \param[in] _teamName Agent name
-  /// \param[in] _socketID SocketID associated with agent
-  /// \return Pointer to the agent object created
-  public: Agent* AddAgent(const int _uNum, const std::string &_teamName,
-    const int _socketID = -1);
+  /// \return True when adding agent is successful
+  public: bool AddAgent(const int _uNum, const std::string &_teamName);
 
   /// \brief Remove agent from game state
   /// \param[in] _uNum Agent number
@@ -338,10 +328,8 @@ class GameState
   public: void SetHalf(const Half _newHalf);
 
   /// \brief Get the elapsed time in seconds since beginning of half.
-  /// \param[in] _beginning If true, will return elapsed time always since
-  /// first half
   /// \return The elapsed game time
-  public: double GetElapsedGameTime(const bool _beginning = false) const;
+  public: double GetElapsedGameTime() const;
 
   /// \brief Get the elapsed time in seconds since last cycle.
   /// \return The elapsed game time since last cycle
@@ -383,11 +371,6 @@ class GameState
   /// \return Pointer to the last ball contact
   public: std::shared_ptr<GameState::BallContact> GetLastBallContact() const;
 
-  /// \brief Checks whether ball is in goal box or has intersected its front
-  /// \param[in] _side Side of field to check on
-  /// \return True if ball is in goal box or intersected its front
-  public: bool IsBallInGoal(Team::Side _side);
-
   /// \brief Method executed each time the game state changes.
   private: void Initialize();
 
@@ -396,6 +379,24 @@ class GameState
   /// \param[in] _j Second comparison AgentDist object
   /// \return True when _i is smaller than _j
   private: static bool SortDist(const AgentDist &_i, const AgentDist &_j);
+
+  /// \brief Helper function for loading gameState configuration variables
+  /// \param[in] _config Map of configuration variables
+  /// \param[in] _key Key to look for in map
+  /// \param[out] _value Value to return
+  /// \return True if loading of parameter is successful
+  private: bool LoadConfigParameter(
+    const std::map<std::string, std::string> &_config,
+    const std::string &_key, double &_value) const;
+
+  /// \brief Helper function for loading gameState configuration variables
+  /// \param[in] _config Map of configuration variables
+  /// \param[in] _key Key to look for in map
+  /// \param[out] _boolValue Value to return
+  /// \return True if loading of parameter is successful
+  private: bool LoadConfigParameterBool(
+    const std::map<std::string, std::string> &_config,
+    const std::string &_key, bool &_boolValue) const;
 
   /// \brief beforeKickOffState playmode
   public: std::shared_ptr<states::BeforeKickOffState> beforeKickOffState;
@@ -441,9 +442,6 @@ class GameState
 
   /// \brief freeKickRightState playmode
   public: std::shared_ptr<states::FreeKickState> freeKickRightState;
-
-  /// \brief Map of playmode names and corresponding shared ptr
-  public: std::map<std::string, std::shared_ptr<states::State>> playModeNameMap;
 
   /// \brief Name of BeforeKickOff playmode
   public: static const std::string BeforeKickOff;
@@ -551,9 +549,6 @@ class GameState
   /// \brief Flag whether to restrict field of view
   public: static bool restrictVision;
 
-  /// \brief Flag whether to output groundtruth information during perception
-  public: static bool groundTruthInfo;
-
   /// \brief How long in game time is each cycle
   public: static const double counterCycleTime;
 
@@ -563,10 +558,9 @@ class GameState
   /// \brief Noise added to beams
   public: static const double beamNoise;
 
-  /// \brief If less than ballContactInterval time has passed since the last
-  /// ball contact by the same agent, then it will not count as a new ball
-  /// contact (the time of the last ball contact is update instead)
-  public: static const double ballContactInterval;
+  /// \brief Pointer to configuration variables
+  public: static std::shared_ptr<std::map<const std::string,
+    const std::string>> config;
 
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;
@@ -602,9 +596,6 @@ class GameState
 
   /// \brief Game time during previous cycle.
   private: double prevCycleGameTime;
-
-  /// \brief Time of last cycle
-  private: double lastCycleTimeLength;
 
   /// \brief Time when half starts (elapsed game time is essentially
   /// gameTime - startGameTime)

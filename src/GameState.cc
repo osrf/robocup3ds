@@ -24,7 +24,6 @@
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Agent.hh"
 #include "robocup3ds/Geometry.hh"
-#include "robocup3ds/Nao.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/states/BeforeKickOffState.hh"
 #include "robocup3ds/states/CornerKickState.hh"
@@ -35,7 +34,6 @@
 #include "robocup3ds/states/KickInState.hh"
 #include "robocup3ds/states/KickOffState.hh"
 #include "robocup3ds/states/PlayOnState.hh"
-#include "robocup3ds/Util.hh"
 
 using namespace ignition;
 using namespace states;
@@ -63,10 +61,10 @@ double GameState::SecondsKickInPause = 1;
 double GameState::SecondsKickIn = 15;
 double GameState::SecondsBeforeKickOff = 5;
 double GameState::SecondsKickOff = 15;
-bool   GameState::useCounterForGameTime = false;
+bool   GameState::useCounterForGameTime = true;
 int    GameState::playerLimit = 11;
 int    GameState::penaltyBoxLimit = 3;
-double GameState::beamHeight = NaoRobot::torsoHeight + 0.05;
+double GameState::beamHeight = SoccerField::RobotPoseHeight + 0.05;
 double GameState::crowdingEnableRadius = 0.8;
 double GameState::innerCrowdingRadius = 0.4;
 double GameState::outerCrowdingRadius = 1.0;
@@ -76,11 +74,9 @@ double GameState::dropBallRadius = 2;
 double GameState::HFov = 120;
 double GameState::VFov = 120;
 bool   GameState::restrictVision = true;
-bool   GameState::groundTruthInfo = false;
 const double GameState::counterCycleTime = 0.02;
 const double GameState::dropBallRadiusMargin = 0.5;
 const double GameState::beamNoise = 0.1;
-const double GameState::ballContactInterval = 0.1;
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -116,35 +112,16 @@ GameState::GameState():
   updateBallPose(false),
   gameTime(0.0),
   prevCycleGameTime(0.0),
-  lastCycleTimeLength(0.0),
   startGameTime(0.0),
   currentState(nullptr),
   half(Half::FIRST_HALF),
   cycleCounter(0)
 {
-  this->playModeNameMap[beforeKickOffState->name] = beforeKickOffState;
-  this->playModeNameMap[kickOffLeftState->name] = kickOffLeftState;
-  this->playModeNameMap[kickOffRightState->name] = kickOffRightState;
-  this->playModeNameMap[playOnState->name] = playOnState;
-  this->playModeNameMap[kickInLeftState->name] = kickInLeftState;
-  this->playModeNameMap[kickInRightState->name] = kickInRightState;
-  this->playModeNameMap[cornerKickLeftState->name] = cornerKickLeftState;
-  this->playModeNameMap[cornerKickRightState->name] = cornerKickRightState;
-  this->playModeNameMap[goalKickLeftState->name] = goalKickLeftState;
-  this->playModeNameMap[goalKickRightState->name] = goalKickRightState;
-  this->playModeNameMap[gameOverState->name] = gameOverState;
-  this->playModeNameMap[goalLeftState->name] = goalLeftState;
-  this->playModeNameMap[goalRightState->name] = goalRightState;
-  this->playModeNameMap[freeKickLeftState->name] = freeKickLeftState;
-  this->playModeNameMap[freeKickRightState->name] = freeKickRightState;
   this->SetCurrent(beforeKickOffState);
-
   this->teams.push_back(std::make_shared<Team>(
-                          "_empty_team", Team::Side::LEFT, 0,
-                          GameState::playerLimit));
+                          "_empty_team", Team::Side::LEFT, 0, GameState::playerLimit));
   this->teams.push_back(std::make_shared<Team>(
-                          "_empty_team", Team::Side::RIGHT, 0,
-                          GameState::playerLimit));
+                          "_empty_team", Team::Side::RIGHT, 0, GameState::playerLimit));
 }
 
 /////////////////////////////////////////////////
@@ -236,10 +213,42 @@ void GameState::LoadConfiguration(
   {
     GameState::restrictVision = boolValue;
   }
-  if (LoadConfigParameterBool(_config, "percept_groundtruthinfo", boolValue))
+}
+
+/////////////////////////////////////////////////
+bool GameState::LoadConfigParameter(
+  const std::map<std::string, std::string> &_config,
+  const std::string &_key,
+  double &_value) const
+{
+  try
   {
-    GameState::groundTruthInfo = boolValue;
+    _value = std::stod(_config.at(_key));
   }
+  catch (const std::exception &exc)
+  {
+    std::cerr << exc.what();
+    return false;
+  }
+  return true;
+}
+
+/////////////////////////////////////////////////
+bool GameState::LoadConfigParameterBool(
+  const std::map<std::string, std::string> &_config,
+  const std::string &_key,
+  bool &_boolValue) const
+{
+  try
+  {
+    _boolValue = _config.at(_key) != "false";
+  }
+  catch (const std::exception &exc)
+  {
+    std::cerr << exc.what();
+    return false;
+  }
+  return true;
 }
 
 /////////////////////////////////////////////////
@@ -256,7 +265,6 @@ void GameState::Update()
   {
     this->gameTime = this->cycleCounter * GameState::counterCycleTime;
   }
-  this->lastCycleTimeLength = this->gameTime - this->prevCycleGameTime;
 
   this->hasCurrentStateChanged = false;
   if (this->currentState)
@@ -264,13 +272,6 @@ void GameState::Update()
     this->currentState->Update();
   }
 
-  for (auto &team : this->teams)
-  {
-    for (auto &agent : team->members)
-    {
-      agent.prevPos = agent.pos;
-    }
-  }
   this->prevCycleGameTime = this->gameTime;
 }
 
@@ -281,7 +282,6 @@ void GameState::ReleasePlayers()
   {
     for (auto &agent : team->members)
     {
-      agent.prevStatus = agent.status;
       agent.status = Agent::Status::RELEASED;
     }
   }
@@ -294,7 +294,6 @@ void GameState::StopPlayers()
   {
     for (auto &agent : team->members)
     {
-      agent.prevStatus = agent.status;
       agent.status = Agent::Status::STOPPED;
     }
   }
@@ -316,8 +315,6 @@ void GameState::SetCurrent(const std::shared_ptr<State> &_newState,
     this->currentState = _newState;
     this->currentState->Preinitialize();
     this->hasCurrentStateChanged = true;
-    gzmsg << "(" << this->gameTime << ") playmode changed to "
-          << this->currentState->name << std::endl;
   }
 }
 
@@ -384,7 +381,6 @@ void GameState::CheckTiming()
 
     // End of the first half
     this->startGameTime = this->gameTime;
-    gzmsg << "first half over, switching to second half" << std::endl;
     this->SetHalf(Half::SECOND_HALF);
     this->SetCurrent(kickOffRightState);
   }
@@ -394,42 +390,6 @@ void GameState::CheckTiming()
     // End of the game
     this->SetCurrent(gameOverState);
   }
-}
-
-/////////////////////////////////////////////////
-bool GameState::IsBallInGoal(Team::Side _side)
-{
-  math::Box goalBox;
-  math::Plane<double> goalPlane;
-  if (_side == Team::Side::LEFT)
-  {
-    goalBox = SoccerField::GoalBoxLeft;
-    goalPlane = SoccerField::GoalPlaneLeft;
-  }
-  else
-  {
-    goalBox = SoccerField::GoalBoxRight;
-    goalPlane = SoccerField::GoalPlaneRight;
-  }
-
-  if (goalBox.Contains(this->ballPos))
-  {
-    return true;
-  }
-
-  double t;
-  math::Vector3<double> pt;
-  math::Line3<double> ballLine(
-    this->ballPos - (this->GetElapsedCycleGameTime() * this->ballVel),
-    this->ballPos);
-  bool intersect = Geometry::IntersectionPlaneLine(ballLine, goalPlane, t, pt);
-  if (intersect && t > 0 && t < 1 && fabs(pt.Y()) < SoccerField::HalfGoalWidth
-      && pt.Z() > 0 && pt.Z() < SoccerField::GoalHeight)
-  {
-    return true;
-  }
-
-  return false;
 }
 
 /////////////////////////////////////////////////
@@ -457,11 +417,11 @@ void GameState::CheckBall()
   }
 
   // The ball is inside the left goal.
-  if (this->IsBallInGoal(Team::Side::LEFT))
+  if (SoccerField::GoalBoxLeft.Contains(this->ballPos))
   {
     this->SetCurrent(goalRightState);
   }
-  else if (this->IsBallInGoal(Team::Side::RIGHT))
+  else if (SoccerField::GoalBoxRight.Contains(this->ballPos))
   {
     // The ball is inside the right goal.
     this->SetCurrent(goalLeftState);
@@ -533,7 +493,6 @@ void GameState::CheckGoalKickIllegalDefense(const Team::Side _teamAllowed)
       {
         if (penaltyBox.Contains(agent.pos))
         {
-          gzmsg << "CheckGoalKickIllegalDefense() violation" << std::endl;
           this->MoveAgentToSide(agent);
         }
       }
@@ -591,7 +550,7 @@ void GameState::CheckIllegalDefense()
           if (agent.IsGoalKeeper())
           {
             double bestDist = -1;
-            Agent *bestAgent = nullptr;
+            Agent *bestAgent = NULL;
             for (auto &nonGoalieAgent : team->members)
             {
               if (nonGoalieAgent.IsGoalKeeper())
@@ -609,14 +568,12 @@ void GameState::CheckIllegalDefense()
             }
             if (bestAgent)
             {
-              gzmsg << "CheckIllegalDefense() violation" << std::endl;
               this->MoveAgentToSide(*bestAgent);
             }
             agent.inPenaltyBox = true;
           }
           else
           {
-            gzmsg << "CheckIllegalDefense() violation" << std::endl;
             this->MoveAgentToSide(agent);
           }
         }
@@ -678,7 +635,6 @@ exitLoop:
           }
           else
           {
-            gzmsg << "CheckCrowding() violation" << std::endl;
             this->MoveAgentToSide(*agentDist.agent);
           }
         }
@@ -695,7 +651,6 @@ exitLoop:
           }
           else
           {
-            gzmsg << "CheckCrowding() violation" << std::endl;
             this->MoveAgentToSide(*agentDist.agent);
           }
         }
@@ -720,7 +675,7 @@ void GameState::CheckImmobility()
         agent.timeImmobilized = 0;
       }
 
-      if (agent.pos.Z() < NaoRobot::torsoHeight * 0.5)
+      if (agent.pos.Z() < SoccerField::RobotPoseHeight * 0.5)
       {
         agent.timeFallen += this->GetElapsedCycleGameTime();
       }
@@ -736,9 +691,9 @@ void GameState::CheckImmobility()
       {
         agent.timeImmobilized = 0;
         agent.timeFallen = 0;
-        gzmsg << "CheckImmobility() violation" << std::endl;
         this->MoveAgentToSide(agent);
       }
+      agent.prevPos = agent.pos;
     }
   }
 }
@@ -763,8 +718,7 @@ void GameState::CheckDoubleTouch()
       && this->touchBallKickoff->side == firstContact->side
       && this->touchBallKickoff->uNum == firstContact->uNum)
   {
-    gzmsg << "CheckDoubleTouch() violation" << std::endl;
-    if (this->currentState->prevState->side == Team::Side::LEFT)
+    if (this->currentState->prevState->GetName() == "KickOffLeft")
     {
       this->SetCurrent(kickOffRightState);
     }
@@ -825,7 +779,6 @@ void GameState::CheckOffSidesOnKickOff(const Team::Side _kickingSide)
                                          SoccerField::CenterCircleRadius))
       {
         // move them to side of field for now
-        gzmsg << "CheckOffSidesOnKickOff() violation" << std::endl;
         this->MoveOffSideAgent(agent);
 
         // if on defending team, cannot cross line and go inside circle.
@@ -835,7 +788,6 @@ void GameState::CheckOffSidesOnKickOff(const Team::Side _kickingSide)
                 < SoccerField::CenterCircleRadius))
       {
         // move them to side of field for now
-        gzmsg << "CheckOffSidesOnKickOff() violation" << std::endl;
         this->MoveOffSideAgent(agent);
       }
     }
@@ -873,9 +825,6 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
   _agent.pos.Set(_x + offsetX, _y + offsetY, GameState::beamHeight);
   _agent.rot.Euler(0, 0, _yaw + offsetYaw);
   _agent.updatePose = true;
-  // std::cerr << "MoveAgentNoisy to X:" << _agent.pos.X() <<
-  //    " to Y:" << _agent.pos.Y() << " to Z:"
-  //      << _agent.pos.Z() << std::endl;
 }
 
 void GameState::MoveAgent(Agent &_agent, const math::Vector3<double> &_pos,
@@ -927,8 +876,6 @@ math::Vector3<double> GameState::GetBall()
 void GameState::MoveBallToCenter()
 {
   this->ballPos = SoccerField::BallCenterPosition;
-  this->ballVel = math::Vector3<double>(0, 0, 0);
-  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -941,8 +888,6 @@ void GameState::MoveBallForGoalKick()
     newX = -newX;
   }
   this->ballPos = math::Vector3<double>(newX, 0, SoccerField::BallRadius);
-  this->ballVel = math::Vector3<double>(0, 0, 0);
-  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -955,8 +900,6 @@ void GameState::MoveBallToCorner()
                     (fabs(ballPos.Y()) / ballPos.Y()) *
                     SoccerField::HalfFieldHeight,
                     SoccerField::BallRadius);
-  this->ballVel = math::Vector3<double>(0, 0, 0);
-  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -968,8 +911,6 @@ void GameState::MoveBallInBounds()
   double newY = std::max(std::min(SoccerField::HalfFieldHeight, ballPos.Y()),
                          -SoccerField::HalfFieldHeight);
   this->ballPos.Set(newX, newY, SoccerField::BallRadius);
-  this->ballVel = math::Vector3<double>(0, 0, 0);
-  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -977,8 +918,6 @@ void GameState::MoveBallInBounds()
 void GameState::MoveBall(const math::Vector3<double> &_ballPos)
 {
   this->ballPos = _ballPos;
-  this->ballVel = math::Vector3<double>(0, 0, 0);
-  this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
 }
 
@@ -996,18 +935,6 @@ void GameState::SetBallAngVel(const math::Vector3<double> &_ballAngVel)
   this->updateBallPose = true;
 }
 
-/////////////////////////////////////////////////
-ignition::math::Vector3<double> GameState::GetBallVel() const
-{
-  return this->ballVel;
-}
-
-/////////////////////////////////////////////////
-ignition::math::Vector3<double> GameState::GetBallAngVel() const
-{
-  return this->ballAngVel;
-}
-
 ////////////////////////////////////////////////
 void GameState::Initialize()
 {
@@ -1016,15 +943,8 @@ void GameState::Initialize()
 }
 
 ////////////////////////////////////////////////
-Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
-                           const int _socketID)
+bool GameState::AddAgent(const int _uNum, const std::string &_teamName)
 {
-  if (this->currentState->GetName() != "BeforeKickOff")
-  {
-    // std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
-    return nullptr;
-  }
-
   int uNum = _uNum;
   // std::cout << "adding agent: " << uNum << " teamName: "
   // << teamName << std::endl;
@@ -1032,7 +952,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
   {
     // std::cout << "uNum " << uNum << " is invalid, cannot add agent to team "
     // << teamName << "!" << std::endl;
-    return nullptr;
+    return false;
   }
   std::shared_ptr<Team> teamToAdd(nullptr);
   for (auto &team : this->teams)
@@ -1059,7 +979,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
     // std::cout << uNum << " " << teamName.c_str() << std::endl;
     // std::cout << "There already are two teams, cannot add agent into
     // new team!" << std::endl;
-    return nullptr;
+    return false;
   }
 
   // code below never reached
@@ -1080,7 +1000,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
     {
       // std::cout << "Already have an agent with this unum: " << uNum <<
       // ", cannot add agent to team!" << std::endl;
-      return nullptr;
+      return false;
     }
   }
   if (uNum == 0)
@@ -1098,10 +1018,10 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
   {
     // std::cout << "No free uNums avaliable, cannot add agent to team!"
     // << std::endl;
-    return nullptr;
+    return false;
   }
-  teamToAdd->members.push_back(Agent(uNum, teamToAdd, _socketID));
-  return &teamToAdd->members.back();
+  teamToAdd->members.push_back(Agent(uNum, teamToAdd));
+  return true;
 }
 
 
@@ -1147,7 +1067,7 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
       {
         if (agent.uNum == _uNum)
         {
-          this->MoveAgentNoisy(agent, _x, _y, RAD(_rot));
+          this->MoveAgentNoisy(agent, _x, _y, _rot);
           return true;
         }
       }
@@ -1170,23 +1090,15 @@ void GameState::SetHalf(const Half _newHalf)
 }
 
 ////////////////////////////////////////////////
-double GameState::GetElapsedGameTime(const bool _beginning) const
+double GameState::GetElapsedGameTime() const
 {
-  if (_beginning && this->GetHalf() == Half::SECOND_HALF)
-  {
-    return (this->gameTime - this->startGameTime) +
-           GameState::SecondsEachHalf;
-  }
-  else
-  {
-    return this->gameTime - this->startGameTime;
-  }
+  return this->gameTime - this->startGameTime;
 }
 
 ////////////////////////////////////////////////
 double GameState::GetElapsedCycleGameTime() const
 {
-  return this->lastCycleTimeLength;
+  return this->gameTime - this->prevCycleGameTime;
 }
 
 ////////////////////////////////////////////////

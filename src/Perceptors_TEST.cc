@@ -14,7 +14,7 @@
  * limitations under the License.
  *
 */
-#include <netinet/in.h>
+
 #include <cmath>
 #include <ignition/math.hh>
 #include <memory>
@@ -34,43 +34,42 @@ using namespace ignition;
 class PerceptorTest : public ::testing::Test
 {
   protected: virtual void SetUp()
-    {
-    GameState::useCounterForGameTime = true;
+  {
     this->gameState = std::make_shared<GameState>();
     this->perceptor = std::make_shared<Perceptor>(this->gameState.get());
-    }
+  }
 
   protected: virtual bool UpdateLine_Test(Agent &_agent,
                                  const math::Line3<double> &_line,
                                  math::Line3<double> &_testLine)
+  {
+    this->perceptor->SetG2LMat(_agent);
+    _agent.percept.fieldLines.clear();
+    this->perceptor->UpdateLine(_agent, _line);
+    if (_agent.percept.fieldLines.size() == 0)
     {
-      this->perceptor->SetG2LMat(_agent);
-      _agent.percept.fieldLines.clear();
-      this->perceptor->UpdateLine(_agent, _line);
-      if (_agent.percept.fieldLines.size() == 0)
-      {
-        return false;
-      }
-      _testLine.Set(
-        Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[0]),
-        Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[1]));
-      return true;
+      return false;
     }
+    _testLine.Set(
+      Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[0]),
+      Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[1]));
+    return true;
+  }
 
   protected: virtual bool UpdateLandmark_Test(Agent &_agent,
                                      const math::Vector3<double> &_landmark,
                                      math::Vector3<double> &_testLandmark)
+  {
+    this->perceptor->SetG2LMat(_agent);
+    _agent.percept.landMarks.clear();
+    this->perceptor->UpdateLandmark(_agent, "test", _landmark);
+    if (_agent.percept.landMarks.empty())
     {
-      this->perceptor->SetG2LMat(_agent);
-      _agent.percept.landMarks.clear();
-      this->perceptor->UpdateLandmark(_agent, "test", _landmark);
-      if (_agent.percept.landMarks.empty())
-      {
-        return false;
-      }
-      _testLandmark = Geometry::PolarToCart(_agent.percept.landMarks["test"]);
-      return true;
+      return false;
     }
+    _testLandmark = Geometry::PolarToCart(_agent.percept.landMarks["test"]);
+    return true;
+  }
 
   protected: virtual void TearDown() {}
   protected: std::shared_ptr<GameState> gameState;
@@ -145,7 +144,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive y-axis
-  agent.cameraPos.Set(0, 0, 0);
+  agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, M_PI / 2);
 
   // we have line on positive y-axis in global coordinates
@@ -173,7 +172,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
   EXPECT_EQ(testLine, gdLine);
 
   // offset agent by 1 in every axis, same with line
-  agent.cameraPos.Set(1, 1, 1);
+  agent.pos.Set(1, 1, 1);
   origLine.Set(0, 1, 1, 0, 2, 1);
   UpdateLine_Test(agent, origLine, testLine);
   gdLine.Set(1, 0, 0, 1, -1, 0);
@@ -193,7 +192,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Restrictvis)
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive x-axis
-  agent.cameraPos.Set(0, 0, 0);
+  agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
 
   // we have line spanning Y-axis, must be clipped
@@ -242,7 +241,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
   /// agent's camera is at origin, facing straight down the positive y-axis
-  agent.cameraPos.Set(0, 0, 0);
+  agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, M_PI / 2);
 
   origLandmark.Set(1, 0, 0);
@@ -261,7 +260,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
   gdLandmark.Set(1 / sqrt(2), -1 / sqrt(2), 0);
   EXPECT_EQ(gdLandmark, testLandmark);
 
-  agent.cameraPos.Set(1, 2, 3);
+  agent.pos.Set(1, 2, 3);
   origLandmark.Set(1, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
   UpdateLandmark_Test(agent, origLandmark, testLandmark);
@@ -280,7 +279,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
-  agent.cameraPos.Set(0, 0, 0);
+  agent.pos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, 0);
 
   origLandmark.Set(-999, 0, 0);
@@ -318,13 +317,12 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
   gameState->AddAgent(1, "red");
   Agent &agent1 = gameState->teams.at(0)->members.at(0);
   Agent &agent2 = gameState->teams.at(1)->members.at(0);
-  agent1.cameraPos.Set(0, 0, 0);
+  agent1.pos.Set(0, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
   perceptor->SetG2LMat(agent1);
-  agent2.cameraPos.Set(1, 1, 0);
-  agent2.selfBodyMap["HEAD"] = agent2.cameraPos +
-                               math::Vector3<double>(0, 0, 1);
-  agent2.selfBodyMap["BODY"] = agent2.cameraPos;
+  agent2.pos.Set(1, 1, 0);
+  agent2.selfBodyMap["HEAD"] = agent2.pos + math::Vector3<double>(0, 0, 1);
+  agent2.selfBodyMap["BODY"] = agent2.pos;
   AgentId agent2Id(1, "red");
 
   // without restricted vision, other agent's body parts should be visible
@@ -360,9 +358,9 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
   auto team = gameState->teams.at(0);
   Agent &agent1 = team->members.at(0);
   Agent &agent2 = team->members.at(1);
-  agent1.cameraPos.Set(5, 0, 0);
+  agent1.pos.Set(5, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
-  agent2.cameraPos.Set(0, 100, 0);
+  agent2.pos.Set(0, 100, 0);
   gameState->say.agentId = std::make_pair(5, "red");
   gameState->say.pos.Set(0, 0, 0);
   gameState->say.msg = "hello";
@@ -394,7 +392,6 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
   perceptor->UpdateAgentHear(agent2);
   EXPECT_FALSE(agent2.percept.hear.isValid);
 }
-
 /// \Brief Test whether the Update() function works
 TEST_F(PerceptorTest, Percepter_Update)
 {
@@ -443,84 +440,6 @@ TEST_F(PerceptorTest, Percepter_Update)
       }
     }
   }
-}
-
-/// \Brief Test whether the Serialize() function works
-TEST_F(PerceptorTest, Percepter_Serialize)
-{
-  std::string teamNames[2] = {"red", "blue"};
-  for (int i = 0; i < 2; ++i)
-  {
-    for (int j = 0; j < 11; ++j)
-    {
-      gameState->AddAgent(j + 1, teamNames[i]);
-      auto &agent = gameState->teams.at(i)->members.at(j);
-      if (i == 0 && j == 0)
-      { continue; }
-      gameState->MoveAgent(agent, math::Vector3<double>(5.0, 1.0,
-                           GameState::beamHeight));
-      agent.selfBodyMap["BODY"] = agent.pos;
-      agent.selfBodyMap["HEAD"] = agent.pos +
-                                  math::Vector3<double>(0, 0, 1);
-    }
-  }
-  GameState::restrictVision = true;
-  gameState->say.agentId = std::make_pair(1, "blue");
-  gameState->say.pos.Set(5.0, 1.0, GameState::beamHeight);
-  gameState->say.msg = "hello";
-  gameState->say.isValid = true;
-  perceptor->useNoise = false;
-  GameState::HFov = 90;
-  GameState::VFov = 90;
-  perceptor->SetViewFrustum();
-
-  auto &redAgent = gameState->teams.at(0)->members.at(0);
-  redAgent.percept.hingeJoints["joint1"] = 0.5;
-  redAgent.percept.hingeJoints["joint2"] = 0.2;
-  perceptor->SetG2LMat(redAgent);
-  perceptor->Update();
-
-  char testString[16384];
-  int cx;
-
-  // currently takes around 1.2 milliseconds to finish for all 22 agents
-  for (int i = 0; i < 1000; ++i)
-  { cx = perceptor->Serialize(redAgent, testString, sizeof(testString)); }
-  std::cout << testString << std::endl;
-
-  // check that certain names are there in string
-  EXPECT_TRUE(strstr(testString, "joint1"));
-  EXPECT_TRUE(strstr(testString, "joint2"));
-  EXPECT_TRUE(strstr(testString, "HEAD"));
-  EXPECT_TRUE(strstr(testString, "BODY"));
-  EXPECT_TRUE(strstr(testString, "hear"));
-
-  // check that parenthesis are balanced
-  int paren = 0;
-  for (size_t i = 0; i < sizeof(testString); ++i)
-  {
-    if (testString[i] == '\0')
-    { break; }
-    if (testString[i] == '(')
-    { paren++; }
-    else if (testString[i] == ')')
-    { paren--; }
-  }
-  EXPECT_EQ(0, paren);
-
-  // make sure returned length is correct
-  EXPECT_EQ(static_cast<int>(strlen(testString)), cx);
-
-  // ensure that encoding is correct
-  char b[4];
-  unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-  b[0] =  _cx        & 0xff;
-  b[1] = (_cx >>  8) & 0xff;
-  b[2] = (_cx >> 16) & 0xff;
-  b[3] = (_cx >> 24) & 0xff;
-  unsigned int _cx2 = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | (b[0]);
-  int cx2 = static_cast<int>(ntohl(_cx2));
-  EXPECT_EQ(cx, cx2);
 }
 
 int main(int argc, char **argv)
