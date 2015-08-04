@@ -383,6 +383,11 @@ class GameState
   /// \return Pointer to the last ball contact
   public: std::shared_ptr<GameState::BallContact> GetLastBallContact() const;
 
+  /// \brief Checks whether ball is in goal box or has intersected its front
+  /// \param[in] _side Side of field to check on
+  /// \return True if ball is in goal box or intersected its front
+  private: bool IsBallInGoal(Team::Side _side);
+
   /// \brief Method executed each time the game state changes.
   private: void Initialize();
 

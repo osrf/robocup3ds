@@ -229,6 +229,13 @@ void GameState::Update()
     this->currentState->Update();
   }
 
+  for (auto &team : this->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      agent.prevPos = agent.pos;
+    }
+  }
   this->prevCycleGameTime = this->gameTime;
 }
 
@@ -354,6 +361,36 @@ void GameState::CheckTiming()
 }
 
 /////////////////////////////////////////////////
+bool GameState::IsBallInGoal(Team::Side _side)
+{
+  math::Box goalBox;
+  math::Plane<double> goalPlane;
+  if (_side == Team::Side::LEFT)
+  {
+    goalBox = SoccerField::GoalBoxLeft;
+    goalPlane = SoccerField::GoalPlaneLeft;
+  }
+  else
+  {
+    goalBox = SoccerField::GoalBoxRight;
+    goalPlane = SoccerField::GoalPlaneRight;
+  }
+
+  if (goalBox.Contains(this->ballPos))
+  { return true; }
+
+  double t;
+  math::Vector3<double> pt;
+  math::Line3<double> ballLine(this->ballPos - this->ballVel, this->ballPos);
+  bool intersect = Geometry::IntersectionPlaneLine(ballLine, goalPlane, t, pt);
+  if (intersect && t > 0 && t < 1 && fabs(pt.Y()) < SoccerField::HalfGoalWidth
+      && pt.Z() > 0 && pt.Z() < SoccerField::GoalHeight)
+  { return true; }
+
+  return false;
+}
+
+/////////////////////////////////////////////////
 void GameState::CheckBall()
 {
   if (this->hasCurrentStateChanged)
@@ -378,11 +415,11 @@ void GameState::CheckBall()
   }
 
   // The ball is inside the left goal.
-  if (SoccerField::GoalBoxLeft.Contains(this->ballPos))
+  if (this->IsBallInGoal(Team::Side::LEFT))
   {
     this->SetCurrent(goalRightState);
   }
-  else if (SoccerField::GoalBoxRight.Contains(this->ballPos))
+  else if (this->IsBallInGoal(Team::Side::RIGHT))
   {
     // The ball is inside the right goal.
     this->SetCurrent(goalLeftState);
@@ -648,7 +685,6 @@ void GameState::CheckImmobility()
         gzmsg << "CheckImmobility() violation" << std::endl;
         this->MoveAgentToSide(agent);
       }
-      agent.prevPos = agent.pos;
     }
   }
 }
