@@ -109,11 +109,11 @@ void ClientAgent::Update()
 
   size_t currActionIndex = 0;
   size_t currMsgIndex = 0;
-  std::chrono::microseconds ms(20000);
+  // std::chrono::microseconds ms(20000);
   std::string receivedMsg;
   while (this->running)
   {
-    this->Wait(ms.count());
+    this->Wait();
     // std::chrono::high_resolution_clock::time_point start =
     //   std::chrono::high_resolution_clock::now();
 
@@ -362,7 +362,7 @@ bool ClientAgent::SelectInput()
   fd_set readfds;
   struct timeval tv;
   tv.tv_sec = 0;
-  tv.tv_usec = 250000;
+  tv.tv_usec = 1000;
   FD_ZERO(&readfds);
   FD_SET(this->socketID, &readfds);
 

@@ -49,6 +49,7 @@ class IntegrationTest : public gazebo::ServerFixture
   public:
     virtual void SetUp()
     {
+      cerr << "Setting Up Test" << endl;
       this->agent = make_shared<ClientAgent>(
                       "0.0.0.0", 3100, 3200, 1, "red", "left");
       this->Wait();
@@ -57,6 +58,7 @@ class IntegrationTest : public gazebo::ServerFixture
   public:
     virtual void TearDown()
     {
+      cerr << "Tearing Down Test" << endl;
       this->agent.reset();
       gazebo::ServerFixture::TearDown();
       this->Wait();
@@ -78,7 +80,6 @@ class IntegrationTest : public gazebo::ServerFixture
 TEST_F(IntegrationTest, TestLoadWorldPlugin)
 {
   this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
-  this->Wait();
   SUCCEED();
 }
 
@@ -89,7 +90,9 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
   this->Wait();
   this->agent->InitAndBeam(1, 1, 90);
   this->agent->Start();
-  this->Wait();
+
+  while (this->agent->allMsgs.size() == 0u)
+  { this->Wait(); }
 
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
@@ -120,9 +123,11 @@ TEST_F(IntegrationTest, TestMonitor)
   this->agent->InitAndBeam(1, 1, 90);
   this->agent->ChangePlayMode("PlayOn");
   this->agent->Start();
-  this->Wait();
 
   // test game mode has successfully changed
+  while (this->agent->allMsgs.size() == 0u)
+  { this->Wait(); }
+
   const auto &lastMsg = this->agent->allMsgs.back();
   EXPECT_NE(lastMsg.find("PlayOn"), string::npos);
 
@@ -147,11 +152,16 @@ TEST_F(IntegrationTest, TestMonitor)
     numMessages = this->agent->allMsgs.size();
   }
   this->agent->RemoveAgent();
-  this->Wait();
-  size_t numMessages2 = this->agent->allMsgs.size();
-  EXPECT_EQ((numMessages + 2), numMessages2);
+  size_t currMsgCount = this->agent->allMsgs.size() - 1;
+  while (this->agent->allMsgs.size() != currMsgCount)
+  {
+    this->Wait();
+    currMsgCount = this->agent->allMsgs.size();
+  }
+  SUCCEED();
+  // EXPECT_LE(numMessages2 - numMessages, 3u);
   cerr << "num msgs before kill: " << numMessages
-       << " num msgs after kill: " << numMessages2 << endl;
+       << " num msgs after kill: " << currMsgCount << endl;
 }
 
 /// \brief This tests whether agent walk works
