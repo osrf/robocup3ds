@@ -125,11 +125,6 @@ GameState::GameState():
 }
 
 /////////////////////////////////////////////////
-GameState::~GameState()
-{
-}
-
-/////////////////////////////////////////////////
 void GameState::LoadConfiguration(
   const std::map<std::string, std::string> &_config) const
 {
@@ -146,42 +141,78 @@ void GameState::LoadConfiguration(
     GameState::SecondsFullGame = 2.0 * GameState::SecondsEachHalf;
   }
   if (LoadConfigParameter(_config, "gamestate_secondsgoalpause", value))
-  { GameState::SecondsGoalPause = value; }
+  {
+    GameState::SecondsGoalPause = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_secondskickinpause", value))
-  { GameState::SecondsKickInPause = value; }
+  {
+    GameState::SecondsKickInPause = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_secondskickin", value))
-  { GameState::SecondsKickIn = value; }
+  {
+    GameState::SecondsKickIn = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_secondsbeforekickoff", value))
-  { GameState::SecondsBeforeKickOff = value; }
+  {
+    GameState::SecondsBeforeKickOff = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_secondskickoff", value))
-  { GameState::SecondsKickOff = value; }
+  {
+    GameState::SecondsKickOff = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_dropballradius", value))
-  { GameState::dropBallRadius = value; }
+  {
+    GameState::dropBallRadius = value;
+  }
   if (LoadConfigParameterBool(
         _config, "gamestate_usecounterforgametime", boolValue))
-  { GameState::useCounterForGameTime = boolValue; }
+  {
+    GameState::useCounterForGameTime = boolValue;
+  }
   if (LoadConfigParameter(_config, "gamestate_playerlimit", value))
-  { GameState::playerLimit = static_cast<int>(value); }
+  {
+    GameState::playerLimit = static_cast<int>(value);
+  }
   if (LoadConfigParameter(_config, "gamestate_penaltyboxlimit", value))
-  { GameState::penaltyBoxLimit = static_cast<int>(value); }
+  {
+    GameState::penaltyBoxLimit = static_cast<int>(value);
+  }
   if (LoadConfigParameter(_config, "gamestate_beamheight", value))
-  { GameState::beamHeight = value; }
+  {
+    GameState::beamHeight = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_crowdingenableradius", value))
-  { GameState::crowdingEnableRadius = value; }
+  {
+    GameState::crowdingEnableRadius = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_innercrowdingradius", value))
-  { GameState::innerCrowdingRadius = value; }
+  {
+    GameState::innerCrowdingRadius = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_outercrowdingradius", value))
-  { GameState::outerCrowdingRadius = value; }
+  {
+    GameState::outerCrowdingRadius = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_immobilitytimelimit", value))
-  { GameState::immobilityTimeLimit = value; }
+  {
+    GameState::immobilityTimeLimit = value;
+  }
   if (LoadConfigParameter(_config, "gamestate_fallentimelimit", value))
-  { GameState::fallenTimeLimit = value; }
+  {
+    GameState::fallenTimeLimit = value;
+  }
   if (LoadConfigParameter(_config, "percept_hfov", value))
-  { GameState::HFov = value; }
+  {
+    GameState::HFov = value;
+  }
   if (LoadConfigParameter(_config, "percept_vfov", value))
-  { GameState::VFov = value; }
+  {
+    GameState::VFov = value;
+  }
   if (LoadConfigParameterBool(_config, "percept_restrictvision", boolValue))
-  { GameState::restrictVision = boolValue; }
+  {
+    GameState::restrictVision = boolValue;
+  }
 }
 
 /////////////////////////////////////////////////
@@ -290,7 +321,7 @@ void GameState::SetCurrent(const std::shared_ptr<State> &_newState,
 /////////////////////////////////////////////////
 void GameState::DropBallImpl(const Team::Side _teamAllowed)
 {
-  // Check if the player is withing FREE_KICK distance.
+  // Check if the player is within FREE_KICK distance.
   for (auto &team : this->teams)
   {
     if (team->side != _teamAllowed)
@@ -340,7 +371,8 @@ void GameState::CheckTiming()
   }
 
   double elapsedGameTime = this->GetElapsedGameTime();
-  if ((this->half == Half::FIRST_HALF) && (elapsedGameTime >= SecondsEachHalf))
+  if ((this->half == Half::FIRST_HALF) && (elapsedGameTime >=
+      GameState::SecondsEachHalf))
   {
     // swap team sides
     Team::Side temp = this->teams.at(0)->side;
@@ -353,7 +385,7 @@ void GameState::CheckTiming()
     this->SetCurrent(kickOffRightState);
   }
   else if ((this->half == Half::SECOND_HALF)
-           && (elapsedGameTime >= SecondsEachHalf))
+           && (elapsedGameTime >= GameState::SecondsEachHalf))
   {
     // End of the game
     this->SetCurrent(gameOverState);
@@ -400,9 +432,13 @@ void GameState::CheckBall()
     // The ball is outside of the sideline.
     // Choose team
     if (lastContactSide == Team::Side::LEFT)
-    { this->SetCurrent(kickInRightState); }
+    {
+      this->SetCurrent(kickInRightState);
+    }
     else
-    { this->SetCurrent(kickInLeftState); }
+    {
+      this->SetCurrent(kickInLeftState);
+    }
   }
   else if (fabs(this->ballPos.X()) > SoccerField::HalfFieldWidth +
            SoccerField::OutofBoundsTol)
@@ -413,17 +449,25 @@ void GameState::CheckBall()
     {
       // Choose team 1
       if (lastContactSide == Team::Side::LEFT)
-      { this->SetCurrent(cornerKickRightState); }
+      {
+        this->SetCurrent(cornerKickRightState);
+      }
       else
-      { this->SetCurrent(goalKickLeftState); }
+      {
+        this->SetCurrent(goalKickLeftState);
+      }
     }
     else
     {
       // Choose team 2
       if (lastContactSide == Team::Side::LEFT)
-      { this->SetCurrent(goalKickRightState); }
+      {
+        this->SetCurrent(goalKickRightState);
+      }
       else
-      { this->SetCurrent(cornerKickLeftState); }
+      {
+        this->SetCurrent(cornerKickLeftState);
+      }
     }
   }
 }
@@ -720,9 +764,13 @@ void GameState::CheckOffSidesOnKickOff(const Team::Side _kickingSide)
 
       bool isOffSide;
       if (team->side == Team::Side::LEFT)
-      { isOffSide = agent.pos.X() > 0; }
+      {
+        isOffSide = agent.pos.X() > 0;
+      }
       else
-      { isOffSide = agent.pos.X() < 0; }
+      {
+        isOffSide = agent.pos.X() < 0;
+      }
 
       // if on kicking team, must stay in circle or cannot cross line.
       if (team->side == _kickingSide && (isOffSide &&
