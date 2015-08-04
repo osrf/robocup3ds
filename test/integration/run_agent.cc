@@ -60,6 +60,7 @@ class IntegrationTest : public gazebo::ServerFixture
     {
       cerr << "Tearing Down Test" << endl;
       this->agent.reset();
+      this->world.reset();
       gazebo::ServerFixture::TearDown();
       this->Wait();
     }
