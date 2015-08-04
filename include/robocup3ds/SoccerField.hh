@@ -59,7 +59,7 @@ namespace SoccerField
     ignition::math::Vector3<double>(1, 0, 0), HalfFieldWidth);
 
   static const ignition::math::Plane<double> GoalPlaneRight(
-    ignition::math::Vector3<double>(-1, 0, 0), -HalfFieldWidth);
+    ignition::math::Vector3<double>(1, 0, 0), -HalfFieldWidth);
 
   static const ignition::math::Box GoalBoxLeft(
     ignition::math::Vector3<double>(-(GoalDepth + HalfFieldWidth),

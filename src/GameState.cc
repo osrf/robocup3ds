@@ -116,6 +116,7 @@ GameState::GameState():
   updateBallPose(false),
   gameTime(0.0),
   prevCycleGameTime(0.0),
+  lastCycleTimeLength(0.0),
   startGameTime(0.0),
   currentState(nullptr),
   half(Half::FIRST_HALF),
@@ -222,6 +223,7 @@ void GameState::Update()
   {
     this->gameTime = this->cycleCounter * GameState::counterCycleTime;
   }
+  this->lastCycleTimeLength = this->gameTime - this->prevCycleGameTime;
 
   this->hasCurrentStateChanged = false;
   if (this->currentState)
@@ -381,7 +383,9 @@ bool GameState::IsBallInGoal(Team::Side _side)
 
   double t;
   math::Vector3<double> pt;
-  math::Line3<double> ballLine(this->ballPos - this->ballVel, this->ballPos);
+  math::Line3<double> ballLine(
+    this->ballPos - (this->GetElapsedCycleGameTime() * this->ballVel),
+    this->ballPos);
   bool intersect = Geometry::IntersectionPlaneLine(ballLine, goalPlane, t, pt);
   if (intersect && t > 0 && t < 1 && fabs(pt.Y()) < SoccerField::HalfGoalWidth
       && pt.Z() > 0 && pt.Z() < SoccerField::GoalHeight)
@@ -1126,7 +1130,7 @@ double GameState::GetElapsedGameTime(const bool _beginning) const
 ////////////////////////////////////////////////
 double GameState::GetElapsedCycleGameTime() const
 {
-  return this->gameTime - this->prevCycleGameTime;
+  return this->lastCycleTimeLength;
 }
 
 ////////////////////////////////////////////////

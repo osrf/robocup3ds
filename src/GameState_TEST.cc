@@ -693,6 +693,33 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
     gameState.Update();
     EXPECT_EQ(states.at((i + 1) % 2)->name, gameState.GetCurrentState()->name);
   }
+
+  ballPositions.clear();
+  ballPositions.push_back(math::Vector3<double>(
+                            -(SoccerField::HalfFieldWidth + 2.0),
+                            1, SoccerField::BallRadius));
+  ballPositions.push_back(math::Vector3<double>(
+                            SoccerField::HalfFieldWidth + 2.0,
+                            -1, SoccerField::BallRadius));
+  std::vector<math::Vector3<double>> ballVelocities;
+  ballVelocities.push_back(math::Vector3<double>(-1000, 0, 0));
+  ballVelocities.push_back(math::Vector3<double>(1000, 0, 0));
+
+  for (size_t i = 0; i < states.size(); ++i)
+  {
+    gameState.MoveBall(math::Vector3<double>::Zero);
+    gameState.SetCurrent(gameState.playOnState);
+    gameState.Update();
+    EXPECT_EQ("PlayOn", gameState.GetCurrentState()->name);
+
+    gameState.MoveBall(ballPositions.at(i));
+    gameState.SetBallVel(ballVelocities.at(i));
+
+    gameState.Update();
+    // std::cout << gameState.IsBallInGoal(gameState.teams.at(i)->side)
+    //           << std::endl;
+    EXPECT_EQ(states.at((i + 1) % 2)->name, gameState.GetCurrentState()->name);
+  }
 }
 
 /// \brief Test for whether PlayOn play mode transitions to goalKick correctly

@@ -386,7 +386,7 @@ class GameState
   /// \brief Checks whether ball is in goal box or has intersected its front
   /// \param[in] _side Side of field to check on
   /// \return True if ball is in goal box or intersected its front
-  private: bool IsBallInGoal(Team::Side _side);
+  public: bool IsBallInGoal(Team::Side _side);
 
   /// \brief Method executed each time the game state changes.
   private: void Initialize();
@@ -602,6 +602,9 @@ class GameState
 
   /// \brief Game time during previous cycle.
   private: double prevCycleGameTime;
+
+  /// \brief Time of last cycle
+  private: double lastCycleTimeLength;
 
   /// \brief Time when half starts (elapsed game time is essentially
   /// gameTime - startGameTime)
