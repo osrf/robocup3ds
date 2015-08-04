@@ -102,7 +102,7 @@ class GameState
       {
         std::cout << "[" << this->gameState->GetCycleCounter() << "]["
                   << this->gameState->GetGameTime() << "][lvl:" <<
-                  _level << "]\t" << _message.c_str();
+                  _level << "]\t" << _message.c_str() << std::endl;
       }
     }
 
@@ -115,7 +115,7 @@ class GameState
       {
         std::cout << "\033[31m[" << this->gameState->GetCycleCounter() << "]["
                   << this->gameState->GetGameTime() << "][lvl:" <<
-                  _level << "]\t" << _message.c_str();
+                  _level << "]\t" << _message.c_str() << std::endl;
       }
     }
 
@@ -173,7 +173,7 @@ class GameState
     const std::map<std::string, std::string> &_config) const;
 
   /// \brief Destructor.
-  public: virtual ~GameState();
+  public: virtual ~GameState() = default;
 
   /// \brief Clears the history of ball contacts
   public: void ClearBallContactHistory();
