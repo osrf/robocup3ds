@@ -33,7 +33,7 @@ namespace Geometry
   /// The intersection point can be derived from _t using the following formula:
   /// _line[0] + t * (_line[1] - _line[0])
   /// If _t < 0 or _t > 1, it means intersection point exceeds the endpoints of
-  /// the line. 
+  /// the line.
   /// \param[out] _pt Intersection point
   /// \return True when line intersects with plane
   bool IntersectionPlaneLine(const ignition::math::Line3<double> &_line,
@@ -55,7 +55,7 @@ namespace Geometry
   bool PointAbovePlane(const ignition::math::Vector3<double> &_pt,
                        const ignition::math::Plane<double> &_plane);
 
-  /// \brief Calculates the intersection between a 2D circle (XY Cartesian 
+  /// \brief Calculates the intersection between a 2D circle (XY Cartesian
   /// coordinates) and a line3D's 2D projection onto the XY plane
   /// passing through its center.
   /// \param[in] _line 3D line object
