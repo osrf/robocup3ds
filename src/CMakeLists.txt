@@ -4,6 +4,7 @@ set (sources
 )
 
 set (gtest_sources
+  Agent_TEST.cc
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
 )

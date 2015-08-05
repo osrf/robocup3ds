@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_NAO_HH_
-#define _GAZEBO_NAO_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_NAO_HH_
+#define _GAZEBO_ROBOCUP3DS_NAO_HH_
 
 #include <string>
 #include <map>
@@ -24,11 +24,15 @@
 
 namespace NaoRobot
 {
-  static const double height = 0.6;
+  /// \brief Height of Nao robot in meters
+  static const double kHeight = 0.6;
 
-  static const double torsoHeight = 0.3;
+  /// \brief Height of Nao robot's torso in meters
+  static const double kTorsoHeight = 0.3;
 
-  static const std::map<std::string, std::string> bodyPartMap =
+  /// \brief A map of link names in Nao model's SDF file and names sent
+  /// by server to client
+  static const std::map<std::string, std::string> kBodyPartMap =
   {
     {"head", "Head"},
     {"llowerarm", "LForeArm"},
@@ -37,7 +41,9 @@ namespace NaoRobot
     {"rfoot", "r_sole"}
   };
 
-  static const std::map<std::string, std::string> hingeJointEffectorMap =
+  /// \brief A map of joint names sent received by server from client and
+  /// joint names in Nao model's SDF file
+  static const std::map<std::string, std::string> kHingeJointEffectorMap =
   {
     {"he1", "HeadYaw"},
     {"he2", "HeadPitch"},
@@ -63,7 +69,9 @@ namespace NaoRobot
     {"rae4", "RElbowYaw"}
   };
 
-  static const std::map<std::string, std::string> hingeJointPerceptorMap =
+  /// \brief A map of joint names sent received by server from client and
+  /// joint names in Nao model's SDF file
+  static const std::map<std::string, std::string> kHingeJointPerceptorMap =
   {
     {"hj1", "HeadYaw"},
     {"hj2", "HeadPitch"},
@@ -89,15 +97,20 @@ namespace NaoRobot
     {"raj4", "RElbowYaw"}
   };
 
-  static const std::string cameraLinkName = "Head";
+  /// \brief Name of link in Nao model that is used for camera position
+  static const std::string kCameraLinkName = "Head";
 
-  static const std::string torsoLinkName = "base_link";
+  /// \brief Name of link that is torso
+  static const std::string kTorsoLinkName = "base_link";
 
-  static const std::string leftFootLinkName = "l_sole";
+  /// \brief Name of link for left foot
+  static const std::string kLeftFootLinkName = "l_sole";
 
-  static const std::string rightFootLinkName = "r_sole";
+  /// \brief Name of link for right foot
+  static const std::string kRightFootLinkName = "r_sole";
 
-  static const std::string defaultModelName = "naoH25V40";
+  /// \brief Default name of Nao model
+  static const std::string kDefaultModelName = "naoH25V40";
 }
 
 #endif

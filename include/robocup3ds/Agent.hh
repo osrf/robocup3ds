@@ -69,13 +69,21 @@ class Team
   /// \brief Equality operator for teams
   /// \param[in] _team Team compared against
   /// \return True if they are equal
-  public: bool operator==(const Team &_team)
+  public: bool operator==(const Team &_team) const
   {
     return this == &_team;
   }
 
+  /// \brief Inequality operator for teams
+  /// \param[in] _team Team compared against
+  /// \return True if they are not equal
+  public: bool operator!=(const Team &_team) const
+  {
+    return !(*this == _team);
+  }
+
   /// \brief Get the string version of side
-  /// \brief _side Enum version of side
+  /// \param[in] _side Enum version of side
   /// \return String version of side
   public: static std::string GetSideAsString(const Side _side)
   {
@@ -154,14 +162,14 @@ class AgentPerceptions
   /// \brief AgentPerception constructor
   public: AgentPerceptions()
   {
-    this->fieldLines.reserve(SoccerField::FieldLines.size());
+    this->fieldLines.reserve(SoccerField::kFieldLines.size());
   }
 
-  /// \brief Map of landmarks that have been transformed to agent's cood
+  /// \brief Map of landmarks that have been transformed to agent's coordinate
   /// frame
   public: std::map<std::string, ignition::math::Vector3<double>> landMarks;
 
-  /// \brief Vector of lines that have been transformed to agent's cood
+  /// \brief Vector of lines that have been transformed to agent's coordinate
   /// frame
   public: std::vector<ignition::math::Line3<double>> fieldLines;
 
@@ -181,11 +189,11 @@ class AgentPerceptions
   /// \brief Acceleration of torso
   public: ignition::math::Vector3<double> accel;
 
-  /// \brief Force information for left foot of nao
+  /// \brief Position of left foot of Agent and force exerted on it
   public: std::pair<ignition::math::Vector3<double>,
   ignition::math::Vector3<double>> leftFootFR;
 
-  /// \brief Force information for right foot of nao
+  /// \brief Position of right foot of Agent and force exerted on it
   public: std::pair<ignition::math::Vector3<double>,
   ignition::math::Vector3<double>> rightFootFR;
 };
@@ -195,7 +203,7 @@ class AgentPerceptions
 class AgentActions
 {
   /// \brief Constructor
-  public: AgentActions() {}
+  public: AgentActions() = default;
 
   /// \brief Stores the velocity and angle information
   public: std::map<std::string, double> jointEffectors;
@@ -223,7 +231,7 @@ class Agent
     team(_team)
   {
     this->socketID = _socketID;
-    this->syn = false;
+    this->isSynced = false;
     this->inSimWorld = false;
     this->status = Status::RELEASED;
     this->prevStatus = this->status;
@@ -231,8 +239,8 @@ class Agent
     this->inPenaltyBox = false;
     this->timeImmobilized = 0;
     this->timeFallen = 0;
-    this->pos.Set(0, SoccerField::HalfFieldHeight,
-      NaoRobot::torsoHeight + 0.05);
+    this->pos.Set(0, SoccerField::kHalfFieldHeight,
+      NaoRobot::kTorsoHeight + 0.05);
   }
 
   /// \brief Equality operator for agents
@@ -241,6 +249,14 @@ class Agent
   public: bool operator==(const Agent &_agent) const
   {
     return this == &_agent;
+  }
+
+  /// \brief Inequality operator for agents
+  /// \param[in] _agent Agent compared against
+  /// \return True if they are not equal
+  public: bool operator!=(const Agent &_agent) const
+  {
+    return !(*this == _agent);
   }
 
   /// \brief Return AgentId of agent
@@ -284,7 +300,7 @@ class Agent
     {
       size_t sepIndex = _agentName.find_first_of("_");
       _uNum = std::stoi(_agentName.substr(0, sepIndex));
-      _teamName = _agentName.substr(0, sepIndex + 1);
+      _teamName = _agentName.substr(sepIndex + 1, _agentName.length());
       return true;
     }
     catch (const std::exception &exc)
@@ -352,7 +368,7 @@ class Agent
   public: double timeFallen;
 
   /// \brief Flag whether agent has finished syncing messages
-  public: bool syn;
+  public: bool isSynced;
 
   /// \brief Flag whether the agent has been successfully load into gazebo
   /// simulation world

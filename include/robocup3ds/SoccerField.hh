@@ -23,75 +23,122 @@
 #include <string>
 #include <vector>
 
+/// \brief Field dimensions and locations/sizes of goals and lines. All
+/// measurements are in meters
 namespace SoccerField
 {
-  // Field dimensions.
-  static const double CenterCircleRadius = 2;
-  static const double FieldWidth = 30.0;
-  static const double HalfFieldWidth = FieldWidth * 0.5;
-  static const double FieldHeight = 20.0;
-  static const double HalfFieldHeight = FieldHeight * 0.5;
-  static const double GoalWidth = 2.1;
-  static const double HalfGoalWidth = GoalWidth * 0.5;
-  static const double GoalDepth = 0.6;
-  static const double GoalHeight = 0.8;
-  static const double BallRadius = 0.042;
-  static const double OutofBoundsTol = BallRadius;
-  static const double PenaltyBoxWidth = 3.9;
-  static const double HalfPenaltyBoxWidth = PenaltyBoxWidth * 0.5;
-  static const double PenaltyBoxDepth = 1.8;
 
+  /// \brief Size of center circle
+  static const double kCenterCircleRadius = 2;
+
+  /// \brief Width of field (X-axis)
+  static const double kFieldWidth = 30.0;
+
+  /// \brief Width of half a field
+  static const double kHalfFieldWidth = kFieldWidth * 0.5;
+
+  /// \brief Height of field (Y-axis)
+  static const double kFieldHeight = 20.0;
+
+  /// \brief Height of half a field
+  static const double kHalfFieldHeight = kFieldHeight * 0.5;
+
+  /// \brief Width of goal
+  static const double kGoalWidth = 2.1;
+
+  /// \brief Width of half a goal
+  static const double kHalfGoalWidth = kGoalWidth * 0.5;
+
+  /// \brief Depth of goal
+  static const double kGoalDepth = 0.6;
+
+  /// \brief Height of goal
+  static const double kGoalHeight = 0.8;
+
+  /// \brief Radius of ball
+  static const double kBallRadius = 0.042;
+
+  /// \brief How much ball to have travel beyond field lines to count as out
+  /// of bounds
+  static const double kOutofBoundsTol = kBallRadius;
+
+  /// \brief Width of penalty box
+  static const double kPenaltyBoxWidth = 3.9;
+
+  /// \brief Width of half a penalty box
+  static const double kHalfPenaltyBoxWidth = kPenaltyBoxWidth * 0.5;
+
+  /// \brief Depth of penalty box
+  static const double kPenaltyBoxDepth = 1.8;
+
+  /// \brief Center of left goal
   static const ignition::math::Vector3<double>
-  GoalCenterLeft(-HalfFieldWidth, 0, 0);
+  kGoalCenterLeft(-kHalfFieldWidth, 0, 0);
 
+  /// \brief Center of right goal
   static const ignition::math::Vector3<double>
-  GoalCenterRight(HalfFieldWidth, 0, 0);
+  kGoalCenterRight(kHalfFieldWidth, 0, 0);
 
+  /// \brief Position of ball in center of the field
   static const ignition::math::Vector3<double>
-  BallCenterPosition(0, 0, BallRadius);
+  kBallCenterPosition(0, 0, kBallRadius);
 
+  /// \brief Center of the field
   static const ignition::math::Vector3<double>
-  CenterOfField(0, 0, 0);
+  kCenterOfField(0, 0, 0);
 
-  static const ignition::math::Plane<double> GoalPlaneLeft(
-    ignition::math::Vector3<double>(1, 0, 0), HalfFieldWidth);
+  /// \brief Left goal plane, if ball travels through the plane,
+  /// it counts as a goal
+  static const ignition::math::Plane<double> kGoalPlaneLeft(
+    ignition::math::Vector3<double>(1, 0, 0), kHalfFieldWidth);
 
+  /// \brief Left goal plane, if ball travels through the plane,
+  /// it counts as a goal
   static const ignition::math::Plane<double> GoalPlaneRight(
-    ignition::math::Vector3<double>(1, 0, 0), -HalfFieldWidth);
+    ignition::math::Vector3<double>(1, 0, 0), -kHalfFieldWidth);
 
-  static const ignition::math::Box GoalBoxLeft(
-    ignition::math::Vector3<double>(-(GoalDepth + HalfFieldWidth),
-                                    -HalfGoalWidth, -BallRadius),
+  /// \brief Left goal box, if ball is inside box
+  /// it counts as a goal
+  static const ignition::math::Box kGoalBoxLeft(
+    ignition::math::Vector3<double>(-(kGoalDepth + kHalfFieldWidth),
+                                    -kHalfGoalWidth, -kBallRadius),
     ignition::math::Vector3<double>
-    (-HalfFieldWidth, HalfGoalWidth, GoalHeight));
+    (-kHalfFieldWidth, kHalfGoalWidth, kGoalHeight));
 
-  static const ignition::math::Box GoalBoxRight(
-    ignition::math::Vector3<double>(GoalDepth + HalfFieldWidth,
-                                    -HalfGoalWidth, -BallRadius),
+  /// \brief Right goal box, if ball is inside box
+  /// it counts as a goal
+  static const ignition::math::Box kGoalBoxRight(
+    ignition::math::Vector3<double>(kGoalDepth + kHalfFieldWidth,
+                                    -kHalfGoalWidth, -kBallRadius),
     ignition::math::Vector3<double>
-    (HalfFieldWidth, HalfGoalWidth, GoalHeight));
+    (kHalfFieldWidth, kHalfGoalWidth, kGoalHeight));
 
-  static const ignition::math::Box PenaltyBoxLeft(
+  /// \brief Left penalty box
+  static const ignition::math::Box kPenaltyBoxLeft(
     ignition::math::Vector3<double>
-    (-HalfFieldWidth, -HalfPenaltyBoxWidth, -10),
+    (-kHalfFieldWidth, -kHalfPenaltyBoxWidth, -10),
     ignition::math::Vector3<double>
-    (-HalfFieldWidth + PenaltyBoxDepth, HalfPenaltyBoxWidth, 10));
+    (-kHalfFieldWidth + kPenaltyBoxDepth, kHalfPenaltyBoxWidth, 10));
 
-  static const ignition::math::Box PenaltyBoxRight(
+  /// \brief Right penalty box
+  static const ignition::math::Box kPenaltyBoxRight(
     ignition::math::Vector3<double>
-    (HalfFieldWidth, -HalfPenaltyBoxWidth, -10),
+    (kHalfFieldWidth, -kHalfPenaltyBoxWidth, -10),
     ignition::math::Vector3<double>
-    (HalfFieldWidth - PenaltyBoxDepth, HalfPenaltyBoxWidth, 10));
+    (kHalfFieldWidth - kPenaltyBoxDepth, kHalfPenaltyBoxWidth, 10));
 
+  /// \brief Bounding box around left side of field
   static const ignition::math::Box FieldLeft(ignition::math::Vector3<double>
-      (-SoccerField::HalfFieldHeight, -SoccerField::HalfFieldWidth, 0),
-      ignition::math::Vector3<double>(0, SoccerField::HalfFieldWidth, 0));
+      (-SoccerField::kHalfFieldHeight, -SoccerField::kHalfFieldWidth, -10),
+      ignition::math::Vector3<double>(0, SoccerField::kHalfFieldWidth, 10));
 
+  /// \brief Bounding box around right side of field
   static const ignition::math::Box FieldRight(ignition::math::Vector3<double>
-      (0, -SoccerField::HalfFieldWidth, 0), ignition::math::Vector3<double>
-      (SoccerField::HalfFieldHeight, SoccerField::HalfFieldWidth, 0));
+      (0, -SoccerField::kHalfFieldWidth, -10), ignition::math::Vector3<double>
+      (SoccerField::kHalfFieldHeight, SoccerField::kHalfFieldWidth, 10));
 
-  static const std::vector<ignition::math::Line3<double> > FieldLines =
+  /// \brief Vector of all the field lines on field
+  static const std::vector<ignition::math::Line3<double> > kFieldLines =
   {
     // middle line
     ignition::math::Line3<double>(0, -10, 0, 10),
@@ -127,8 +174,9 @@ namespace SoccerField
     ignition::math::Line3<double>(1.618033989, -1.175570505, 2, 0)
   };
 
+  /// \brief Vector of all the landmarks on field
   static const std::map<std::string, ignition::math::Vector3<double>>
-  LandMarks =
+  kLandMarks =
   {
     {"F1L", ignition::math::Vector3<double>(-15, 10, 0)},
     {"F1R", ignition::math::Vector3<double>(15, 10, 0)},
@@ -140,9 +188,11 @@ namespace SoccerField
     {"G2R", ignition::math::Vector3<double>(15, -1.05, 0.8)}
   };
 
-  static const std::string ballName = "soccer_ball";
+  /// \brief Name of ball model
+  static const std::string kBallName = "soccer_ball";
 
-  static const std::string ballLinkName = "soccer_ball_link";
+  /// \brief Name of link of ball model
+  static const std::string kBallLinkName = "soccer_ball_link";
 }
 
 #endif
