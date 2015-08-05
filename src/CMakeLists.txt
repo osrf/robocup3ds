@@ -1,9 +1,11 @@
 set (sources
+  Geometry.cc
   Robocup3dsPlugin.cc
   Server.cc
 )
 
 set (gtest_sources
+  Geometry_TEST.cc
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
 )
