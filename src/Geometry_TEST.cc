@@ -24,8 +24,8 @@
 using namespace ignition;
 using namespace std;
 
-/// \brief Test whether IntersectionCircunferenceLine function works
-TEST(Geometry_Test, IntersectionCircunferenceLine)
+/// \brief Test whether IntersectionCircumferenceLine function works
+TEST(Geometry_Test, IntersectionCircumferenceLine)
 {
   // y = 0
   math::Line3<double> line(-999, 0, 999, 0);
@@ -34,13 +34,13 @@ TEST(Geometry_Test, IntersectionCircunferenceLine)
 
   math::Vector3<double> pt1, pt2;
   EXPECT_TRUE(
-    Geometry::IntersectionCircunferenceLine(line, center, radius, pt1, pt2));
+    Geometry::IntersectionCircumferenceLine(line, center, radius, pt1, pt2));
   EXPECT_EQ(pt1, math::Vector3<double>(-1, 0, 0));
   EXPECT_EQ(pt2, math::Vector3<double>(1, 0, 0));
 
   radius = 2.0;
   EXPECT_TRUE(
-    Geometry::IntersectionCircunferenceLine(line, center, radius, pt1, pt2));
+    Geometry::IntersectionCircumferenceLine(line, center, radius, pt1, pt2));
   EXPECT_EQ(pt1, math::Vector3<double>(-2, 0, 0));
   EXPECT_EQ(pt2, math::Vector3<double>(2, 0, 0));
 
@@ -48,22 +48,24 @@ TEST(Geometry_Test, IntersectionCircunferenceLine)
   line.Set(-999, -999, 999, 999);
   radius = 1.0;
   EXPECT_TRUE(
-    Geometry::IntersectionCircunferenceLine(line, center, radius, pt1, pt2));
-  EXPECT_EQ(pt1, math::Vector3<double>(-sin(RAD(45)), -cos(RAD(45)), 0));
-  EXPECT_EQ(pt2, math::Vector3<double>(sin(RAD(45)), cos(RAD(45)), 0));
+    Geometry::IntersectionCircumferenceLine(line, center, radius, pt1, pt2));
+  EXPECT_EQ(pt1, math::Vector3<double>(-sin(IGN_DTOR(45)),
+                                       -cos(IGN_DTOR(45)), 0));
+  EXPECT_EQ(pt2, math::Vector3<double>(sin(IGN_DTOR(45)),
+                                       cos(IGN_DTOR(45)), 0));
 
   // x = 5
   line.Set(5, 999, 5, -999);
   center.Set(5, 2, 0);
   EXPECT_TRUE(
-    Geometry::IntersectionCircunferenceLine(line, center, radius, pt1, pt2));
+    Geometry::IntersectionCircumferenceLine(line, center, radius, pt1, pt2));
   EXPECT_EQ(pt1, math::Vector3<double>(5, 3, 0));
   EXPECT_EQ(pt2, math::Vector3<double>(5, 1, 0));
 
   // x = 0 does not intersect
   line.Set(0, 999, 0, -999);
   EXPECT_FALSE(
-    Geometry::IntersectionCircunferenceLine(line, center, radius, pt1, pt2));
+    Geometry::IntersectionCircumferenceLine(line, center, radius, pt1, pt2));
 }
 
 
@@ -127,15 +129,15 @@ TEST(Geometry_Test, ClipPlaneLine)
   math::Plane<double> plane(math::Vector3<double>(0, 0, 1));
 
   EXPECT_TRUE(Geometry::ClipPlaneLine(line, plane));
-  ASSERT_EQ(line, math::Line3<double>(0, 0, 0, 0, 0, 999));
+  EXPECT_EQ(line, math::Line3<double>(0, 0, 0, 0, 0, 999));
 
   line.Set(0, 0, 1, 0, 0, 2);
   EXPECT_TRUE(Geometry::ClipPlaneLine(line, plane));
-  ASSERT_EQ(line, math::Line3<double>(0, 0, 1, 0, 0, 2));
+  EXPECT_EQ(line, math::Line3<double>(0, 0, 1, 0, 0, 2));
 
   line.Set(0, 0, 1, 0, 0, -2);
   EXPECT_TRUE(Geometry::ClipPlaneLine(line, plane));
-  ASSERT_EQ(line, math::Line3<double>(0, 0, 1, 0, 0, 0));
+  EXPECT_EQ(line, math::Line3<double>(0, 0, 1, 0, 0, 0));
 
   line.Set(0, 0, -1, 0, 0, -2);
   EXPECT_FALSE(Geometry::ClipPlaneLine(line, plane));
@@ -145,24 +147,25 @@ TEST(Geometry_Test, ClipPlaneLine)
 TEST(Geometry_Test, CartToPolar_PolarToCart)
 {
   math::Vector3<double> pt(5, 0, 0);
-  math::Vector3<double> pt2(5, 0, RAD(90));
-  ASSERT_EQ(Geometry::CartToPolar(pt), pt2);
-  ASSERT_EQ(pt, Geometry::PolarToCart(pt2));
+  math::Vector3<double> pt2(5, 0, IGN_DTOR(90));
+  EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
+  EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
 
   pt.Set(6, 0, 4);
-  pt2.Set(7.211102550928, 0, RAD(56.30993247402));
-  ASSERT_EQ(Geometry::CartToPolar(pt), pt2);
-  ASSERT_EQ(pt, Geometry::PolarToCart(pt2));
+  pt2.Set(7.211102550928, 0, IGN_DTOR(56.30993247402));
+  EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
+  EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
 
   pt.Set(3, 4, 5);
-  pt2.Set(7.0710678118655, RAD(53.130102354156), RAD(45));
-  ASSERT_EQ(Geometry::CartToPolar(pt), pt2);
-  ASSERT_EQ(pt, Geometry::PolarToCart(pt2));
+  pt2.Set(7.0710678118655, IGN_DTOR(53.130102354156), IGN_DTOR(45));
+  EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
+  EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
 
   pt.Set(-1, 3, 2);
-  pt2.Set(3.7416573867739, RAD(108.43494882292), RAD(57.688466762576));
-  ASSERT_EQ(Geometry::CartToPolar(pt), pt2);
-  ASSERT_EQ(pt, Geometry::PolarToCart(pt2));
+  pt2.Set(3.7416573867739,
+          IGN_DTOR(108.43494882292), IGN_DTOR(57.688466762576));
+  EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
+  EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
 }
 
 int main(int argc, char **argv)
