@@ -157,6 +157,8 @@ TEST(Geometry_Test, CartToPolar_PolarToCart)
   EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
 
   pt.Set(3, 4, 5);
+  // calculated using an online calculator:
+  // http://www.abecedarical.com/javascript/script_intersectionlineandplane.html
   pt2.Set(7.0710678118655, IGN_DTOR(53.130102354156), IGN_DTOR(45));
   EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
   EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
