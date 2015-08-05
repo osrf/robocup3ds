@@ -55,7 +55,8 @@ namespace Geometry
   bool PointAbovePlane(const ignition::math::Vector3<double> &_pt,
                        const ignition::math::Plane<double> &_plane);
 
-  /// \brief Calculates the 2D intersection between a circumference and a line
+  /// \brief Calculates the intersection between a 2D circle and a 
+  /// line3D's 2D projection
   /// passing through its center.
   /// \param[in] _line 3D line object
   /// \param[in] _pc Center of the circumference

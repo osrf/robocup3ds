@@ -66,6 +66,20 @@ TEST(Geometry_Test, IntersectionCircumferenceLine)
   line.Set(0, 999, 0, -999);
   EXPECT_FALSE(
     Geometry::IntersectionCircumferenceLine(line, center, radius, pt1, pt2));
+
+  // z value of line is not 0
+  line.Set(5, 999, -5, 5, -999, 3);
+  EXPECT_TRUE(
+    Geometry::IntersectionCircumferenceLine(line, center, radius, pt1, pt2));
+  EXPECT_EQ(pt1, math::Vector3<double>(5, 3, 0));
+  EXPECT_EQ(pt2, math::Vector3<double>(5, 1, 0));
+
+  // line does not pass through center of circle
+  line.Set(5.9999999, 999, 5.9999999, -999);
+  EXPECT_TRUE(
+  Geometry::IntersectionCircumferenceLine(line, center, radius, pt1, pt2));
+  EXPECT_EQ(pt1, math::Vector3<double>(6, 2, 0));
+  EXPECT_EQ(pt2, math::Vector3<double>(6, 2, 0));
 }
 
 
