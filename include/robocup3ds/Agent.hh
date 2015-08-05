@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 
+#include "robocup3ds/Nao.hh"
 #include "robocup3ds/SoccerField.hh"
 
 class Agent;
@@ -230,7 +231,8 @@ class Agent
     this->inPenaltyBox = false;
     this->timeImmobilized = 0;
     this->timeFallen = 0;
-    this->pos.Set(0, SoccerField::HalfFieldHeight, 1);
+    this->pos.Set(0, SoccerField::HalfFieldHeight,
+      NaoRobot::torsoHeight + 0.05);
   }
 
   /// \brief Equality operator for agents
