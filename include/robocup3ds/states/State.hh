@@ -28,7 +28,7 @@ class GameState;
 
 namespace states
 {
-  /// \brief State pattern used for the game mode.
+  /// \brief State pattern used for the game modes.
   class State
   {
     /// \brief Class constructor.
@@ -57,16 +57,16 @@ namespace states
     /// \return Name of state
     public: std::string GetName() const;
 
-    /// \brief Checks whether agent contacts ball since Initialize()
+    /// \brief Checks whether agent contacts ball since Initialize() is called
     /// \return True if agent has contacted ball
     public: bool HasBallContactOccurred() const;
 
     /// \brief Time elapsed since we entered this game mode.
     /// \return Seconds since current playmode begin
-    public: virtual double GetElapsedTime() const;
+    public: double GetElapsedTime() const;
 
-    // \brief Used to determine if ball contact has occurred since
-    /// Initialize()
+    /// \brief Used to determine if ball contact has occurred since
+    /// Initialize() is called
     public: int ballContactHistorySize;
 
     /// \brief Name of the state.
