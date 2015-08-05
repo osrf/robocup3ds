@@ -124,7 +124,9 @@ void Perceptor::Update()
           {
             if (otherAgent.uNum != agent.uNum ||
                 otherAgent.team->name != agent.team->name)
-            { this->UpdateOtherAgent(agent, otherAgent); }
+            {
+              this->UpdateOtherAgent(agent, otherAgent);
+            }
           }
         }
       }
@@ -154,7 +156,9 @@ void Perceptor::UpdateLine(Agent &_agent,
       //           this->viewFrustum.at(i).Normal() << " // " << validLine
       //           << std::endl;
       if (!Geometry::ClipPlaneLine(agentLine, viewPlane))
-      { return; }
+      {
+        return;
+      }
     }
   }
 
@@ -177,7 +181,9 @@ void Perceptor::UpdateLandmark(Agent &_agent,
     for (auto &viewPlane : this->viewFrustum)
     {
       if (!Geometry::PointAbovePlane(_agentLandMark, viewPlane))
-      { return; }
+      {
+        return;
+      }
     }
   }
 
@@ -199,7 +205,9 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
       for (auto &viewPlane : this->viewFrustum)
       {
         if (!Geometry::PointAbovePlane(_otherAgentPart, viewPlane))
-        { return; }
+        {
+          return;
+        }
       }
     }
 
@@ -247,9 +255,13 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   for (const auto &team : this->gameState->teams)
   {
     if (team->side == Team::Side::LEFT)
-    { sl = team->score; }
+    {
+      sl = team->score;
+    }
     if (team->side == Team::Side::RIGHT)
-    { sr = team->score; }
+    {
+      sr = team->score;
+    }
   }
   cx += snprintf(_string + cx, _size - cx,
                  "(time (now %.2f)) (GS (unum %d) (team %s) "
