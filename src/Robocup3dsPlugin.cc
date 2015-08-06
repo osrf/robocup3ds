@@ -28,6 +28,7 @@
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/physics/World.hh>
+#include "gazebo/physics/JointController.hh"
 #include <ignition/math.hh>
 #include <string>
 #include <sdf/sdf.hh>
@@ -248,16 +249,87 @@ void Robocup3dsPlugin::UpdateEffector()
   {
     for (auto &agent : team->members)
     {
+      // Get the model of the agent
       const auto &model = this->world->GetModel(agent.GetName());
-      if (agent.status == Agent::Status::STOPPED || !agent.inSimWorld)
+
+      // If the agent is not in simulator
+      if (!agent.inSimWorld)
       { continue; }
 
+
+      // Initial the joint values
+      if (agent.status == Agent::Status::STOPPED)
+      {
+        for (const auto &jointName : NaoRobot::hingeJointEffectorMap )
+        {
+          // Increase the actuators damping to 1.5, in SDF file is (0.75)
+          model->GetJoint(jointName.second)->SetDamping(0, 1.5);
+          //model->GetJoint(naoJointName)->SetStiffness(0, 1);
+
+
+          // Reset the joint angle to it origin
+          model->GetJoint(jointName.second)->SetAngle(0, 0);
+          model->GetJoint(jointName.second)->SetVelocity(0, 0);
+        }
+        continue;
+      }
+
+      // send control the joints, according to joints effectors
+      // Joint Effectors are Joints target speed in Radial/Second
       for (auto &kv : agent.action.jointEffectors)
       {
+
+        // Get the Joint name
         std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
-                                     std::string(kv.first))->second;
-        model->GetJoint(naoJointName)->SetVelocity(0, kv.second);
+            std::string(kv.first))->second;
+
+        // Initial the Joint Controller;
+        physics::JointControllerPtr jointController(
+                          new physics::JointController(model));
+
+        jointController -> AddJoint(model->GetJoint(naoJointName));
+
+
+        // Calculate the target degree based on the target Speed
+        double target = (kv.second*GameState::counterCycleTime)
+            + model->GetJoint(naoJointName)->GetAngle(0).Radian();
+
+
+        // For test, move only Head joints
+        if(naoJointName != "HeadPitch" && naoJointName != "HeadYaw")
+        {
+          target=0;
+        }
+
+        // For test, to move the arms
+        if(naoJointName == "LShoulderPitch" || naoJointName == "RShoulderPitch")
+        {
+          target=1;
+        }
+
+        // Set the Position PID Values
+        jointController->SetPositionPID(
+             model->GetJoint(naoJointName)->GetScopedName(),
+             common::PID(800, 0, 0.0));
+
+        // Set the target position
+        jointController->SetPositionTarget(
+                     model->GetJoint(naoJointName)->GetScopedName(), target);
+
+        /*
+        // Control the joints velocity to be Zero, For Test
+        jointController->SetVelocityPID(
+            model->GetJoint(naoJointName)->GetScopedName(),
+            common::PID(1000, 10, 0));
+
+        jointController->SetVelocityTarget(
+            model->GetJoint(naoJointName)->GetScopedName(), 0);
+        */
+
+        jointController->Update();
+
       }
+
       agent.action.jointEffectors.clear();
     }
   }
