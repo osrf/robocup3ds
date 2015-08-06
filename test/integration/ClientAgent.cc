@@ -76,7 +76,9 @@ void ClientAgent::Start()
 {
   // The service is already running.
   if (this->running)
-  { return; }
+  {
+    return;
+  }
 
   this->running = true;
 
@@ -94,7 +96,9 @@ void ClientAgent::Update()
   {
     this->Wait();
     if (!clientConnect)
-    { clientConnect = this->Connect(this->port, this->socketID); }
+    {
+      clientConnect = this->Connect(this->port, this->socketID);
+    }
     if (!monitorConnect)
     {
       monitorConnect =
@@ -103,7 +107,9 @@ void ClientAgent::Update()
     this->connected = clientConnect && monitorConnect;
   }
   if (!this->connected)
-  { return; }
+  {
+    return;
+  }
 
   std::cout << "client has connected!" << std::endl;
 
@@ -238,18 +244,21 @@ void ClientAgent::InitAndBeam(const double _x,
   this->actionResponses.push_back(ar);
 }
 
-void ClientAgent::Walk(const math::Vector3<double> &_start,
-                       const math::Vector3<double> &_end, const int _nSteps)
+/////////////////////////////////////////////////
+void ClientAgent::Dribble(const math::Vector3<double> &_start,
+                          const math::Vector3<double> &_end, const int _nSteps)
 {
   for (int i = 0; i <= _nSteps; ++i)
   {
-    auto pt = _start + ((_end - _start) * (i / _nSteps));
-    const auto msg = "(agent (unum " + std::to_string(this->uNum) +  ") (team "
+    const auto pt = _start + ((_end - _start) * (i / _nSteps));
+    auto msg = "(agent (unum " + std::to_string(this->uNum) +  ") (team "
                      + this->side + ") (pos " + std::to_string(pt.X()) +
                      " " + std::to_string(pt.Y()) +
                      " " + std::to_string(pt.Z()) + "))";
-
-    ActionResponse ar("Walk_" + std::to_string(this->cycleCounter));
+    msg += " (ball (pos " + std::to_string(pt.X()) +
+           " " + std::to_string(pt.Y()) +
+           " " + std::to_string(pt.Z()) + "))";
+    ActionResponse ar("Dribble_" + std::to_string(this->cycleCounter));
     ar.msgToSend.push_back("");
     ar.monitorMsgToSend.push_back(msg);
 
@@ -258,6 +267,7 @@ void ClientAgent::Walk(const math::Vector3<double> &_start,
   }
 }
 
+/////////////////////////////////////////////////
 void ClientAgent::ChangePlayMode(const std::string &_playMode)
 {
   const auto msg = "(playMode " + _playMode + ")";
@@ -270,6 +280,7 @@ void ClientAgent::ChangePlayMode(const std::string &_playMode)
   this->actionResponses.push_back(ar);
 }
 
+/////////////////////////////////////////////////
 void ClientAgent::MoveBall(const math::Vector3<double> &_pos)
 {
   const auto msg = "(ball (pos " + std::to_string(_pos.X()) +
@@ -284,6 +295,7 @@ void ClientAgent::MoveBall(const math::Vector3<double> &_pos)
   this->actionResponses.push_back(ar);
 }
 
+/////////////////////////////////////////////////
 void ClientAgent::MoveAgent(const math::Vector3<double> &_pos)
 {
   const auto msg = "(agent (unum " + std::to_string(this->uNum) +  ") (team "
@@ -299,6 +311,7 @@ void ClientAgent::MoveAgent(const math::Vector3<double> &_pos)
   this->actionResponses.push_back(ar);
 }
 
+/////////////////////////////////////////////////
 void ClientAgent::RemoveAgent()
 {
   const auto msg = "(kill (unum " + std::to_string(this->uNum) +  ") (team "
@@ -378,7 +391,9 @@ bool ClientAgent::SelectInput()
       return false;
     default:
       if (errno == EINTR)
-      { continue; }
+      {
+        continue;
+      }
       std::cerr << "(SelectInput) select failed "
                 << strerror(errno) << std::endl;
       return false;
@@ -401,9 +416,13 @@ bool ClientAgent::GetMessage(std::string &_msg)
     int readResult = read(this->socketID, buffer + bytesRead,
                           sizeof(unsigned int) - bytesRead);
     if (readResult < 0)
-    { continue; }
+    {
+      continue;
+    }
     if (readResult == 0)
-    { return false; }
+    {
+      return false;
+    }
     // if (readResult == 0)
     // {
     //   // [patmac] Kill ourselves if we disconnect from the server
@@ -446,11 +465,15 @@ bool ClientAgent::GetMessage(std::string &_msg)
 
     unsigned readLen = sizeof(buffer) - msgRead;
     if (readLen > msgLen - msgRead)
-    { readLen = msgLen - msgRead; }
+    {
+      readLen = msgLen - msgRead;
+    }
 
     int readResult = read(this->socketID, offset, readLen);
     if (readResult < 0)
-    { continue; }
+    {
+      continue;
+    }
     msgRead += readResult;
     offset += readResult;
   }

@@ -99,11 +99,12 @@ class ClientAgent
   public: void InitAndBeam(const double _x,
     const double _y, const double _yaw);
 
-  /// \brief Simulates the agent moving from one location to another
+  /// \brief Simulates the agent and ball moving together
+  /// from one location to another
   /// \param[in] _start Starting position
   /// \param[in] _end Ending position
   /// \param[in] _nSteps Number of time steps to walk
-  public: void Walk(const ignition::math::Vector3<double> &_start,
+  public: void Dribble(const ignition::math::Vector3<double> &_start,
     const ignition::math::Vector3<double> &_end, const int _nSteps);
 
   /// \brief Sends a change playmode monitor message

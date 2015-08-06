@@ -161,28 +161,27 @@ TEST_F(IntegrationTest, TestMonitor)
     this->Wait();
     currMsgCount = this->agent->allMsgs.size();
   }
-  SUCCEED();
-  // EXPECT_LE(currMsgCount - numMessages, 3u);
+  EXPECT_LE(currMsgCount - numMessages, 3u);
   cerr << "num msgs before kill: " << numMessages
        << " num msgs after kill: " << currMsgCount << endl;
 }
 
-/// \brief This tests whether agent walk works
-// TEST_F(IntegrationTest, TestWalk)
-// {
-//   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
+/// \brief This tests whether we can transition from playOn to kickin
+TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
+{
+  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
 
-//   this->Wait();
-//   this->agent->InitAndBeam(0, 0, 0);
-//   this->agent->ChangePlayMode("PlayOn");
-//   this->agent->Walk(math::Vector3d(-5, -5, 0.35),
-//                     math::Vector3d(5, 5, 0.35), 100);
-//   this->agent->Start();
-//   this->Wait(2500);
+  this->Wait();
+  this->agent->InitAndBeam(0, 0, 0);
+  this->agent->ChangePlayMode("PlayOn");
+  this->agent->Dribble(math::Vector3d(3, -5, 0.35),
+                    math::Vector3d(5, -12, 0.35), 20);
+  this->agent->Start();
+  this->Wait(2500);
 
-//   const auto &lastMsg = this->agent->allMsgs.back();
-//   std::cerr << lastMsg << std::endl;
-// }
+  const auto &lastMsg = this->agent->allMsgs.back();
+  std::cerr << lastMsg << std::endl;
+}
 
 int main(int argc, char **argv)
 {
