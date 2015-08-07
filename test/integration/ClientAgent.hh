@@ -95,7 +95,7 @@ class ClientAgent
   /// \param[in] _x X position in meters
   /// \param[in] _y Y position in meters
   /// \param[in] _yaw Yaw in degrees
-  /// \return True if action is successful
+  /// \return True if action is successful or not
   public: void InitAndBeam(const double _x,
     const double _y, const double _yaw);
 
