@@ -43,59 +43,60 @@ namespace NaoRobot
 
   /// \brief A map of joint names sent received by server from client and
   /// joint names in Nao model's SDF file
-  static const std::map<std::string, std::string> kHingeJointEffectorMap =
+  static const std::map<std::string, std::string> hingeJointEffectorMap =
   {
     {"he1", "HeadYaw"},
     {"he2", "HeadPitch"},
     {"lae1", "LShoulderPitch"},
     {"lae2", "LShoulderRoll"},
-    {"lae3", "LElbowRoll"},
-    {"lae4", "LElbowYaw"},
+    {"lae3", "LElbowYaw"},
+    {"lae4", "LElbowRoll"},
     {"lle1", "LHipYawPitch"},
-    {"lle2", "LHipRoll"},
-    {"lle3", "LHipPitch"},
+    {"lle2", "LHipPitch"},
+    {"lle3", "LHipRoll"},
     {"lle4", "LKneePitch"},
     {"lle5", "LAnklePitch"},
     {"lle6", "LAnkleRoll"},
     {"rle1", "RHipYawPitch"},
-    {"rle2", "RHipRoll"},
-    {"rle3", "RHipPitch"},
+    {"rle2", "RHipPitch"},
+    {"rle3", "RHipRoll"},
     {"rle4", "RKneePitch"},
     {"rle5", "RAnklePitch"},
     {"rle6", "RAnkleRoll"},
     {"rae1", "RShoulderPitch"},
     {"rae2", "RShoulderRoll"},
-    {"rae3", "RElbowRoll"},
-    {"rae4", "RElbowYaw"}
+    {"rae3", "RElbowYaw"},
+    {"rae4", "RElbowRoll"}
   };
 
   /// \brief A map of joint names sent received by server from client and
   /// joint names in Nao model's SDF file
-  static const std::map<std::string, std::string> kHingeJointPerceptorMap =
+  static const std::map<std::string, std::string> hingeJointPerceptorMap =
   {
     {"hj1", "HeadYaw"},
     {"hj2", "HeadPitch"},
     {"laj1", "LShoulderPitch"},
     {"laj2", "LShoulderRoll"},
-    {"laj3", "LElbowRoll"},
-    {"laj4", "LElbowYaw"},
+    {"laj3", "LElbowYaw"},
+    {"laj4", "LElbowRoll"},
     {"llj1", "LHipYawPitch"},
-    {"llj2", "LHipRoll"},
-    {"llj3", "LHipPitch"},
+    {"llj2", "LHipPitch"},
+    {"llj3", "LHipRoll"},
     {"llj4", "LKneePitch"},
     {"llj5", "LAnklePitch"},
     {"llj6", "LAnkleRoll"},
     {"rlj1", "RHipYawPitch"},
-    {"rlj2", "RHipRoll"},
-    {"rlj3", "RHipPitch"},
+    {"rlj2", "RHipPitch"},
+    {"rlj3", "RHipRoll"},
     {"rlj4", "RKneePitch"},
     {"rlj5", "RAnklePitch"},
     {"rlj6", "RAnkleRoll"},
     {"raj1", "RShoulderPitch"},
     {"raj2", "RShoulderRoll"},
-    {"raj3", "RElbowRoll"},
-    {"raj4", "RElbowYaw"}
+    {"raj3", "RElbowYaw"},
+    {"raj4", "RElbowRoll"}
   };
+
 
   /// \brief Name of link in Nao model that is used for camera position
   static const std::string kCameraLinkName = "Head";
