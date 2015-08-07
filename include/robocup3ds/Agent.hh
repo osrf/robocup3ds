@@ -180,7 +180,7 @@ class AgentPerceptions
   /// \brief Hear perceptor
   public: AgentHear hear;
 
-  /// \brief Map of hinge joints and their angles
+  /// \brief Map of hinge joint names and their angles
   public: std::map<std::string, double> hingeJoints;
 
   /// \brief Gyro information of torso
@@ -191,11 +191,11 @@ class AgentPerceptions
 
   /// \brief Position of left foot of Agent and force exerted on it
   public: std::pair<ignition::math::Vector3<double>,
-  ignition::math::Vector3<double>> leftFootFR;
+    ignition::math::Vector3<double>> leftFootFR;
 
   /// \brief Position of right foot of Agent and force exerted on it
   public: std::pair<ignition::math::Vector3<double>,
-  ignition::math::Vector3<double>> rightFootFR;
+    ignition::math::Vector3<double>> rightFootFR;
 };
 
 /// \brief This class serves as an container for the information by the
@@ -205,7 +205,7 @@ class AgentActions
   /// \brief Constructor
   public: AgentActions() = default;
 
-  /// \brief Stores the velocity and angle information
+  /// \brief Map of hinge joint names and their velocities
   public: std::map<std::string, double> jointEffectors;
 };
 
