@@ -21,6 +21,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 #include <gazebo/gazebo.hh>
 #include <sdf/sdf.hh>
 
@@ -57,6 +58,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \param[in] _config Map of configuration variables
   private: void LoadConfiguration(
     const std::map<std::string, std::string> &_config) const;
+
+  /// \brief Copys contact objects from the world contact manager to contacts
+  private: void UpdateContactManager();
 
   /// \brief Update the effector, use collected joint information to update
   /// gazebo world
@@ -123,6 +127,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Size of buffer in bytes
   private: static const int kBufferSize;
+
+  /// \brief Vector of all contacts received from contact manager
+  private: std::vector<gazebo::physics::Contact> contacts;
 };
 
 #endif

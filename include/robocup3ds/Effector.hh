@@ -92,6 +92,12 @@ class Effector: public SocketParser
   /// \param[in] _exp Pointer to a S-expression.
   protected: void ParseHingeJoint(sexp_t *_exp);
 
+  /// \brief Converts a c-string to double
+  /// \param[in] _str C-string
+  /// \param[out] _v Double value
+  /// \return True if conversion is successful
+  protected: inline bool Double(const char *_str, double &_v) const;
+
   /// \brief List of agent names to add to gazebo world this update cycle.
   public: std::vector<std::string> agentsToAdd;
 

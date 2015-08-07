@@ -23,6 +23,7 @@
 #include <memory>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/Collision.hh>
+#include <gazebo/physics/Contact.hh>
 #include <gazebo/physics/ContactManager.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
@@ -171,6 +172,7 @@ void Robocup3dsPlugin::Init()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 {
+  this->UpdateContactManager();
   // checks if enough time has elapsed to update gameState and send out
   // information
   if (this->world->GetSimTime().Double() - this->lastUpdateTime <
@@ -214,6 +216,7 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
     }
   }
 
+  this->UpdateContactManager();
   this->UpdateMonitorEffector();
   this->UpdateGameState();
   this->UpdatePerceptor();
@@ -290,6 +293,26 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
           agentName << std::endl;
   }
 }
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateContactManager()
+{
+  const auto &contactMgr = this->world->GetPhysicsEngine()->GetContactManager();
+  gzmsg << "num contacts: " << contactMgr->GetContactCount() << std::endl;
+  gzmsg << "ball position: " << this->world->GetModel(SoccerField::ballName)
+        ->GetWorldPose().pos << std::endl;
+  const auto &model = this->world->GetModel("1_red");
+  if (model)
+  {
+    gzmsg << "player position: " << model->GetWorldPose().pos << std::endl;
+  }
+  for (unsigned int i = 0; i < contactMgr->GetContactCount(); ++i)
+  {
+    this->contacts.push_back(*contactMgr->GetContact(i));
+  }
+  contactMgr->ResetCount();
+}
+
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateBallContactHistory()
 {
@@ -301,70 +324,61 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
   int uNum;
   std::string teamName;
 
-  const auto contactMgr = this->world->GetPhysicsEngine()->GetContactManager();
-  // gzmsg << "num contacts: " << contactMgr->GetContactCount() << std::endl;
-  // gzmsg << "ball position: " << this->world->GetModel(SoccerField::ballName)
-  //       ->GetWorldPose().pos << std::endl;
-  // const auto &model = this->world->GetModel("1_red");
-  // if (model)
-  // {
-  //   gzmsg << "player position: " << model->GetWorldPose().pos << std::endl;
-  // }
-
-  for (unsigned int i = 0; i < contactMgr->GetContactCount(); ++i)
+  for (const auto &contact : this->contacts)
   {
-    const auto contact = contactMgr->GetContact(i);
-    const auto model1 = contact->collision1->GetModel();
-    const auto model2 = contact->collision2->GetModel();
+    const auto &model1 = contact.collision1->GetModel();
+    const auto &model2 = contact.collision2->GetModel();
     if (!model1 || !model2)
     {
       continue;
     }
     physics::ModelPtr ballModel;
     physics::ModelPtr playerModel;
-    if (model1->GetName() == SoccerField::ballName)
+    if (model1->GetName() == SoccerField::ballName
+        && Agent::CheckAgentName(model2->GetName(), uNum, teamName))
     {
       ballModel = model1;
       playerModel = model2;
     }
-    else
+    else if (Agent::CheckAgentName(model1->GetName(), uNum, teamName)
+             && model2->GetName() == SoccerField::ballName)
     {
       ballModel = model2;
       playerModel = model1;
     }
-    const auto &ballPose = ballModel->GetWorldPose();
-
-    // make sure that model belongs to an agent
-    if (Agent::CheckAgentName(playerModel->GetName(), uNum, teamName))
+    else
     {
-      const auto &lastBallContact = gameState->GetLastBallContact();
+      continue;
+    }
 
-      // only update the last ball contact if contact by same agent
-      // has occurred less than a certain time interval ago, otherwise
-      // add new ball contact to history
-      if (lastBallContact
-          && lastBallContact->uNum == uNum
-          && lastBallContact->side == teamSide[teamName]
-          && gameState->GetGameTime() - lastBallContact->contactTime
-          < GameState::ballContactInterval)
-      {
-        lastBallContact->contactTime = gameState->GetGameTime();
-        // gzmsg << "last ball contact updated: " << playerModel->GetName() <<
-        //       " " << gameState->GetGameTime() << std::endl;
-      }
-      else
-      {
-        // gzmsg << "new ball contact: " << playerModel->GetName() <<
-        //       " " << gameState->GetGameTime() << std::endl;
-        std::shared_ptr<GameState::BallContact> ballContact(
-          new GameState::BallContact(uNum, teamSide[teamName],
-                                     gameState->GetGameTime(),
-                                     G2I(ballPose.pos)));
-        gameState->ballContactHistory.push_back(ballContact);
-      }
+    const auto &ballPose = ballModel->GetWorldPose();
+    const auto &lastBallContact = gameState->GetLastBallContact();
+
+    // only update the last ball contact if contact by same agent
+    // has occurred less than a certain time interval ago, otherwise
+    // add new ball contact to history
+    if (lastBallContact
+        && lastBallContact->uNum == uNum
+        && lastBallContact->side == teamSide[teamName]
+        && gameState->GetGameTime() - lastBallContact->contactTime
+        < GameState::ballContactInterval)
+    {
+      lastBallContact->contactTime = gameState->GetGameTime();
+      gzmsg << "last ball contact updated: " << playerModel->GetName() <<
+            " " << gameState->GetGameTime() << std::endl;
+    }
+    else
+    {
+      gzmsg << "new ball contact: " << playerModel->GetName() <<
+            " " << gameState->GetGameTime() << std::endl;
+      std::shared_ptr<GameState::BallContact> ballContact(
+        new GameState::BallContact(uNum, teamSide[teamName],
+                                   gameState->GetGameTime(),
+                                   G2I(ballPose.pos)));
+      gameState->ballContactHistory.push_back(ballContact);
     }
   }
-  // contactMgr->ResetCount();
+  this->contacts.clear();
 }
 
 /////////////////////////////////////////////////
@@ -551,10 +565,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
       int cx = perceptor->Serialize(agent, &(this->buffer[4]),
                                     Robocup3dsPlugin::kBufferSize - 4);
       unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-      this->buffer[0] =  _cx        & 0xff;
-      this->buffer[1] = (_cx >>  8) & 0xff;
-      this->buffer[2] = (_cx >> 16) & 0xff;
-      this->buffer[3] = (_cx >> 24) & 0xff;
+      memcpy(this->buffer, &_cx, 4);
       this->clientServer->Send(agent.socketID, this->buffer, cx + 4);
     }
   }

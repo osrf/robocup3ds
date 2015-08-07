@@ -198,6 +198,7 @@ TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
   EXPECT_NE(lastMsg.find("KickInRight"), string::npos);
 }
 
+/// \brief This tests whether we can transition from kickOff to playOn
 TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
 {
   this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
@@ -206,9 +207,9 @@ TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
   this->agent->InitAndBeam(0, 0, 0);
   this->agent->ChangePlayMode("KickOffLeft");
   this->agent->Dribble(math::Vector3d(0, 0, 0.35),
-                       math::Vector3d(5, 5, 0.35), 20);
+                       math::Vector3d(0, 1, 0.35), 10);
   this->agent->Start();
-  this->Wait(2500);
+  this->Wait(1000);
 
   const auto &lastMsg = this->agent->allMsgs.back();
   // std::cerr << lastMsg << std::endl;

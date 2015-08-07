@@ -17,6 +17,8 @@
 
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <cerrno>
+#include <cstdlib>
 #include <iostream>
 #include <ignition/math.hh>
 #include <map>
@@ -33,9 +35,9 @@ const int Effector::kBufferSize = 16384;
 
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
-      gameState(_gameState),
-      currAgent(NULL),
-      currSocketId(-1)
+  gameState(_gameState),
+  currAgent(NULL),
+  currSocketId(-1)
 {
   // Initialize global variables
   this->buffer = new char[Effector::kBufferSize];
@@ -84,7 +86,7 @@ bool Effector::Parse(int _socket)
   while (bytesRead < totalBytes)
   {
     int result = recv(_socket, this->buffer + bytesRead,
-        totalBytes - bytesRead, 0);
+                      totalBytes - bytesRead, 0);
 
     if (result < 1)
     {
@@ -98,11 +100,13 @@ bool Effector::Parse(int _socket)
 
   std::lock_guard<std::mutex> lock(this->mutex);
   if (this->socketIDMessageMap[_socket] == "__empty__")
-  { this->socketIDMessageMap[_socket] = msg; }
+  {
+    this->socketIDMessageMap[_socket] = msg;
+  }
   else
   {
     this->socketIDMessageMap[_socket]
-                             = this->socketIDMessageMap[_socket] + msg;
+      = this->socketIDMessageMap[_socket] + msg;
   }
   // std::cerr << "socket id and msg: " << _socket << std::endl;
   // std::cerr << this->socketIDMessageMap[_socket] << std::endl;
@@ -116,7 +120,7 @@ void Effector::ParseMessage(const std::string &_msg)
 
   // Create a s-expression message using the received pile of s-expressions
   snprintf(this->sexpBuffer, Effector::kBufferSize, "(msg %s)",
-      _msg.c_str());
+           _msg.c_str());
 
   // use parse_sexp() from s-expression library
   exp = parse_sexp(this->sexpBuffer, _msg.length() + 6);
@@ -142,12 +146,33 @@ void Effector::ParseMessage(const std::string &_msg)
   while (ptr != NULL)
   {
     if (ptr->ty == SEXP_LIST)
-    { ParseSexp(ptr); }
+    {
+      ParseSexp(ptr);
+    }
 
     ptr = ptr->next;
   }
 
   destroy_sexp(exp);
+}
+
+//////////////////////////////////////////////////
+bool Effector::Double(const char *_str, double &_v) const
+{
+  char *e;
+  errno = 0;
+  double temp = std::strtod(_str, &e);
+
+  if (*e != '\0' ||  // error, we didn't consume the entire string
+      errno != 0 )   // error, overflow or underflow
+  {
+    return false;
+  }
+  else
+  {
+    _v = temp;
+    return true;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -200,7 +225,7 @@ void Effector::ParseSexp(sexp_t *_exp)
     this->ParseSay(_exp);
   }
   else if (NaoRobot::hingeJointEffectorMap.find(std::string(v))
-      != NaoRobot::hingeJointEffectorMap.end())
+           != NaoRobot::hingeJointEffectorMap.end())
   {
     this->ParseHingeJoint(_exp);
   }
@@ -218,10 +243,10 @@ void Effector::ParseHingeJoint(sexp_t *_exp)
     return;
   }
 
+  double angle;
   std::string jointName = _exp->list->val;
-  if (_exp->list->next)
+  if (_exp->list->next && this->Double(_exp->list->next->val, angle))
   {
-    double angle = atof(_exp->list->next->val);
     this->currAgent->action.jointEffectors[jointName] = angle;
   }
 }
@@ -251,14 +276,15 @@ void Effector::ParseBeam(sexp_t *_exp)
     return;
   }
 
+  double x, y, yaw;
   if (_exp->list->next && _exp->list->next->next
-      && _exp->list->next->next->next)
+      && _exp->list->next->next->next
+      && this->Double(_exp->list->next->val, x)
+      && this->Double(_exp->list->next->next->val, y)
+      && this->Double(_exp->list->next->next->next->val, yaw))
   {
-    double x = atof(_exp->list->next->val);
-    double y = atof(_exp->list->next->next->val);
-    double yaw = atof(_exp->list->next->next->next->val);
     this->gameState->BeamAgent(this->currAgent->uNum,
-        this->currAgent->team->name, x, y, yaw);
+                               this->currAgent->team->name, x, y, yaw);
 
     // std::cerr << "beamed to " << x << "," << y << "," << yaw << std::endl;
   }
@@ -276,34 +302,31 @@ void Effector::ParseSay(sexp_t *_exp)
   // characters and S-expression phrases
   if (_exp->list->next && !_exp->list->next->next)
   {
-    std::string message = _exp->list->next->val;
-
-    int size = message.length();
+    const std::string message = _exp->list->next->val;
+    const int size = message.length();
 
     // Accept only say message less than 20 characters
-    if (size <= 20)
+    if (size > 20)
     {
-      bool acceptFlag = true;
+      return;
+    }
 
-      for (int i = 0; i < size; ++i)
+    // Accept only printing characters
+    for (int i = 0; i < size; ++i)
+    {
+      const int asciiVal = static_cast<int>(message[i]);
+      if ( asciiVal <= 32 || asciiVal >= 127 )
       {
-        const int asciiVal = static_cast<int>(message[i]);
-        // Accept only printing characters
-        if ( asciiVal <= 32 || asciiVal >= 127 )
-        {
-          acceptFlag = false;
-        }
-      }
-
-      // Update the say message container
-      if (acceptFlag)
-      {
-        gameState->say.isValid = true;
-        gameState->say.msg = message;
+        return;
       }
     }
+
+    // Update the say message container
+    gameState->say.isValid = true;
+    gameState->say.msg = message;
   }
 }
+
 
 //////////////////////////////////////////////////
 void Effector::ParseInit(sexp_t *_exp)
@@ -326,7 +349,11 @@ void Effector::ParseInit(sexp_t *_exp)
     {
       if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
       {
-        playerNum = atof(ptr->list->next->val);
+        double temp;
+        if (this->Double(ptr->list->next->val, temp))
+        {
+          playerNum = static_cast<double>(temp);
+        }
       }
       else if (!strcmp(ptr->list->val, "teamname") && ptr->list->next)
       {
@@ -337,7 +364,7 @@ void Effector::ParseInit(sexp_t *_exp)
   }
 
   this->currAgent = this->gameState->AddAgent(
-      playerNum, teamName, this->currSocketId);
+                      playerNum, teamName, this->currSocketId);
   if (this->currAgent)
   {
     // std::cerr << "added: " << this->currAgent->GetName() << std::endl;
@@ -386,12 +413,14 @@ void Effector::Update()
 
   // Update Effectors using message received by Parse()
   for (auto kv = this->socketIDMessageMap.begin();
-      kv != this->socketIDMessageMap.end();)
+       kv != this->socketIDMessageMap.end();)
   {
     this->currSocketId = kv->first;
     this->currAgent = NULL;
     if (socketIdAgentMap.find(this->currSocketId) != socketIdAgentMap.end())
-    { this->currAgent = socketIdAgentMap[this->currSocketId]; }
+    {
+      this->currAgent = socketIdAgentMap[this->currSocketId];
+    }
 
     if (kv->second == "__del__")
     {
@@ -420,7 +449,7 @@ void Effector::Update()
 
 //////////////////////////////////////////////////
 MonitorEffector::MonitorEffector(GameState *const _gameState):
-      Effector(_gameState)
+  Effector(_gameState)
 {}
 
 //////////////////////////////////////////////////
@@ -433,7 +462,7 @@ void MonitorEffector::Update()
 
   // Update Effectors using message received by Parse()
   for (auto kv = this->socketIDMessageMap.begin();
-      kv != this->socketIDMessageMap.end();)
+       kv != this->socketIDMessageMap.end();)
   {
     if (kv->second == "__del__")
     {
@@ -512,6 +541,7 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
   bool pMove = false;
   bool pUNum = false;
   bool pTeamS = false;
+  bool pDouble = false;
 
   sexp_t *ptr = _exp->list->next;
 
@@ -521,7 +551,11 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
     {
       if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
       {
-        uNum = atof(ptr->list->next->val);
+        double temp;
+        if (this->Double(ptr->list->next->val, temp))
+        {
+          uNum = static_cast<double>(temp);
+        }
         pUNum = true;
       }
       else if (!strcmp(ptr->list->val, "team") && ptr->list->next)
@@ -530,46 +564,70 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
         pTeamS = true;
       }
       else if (!strcmp(ptr->list->val, "pos") && ptr->list->next
-          && ptr->list->next->next && ptr->list->next->next->next)
+               && ptr->list->next->next && ptr->list->next->next->next)
       {
-        x = atof(ptr->list->next->val);
-        y = atof(ptr->list->next->next->val);
-        z = atof(ptr->list->next->next->next->val);
-        pMove = false;
+        if (this->Double(ptr->list->next->val, x)
+            && this->Double(ptr->list->next->next->val, y)
+            && this->Double(ptr->list->next->next->next->val, z))
+        {
+          pMove = false;
+          pDouble = true;
+        }
+        else
+        {
+          pDouble = false;
+        }
       }
       else if (!strcmp(ptr->list->val, "move") && ptr->list->next
-          && ptr->list->next->next && ptr->list->next->next->next
-          && ptr->list->next->next->next->next)
+               && ptr->list->next->next && ptr->list->next->next->next
+               && ptr->list->next->next->next->next)
       {
-        x = atof(ptr->list->next->val);
-        y = atof(ptr->list->next->next->val);
-        z = atof(ptr->list->next->next->next->val);
-        yaw = atof(ptr->list->next->next->next->next->val);
-        pMove = true;
+        if (this->Double(ptr->list->next->val, x)
+            && this->Double(ptr->list->next->next->val, y)
+            && this->Double(ptr->list->next->next->next->val, z)
+            && this->Double(ptr->list->next->next->next->next->val, yaw))
+        {
+          pMove = true;
+          pDouble = true;
+        }
+        else
+        {
+          pDouble = false;
+        }
       }
     }
     ptr = ptr->next;
   }
 
-  if (!pUNum || !pTeamS)
-  { return; }
+  if (!pUNum || !pTeamS || !pDouble)
+  {
+    return;
+  }
 
   if (uNum < 0 || uNum > 11)
-  { return; }
+  {
+    return;
+  }
 
   Team::Side side = Team::GetSideAsEnum(teamSide);
   if (side == Team::Side::NEITHER)
-  { return; }
+  {
+    return;
+  }
 
   auto newPos = math::Vector3<double>(x, y, z);
   for (const auto &team : this->gameState->teams)
   {
     if (team->side != side)
-    { continue; }
+    {
+      continue;
+    }
     for (auto &agent : team->members)
     {
       if (agent.uNum != uNum)
-      { continue; }
+      {
+        continue;
+      }
       if (pMove)
       {
         auto newRot = math::Quaternion<double>(0, 0, yaw);
@@ -595,19 +653,19 @@ void MonitorEffector::ParseMoveBall(sexp_t *_exp)
     if (ptr->ty == SEXP_LIST)
     {
       if (!strcmp(ptr->list->val, "pos") && ptr->list->next
-          && ptr->list->next->next && ptr->list->next->next->next)
+          && ptr->list->next->next && ptr->list->next->next->next
+          && this->Double(ptr->list->next->val, x)
+          && this->Double(ptr->list->next->next->val, y)
+          && this->Double(ptr->list->next->next->next->val, z))
       {
-        x = atof(ptr->list->next->val);
-        y = atof(ptr->list->next->next->val);
-        z = atof(ptr->list->next->next->next->val);
         this->gameState->MoveBall(math::Vector3<double>(x, y, z));
       }
       else if (!strcmp(ptr->list->val, "vel") && ptr->list->next
-          && ptr->list->next->next && ptr->list->next->next->next)
+               && ptr->list->next->next && ptr->list->next->next->next
+               && this->Double(ptr->list->next->val, u)
+               && this->Double(ptr->list->next->next->val, v)
+               && this->Double(ptr->list->next->next->next->val, w))
       {
-        u = atof(ptr->list->next->val);
-        v = atof(ptr->list->next->next->val);
-        w = atof(ptr->list->next->next->next->val);
         this->gameState->SetBallVel(math::Vector3<double>(u, v, w));
       }
     }
@@ -644,7 +702,11 @@ void MonitorEffector::ParseRemoveAgent(sexp_t *_exp)
     {
       if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
       {
-        uNum = atof(ptr->list->next->val);
+        double temp;
+        if (this->Double(ptr->list->next->val, temp))
+        {
+          uNum = static_cast<double>(temp);
+        }
         pUNum = true;
       }
       else if (!strcmp(ptr->list->val, "team") && ptr->list->next)
@@ -657,22 +719,32 @@ void MonitorEffector::ParseRemoveAgent(sexp_t *_exp)
   }
 
   if (!pUNum || !pTeamS)
-  { return; }
+  {
+    return;
+  }
 
   if (uNum < 0 || uNum > 11)
-  { return; }
+  {
+    return;
+  }
 
   Team::Side side = Team::GetSideAsEnum(teamSide);
   if (side == Team::Side::NEITHER)
-  { return; }
+  {
+    return;
+  }
 
   std::string teamName;
   for (const auto &team : this->gameState->teams)
   {
     if (team->side == side)
-    { teamName = team->name; }
+    {
+      teamName = team->name;
+    }
   }
 
   if (this->gameState->RemoveAgent(uNum, teamName))
-  { this->agentsToRemove.push_back(Agent::GetName(uNum, teamName)); }
+  {
+    this->agentsToRemove.push_back(Agent::GetName(uNum, teamName));
+  }
 }

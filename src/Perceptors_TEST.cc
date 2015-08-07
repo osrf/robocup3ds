@@ -512,13 +512,16 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   EXPECT_EQ(static_cast<int>(strlen(testString)), cx);
 
   // ensure that encoding is correct
-  char b[4];
+  char b[400];
   unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-  b[0] =  _cx        & 0xff;
-  b[1] = (_cx >>  8) & 0xff;
-  b[2] = (_cx >> 16) & 0xff;
-  b[3] = (_cx >> 24) & 0xff;
-  unsigned int _cx2 = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | (b[0]);
+  memcpy(b, &_cx, 4);
+  // b[0] =  _cx        & 0xff;
+  // b[1] = (_cx >>  8) & 0xff;
+  // b[2] = (_cx >> 16) & 0xff;
+  // b[3] = (_cx >> 24) & 0xff;
+  // unsigned int _cx2 = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | (b[0]);
+  unsigned int _cx2;
+  memcpy(&_cx2, b, 4);
   int cx2 = static_cast<int>(ntohl(_cx2));
   EXPECT_EQ(cx, cx2);
 }
