@@ -27,9 +27,12 @@ TEST(AgentTest, TeamMethods)
 {
   EXPECT_EQ("left", Team::GetSideAsString(Team::Side::LEFT));
   EXPECT_EQ("right", Team::GetSideAsString(Team::Side::RIGHT));
+  EXPECT_EQ("neither", Team::GetSideAsString(Team::Side::NEITHER));
 
   EXPECT_EQ(Team::Side::LEFT, Team::GetSideAsEnum("left"));
   EXPECT_EQ(Team::Side::RIGHT, Team::GetSideAsEnum("right"));
+  EXPECT_EQ(Team::Side::NEITHER, Team::GetSideAsEnum("none"));
+  EXPECT_EQ(Team::Side::NEITHER, Team::GetSideAsEnum("neither"));
 
   Team t1("red", Team::Side::LEFT, 0, 11);
   Team t2("blue", Team::Side::RIGHT, 0, 11);
@@ -68,6 +71,11 @@ TEST(AgentTest, AgentMethods)
   EXPECT_FALSE(as.isValid);
   AgentHear ah;
   EXPECT_FALSE(ah.isValid);
+
+  Agent a3(4, nullptr);
+  EXPECT_EQ(a3.GetName(), "4");
+  AgentId agentId2(4, "");
+  EXPECT_EQ(agentId2, a3.GetAgentID());
 }
 
 int main(int argc, char **argv)
