@@ -782,8 +782,8 @@ void GameState::CheckDoubleTouch()
 /////////////////////////////////////////////////
 void GameState::CheckCanScore()
 {
-  std::shared_ptr<BallContact> ballContact = this->GetLastBallContact();
-  if (!ballContact)
+  std::shared_ptr<BallContact> lastBallContact = this->GetLastBallContact();
+  if (!lastBallContact)
   {
     return;
   }
@@ -791,10 +791,10 @@ void GameState::CheckCanScore()
   {
     if ((!team->canScore)
         && (this->touchBallKickoff)
-        && ((ballContact->side != team->side)
-            || (ballContact->side == team->side
-                && this->touchBallKickoff->uNum != ballContact->uNum
-                && ballContact->contactPos.Distance(
+        && ((lastBallContact->side != team->side)
+            || (lastBallContact->side == team->side
+                && this->touchBallKickoff->uNum != lastBallContact->uNum
+                && lastBallContact->contactPos.Distance(
                   SoccerField::CenterOfField) >
                 SoccerField::CenterCircleRadius)))
     {

@@ -21,9 +21,9 @@
 #include <cstdlib>
 #include <map>
 #include <memory>
-#include <gazebo/common/ModelDatabase.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/Collision.hh>
+#include <gazebo/physics/ContactManager.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
@@ -301,14 +301,41 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
   int uNum;
   std::string teamName;
 
-  const auto &ball = this->world->GetModel(SoccerField::ballName);
-  const auto &ballPose = ball->GetWorldPose();
-  const auto &ballLink = ball->GetLink(SoccerField::ballLinkName);
-  for (const auto &collision : ballLink->GetCollisions())
+  const auto contactMgr = this->world->GetPhysicsEngine()->GetContactManager();
+  // gzmsg << "num contacts: " << contactMgr->GetContactCount() << std::endl;
+  // gzmsg << "ball position: " << this->world->GetModel(SoccerField::ballName)
+  //       ->GetWorldPose().pos << std::endl;
+  // const auto &model = this->world->GetModel("1_red");
+  // if (model)
+  // {
+  //   gzmsg << "player position: " << model->GetWorldPose().pos << std::endl;
+  // }
+
+  for (unsigned int i = 0; i < contactMgr->GetContactCount(); ++i)
   {
-    const auto &model = collision->GetModel();
+    const auto contact = contactMgr->GetContact(i);
+    const auto model1 = contact->collision1->GetModel();
+    const auto model2 = contact->collision2->GetModel();
+    if (!model1 || !model2)
+    {
+      continue;
+    }
+    physics::ModelPtr ballModel;
+    physics::ModelPtr playerModel;
+    if (model1->GetName() == SoccerField::ballName)
+    {
+      ballModel = model1;
+      playerModel = model2;
+    }
+    else
+    {
+      ballModel = model2;
+      playerModel = model1;
+    }
+    const auto &ballPose = ballModel->GetWorldPose();
+
     // make sure that model belongs to an agent
-    if (model && Agent::CheckAgentName(model->GetName(), uNum, teamName))
+    if (Agent::CheckAgentName(playerModel->GetName(), uNum, teamName))
     {
       const auto &lastBallContact = gameState->GetLastBallContact();
 
@@ -322,18 +349,22 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
           < GameState::ballContactInterval)
       {
         lastBallContact->contactTime = gameState->GetGameTime();
+        // gzmsg << "last ball contact updated: " << playerModel->GetName() <<
+        //       " " << gameState->GetGameTime() << std::endl;
       }
       else
       {
+        // gzmsg << "new ball contact: " << playerModel->GetName() <<
+        //       " " << gameState->GetGameTime() << std::endl;
         std::shared_ptr<GameState::BallContact> ballContact(
           new GameState::BallContact(uNum, teamSide[teamName],
                                      gameState->GetGameTime(),
                                      G2I(ballPose.pos)));
         gameState->ballContactHistory.push_back(ballContact);
       }
-      break;
     }
   }
+  // contactMgr->ResetCount();
 }
 
 /////////////////////////////////////////////////

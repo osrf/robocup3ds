@@ -52,6 +52,8 @@ class IntegrationTest : public gazebo::ServerFixture
       cerr << "Setting Up Test" << endl;
       this->agent = make_shared<ClientAgent>(
                       "0.0.0.0", 3100, 3200, 1, "red", "left");
+      this->oppAgent = make_shared<ClientAgent>(
+                         "0.0.0.0", 3100, 3200, 1, "blue", "right");
       this->Wait();
     }
 
@@ -60,6 +62,7 @@ class IntegrationTest : public gazebo::ServerFixture
     {
       cerr << "Tearing Down Test" << endl;
       this->agent.reset();
+      this->oppAgent.reset();
       this->world.reset();
       gazebo::ServerFixture::TearDown();
       this->Wait();
@@ -71,6 +74,9 @@ class IntegrationTest : public gazebo::ServerFixture
 
   public:
     shared_ptr<ClientAgent> agent;
+
+  public:
+    shared_ptr<ClientAgent> oppAgent;
 
   public:
     gazebo::physics::WorldPtr world;
@@ -93,7 +99,9 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
   this->agent->Start();
 
   while (this->agent->allMsgs.size() == 0u)
-  { this->Wait(); }
+  {
+    this->Wait();
+  }
 
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
@@ -111,7 +119,9 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
   for (const auto &msg : this->agent->allMsgs)
   {
     if (msg.find("See"))
-    { see = true; }
+    {
+      see = true;
+    }
   }
   EXPECT_TRUE(see);
 }
@@ -127,7 +137,9 @@ TEST_F(IntegrationTest, TestMonitor)
 
   // test game mode has successfully changed
   while (this->agent->allMsgs.size() == 0u)
-  { this->Wait(); }
+  {
+    this->Wait();
+  }
 
   const auto &lastMsg = this->agent->allMsgs.back();
   cerr << lastMsg << endl;
@@ -144,7 +156,9 @@ TEST_F(IntegrationTest, TestMonitor)
   for (const auto &msg : this->agent->allMsgs)
   {
     if (msg.find("1.35 5.69 0.04") && msg.find("-7.35 -11.69 0.35"))
-    { gd = true; }
+    {
+      gd = true;
+    }
   }
   EXPECT_TRUE(gd);
 
@@ -175,12 +189,30 @@ TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
   this->agent->InitAndBeam(0, 0, 0);
   this->agent->ChangePlayMode("PlayOn");
   this->agent->Dribble(math::Vector3d(3, -5, 0.35),
-                    math::Vector3d(5, -12, 0.35), 20);
+                       math::Vector3d(5, -12, 0.35), 20);
   this->agent->Start();
   this->Wait(2500);
 
   const auto &lastMsg = this->agent->allMsgs.back();
-  std::cerr << lastMsg << std::endl;
+  // std::cerr << lastMsg << std::endl;
+  EXPECT_NE(lastMsg.find("KickInRight"), string::npos);
+}
+
+TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
+{
+  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
+
+  this->Wait();
+  this->agent->InitAndBeam(0, 0, 0);
+  this->agent->ChangePlayMode("KickOffLeft");
+  this->agent->Dribble(math::Vector3d(0, 0, 0.35),
+                       math::Vector3d(5, 5, 0.35), 20);
+  this->agent->Start();
+  this->Wait(2500);
+
+  const auto &lastMsg = this->agent->allMsgs.back();
+  // std::cerr << lastMsg << std::endl;
+  EXPECT_NE(lastMsg.find("PlayOn"), string::npos);
 }
 
 int main(int argc, char **argv)

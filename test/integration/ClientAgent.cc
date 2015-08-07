@@ -250,11 +250,12 @@ void ClientAgent::Dribble(const math::Vector3<double> &_start,
 {
   for (int i = 0; i <= _nSteps; ++i)
   {
-    const auto pt = _start + ((_end - _start) * (i / _nSteps));
+    const auto pt = _start + ((_end - _start) * (static_cast<double>(i)
+                              / static_cast<double>(_nSteps)));
     auto msg = "(agent (unum " + std::to_string(this->uNum) +  ") (team "
-                     + this->side + ") (pos " + std::to_string(pt.X()) +
-                     " " + std::to_string(pt.Y()) +
-                     " " + std::to_string(pt.Z()) + "))";
+               + this->side + ") (pos " + std::to_string(pt.X()) +
+               " " + std::to_string(pt.Y()) +
+               " " + std::to_string(pt.Z()) + "))";
     msg += " (ball (pos " + std::to_string(pt.X()) +
            " " + std::to_string(pt.Y()) +
            " " + std::to_string(pt.Z()) + "))";

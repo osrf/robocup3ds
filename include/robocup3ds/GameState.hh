@@ -515,7 +515,7 @@ class GameState
   public: static double dropBallRadius;
 
   /// \brief Every cycle counts as [counterCycleTime] of
-  /// game time (for `fake simulations)
+  /// game time (for fake simulations)
   public: static bool useCounterForGameTime;
 
   /// \brief Max players per team
