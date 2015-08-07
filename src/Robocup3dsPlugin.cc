@@ -262,14 +262,26 @@ void Robocup3dsPlugin::UpdateEffector()
       {
         for (const auto &jointName : NaoRobot::hingeJointEffectorMap )
         {
-          // Increase the actuators damping to 1.5, in SDF file is (0.75)
-          model->GetJoint(jointName.second)->SetDamping(0, 1.5);
-          //model->GetJoint(naoJointName)->SetStiffness(0, 1);
+          // Increase the actuators damping to 1, in SDF file is (0.75)
+          model->GetJoint(jointName.second)->SetDamping(0, 1);
 
+          // Initial the Joint Controller;
+          physics::JointControllerPtr jointController(
+                            new physics::JointController(model));
 
-          // Reset the joint angle to it origin
-          model->GetJoint(jointName.second)->SetAngle(0, 0);
-          model->GetJoint(jointName.second)->SetVelocity(0, 0);
+          jointController -> AddJoint(model->GetJoint(jointName.second));
+
+          // Set the Position PID Values
+          jointController->SetPositionPID(
+               model->GetJoint(jointName.second)->GetScopedName(),
+               common::PID(800, 10, 0.0));
+
+          // Set the joint angle to it origin
+          jointController->SetPositionTarget(
+                       model->GetJoint(jointName.second)-> GetScopedName(), 0);
+
+          jointController->Update();
+
         }
         continue;
       }
@@ -295,26 +307,22 @@ void Robocup3dsPlugin::UpdateEffector()
             + model->GetJoint(naoJointName)->GetAngle(0).Radian();
 
 
-        // For test, move only Head joints
-        if(naoJointName != "HeadPitch" && naoJointName != "HeadYaw")
+        // For test, move only Head joints and arms
+        if(naoJointName != "HeadPitch" && naoJointName != "HeadYaw"
+           && naoJointName != "LShoulderPitch" && naoJointName != "RShoulderPitch")
         {
           target=0;
         }
 
-        // For test, to move the arms
-        if(naoJointName == "LShoulderPitch" || naoJointName == "RShoulderPitch")
-        {
-          target=1;
-        }
 
         // Set the Position PID Values
         jointController->SetPositionPID(
              model->GetJoint(naoJointName)->GetScopedName(),
-             common::PID(800, 0, 0.0));
+             common::PID(800, 10, 0.0));
 
         // Set the target position
         jointController->SetPositionTarget(
-                     model->GetJoint(naoJointName)->GetScopedName(), target);
+                     model->GetJoint(naoJointName)-> GetScopedName(), target);
 
         /*
         // Control the joints velocity to be Zero, For Test
