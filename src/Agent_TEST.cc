@@ -63,6 +63,11 @@ TEST(AgentTest, AgentMethods)
 
   EXPECT_TRUE(a1.IsGoalKeeper());
   EXPECT_FALSE(a2.IsGoalKeeper());
+
+  AgentSay as;
+  EXPECT_FALSE(as.isValid);
+  AgentHear ah;
+  EXPECT_FALSE(ah.isValid);
 }
 
 int main(int argc, char **argv)

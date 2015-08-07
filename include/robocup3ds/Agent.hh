@@ -241,6 +241,11 @@ class Agent
     this->timeFallen = 0;
     this->pos.Set(0, SoccerField::kHalfFieldHeight,
       NaoRobot::kTorsoHeight + 0.05);
+
+    if (!this->team)
+      this->name = std::to_string(this->uNum);
+    else
+      this->name = std::to_string(this->uNum) + "_" + this->team->name;
   }
 
   /// \brief Equality operator for agents
@@ -272,9 +277,7 @@ class Agent
   /// \return A String that is composed of unum and team name
   public: std::string GetName() const
   {
-    if (!this->team)
-      return std::to_string(this->uNum);
-    return std::to_string(this->uNum) + "_" + this->team->name;
+    return this->name;
   }
 
   /// \brief Return name of agent
@@ -373,6 +376,9 @@ class Agent
   /// \brief Flag whether the agent has been successfully load into gazebo
   /// simulation world
   public: bool inSimWorld;
+
+  /// \brief Name of agent
+  public: std::string name;
 };
 
 /// \brief Container that contains info for say effector

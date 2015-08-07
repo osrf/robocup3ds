@@ -72,20 +72,20 @@ namespace SoccerField
   static const double kPenaltyBoxDepth = 1.8;
 
   /// \brief Center of left goal
-  static const ignition::math::Vector3<double>
-  kGoalCenterLeft(-kHalfFieldWidth, 0, 0);
+  static const ignition::math::Vector3<double>kGoalCenterLeft(
+    -kHalfFieldWidth, 0, 0);
 
   /// \brief Center of right goal
-  static const ignition::math::Vector3<double>
-  kGoalCenterRight(kHalfFieldWidth, 0, 0);
+  static const ignition::math::Vector3<double>kGoalCenterRight(
+    kHalfFieldWidth, 0, 0);
 
   /// \brief Position of ball in center of the field
-  static const ignition::math::Vector3<double>
-  kBallCenterPosition(0, 0, kBallRadius);
+  static const ignition::math::Vector3<double>kBallCenterPosition(
+    0, 0, kBallRadius);
 
   /// \brief Center of the field
-  static const ignition::math::Vector3<double>
-  kCenterOfField(0, 0, 0);
+  static const ignition::math::Vector3<double>kCenterOfField(
+    0, 0, 0);
 
   /// \brief Left goal plane, if ball travels through the plane,
   /// it counts as a goal
@@ -176,7 +176,7 @@ namespace SoccerField
 
   /// \brief Vector of all the landmarks on field
   static const std::map<std::string, ignition::math::Vector3<double>>
-  kLandMarks =
+      kLandMarks =
   {
     {"F1L", ignition::math::Vector3<double>(-15, 10, 0)},
     {"F1R", ignition::math::Vector3<double>(15, 10, 0)},
