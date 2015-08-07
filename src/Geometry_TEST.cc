@@ -116,6 +116,8 @@ TEST(Geometry_Test, IntersectionPlaneLine)
   plane.Normal() = math::Vector3<double>(5, 3, 4);
   line.Set(1, 2, 3, 5, 7, 9);
   EXPECT_TRUE(Geometry::IntersectionPlaneLine(line, plane, t, pt));
+  // calculated using an online calculator:
+  // http://www.abecedarical.com/javascript/script_intersectionlineandplane.html
   EXPECT_EQ(pt, math::Vector3<double>(-0.5593220338983051,
                                       0.05084745762711851,
                                       0.6610169491525424));
@@ -171,8 +173,6 @@ TEST(Geometry_Test, CartToPolar_PolarToCart)
   EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
 
   pt.Set(3, 4, 5);
-  // calculated using an online calculator:
-  // http://www.abecedarical.com/javascript/script_intersectionlineandplane.html
   pt2.Set(7.0710678118655, IGN_DTOR(53.130102354156), IGN_DTOR(45));
   EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
   EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
@@ -186,8 +186,6 @@ TEST(Geometry_Test, CartToPolar_PolarToCart)
 
 int main(int argc, char **argv)
 {
-  // Set a specific seed to avoid occasional test failures due to
-  // statistically unlikely, but possible results.
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

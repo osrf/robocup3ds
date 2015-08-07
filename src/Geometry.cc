@@ -24,11 +24,11 @@ using namespace ignition;
 
 /////////////////////////////////////////////////
 bool Geometry::IntersectionCircumferenceLine(
-  const math::Line3<double> &_line, const math::Vector3<double> &_pc, double _r,
-  math::Vector3<double> &_int1, math::Vector3<double> &_int2)
+  const math::Line3<double> &_line, const math::Vector3<double> &_circleCenter,
+  double _r, math::Vector3<double> &_int1, math::Vector3<double> &_int2)
 {
-  math::Vector3<double> localP1 = _line[0] - _pc;
-  math::Vector3<double> localP2 = _line[1] - _pc;
+  math::Vector3<double> localP1 = _line[0] - _circleCenter;
+  math::Vector3<double> localP2 = _line[1] - _circleCenter;
   math::Vector3<double> localDir = localP2 - localP1;
 
   double a = G_SQUARE(localDir.X()) + G_SQUARE(localDir.Y());
@@ -107,12 +107,16 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
   else if (!isPt1AbovePlane && isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
-    { _line.SetA(pt); }
+    {
+      _line.SetA(pt);
+    }
   }
   else if (isPt1AbovePlane && !isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
-    { _line.SetB(pt); }
+    {
+      _line.SetB(pt);
+    }
   }
   else if (!isPt1AbovePlane && !isPt2AbovePlane)
   {

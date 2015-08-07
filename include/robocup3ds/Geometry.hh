@@ -41,7 +41,7 @@ namespace Geometry
                              double &_t,
                              ignition::math::Vector3<double> &_pt);
 
-  /// \brief Clips a line to a plane if necessary
+  /// \brief Clips a line to the positive side of plane if necessary
   /// \param[out] _line Line object
   /// \param[in] _plane Plane object
   /// \return True when line still exists after clipping
@@ -56,18 +56,18 @@ namespace Geometry
                        const ignition::math::Plane<double> &_plane);
 
   /// \brief Calculates the intersection between a 2D circle (XY Cartesian
-  /// coordinates) and a line3D's 2D projection onto the XY plane
-  /// passing through its center.
+  /// coordinates) and a line3D's 2D projection onto the XY plane.
   /// \param[in] _line 3D line object
-  /// \param[in] _pc Center of the circumference
-  /// \param[in] _r Radius of the circumference.
+  /// \param[in] _circleCenter Center of the circle
+  /// \param[in] _r Radius of the circle.
   /// \param[out] _int1 Vector3 with the coordinates of the first intersection
   /// point.
   /// \param[out] _int2 Vector3 with the coordinates of the second intersection
   /// point.
   /// \return True if line intersects circle
   bool IntersectionCircumferenceLine(const ignition::math::Line3<double> &_line,
-                                     const ignition::math::Vector3<double> &_pc,
+                                     const ignition::math::Vector3<double>
+                                     &_circleCenter,
                                      double _r,
                                      ignition::math::Vector3<double> &_int1,
                                      ignition::math::Vector3<double> &_int2);
