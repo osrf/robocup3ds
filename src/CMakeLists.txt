@@ -45,8 +45,9 @@ robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources} ${PARSER_SOURCE} $
 robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
 
 target_link_libraries(${PROJECT_NAME_LOWER}Plugin
-  gazebo_sensors
   gazebo_common
+  gazebo_physics
+  gazebo_sensors
   ${IGNITION-MATH_LIBRARIES}
 )
 

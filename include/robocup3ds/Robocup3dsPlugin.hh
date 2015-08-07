@@ -62,6 +62,11 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// gazebo world
   private: void UpdateEffector();
 
+  /// \brief This is called every update cycle, not only the valid cycles.
+  /// It's used to make sure the agents' states are the desired ones in between
+  /// user-cycles.
+  private: void KeepEffectorsState();
+
   /// \brief Update the monitor effector
   private: void UpdateMonitorEffector();
 
@@ -123,6 +128,12 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Size of buffer in bytes
   private: static const int kBufferSize;
+
+  /// \brief Used by our PID controller to keep track of the time.
+  private: gazebo::common::Time prevUpdateTime;
+
+  /// \brief Used by our PID controller to keep track of the error.
+  private: std::map<std::string, double> qp;
 };
 
 #endif
