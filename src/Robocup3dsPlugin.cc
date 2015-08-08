@@ -375,6 +375,7 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
         && gameState->GetCurrentState()->name == lastBallContact->playMode)
     {
       lastBallContact->contactTime = gameState->GetGameTime();
+      break;
       // gzmsg << "last ball contact updated: " << playerModel->GetName() <<
       //       " " << gameState->GetGameTime() << " " <<
       //       lastBallContact->contactTime << std::endl;
@@ -387,6 +388,7 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
                                    G2I(ballPose.pos),
                                    gameState->GetCurrentState()->name));
       gameState->ballContactHistory.push_back(ballContact);
+      break;
       // gzmsg << "new ball contact: " << playerModel->GetName() <<
       //       " " << gameState->GetGameTime() << std::endl;
       // gzmsg << "total number of contacts: " <<
