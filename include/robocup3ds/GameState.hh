@@ -129,11 +129,13 @@ class GameState
     /// \param[in] _contactPos position where ball was touched
     public: BallContact(const int _uNum, const Team::Side _side,
                         const double _contactTime,
-                        const ignition::math::Vector3<double> &_contactPos):
+                        const ignition::math::Vector3<double> &_contactPos,
+                        const std::string &_playMode = ""):
       uNum(_uNum),
       side(_side),
       contactTime(_contactTime),
-      contactPos(_contactPos)
+      contactPos(_contactPos),
+      playMode(_playMode)
     {
     }
 
@@ -150,8 +152,11 @@ class GameState
     /// \brief Position where agent contacted ball
     public: ignition::math::Vector3<double> contactPos;
 
-    /// \brief Pointer to team of agent who touched ball
+    /// \brief Name to team of agent who touched ball
     public: std::string teamName;
+
+    /// \brief Name of playMode when ball contact occurred
+    public: std::string playMode;
   };
 
   /// \brief Constructor.

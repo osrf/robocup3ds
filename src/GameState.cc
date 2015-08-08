@@ -250,6 +250,7 @@ void GameState::LoadConfiguration(
 /////////////////////////////////////////////////
 void GameState::ClearBallContactHistory()
 {
+  // gzmsg << "ball contact history cleared!" << std::endl;
   this->ballContactHistory.clear();
 }
 
@@ -756,7 +757,7 @@ void GameState::CheckDoubleTouch()
     return;
   }
 
-  // check && make sure that the first contact after kick off
+  // check and make sure that the first contact after kick off
   // (or second overall contact) is not by the same agent who performed
   // the kick off
   std::shared_ptr<BallContact> firstContact = this->ballContactHistory.at(1);

@@ -198,7 +198,8 @@ TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
   EXPECT_NE(lastMsg.find("KickInRight"), string::npos);
 }
 
-/// \brief This tests whether we can transition from kickOff to playOn
+/// \brief This tests whether we can transition from kickOff to playOn and then
+/// back to kick off due to double touch violation
 TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
 {
   this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
@@ -211,9 +212,21 @@ TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
   this->agent->Start();
   this->Wait(1000);
 
-  const auto &lastMsg = this->agent->allMsgs.back();
-  // std::cerr << lastMsg << std::endl;
-  EXPECT_NE(lastMsg.find("PlayOn"), string::npos);
+  bool playOn = false;
+  bool kickOffRight = false;
+  for (const auto &msg : this->agent->allMsgs)
+  {
+    if (msg.find("PlayOn"))
+    {
+      playOn = true;
+    }
+    if (playOn && msg.find("KickOffRight"))
+    {
+      kickOffRight = true;
+    }
+  }
+  EXPECT_TRUE(playOn);
+  EXPECT_TRUE(kickOffRight);
 }
 
 int main(int argc, char **argv)

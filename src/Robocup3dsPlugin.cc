@@ -32,6 +32,7 @@
 #include <ignition/math.hh>
 #include <string>
 #include <sdf/sdf.hh>
+#include <vector>
 
 #include "robocup3ds/Effector.hh"
 #include "robocup3ds/GameState.hh"
@@ -41,6 +42,7 @@
 #include "robocup3ds/Server.hh"
 #include "robocup3ds/SoccerField.hh"
 #include "robocup3ds/SocketParser.hh"
+#include "robocup3ds/states/State.hh"
 #include "robocup3ds/Util.hh"
 
 using namespace gazebo;
@@ -150,7 +152,7 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
     this->world->GetPhysicsEngine()->SetRealTimeUpdateRate(0);
   }
 
-  // start server
+  // start RCPserver
   if (this->clientServer->GetPort() != Robocup3dsPlugin::clientPort)
   {
     this->clientServer->SetPort(Robocup3dsPlugin::clientPort);
@@ -161,6 +163,14 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   }
   this->clientServer->Start();
   this->monitorServer->Start();
+
+  // create ball collision filter for contact manager
+  const auto &contactMgr = this->world->GetPhysicsEngine()->GetContactManager();
+  const auto &ball = this->world->GetModel(SoccerField::ballName);
+  const auto &ballLink = ball->GetLink(SoccerField::ballLinkName);
+
+  contactMgr->CreateFilter(
+    ball->GetName(), ballLink->GetCollision("collision")->GetScopedName());
 }
 
 /////////////////////////////////////////////////
@@ -298,14 +308,14 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
 void Robocup3dsPlugin::UpdateContactManager()
 {
   const auto &contactMgr = this->world->GetPhysicsEngine()->GetContactManager();
-  gzmsg << "num contacts: " << contactMgr->GetContactCount() << std::endl;
-  gzmsg << "ball position: " << this->world->GetModel(SoccerField::ballName)
-        ->GetWorldPose().pos << std::endl;
-  const auto &model = this->world->GetModel("1_red");
-  if (model)
-  {
-    gzmsg << "player position: " << model->GetWorldPose().pos << std::endl;
-  }
+  // gzmsg << "num contacts: " << contactMgr->GetContactCount() << std::endl;
+  // gzmsg << "ball position: " << this->world->GetModel(SoccerField::ballName)
+  //       ->GetWorldPose().pos << std::endl;
+  // const auto &model = this->world->GetModel("1_red");
+  // if (model)
+  // {
+  //   gzmsg << "player position: " << model->GetWorldPose().pos << std::endl;
+  // }
   for (unsigned int i = 0; i < contactMgr->GetContactCount(); ++i)
   {
     this->contacts.push_back(*contactMgr->GetContact(i));
@@ -361,21 +371,26 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
         && lastBallContact->uNum == uNum
         && lastBallContact->side == teamSide[teamName]
         && gameState->GetGameTime() - lastBallContact->contactTime
-        < GameState::ballContactInterval)
+        < GameState::ballContactInterval
+        && gameState->GetCurrentState()->name == lastBallContact->playMode)
     {
       lastBallContact->contactTime = gameState->GetGameTime();
-      gzmsg << "last ball contact updated: " << playerModel->GetName() <<
-            " " << gameState->GetGameTime() << std::endl;
+      // gzmsg << "last ball contact updated: " << playerModel->GetName() <<
+      //       " " << gameState->GetGameTime() << " " <<
+      //       lastBallContact->contactTime << std::endl;
     }
     else
     {
-      gzmsg << "new ball contact: " << playerModel->GetName() <<
-            " " << gameState->GetGameTime() << std::endl;
       std::shared_ptr<GameState::BallContact> ballContact(
         new GameState::BallContact(uNum, teamSide[teamName],
                                    gameState->GetGameTime(),
-                                   G2I(ballPose.pos)));
+                                   G2I(ballPose.pos),
+                                   gameState->GetCurrentState()->name));
       gameState->ballContactHistory.push_back(ballContact);
+      // gzmsg << "new ball contact: " << playerModel->GetName() <<
+      //       " " << gameState->GetGameTime() << std::endl;
+      // gzmsg << "total number of contacts: " <<
+      //       this->gameState->ballContactHistory.size() << std::endl;
     }
   }
   this->contacts.clear();
