@@ -262,7 +262,7 @@ void Robocup3dsPlugin::UpdateEffector()
       {
         for (const auto &jointName : NaoRobot::hingeJointEffectorMap )
         {
-          // Increase the actuators damping to 1, in SDF file is (0.75)
+          // Increase the actuators damping to 1
           model->GetJoint(jointName.second)->SetDamping(0, 1);
 
           // Initial the Joint Controller;
@@ -306,33 +306,36 @@ void Robocup3dsPlugin::UpdateEffector()
         double target = (kv.second*GameState::counterCycleTime)
             + model->GetJoint(naoJointName)->GetAngle(0).Radian();
 
-
-        // For test, move only Head joints and arms
-        if(naoJointName != "HeadPitch" && naoJointName != "HeadYaw"
-           && naoJointName != "LShoulderPitch" && naoJointName != "RShoulderPitch")
-        {
-          target=0;
-        }
-
-
         // Set the Position PID Values
-        jointController->SetPositionPID(
-             model->GetJoint(naoJointName)->GetScopedName(),
-             common::PID(800, 10, 0.0));
+        if(naoJointName == "LAnklePitch" || naoJointName == "RAnklePitch")
+        {
+          jointController->SetPositionPID(
+          model->GetJoint(naoJointName)->GetScopedName(),
+          common::PID(4000, 4000, 0));
+        }
+        else if(naoJointName == "LKneePitch" || naoJointName == "RKneePitch")
+        {
+          jointController->SetPositionPID(
+          model->GetJoint(naoJointName)->GetScopedName(),
+          common::PID(4000, 4000, 0));
+        }
+        else if(naoJointName == "LHipPitch" || naoJointName == "RHipPitch")
+        {
+          jointController->SetPositionPID(
+          model->GetJoint(naoJointName)->GetScopedName(),
+          common::PID(4000, 4000, 0));
+        }
+        else
+        {
+          jointController->SetPositionPID(
+          model->GetJoint(naoJointName)->GetScopedName(),
+          common::PID(1600, 1600, 0.0));
+        }
 
         // Set the target position
         jointController->SetPositionTarget(
                      model->GetJoint(naoJointName)-> GetScopedName(), target);
 
-        /*
-        // Control the joints velocity to be Zero, For Test
-        jointController->SetVelocityPID(
-            model->GetJoint(naoJointName)->GetScopedName(),
-            common::PID(1000, 10, 0));
-
-        jointController->SetVelocityTarget(
-            model->GetJoint(naoJointName)->GetScopedName(), 0);
-        */
 
         jointController->Update();
 

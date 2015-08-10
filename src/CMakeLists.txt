@@ -44,9 +44,10 @@ link_directories(
 robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources} ${PARSER_SOURCE} ${HEADER_SOURCE})
 robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
 
+set(GAZEBO_LIBRARIES_ROBOCUP3DS   libgazebo_client.so   libgazebo_gui_building.so   libgazebo_gui_viewers.so   libgazebo_gui_model.so   libgazebo_gui.so  libgazebo_sensors.so  libgazebo_rendering.so  libgazebo_selection_buffer.so  libgazebo_physics_dart.so  libgazebo_physics_bullet.so  libgazebo_physics_simbody.so  libgazebo_player.so  libgazebo_physics_ode.so  libgazebo_physics.so  libgazebo_ode.so  libgazebo_rendering_deferred.so  libgazebo_transport.so  libgazebo_msgs.so  libgazebo_util.so  libgazebo_common.so  libgazebo_skyx.so  libgazebo_gimpact.so  libgazebo_opcode.so  libgazebo_opende_ou.so  libgazebo_math.so optimized protobuf.so debug   protobuf.so -lpthread  sdformat.so  libignition-math2.so optimized   OgreMain.so debug   OgreMain.so optimized   OgreTerrain.so debug   OgreTerrain.so optimized   OgrePaging.so debug   OgrePaging.so  libignition-math2.so libgazebo_sensors.so)
+
 target_link_libraries(${PROJECT_NAME_LOWER}Plugin
-  gazebo_sensors
-  gazebo_common
+  ${GAZEBO_LIBRARIES_ROBOCUP3DS}
   ${IGNITION-MATH_LIBRARIES}
 )
 

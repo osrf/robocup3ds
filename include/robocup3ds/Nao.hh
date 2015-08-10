@@ -43,8 +43,8 @@ namespace NaoRobot
     {"he2", "HeadPitch"},
     {"lae1", "LShoulderPitch"},
     {"lae2", "LShoulderRoll"},
-    {"lae3", "LElbowRoll"},
-    {"lae4", "LElbowYaw"},
+    {"lae3", "LElbowYaw"},
+    {"lae4", "LElbowRoll"},
     {"lle1", "LHipYawPitch"},
     {"lle2", "LHipRoll"},
     {"lle3", "LHipPitch"},
@@ -59,8 +59,8 @@ namespace NaoRobot
     {"rle6", "RAnkleRoll"},
     {"rae1", "RShoulderPitch"},
     {"rae2", "RShoulderRoll"},
-    {"rae3", "RElbowRoll"},
-    {"rae4", "RElbowYaw"}
+    {"rae3", "RElbowYaw"},
+    {"rae4", "RElbowRoll"}
   };
 
   static const std::map<std::string, std::string> hingeJointPerceptorMap =
@@ -69,8 +69,8 @@ namespace NaoRobot
     {"hj2", "HeadPitch"},
     {"laj1", "LShoulderPitch"},
     {"laj2", "LShoulderRoll"},
-    {"laj3", "LElbowRoll"},
-    {"laj4", "LElbowYaw"},
+    {"laj3", "LElbowYaw"},
+    {"laj4", "LElbowRoll"},
     {"llj1", "LHipYawPitch"},
     {"llj2", "LHipRoll"},
     {"llj3", "LHipPitch"},
@@ -85,8 +85,8 @@ namespace NaoRobot
     {"rlj6", "RAnkleRoll"},
     {"raj1", "RShoulderPitch"},
     {"raj2", "RShoulderRoll"},
-    {"raj3", "RElbowRoll"},
-    {"raj4", "RElbowYaw"}
+    {"raj3", "RElbowYaw"},
+    {"raj4", "RElbowRoll"}
   };
 
   static const std::string cameraLinkName = "Head";
@@ -97,7 +97,7 @@ namespace NaoRobot
 
   static const std::string rightFootLinkName = "r_sole";
 
-  static const std::string defaultModelName = "naoH25V40";
+  static const std::string defaultModelName = "naoType0";
 }
 
 #endif
