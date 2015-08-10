@@ -1,6 +1,6 @@
 <sdf version='1.5'>
   <model name='naoH25V40'>
-    <link name='base_link'>
+    <link name='Torso'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>
         <pose>-0.00413 0 0.04342 0 -0 0</pose>
@@ -438,7 +438,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='l_ankle'>
+    <link name='lAnkle'>
       <pose>0 0.05 -0.2879 0 -0 0</pose>
       <inertial>
         <pose>0.00045 0.00029 0.00685 0 -0 0</pose>
@@ -452,7 +452,7 @@
           <izz>5.48654e-05</izz>
         </inertia>
       </inertial>
-      <visual name='l_ankle_visual'>
+      <visual name='lAnkle_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -466,7 +466,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LAnklePitch' type='revolute'>
-      <child>l_ankle</child>
+      <child>lAnkle</child>
       <parent>LTibia</parent>
       <axis>
         <xyz>0 1 0</xyz>
@@ -495,7 +495,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='l_sole'>
+    <link name='lSole'>
       <pose>0 0.05 -0.2879 0 -0 0</pose>
       <inertial>
         <pose>0.02542 0.0033 -0.03239 0 -0 0</pose>
@@ -509,7 +509,7 @@
           <izz>0.000525757</izz>
         </inertia>
       </inertial>
-      <collision name='l_sole_collision'>
+      <collision name='lSole_collision'>
         <pose>0.02 0.005 -0.037 0 -0 0</pose>
         <geometry>
           <box>
@@ -532,7 +532,7 @@
           </friction>
         </surface>
       </collision>
-      <visual name='l_sole_visual'>
+      <visual name='lSole_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -546,8 +546,8 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LAnkleRoll' type='revolute'>
-      <child>l_sole</child>
-      <parent>l_ankle</parent>
+      <child>lSole</child>
+      <parent>lAnkle</parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -834,7 +834,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='l_wrist'>
+    <link name='lWrist'>
       <pose>0.16095 0.113 0.1 0 -0 0</pose>
       <inertial>
         <pose>0.03434 -0.00088 0.00308 0 -0 0</pose>
@@ -848,7 +848,7 @@
           <izz>0.000351919</izz>
         </inertia>
       </inertial>
-      <collision name='l_wrist_collision'>
+      <collision name='lWrist_collision'>
         <pose>0.039 0 0 1.27 -0 1.57</pose>
         <geometry>
           <box>
@@ -867,7 +867,7 @@
           </friction>
         </surface>
       </collision>
-      <visual name='l_wrist_visual'>
+      <visual name='lWrist_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -881,7 +881,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LWristYaw' type='revolute'>
-      <child>l_wrist</child>
+      <child>lWrist</child>
       <parent>LForeArm</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -939,7 +939,7 @@
     </link>
     <joint name='LFinger1' type='revolute'>
       <child>LFinger11</child>
-      <parent>l_wrist</parent>
+      <parent>lWrist</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -1110,7 +1110,7 @@
     </link>
     <joint name='LFinger2' type='revolute'>
       <child>LFinger21</child>
-      <parent>l_wrist</parent>
+      <parent>lWrist</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -1252,7 +1252,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='l_gripper'>
+    <link name='lGripper'>
       <pose>0.2187 0.113 0.08769 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
@@ -1271,8 +1271,8 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LHand' type='revolute'>
-      <child>l_gripper</child>
-      <parent>l_wrist</parent>
+      <child>lGripper</child>
+      <parent>lWrist</parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -1329,7 +1329,7 @@
     </link>
     <joint name='LThumb1_joint' type='revolute'>
       <child>LThumb1</child>
-      <parent>l_wrist</parent>
+      <parent>lWrist</parent>
       <axis>
         <xyz>-0 -1 -0</xyz>
         <limit>
@@ -1682,7 +1682,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='r_ankle'>
+    <link name='rAnkle'>
       <pose>0 -0.05 -0.2879 0 -0 0</pose>
       <inertial>
         <pose>0.00045 -0.00029 0.00685 0 -0 0</pose>
@@ -1696,7 +1696,7 @@
           <izz>5.49131e-05</izz>
         </inertia>
       </inertial>
-      <visual name='r_ankle_visual'>
+      <visual name='rAnkle_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -1710,7 +1710,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RAnklePitch' type='revolute'>
-      <child>r_ankle</child>
+      <child>rAnkle</child>
       <parent>RTibia</parent>
       <axis>
         <xyz>0 1 0</xyz>
@@ -1739,7 +1739,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='r_sole'>
+    <link name='rSole'>
       <pose>0 -0.05 -0.2879 0 -0 0</pose>
       <inertial>
         <pose>0.02542 -0.0033 -0.03239 0 -0 0</pose>
@@ -1753,7 +1753,7 @@
           <izz>0.000525035</izz>
         </inertia>
       </inertial>
-      <collision name='r_sole_collision'>
+      <collision name='rSole_collision'>
         <pose>0.02 -0.005 -0.037 0 -0 0</pose>
         <geometry>
           <box>
@@ -1776,7 +1776,7 @@
           </friction>
         </surface>
       </collision>
-      <visual name='r_sole_visual'>
+      <visual name='rSole_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -1790,8 +1790,8 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RAnkleRoll' type='revolute'>
-      <child>r_sole</child>
-      <parent>r_ankle</parent>
+      <child>rSole</child>
+      <parent>rAnkle</parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -2078,7 +2078,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='r_wrist'>
+    <link name='rWrist'>
       <pose>0.16095 -0.113 0.1 0 -0 0</pose>
       <inertial>
         <pose>0.03434 0.00088 0.00308 0 -0 0</pose>
@@ -2092,7 +2092,7 @@
           <izz>0.000351919</izz>
         </inertia>
       </inertial>
-      <collision name='r_wrist_collision'>
+      <collision name='rWrist_collision'>
         <pose>0.039 0 0 1.27 -0 1.57</pose>
         <geometry>
           <box>
@@ -2111,7 +2111,7 @@
           </friction>
         </surface>
       </collision>
-      <visual name='r_wrist_visual'>
+      <visual name='rWrist_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -2125,7 +2125,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RWristYaw' type='revolute'>
-      <child>r_wrist</child>
+      <child>rWrist</child>
       <parent>RForeArm</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -2183,7 +2183,7 @@
     </link>
     <joint name='RFinger1' type='revolute'>
       <child>RFinger11</child>
-      <parent>r_wrist</parent>
+      <parent>rWrist</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -2354,7 +2354,7 @@
     </link>
     <joint name='RFinger2' type='revolute'>
       <child>RFinger21</child>
-      <parent>r_wrist</parent>
+      <parent>rWrist</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -2496,7 +2496,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='r_gripper'>
+    <link name='rGripper'>
       <pose>0.2187 -0.113 0.08769 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
@@ -2515,8 +2515,8 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RHand' type='revolute'>
-      <child>r_gripper</child>
-      <parent>r_wrist</parent>
+      <child>rGripper</child>
+      <parent>rWrist</parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -2573,7 +2573,7 @@
     </link>
     <joint name='RThumb1_joint' type='revolute'>
       <child>RThumb1</child>
-      <parent>r_wrist</parent>
+      <parent>rWrist</parent>
       <axis>
         <xyz>-0 -1 -0</xyz>
         <limit>
