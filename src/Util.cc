@@ -15,6 +15,8 @@
  *
 */
 
+#include <cerrno>
+#include <cstdlib>
 #include <gazebo/gazebo.hh>
 #include <ignition/math.hh>
 #include <map>
@@ -106,4 +108,23 @@ bool LoadConfigParameterBool(
   }
   gzmsg << "KEY: " << _key << " VALUE: " << _boolValue << std::endl;
   return true;
+}
+
+//////////////////////////////////////////////////
+bool S2D(const char *_str, double &_v)
+{
+  char *e;
+  errno = 0;
+  const double temp = std::strtod(_str, &e);
+
+  // error, we didn't consume the entire string or overflow or underflow
+  if (*e != '\0' || errno != 0 )
+  {
+    return false;
+  }
+  else
+  {
+    _v = temp;
+    return true;
+  }
 }

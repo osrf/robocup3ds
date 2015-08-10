@@ -36,12 +36,14 @@ ignition::math::Vector3<double> G2I(const gazebo::math::Vector3 _pt);
 /// \brief Converts from ignition math Quaternion to gazebo math Quaternion
 /// \param[in] _pt Ignition math Quaternion
 /// \return Gazebo math Quaternion
-gazebo::math::Quaternion I2G(const ignition::math::Quaternion<double> _q);
+gazebo::math::Quaternion I2G(
+  const ignition::math::Quaternion<double> _q);
 
 /// \brief Converts from gazebo math Quaternion to ignition math Quaternion
 /// \param[in] _pt Gazebo math Quaternion
 /// \return Ignition math Quaternion
-ignition::math::Quaternion<double> G2I(const gazebo::math::Quaternion _q);
+ignition::math::Quaternion<double> G2I(
+  const gazebo::math::Quaternion _q);
 
 /// \brief Converts from ignition math Pose to gazebo math Pose
 /// \param[in] _pt Ignition math Pose
@@ -72,5 +74,11 @@ bool LoadConfigParameterBool(
   const std::map<std::string, std::string> &_config,
   const std::string &_key,
   bool &_boolValue);
+
+/// \brief Converts a c-string to double
+/// \param[in] _str C-string
+/// \param[out] _v Double value
+/// \return True if conversion is successful
+bool S2D(const char *_str, double &_v);
 
 #endif

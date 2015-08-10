@@ -71,7 +71,7 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   lastUpdateTime(-GameState::counterCycleTime)
 {
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
-  gzmsg << "Starting Robocup Plugin for Gazebo" << std::endl;
+  gzmsg << "Robocup Plugin for Gazebo Started" << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -134,7 +134,7 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
 
   gzmsg << "client port: " << Robocup3dsPlugin::clientPort << std::endl;
   gzmsg << "monitor port: " << Robocup3dsPlugin::monitorPort << std::endl;
-  gzmsg << "syncmode status: " << Robocup3dsPlugin::syncMode << std::endl;
+  gzmsg << "sync mode status: " << Robocup3dsPlugin::syncMode << std::endl;
 
   // connect to the update event.
   if (!Robocup3dsPlugin::syncMode)

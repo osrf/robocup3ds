@@ -28,6 +28,7 @@
 #include "robocup3ds/Nao.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Effector.hh"
+#include "robocup3ds/Util.hh"
 
 using namespace ignition;
 
@@ -157,25 +158,6 @@ void Effector::ParseMessage(const std::string &_msg)
 }
 
 //////////////////////////////////////////////////
-bool Effector::Double(const char *_str, double &_v) const
-{
-  char *e;
-  errno = 0;
-  double temp = std::strtod(_str, &e);
-
-  if (*e != '\0' ||  // error, we didn't consume the entire string
-      errno != 0 )   // error, overflow or underflow
-  {
-    return false;
-  }
-  else
-  {
-    _v = temp;
-    return true;
-  }
-}
-
-//////////////////////////////////////////////////
 void Effector::ParseSexp(sexp_t *_exp)
 {
   // Extract the first element of a s-expression
@@ -245,7 +227,7 @@ void Effector::ParseHingeJoint(sexp_t *_exp)
 
   double angle;
   std::string jointName = _exp->list->val;
-  if (_exp->list->next && this->Double(_exp->list->next->val, angle))
+  if (_exp->list->next && S2D(_exp->list->next->val, angle))
   {
     this->currAgent->action.jointEffectors[jointName] = angle;
   }
@@ -279,9 +261,9 @@ void Effector::ParseBeam(sexp_t *_exp)
   double x, y, yaw;
   if (_exp->list->next && _exp->list->next->next
       && _exp->list->next->next->next
-      && this->Double(_exp->list->next->val, x)
-      && this->Double(_exp->list->next->next->val, y)
-      && this->Double(_exp->list->next->next->next->val, yaw))
+      && S2D(_exp->list->next->val, x)
+      && S2D(_exp->list->next->next->val, y)
+      && S2D(_exp->list->next->next->next->val, yaw))
   {
     this->gameState->BeamAgent(this->currAgent->uNum,
                                this->currAgent->team->name, x, y, yaw);
@@ -350,7 +332,7 @@ void Effector::ParseInit(sexp_t *_exp)
       if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
       {
         double temp;
-        if (this->Double(ptr->list->next->val, temp))
+        if (S2D(ptr->list->next->val, temp))
         {
           playerNum = static_cast<double>(temp);
         }
@@ -552,7 +534,7 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
       if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
       {
         double temp;
-        if (this->Double(ptr->list->next->val, temp))
+        if (S2D(ptr->list->next->val, temp))
         {
           uNum = static_cast<double>(temp);
         }
@@ -566,9 +548,9 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
       else if (!strcmp(ptr->list->val, "pos") && ptr->list->next
                && ptr->list->next->next && ptr->list->next->next->next)
       {
-        if (this->Double(ptr->list->next->val, x)
-            && this->Double(ptr->list->next->next->val, y)
-            && this->Double(ptr->list->next->next->next->val, z))
+        if (S2D(ptr->list->next->val, x)
+            && S2D(ptr->list->next->next->val, y)
+            && S2D(ptr->list->next->next->next->val, z))
         {
           pMove = false;
           pDouble = true;
@@ -582,10 +564,10 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
                && ptr->list->next->next && ptr->list->next->next->next
                && ptr->list->next->next->next->next)
       {
-        if (this->Double(ptr->list->next->val, x)
-            && this->Double(ptr->list->next->next->val, y)
-            && this->Double(ptr->list->next->next->next->val, z)
-            && this->Double(ptr->list->next->next->next->next->val, yaw))
+        if (S2D(ptr->list->next->val, x)
+            && S2D(ptr->list->next->next->val, y)
+            && S2D(ptr->list->next->next->next->val, z)
+            && S2D(ptr->list->next->next->next->next->val, yaw))
         {
           pMove = true;
           pDouble = true;
@@ -654,17 +636,17 @@ void MonitorEffector::ParseMoveBall(sexp_t *_exp)
     {
       if (!strcmp(ptr->list->val, "pos") && ptr->list->next
           && ptr->list->next->next && ptr->list->next->next->next
-          && this->Double(ptr->list->next->val, x)
-          && this->Double(ptr->list->next->next->val, y)
-          && this->Double(ptr->list->next->next->next->val, z))
+          && S2D(ptr->list->next->val, x)
+          && S2D(ptr->list->next->next->val, y)
+          && S2D(ptr->list->next->next->next->val, z))
       {
         this->gameState->MoveBall(math::Vector3<double>(x, y, z));
       }
       else if (!strcmp(ptr->list->val, "vel") && ptr->list->next
                && ptr->list->next->next && ptr->list->next->next->next
-               && this->Double(ptr->list->next->val, u)
-               && this->Double(ptr->list->next->next->val, v)
-               && this->Double(ptr->list->next->next->next->val, w))
+               && S2D(ptr->list->next->val, u)
+               && S2D(ptr->list->next->next->val, v)
+               && S2D(ptr->list->next->next->next->val, w))
       {
         this->gameState->SetBallVel(math::Vector3<double>(u, v, w));
       }
@@ -703,7 +685,7 @@ void MonitorEffector::ParseRemoveAgent(sexp_t *_exp)
       if (!strcmp(ptr->list->val, "unum") && ptr->list->next)
       {
         double temp;
-        if (this->Double(ptr->list->next->val, temp))
+        if (S2D(ptr->list->next->val, temp))
         {
           uNum = static_cast<double>(temp);
         }
