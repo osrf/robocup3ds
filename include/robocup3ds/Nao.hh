@@ -25,10 +25,10 @@
 namespace NaoRobot
 {
   /// \brief Height of Nao robot in meters
-  static const double kHeight = 0.6;
+  static const double kHeight = 0.57;
 
   /// \brief Height of Nao robot's torso in meters
-  static const double kTorsoHeight = 0.3;
+  static const double kTorsoHeight = kHeight * 0.5;
 
   /// \brief A map of link names in Nao model's SDF file and names sent
   /// by server to client
@@ -37,8 +37,8 @@ namespace NaoRobot
     {"head", "Head"},
     {"llowerarm", "LForeArm"},
     {"rlowerarm", "RForeArm"},
-    {"lfoot", "l_sole"},
-    {"rfoot", "r_sole"}
+    {"lfoot", "lSole"},
+    {"rfoot", "rSole"}
   };
 
   /// \brief A map of joint names sent received by server from client and
@@ -102,13 +102,13 @@ namespace NaoRobot
   static const std::string kCameraLinkName = "Head";
 
   /// \brief Name of link that is torso
-  static const std::string kTorsoLinkName = "base_link";
+  static const std::string kTorsoLinkName = "Torso";
 
   /// \brief Name of link for left foot
-  static const std::string kLeftFootLinkName = "l_sole";
+  static const std::string kLeftFootLinkName = "lSole";
 
   /// \brief Name of link for right foot
-  static const std::string kRightFootLinkName = "r_sole";
+  static const std::string kRightFootLinkName = "rSole";
 
   /// \brief Default name of Nao model
   static const std::string kDefaultModelName = "naoH25V40";
