@@ -56,7 +56,7 @@ namespace SoccerField
   static const double kGoalHeight = 0.8;
 
   /// \brief Radius of ball
-  static const double kBallRadius = 0.042;
+  static const double kBallRadius = 0.04;
 
   /// \brief How much ball to have travel beyond field lines to count as out
   /// of bounds
