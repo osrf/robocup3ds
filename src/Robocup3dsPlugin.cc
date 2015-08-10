@@ -182,6 +182,10 @@ void Robocup3dsPlugin::Init()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 {
+  // We only apply new user commands every cycle time, but internally,
+  // we still need to make sure the robot is not let loose and falls to
+  // gravity and other dynamic effects.
+  this->KeepEffectorsState();
   this->UpdateContactManager();
   // checks if enough time has elapsed to update gameState and send out
   // information
@@ -226,6 +230,7 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
     }
   }
 
+  this->KeepEffectorsState();
   this->UpdateContactManager();
   this->UpdateMonitorEffector();
   this->UpdateGameState();
@@ -233,6 +238,106 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
   // gzerr << "updatesync() called at " << this->world->GetSimTime().Double()
   //       << std::endl;
   this->lastUpdateTime = this->world->GetSimTime().Double();
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::KeepEffectorsState()
+{
+  common::Time currTime = this->world->GetSimTime();
+  common::Time stepTime = currTime - this->prevUpdateTime;
+  this->prevUpdateTime = currTime;
+  double dt = stepTime.Double();
+
+  // set joint velocities of agent model
+  for (const auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      const auto &model = this->world->GetModel(agent.GetName());
+      if (agent.status == Agent::Status::STOPPED || !agent.inSimWorld)
+      {
+        model->ResetPhysicsStates();
+        // Why is this pose jittering?
+        ignition::math::Pose3<double> pose(agent.pos, agent.rot);
+        model->SetWorldPose(I2G(pose));
+        continue;
+      }
+      for (auto &jointEffector : agent.action.jointEffectors)
+      {
+        std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
+                                     std::string(jointEffector.first))->second;
+        gazebo::physics::JointPtr joint = model->GetJoint(naoJointName);
+        if (!joint)
+        {
+          continue;
+        }
+
+        ////////////////////////////////////////
+        // Using joint position
+        //
+        // Setting joint positions directly keeps the robot at that exact
+        // configuration.
+        // Not recommended to be used during games because we override physical
+        // effects (robot might float instead of falling due to gravity,
+        // penetration to other robots might happen.
+        ////////////////////////////////////////
+        /*
+                 double targetPos = joint->GetAngle(0).Radian() + jointEffector.second * dt;
+                 joint->SetPosition(0, targetPos);
+        */
+        ////////////////////////////////////////
+        // Using ODE joint control
+        //
+        // Warning: This is deprecated behaviour, may be gone on gazebo7
+        // The ODE physics engine will control the joint to achieve the goal
+        // velocity while respecting the maximum force. We don't need to set
+        // any other parameters.
+        // SetVelocity sets the joint state for the current iteration only,
+        // while this applies a force to the joint trying to fix the velocity.
+        ////////////////////////////////////////
+        /*
+                joint->SetParam("fmax", 0, 1000.0);
+                // joint->SetParam("vel", 0, jointEffector.second);
+                joint->SetParam("vel", 0, 0.0);
+        */
+        ////////////////////////////////////////
+        // Using SetVelocity
+        //
+        // Robot flies - what's happening?
+        ////////////////////////////////////////
+        /*
+                joint->SetVelocity(0, jointEffector.second);
+        */
+        ////////////////////////////////////////
+        // Using our own PID
+        //
+        // PID position control based on sphere_atlas_demo.world
+        // Requires parameter fine tuning for each joint
+        ////////////////////////////////////////
+
+        double jointKp = 480;
+        double jointKd = 100;
+
+        if (this->qp.find(joint->GetName()) == this->qp.end())
+        {
+          this->qp[joint->GetName()] = 0;
+        }
+
+        double p = joint->GetAngle(0).Radian();
+
+        // Target position
+        double targetPos = joint->GetAngle(0).Radian() + jointEffector.second * dt;
+
+        double perror = targetPos - p;
+        double derror = (perror - this->qp[joint->GetName()]) / dt;
+        this->qp[joint->GetName()] = perror;  // save qp
+        double force = jointKp * perror +
+                       jointKd * derror;
+
+        joint->SetForce(0, force);
+      }
+    }
+  }
 }
 
 /////////////////////////////////////////////////
@@ -265,27 +370,28 @@ void Robocup3dsPlugin::UpdateEffector()
           ") agent removed from game world by client: " <<
           agentName << std::endl;
   }
-
-  // set joint velocities of agent model
-  for (const auto &team : this->gameState->teams)
-  {
-    for (auto &agent : team->members)
+  /*
+    // set joint velocities of agent model
+    for (const auto &team : this->gameState->teams)
     {
-      const auto &model = this->world->GetModel(agent.GetName());
-      if (agent.status == Agent::Status::STOPPED || !agent.inSimWorld)
+      for (auto &agent : team->members)
       {
-        continue;
-      }
+        const auto &model = this->world->GetModel(agent.GetName());
+        if (agent.status == Agent::Status::STOPPED || !agent.inSimWorld)
+        {
+          continue;
+        }
 
-      for (auto &kv : agent.action.jointEffectors)
-      {
-        std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
-                                     std::string(kv.first))->second;
-        model->GetJoint(naoJointName)->SetVelocity(0, kv.second);
+        for (auto &kv : agent.action.jointEffectors)
+        {
+          std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
+                                       std::string(kv.first))->second;
+          model->GetJoint(naoJointName)->SetVelocity(0, kv.second);
+        }
+        agent.action.jointEffectors.clear();
       }
-      agent.action.jointEffectors.clear();
     }
-  }
+  */
 }
 
 /////////////////////////////////////////////////
@@ -468,7 +574,8 @@ void Robocup3dsPlugin::UpdateGameState()
       //                          && agent.pos.Distance(G2I(modelPose.pos))
       //                          > NaoRobot::torsoHeight;
 
-      if (!agent.updatePose && agent.status != Agent::Status::STOPPED)
+      // if (!agent.updatePose && agent.status != Agent::Status::STOPPED)
+      if (!agent.updatePose)
       {
         continue;
       }
@@ -477,16 +584,16 @@ void Robocup3dsPlugin::UpdateGameState()
       model->SetWorldPose(I2G(pose));
       agent.updatePose = false;
 
-      if (agent.status == Agent::Status::STOPPED)
-      {
-        // reset joint angles, velocity, and acceleration to zero
-        // gzmsg << "resetting model!" << std::endl;
-        model->ResetPhysicsStates();
-        // for (const auto &joint : model->GetJoints())
-        // {
-        //   joint->Reset();
-        // }
-      }
+      // if (agent.status == Agent::Status::STOPPED)
+      // {
+      // reset joint angles, velocity, and acceleration to zero
+      // gzmsg << "resetting model!" << std::endl;
+      // model->ResetPhysicsStates();
+      // for (const auto &joint : model->GetJoints())
+      // {
+      //   joint->Reset();
+      // }
+      // }
     }
   }
 
