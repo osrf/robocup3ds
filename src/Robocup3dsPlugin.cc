@@ -244,8 +244,8 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
 void Robocup3dsPlugin::KeepEffectorsState()
 {
   common::Time currTime = this->world->GetSimTime();
-  common::Time stepTime = currTime - this->prevUpdateTime;
-  this->prevUpdateTime = currTime;
+  common::Time stepTime = currTime - this->prevPIDUpdateTime;
+  this->prevPIDUpdateTime = currTime;
   double dt = stepTime.Double();
 
   // set joint velocities of agent model
@@ -253,8 +253,12 @@ void Robocup3dsPlugin::KeepEffectorsState()
   {
     for (auto &agent : team->members)
     {
+      if (!agent.inSimWorld)
+      {
+        continue;
+      }
       const auto &model = this->world->GetModel(agent.GetName());
-      if (agent.status == Agent::Status::STOPPED || !agent.inSimWorld)
+      if (agent.status == Agent::Status::STOPPED)
       {
         model->ResetPhysicsStates();
         // Why is this pose jittering?
@@ -262,10 +266,10 @@ void Robocup3dsPlugin::KeepEffectorsState()
         model->SetWorldPose(I2G(pose));
         continue;
       }
-      for (auto &jointEffector : agent.action.jointEffectors)
+      for (const auto &jointEffector : agent.action.jointEffectors)
       {
         std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
-                                     std::string(jointEffector.first))->second;
+                                     jointEffector.first)->second;
         gazebo::physics::JointPtr joint = model->GetJoint(naoJointName);
         if (!joint)
         {
@@ -326,13 +330,14 @@ void Robocup3dsPlugin::KeepEffectorsState()
         double p = joint->GetAngle(0).Radian();
 
         // Target position
-        double targetPos = joint->GetAngle(0).Radian() + jointEffector.second * dt;
+        double targetPos = joint->GetAngle(0).Radian() +
+                           jointEffector.second * dt;
 
-        double perror = targetPos - p;
-        double derror = (perror - this->qp[joint->GetName()]) / dt;
-        this->qp[joint->GetName()] = perror;  // save qp
-        double force = jointKp * perror +
-                       jointKd * derror;
+        double pError = targetPos - p;
+        double dError = (pError - this->qp[joint->GetName()]) / dt;
+        this->qp[joint->GetName()] = pError;  // save qp
+        double force = jointKp * pError +
+                       jointKd * dError;
 
         joint->SetForce(0, force);
       }
@@ -507,8 +512,7 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateGameState()
 {
-  // gzmsg << "
-  // UpdateGameState()" << std::endl;
+  // gzmsg << "UpdateGameState()" << std::endl;
 
   // sync gameState time and gaezbo world time
   this->gameState->SetGameTime(this->world->GetSimTime().Double());

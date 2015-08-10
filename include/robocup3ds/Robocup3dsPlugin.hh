@@ -137,7 +137,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: std::vector<gazebo::physics::Contact> contacts;
 
   /// \brief Used by our PID controller to keep track of the time.
-  private: gazebo::common::Time prevUpdateTime;
+  private: gazebo::common::Time prevPIDUpdateTime;
 
   /// \brief Used by our PID controller to keep track of the error.
   private: std::map<std::string, double> qp;
