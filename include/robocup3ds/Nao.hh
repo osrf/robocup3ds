@@ -37,8 +37,8 @@ namespace NaoRobot
     {"head", "Head"},
     {"llowerarm", "LForeArm"},
     {"rlowerarm", "RForeArm"},
-    {"lfoot", "lSole"},
-    {"rfoot", "rSole"}
+    {"lfoot", "LSole"},
+    {"rfoot", "RSole"}
   };
 
   /// \brief A map of joint names sent received by server from client and
@@ -105,10 +105,10 @@ namespace NaoRobot
   static const std::string kTorsoLinkName = "Torso";
 
   /// \brief Name of link for left foot
-  static const std::string kLeftFootLinkName = "lSole";
+  static const std::string kLeftFootLinkName = "LSole";
 
   /// \brief Name of link for right foot
-  static const std::string kRightFootLinkName = "rSole";
+  static const std::string kRightFootLinkName = "RSole";
 
   /// \brief Default name of Nao model
   static const std::string kDefaultModelName = "naoH25V40";
