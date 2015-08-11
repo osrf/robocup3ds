@@ -1,11 +1,13 @@
 set (sources
   Robocup3dsPlugin.cc
   Server.cc
+  Util.cc
 )
 
 set (gtest_sources
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
+  Util_TEST.cc
 )
 
 # make below target specific?

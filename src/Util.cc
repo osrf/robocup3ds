@@ -51,7 +51,7 @@ ignition::math::Quaternion<double> G2I(const gazebo::math::Quaternion _q)
 /////////////////////////////////////////////////
 gazebo::math::Pose I2G(const ignition::math::Pose3<double> _p)
 {
-  return gazebo::math::Pose(_p));
+  return gazebo::math::Pose(_p);
 }
 
 /////////////////////////////////////////////////
@@ -68,7 +68,12 @@ bool LoadConfigParameter(
 {
   try
   {
-    _value = std::stod(_config.at(_key));
+    size_t offset;
+    _value = std::stod(_config.at(_key), &offset);
+    if (offset != _config.at(_key).size())
+    {
+      return false;
+    }
   }
   catch (const std::exception &exc)
   {
