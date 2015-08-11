@@ -32,7 +32,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
 {
   // Set the frame background and foreground colors
   this->setStyleSheet(
-    "QFrame { background-color : rgba(100, 100, 100, 255); color : white; }");
+    "QFrame { background-color : rgba(255, 100, 100, 255); color : white; }");
 
   // Create the main layout
   QHBoxLayout *mainLayout = new QHBoxLayout;
@@ -75,7 +75,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
   this->node->Init("default");
   this->statsSub = this->node->Subscribe("~/world_stats",
                                          &Robocup3dsGUIPlugin::OnStats, this);
-  gzmsg << "Robocup GUI plugin loaded" << std::endl;
+  gzerr << "Robocup GUI plugin loaded" << std::endl;
 }
 
 /////////////////////////////////////////////////
