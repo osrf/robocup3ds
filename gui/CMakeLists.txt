@@ -12,7 +12,7 @@ set (GUIpluginHeaders
 )
 
 set (GUIpluginMOC
-  moc_Robocup3dsGUIPlugin
+  moc_Robocup3dsGUIPlugin.cxx
 )
 
 # make below target specific?

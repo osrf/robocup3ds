@@ -14,7 +14,9 @@
  * limitations under the License.
  *
 */
+#include <string>
 #include <sstream>
+#include <gazebo/gazebo.hh>
 #include <gazebo/msgs/msgs.hh>
 
 #include "Robocup3dsGUIPlugin.hh"
@@ -30,7 +32,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
 {
   // Set the frame background and foreground colors
   this->setStyleSheet(
-      "QFrame { background-color : rgba(100, 100, 100, 255); color : white; }");
+    "QFrame { background-color : rgba(100, 100, 100, 255); color : white; }");
 
   // Create the main layout
   QHBoxLayout *mainLayout = new QHBoxLayout;
@@ -41,16 +43,16 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
   // Create the layout that sits inside the frame
   QHBoxLayout *frameLayout = new QHBoxLayout();
 
-  QLabel *label = new QLabel(tr("Sim Time:"));
+  QLabel *label = new QLabel(tr("Simulation Time:"));
 
   // Create a time label
-  QLabel *timeLabel = new QLabel(tr("00:00:00.00"));
+  QLabel *timeLabel = new QLabel(tr("00000"));
 
   // Add the label to the frame's layout
   frameLayout->addWidget(label);
   frameLayout->addWidget(timeLabel);
   connect(this, SIGNAL(SetSimTime(QString)),
-      timeLabel, SLOT(setText(QString)), Qt::QueuedConnection);
+          timeLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
   // Add frameLayout to the frame
   mainFrame->setLayout(frameLayout);
@@ -65,14 +67,15 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
   this->setLayout(mainLayout);
 
   // Position and resize this widget
-  this->move(200, 10);
-  this->resize(200, 30);
+  // this->move(200, 10);
+  // this->resize(200, 30);
 
   // Create a node for transportation
   this->node = transport::NodePtr(new transport::Node());
   this->node->Init("default");
   this->statsSub = this->node->Subscribe("~/world_stats",
-      &Robocup3dsGUIPlugin::OnStats, this);
+                                         &Robocup3dsGUIPlugin::OnStats, this);
+  gzmsg << "Robocup GUI plugin loaded" << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -84,35 +87,31 @@ Robocup3dsGUIPlugin::~Robocup3dsGUIPlugin()
 void Robocup3dsGUIPlugin::OnStats(ConstWorldStatisticsPtr &_msg)
 {
   this->SetSimTime(QString::fromStdString(
-        this->FormatTime(_msg->sim_time())));
+                     this->FormatTime(_msg->sim_time())));
 }
 
 /////////////////////////////////////////////////
 std::string Robocup3dsGUIPlugin::FormatTime(const msgs::Time &_msg) const
 {
   std::ostringstream stream;
-  unsigned int day, hour, min, sec, msec;
-
+  // unsigned int day, hour, min, sec, msec;
   stream.str("");
+  // sec = _msg.sec();
+  stream << std::setw(5) << std::setfill('0') << _msg.sec();
 
-  sec = _msg.sec();
+  // day = sec / 86400;
+  // sec -= day * 86400;
+  // hour = sec / 3600;
+  // sec -= hour * 3600;
+  // min = sec / 60;
+  // sec -= min * 60;
+  // msec = rint(_msg.nsec() * 1e-6);
 
-  day = sec / 86400;
-  sec -= day * 86400;
-
-  hour = sec / 3600;
-  sec -= hour * 3600;
-
-  min = sec / 60;
-  sec -= min * 60;
-
-  msec = rint(_msg.nsec() * 1e-6);
-
-  stream << std::setw(2) << std::setfill('0') << day << " ";
-  stream << std::setw(2) << std::setfill('0') << hour << ":";
-  stream << std::setw(2) << std::setfill('0') << min << ":";
-  stream << std::setw(2) << std::setfill('0') << sec << ".";
-  stream << std::setw(3) << std::setfill('0') << msec;
+  // stream << std::setw(2) << std::setfill('0') << day << " ";
+  // stream << std::setw(2) << std::setfill('0') << hour << ":";
+  // stream << std::setw(2) << std::setfill('0') << min << ":";
+  // stream << std::setw(2) << std::setfill('0') << sec << ".";
+  // stream << std::setw(3) << std::setfill('0') << msec;
 
   return stream.str();
 }
