@@ -25,43 +25,43 @@
 #include "robocup3ds/Util.hh"
 
 /////////////////////////////////////////////////
-gazebo::math::Vector3 I2G(const ignition::math::Vector3<double> _pt)
+gazebo::math::Vector3 Util::I2G(const ignition::math::Vector3<double> _pt)
 {
   return gazebo::math::Vector3(_pt);
 }
 
 /////////////////////////////////////////////////
-ignition::math::Vector3<double> G2I(const gazebo::math::Vector3 _pt)
+ignition::math::Vector3<double> Util::G2I(const gazebo::math::Vector3 _pt)
 {
   return _pt.Ign();
 }
 
 /////////////////////////////////////////////////
-gazebo::math::Quaternion I2G(const ignition::math::Quaternion<double> _q)
+gazebo::math::Quaternion Util::I2G(const ignition::math::Quaternion<double> _q)
 {
   return gazebo::math::Quaternion(_q);
 }
 
 /////////////////////////////////////////////////
-ignition::math::Quaternion<double> G2I(const gazebo::math::Quaternion _q)
+ignition::math::Quaternion<double> Util::G2I(const gazebo::math::Quaternion _q)
 {
   return _q.Ign();
 }
 
 /////////////////////////////////////////////////
-gazebo::math::Pose I2G(const ignition::math::Pose3<double> _p)
+gazebo::math::Pose Util::I2G(const ignition::math::Pose3<double> _p)
 {
   return gazebo::math::Pose(_p);
 }
 
 /////////////////////////////////////////////////
-ignition::math::Pose3<double> G2I(const gazebo::math::Pose _p)
+ignition::math::Pose3<double> Util::G2I(const gazebo::math::Pose _p)
 {
   return _p.Ign();
 }
 
 /////////////////////////////////////////////////
-bool LoadConfigParameter(
+bool Util::LoadConfigParameter(
   const std::map<std::string, std::string> &_config,
   const std::string &_key,
   double &_value)
@@ -84,7 +84,7 @@ bool LoadConfigParameter(
 }
 
 /////////////////////////////////////////////////
-bool LoadConfigParameterBool(
+bool Util::LoadConfigParameterBool(
   const std::map<std::string, std::string> &_config,
   const std::string &_key,
   bool &_boolValue)
@@ -113,7 +113,7 @@ bool LoadConfigParameterBool(
 }
 
 //////////////////////////////////////////////////
-bool S2D(const char *_str, double &_v)
+bool Util::S2D(const char *_str, double &_v)
 {
   char *e;
   errno = 0;

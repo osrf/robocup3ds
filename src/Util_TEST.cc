@@ -23,6 +23,8 @@
 
 #include "robocup3ds/Util.hh"
 
+using namespace Util;
+
 /// \brief We test that the functions that convert between gazebo and ignition
 /// math objects work
 TEST(UtilTest, I2G_G2I_Test)
@@ -98,4 +100,9 @@ TEST(UtilTest, Str2DTest)
 
   char x3[50] = "2w0r924252";
   EXPECT_FALSE(S2D(x3, v));
+}
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
