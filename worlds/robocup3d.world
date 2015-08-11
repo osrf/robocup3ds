@@ -56,7 +56,7 @@
       <percept_groundtruthinfo>true</percept_groundtruthinfo>
     </plugin>
     <gui fullscreen='0'>
-      <plugin name="robocup3dGUIplugin" filename="/home/jliang/Desktop/OSRF/gazebo_install/lib/libRobocup3dsGUIPlugin.so">
+      <plugin name="robocup3dGUIplugin" filename="libRobocup3dsGUIPlugin.so">
       </plugin>
     </gui>
   </world>
