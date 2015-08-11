@@ -27,38 +27,37 @@
 /////////////////////////////////////////////////
 gazebo::math::Vector3 I2G(const ignition::math::Vector3<double> _pt)
 {
-  return gazebo::math::Vector3(_pt.X(), _pt.Y(), _pt.Z());
+  return gazebo::math::Vector3(_pt);
 }
 
 /////////////////////////////////////////////////
 ignition::math::Vector3<double> G2I(const gazebo::math::Vector3 _pt)
 {
-  return ignition::math::Vector3<double>(_pt[0], _pt[1], _pt[2]);
+  return _pt.Ign();
 }
 
 /////////////////////////////////////////////////
 gazebo::math::Quaternion I2G(const ignition::math::Quaternion<double> _q)
 {
-  return gazebo::math::Quaternion(_q.W(), _q.X(), _q.Y(), _q.Z());
+  return gazebo::math::Quaternion(_q);
 }
 
 /////////////////////////////////////////////////
 ignition::math::Quaternion<double> G2I(const gazebo::math::Quaternion _q)
 {
-  auto qEuler = _q.GetAsEuler();
-  return ignition::math::Quaternion<double>(qEuler[0], qEuler[1], qEuler[2]);
+  return _q.Ign();
 }
 
 /////////////////////////////////////////////////
 gazebo::math::Pose I2G(const ignition::math::Pose3<double> _p)
 {
-  return gazebo::math::Pose(I2G(_p.Pos()), I2G(_p.Rot()));
+  return gazebo::math::Pose(_p));
 }
 
 /////////////////////////////////////////////////
 ignition::math::Pose3<double> G2I(const gazebo::math::Pose _p)
 {
-  return ignition::math::Pose3<double>(G2I(_p.pos), G2I(_p.rot));
+  return _p.Ign();
 }
 
 /////////////////////////////////////////////////
@@ -73,7 +72,6 @@ bool LoadConfigParameter(
   }
   catch (const std::exception &exc)
   {
-    // gzerr << exc.what() << std::endl;
     return false;
   }
   gzmsg << "KEY: " << _key << " VALUE: " << _value << std::endl;
@@ -103,7 +101,6 @@ bool LoadConfigParameterBool(
   }
   catch (const std::exception &exc)
   {
-    // gzerr << exc.what() << std::endl;
     return false;
   }
   gzmsg << "KEY: " << _key << " VALUE: " << _boolValue << std::endl;
