@@ -2,7 +2,6 @@ include (${project_cmake_dir}/Utils.cmake)
 
 set (headers
   Robocup3dsPlugin.hh
-  SocketParser.hh
 )
 
 set (robocup3ds_headers "" CACHE INTERNAL "RoboCup 3DS headers" FORCE)

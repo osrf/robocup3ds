@@ -254,6 +254,7 @@ else (build_errors)
     add_subdirectory(test)
     add_subdirectory(worlds)
     add_subdirectory(models)
+    add_subdirectory(gui)
   endif (BUILD_ROBOCUP3DS)
 
   ########################################
