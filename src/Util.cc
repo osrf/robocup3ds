@@ -66,21 +66,30 @@ bool Util::LoadConfigParameter(
   const std::string &_key,
   double &_value)
 {
+  bool rValue = true;
   try
   {
     size_t offset;
     _value = std::stod(_config.at(_key), &offset);
     if (offset != _config.at(_key).size())
     {
-      return false;
+      rValue = false;
     }
   }
   catch (const std::exception &exc)
   {
-    return false;
+    rValue = false;
   }
-  gzmsg << "KEY: " << _key << " VALUE: " << _value << std::endl;
-  return true;
+  if (rValue)
+  {
+    gzmsg << "KEY: " << _key << " VALUE: " << _value << std::endl;
+  }
+  else
+  {
+    gzerr << "LoadConfigParameter() failed to read the following key: "
+          << _key << "!" << std::endl;
+  }
+  return rValue;
 }
 
 /////////////////////////////////////////////////
@@ -89,6 +98,7 @@ bool Util::LoadConfigParameterBool(
   const std::string &_key,
   bool &_boolValue)
 {
+  bool rValue = true;
   try
   {
     if (_config.at(_key) == "false" || _config.at(_key) == "0")
@@ -101,15 +111,23 @@ bool Util::LoadConfigParameterBool(
     }
     else
     {
-      return false;
+      rValue = false;
     }
   }
   catch (const std::exception &exc)
   {
-    return false;
+    rValue = false;
   }
-  gzmsg << "KEY: " << _key << " VALUE: " << _boolValue << std::endl;
-  return true;
+  if (rValue)
+  {
+    gzmsg << "KEY: " << _key << " VALUE: " << _boolValue << std::endl;
+  }
+  else
+  {
+    gzerr << "LoadConfigParameterBool() failed to read the following key: "
+          << _key << "!" << std::endl;
+  }
+  return rValue;
 }
 
 //////////////////////////////////////////////////
@@ -122,6 +140,8 @@ bool Util::S2D(const char *_str, double &_v)
   // error, we didn't consume the entire string or overflow or underflow
   if (*e != '\0' || errno != 0 )
   {
+    gzerr << "S2D() failed to read the following string: "
+          << _str << std::endl;
     return false;
   }
   else
