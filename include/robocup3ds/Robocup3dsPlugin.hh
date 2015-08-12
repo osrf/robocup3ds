@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <gazebo/gazebo.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <sdf/sdf.hh>
 
 class RCPServer;
@@ -53,6 +54,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Update the robocup simulation state in sync mode
   /// \param[in] _info Information used in the update event.
   public: void UpdateSync(const gazebo::common::UpdateInfo &_info);
+
+  /// \brief Publish game state information to GUI plugin
+  private: void PublishGameInfo();
 
   /// \brief Function for loading robocupPlugin configuration variables
   /// \param[in] _config Map of configuration variables
@@ -141,6 +145,12 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Used by our PID controller to keep track of the error.
   private: std::map<std::string, double> qp;
+
+  /// \brief Game state publisher.
+  private: gazebo::transport::PublisherPtr statePub;
+
+  /// \brief Pointer to a node for communication.
+  private: gazebo::transport::NodePtr gzNode;
 };
 
 #endif

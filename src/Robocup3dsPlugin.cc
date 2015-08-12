@@ -23,12 +23,14 @@
 #include <memory>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/Collision.hh>
+#include <gazebo/msgs/msgs.hh>
 #include <gazebo/physics/Contact.hh>
 #include <gazebo/physics/ContactManager.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/physics/World.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <ignition/math.hh>
 #include <string>
 #include <sdf/sdf.hh>
@@ -71,6 +73,12 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   lastUpdateTime(-GameState::counterCycleTime)
 {
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
+
+  // initialize transport and publisher
+  this->gzNode = transport::NodePtr(new transport::Node());
+  this->gzNode->Init();
+  this->statePub =
+    this->gzNode->Advertise<msgs::GzString>("~/robocup3ds/state");
   gzmsg << "Robocup Plugin for Gazebo Started" << std::endl;
 }
 
@@ -177,6 +185,25 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
 void Robocup3dsPlugin::Init()
 {
   // do nothing
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::PublishGameInfo()
+{
+  std::string _stateMsg =
+    std::to_string(this->gameState->GetElapsedGameTime(true)) +
+    " " + this->gameState->GetCurrentState()->name + ":";
+  for (const auto &team : this->gameState->teams)
+  {
+    _stateMsg += team->name + " (" + Team::GetSideAsString(
+                   team->side) + ") Score: " + std::to_string(team->score)
+                 + " # of Players: " +
+                 std::to_string(team->members.size()) + "\t";
+  }
+
+  msgs::GzString stateMsg;
+  stateMsg.set_data(_stateMsg);
+  this->statePub->Publish(stateMsg);
 }
 
 /////////////////////////////////////////////////
@@ -697,4 +724,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
       this->clientServer->Send(agent.socketID, this->buffer, cx + 4);
     }
   }
+
+  // publish game information to gui plugin
+  this->PublishGameInfo();
 }
