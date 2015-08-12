@@ -192,13 +192,13 @@ void Robocup3dsPlugin::PublishGameInfo()
 {
   std::string _stateMsg =
     std::to_string(this->gameState->GetElapsedGameTime(true)) +
-    " " + this->gameState->GetCurrentState()->name + ":";
+    " " + this->gameState->GetCurrentState()->name;
   for (const auto &team : this->gameState->teams)
   {
-    _stateMsg += team->name + " (" + Team::GetSideAsString(
-                   team->side) + ") Score: " + std::to_string(team->score)
-                 + " # of Players: " +
-                 std::to_string(team->members.size()) + "\t";
+    _stateMsg += "$" + team->name + " (" + Team::GetSideAsString(
+                   team->side) + ") (Score: " + std::to_string(team->score)
+                 + ") (# of Players: " +
+                 std::to_string(team->members.size()) + ")";
   }
 
   msgs::GzString stateMsg;

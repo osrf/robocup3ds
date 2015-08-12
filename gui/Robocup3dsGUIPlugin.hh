@@ -49,6 +49,14 @@ namespace gazebo
     /// \param[in] _string String representation of game state.
     signals: void SetTeam(QString _string);
 
+    /// \brief A signal used to set the game state line edit.
+    /// \param[in] _string String representation of game state.
+    signals: void SetTeam2(QString _string);
+
+    /// \brief A signal used to set the game state line edit.
+    /// \param[in] _string String representation of game state.
+    signals: void SetPlaymode(QString _string);
+
     /// \brief Callback that received world statistics messages.
     /// \param[in] _msg World statistics message that is received.
     protected: void OnStats(ConstWorldStatisticsPtr &_msg);

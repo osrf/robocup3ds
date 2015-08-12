@@ -140,10 +140,10 @@ GameState::GameState():
   this->SetCurrent(beforeKickOffState);
 
   this->teams.push_back(std::make_shared<Team>(
-                          "_empty_team", Team::Side::LEFT, 0,
+                          "--------", Team::Side::LEFT, 0,
                           GameState::playerLimit));
   this->teams.push_back(std::make_shared<Team>(
-                          "_empty_team", Team::Side::RIGHT, 0,
+                          "--------", Team::Side::RIGHT, 0,
                           GameState::playerLimit));
 }
 
@@ -1051,7 +1051,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
   {
     for (auto &team : this->teams)
     {
-      if (team->name == "_empty_team" && team->members.size() == 0)
+      if (team->name == "--------" && team->members.size() == 0)
       {
         teamToAdd = team;
         team->name = _teamName;
