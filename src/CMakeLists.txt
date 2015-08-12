@@ -4,11 +4,13 @@ Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/
 set (sources
   Robocup3dsPlugin.cc
   Server.cc
+  Util.cc
 )
 
 set (gtest_sources
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
+  Util_TEST.cc
 )
 
 # make below target specific?
