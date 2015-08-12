@@ -15,14 +15,16 @@
  *
 */
 
-#ifndef _GAZEBO_UTIL_HH_
-#define _GAZEBO_UTIL_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_UTIL_HH_
+#define _GAZEBO_ROBOCUP3DS_UTIL_HH_
 
 #include <gazebo/gazebo.hh>
 #include <ignition/math.hh>
 #include <map>
 #include <string>
 
+namespace Util
+{
 /// \brief Converts from ignition math Vector3 to gazebo math Vector3
 /// \param[in] _pt Ignition math Vector3
 /// \return Gazebo math Vector3
@@ -80,5 +82,6 @@ bool LoadConfigParameterBool(
 /// \param[out] _v Double value
 /// \return True if conversion is successful
 bool S2D(const char *_str, double &_v);
+}
 
 #endif

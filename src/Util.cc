@@ -25,67 +25,80 @@
 #include "robocup3ds/Util.hh"
 
 /////////////////////////////////////////////////
-gazebo::math::Vector3 I2G(const ignition::math::Vector3<double> _pt)
+gazebo::math::Vector3 Util::I2G(const ignition::math::Vector3<double> _pt)
 {
-  return gazebo::math::Vector3(_pt.X(), _pt.Y(), _pt.Z());
+  return gazebo::math::Vector3(_pt);
 }
 
 /////////////////////////////////////////////////
-ignition::math::Vector3<double> G2I(const gazebo::math::Vector3 _pt)
+ignition::math::Vector3<double> Util::G2I(const gazebo::math::Vector3 _pt)
 {
-  return ignition::math::Vector3<double>(_pt[0], _pt[1], _pt[2]);
+  return _pt.Ign();
 }
 
 /////////////////////////////////////////////////
-gazebo::math::Quaternion I2G(const ignition::math::Quaternion<double> _q)
+gazebo::math::Quaternion Util::I2G(const ignition::math::Quaternion<double> _q)
 {
-  return gazebo::math::Quaternion(_q.W(), _q.X(), _q.Y(), _q.Z());
+  return gazebo::math::Quaternion(_q);
 }
 
 /////////////////////////////////////////////////
-ignition::math::Quaternion<double> G2I(const gazebo::math::Quaternion _q)
+ignition::math::Quaternion<double> Util::G2I(const gazebo::math::Quaternion _q)
 {
-  auto qEuler = _q.GetAsEuler();
-  return ignition::math::Quaternion<double>(qEuler[0], qEuler[1], qEuler[2]);
+  return _q.Ign();
 }
 
 /////////////////////////////////////////////////
-gazebo::math::Pose I2G(const ignition::math::Pose3<double> _p)
+gazebo::math::Pose Util::I2G(const ignition::math::Pose3<double> _p)
 {
-  return gazebo::math::Pose(I2G(_p.Pos()), I2G(_p.Rot()));
+  return gazebo::math::Pose(_p);
 }
 
 /////////////////////////////////////////////////
-ignition::math::Pose3<double> G2I(const gazebo::math::Pose _p)
+ignition::math::Pose3<double> Util::G2I(const gazebo::math::Pose _p)
 {
-  return ignition::math::Pose3<double>(G2I(_p.pos), G2I(_p.rot));
+  return _p.Ign();
 }
 
 /////////////////////////////////////////////////
-bool LoadConfigParameter(
+bool Util::LoadConfigParameter(
   const std::map<std::string, std::string> &_config,
   const std::string &_key,
   double &_value)
 {
+  bool rValue = true;
   try
   {
-    _value = std::stod(_config.at(_key));
+    size_t offset;
+    _value = std::stod(_config.at(_key), &offset);
+    if (offset != _config.at(_key).size())
+    {
+      rValue = false;
+    }
   }
   catch (const std::exception &exc)
   {
-    // gzerr << exc.what() << std::endl;
-    return false;
+    rValue = false;
   }
-  gzmsg << "KEY: " << _key << " VALUE: " << _value << std::endl;
-  return true;
+  if (rValue)
+  {
+    gzmsg << "KEY: " << _key << " VALUE: " << _value << std::endl;
+  }
+  else
+  {
+    gzerr << "LoadConfigParameter() failed to read the following key: "
+          << _key << "!" << std::endl;
+  }
+  return rValue;
 }
 
 /////////////////////////////////////////////////
-bool LoadConfigParameterBool(
+bool Util::LoadConfigParameterBool(
   const std::map<std::string, std::string> &_config,
   const std::string &_key,
   bool &_boolValue)
 {
+  bool rValue = true;
   try
   {
     if (_config.at(_key) == "false" || _config.at(_key) == "0")
@@ -98,20 +111,27 @@ bool LoadConfigParameterBool(
     }
     else
     {
-      return false;
+      rValue = false;
     }
   }
   catch (const std::exception &exc)
   {
-    // gzerr << exc.what() << std::endl;
-    return false;
+    rValue = false;
   }
-  gzmsg << "KEY: " << _key << " VALUE: " << _boolValue << std::endl;
-  return true;
+  if (rValue)
+  {
+    gzmsg << "KEY: " << _key << " VALUE: " << _boolValue << std::endl;
+  }
+  else
+  {
+    gzerr << "LoadConfigParameterBool() failed to read the following key: "
+          << _key << "!" << std::endl;
+  }
+  return rValue;
 }
 
 //////////////////////////////////////////////////
-bool S2D(const char *_str, double &_v)
+bool Util::S2D(const char *_str, double &_v)
 {
   char *e;
   errno = 0;
@@ -120,6 +140,8 @@ bool S2D(const char *_str, double &_v)
   // error, we didn't consume the entire string or overflow or underflow
   if (*e != '\0' || errno != 0 )
   {
+    gzerr << "S2D() failed to read the following string: "
+          << _str << std::endl;
     return false;
   }
   else

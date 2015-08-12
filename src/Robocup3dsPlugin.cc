@@ -49,6 +49,7 @@
 
 using namespace gazebo;
 using namespace common;
+using namespace Util;
 
 int Robocup3dsPlugin::clientPort        = 3100;
 int Robocup3dsPlugin::monitorPort       = 3200;

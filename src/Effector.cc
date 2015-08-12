@@ -31,6 +31,7 @@
 #include "robocup3ds/Util.hh"
 
 using namespace ignition;
+using namespace Util;
 
 const int Effector::kBufferSize = 16384;
 
