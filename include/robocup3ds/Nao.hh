@@ -78,6 +78,7 @@ class NaoBT
   public: virtual std::string KDefaultModelName() = 0;
 };
 
+/// \brief The official Nao body type from Aldebaran
 class NaoOfficialBT : public NaoBT
 {
   // Documentation inherited
