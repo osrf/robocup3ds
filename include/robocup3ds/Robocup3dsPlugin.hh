@@ -88,6 +88,10 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// information sent to agents
   private: void UpdatePerceptor();
 
+  /// \brief Update the playmode based on msgs sent by the GUI plugin
+  /// \param[in] _msg Message received from GUI
+  private: void UpdateGUIPlaymode(ConstGzStringPtr &_msg);
+
   /// \brief Port used for connecting client agents
   public: static int clientPort;
 
@@ -151,6 +155,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Pointer to a node for communication.
   private: gazebo::transport::NodePtr gzNode;
+
+  /// \brief Subscriber to playmode change messge from GUI plugin.
+  private: gazebo::transport::SubscriberPtr playmodeSub;
 };
 
 #endif

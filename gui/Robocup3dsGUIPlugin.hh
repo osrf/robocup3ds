@@ -27,7 +27,7 @@
 
 namespace gazebo
 {
-  class GAZEBO_VISIBLE Robocup3dsGUIPlugin : public GUIPlugin
+  class Robocup3dsGUIPlugin : public GUIPlugin
   {
     Q_OBJECT
 
@@ -35,7 +35,7 @@ namespace gazebo
     public: Robocup3dsGUIPlugin();
 
     /// \brief Destructor
-    public: virtual ~Robocup3dsGUIPlugin();
+    public: virtual ~Robocup3dsGUIPlugin() = default;
 
     /// \brief A signal used to set the sim time line edit.
     /// \param[in] _string String representation of sim time.
@@ -73,10 +73,17 @@ namespace gazebo
     /// \param[in] _frameLayout Pointer to frame layout object
     protected: void AddGameStateWidget(QHBoxLayout *_frameLayout);
 
-    /// \brief Helper function to format time string.
-    /// \param[in] _msg Time message.
-    /// \return Time formatted as a string.
-    private: std::string FormatTime(const msgs::Time &_msg) const;
+    /// \brief Helper method to add a team info widget
+    /// \param[in] _frameLayout Pointer to frame layout object
+    protected: void AddTeamWidget(QHBoxLayout *_frameLayout);
+
+    /// \brief Helper method to add a playmode combo box widget
+    /// \param[in] _frameLayout Pointer to frame layout object
+    protected: void AddComboBox(QHBoxLayout *_frameLayout);
+
+    /// \brief Helper function callback for playmode combobox
+    /// \param[in] _text Text of current selection
+    protected slots: void HandleSelectionChanged(const QString &_text);
 
     /// \brief Node used to establish communication with gzserver.
     private: transport::NodePtr node;
@@ -86,6 +93,9 @@ namespace gazebo
 
     /// \brief Subscriber to game state messages.
     private: transport::SubscriberPtr gameSub;
+
+    /// \brief Game state publisher.
+    private: gazebo::transport::PublisherPtr playmodePub;
   };
 }
 

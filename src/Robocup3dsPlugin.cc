@@ -80,6 +80,9 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   this->gzNode->Init();
   this->statePub =
     this->gzNode->Advertise<msgs::GzString>("~/robocup3ds/state");
+  this->playmodeSub = this->gzNode->Subscribe(
+                        "~/robocup3dsGUI/playmode",
+                        &Robocup3dsPlugin::UpdateGUIPlaymode, this);
   gzmsg << "Robocup Plugin for Gazebo Started" << std::endl;
 }
 
@@ -205,6 +208,14 @@ void Robocup3dsPlugin::PublishGameInfo()
   msgs::GzString stateMsg;
   stateMsg.set_data(_stateMsg);
   this->statePub->Publish(stateMsg);
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateGUIPlaymode(ConstGzStringPtr &_msg)
+{
+  const std::string playModeStr = _msg->data();
+  this->gameState->SetCurrent(this->gameState->playModeNameMap[playModeStr]);
+  gzmsg << "GUI changed playmode!" << std::endl;
 }
 
 /////////////////////////////////////////////////
