@@ -34,111 +34,111 @@ class NaoBT
 
   /// \brief Returns height of Nao
   /// \return Height in meters
-  public: virtual double KHeight() = 0;
+  public: virtual double KHeight() const = 0;
 
   /// \brief Returns height of Nao's torso
   /// \return Height in meters
-  public: virtual double KTorsoHeight() = 0;
+  public: virtual double KTorsoHeight() const = 0;
 
   /// \brief Returns a map of link names in Nao model's SDF file and names sent
   /// by server to client
   /// \return Map mentioned above
-  public: virtual std::map<std::string, std::string> KBodyPartMap() = 0;
+  public: virtual std::map<std::string, std::string> KBodyPartMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
   /// \return Map mentioned above
   public: virtual
-  std::map<std::string, std::string> HingeJointEffectorMap() = 0;
+  std::map<std::string, std::string> HingeJointEffectorMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
   /// \return Map mentioned above
   public: virtual std::map<std::string, std::string>
-  HingeJointPerceptorMap() = 0;
+  HingeJointPerceptorMap() const = 0;
 
   /// \brief Returns name of link in Nao model that is used for camera position
   /// \return Name mentioned above
-  public: virtual std::string KCameraLinkName() = 0;
+  public: virtual std::string KCameraLinkName() const = 0;
 
   /// \brief Returns name of link that is torso
   /// \return Name mentioned above
-  public: virtual std::string KTorsoLinkName() = 0;
+  public: virtual std::string KTorsoLinkName() const = 0;
 
   /// \brief Returns name of link for left foot
   /// \return Name mentioned above
-  public: virtual std::string KLeftFootLinkName() = 0;
+  public: virtual std::string KLeftFootLinkName() const = 0;
 
   /// \brief Returns name of link for right foot
   /// \return Name mentioned above
-  public: virtual std::string KRightFootLinkName() = 0;
+  public: virtual std::string KRightFootLinkName() const = 0;
 
   /// \brief Returns default name of Nao model
   /// \return Name mentioned above
-  public: virtual std::string KDefaultModelName() = 0;
+  public: virtual std::string KDefaultModelName() const = 0;
 };
 
 /// \brief The official Nao body type from Aldebaran
 class NaoOfficialBT : public NaoBT
 {
   // Documentation inherited
-  public: virtual double KHeight()
+  public: virtual double KHeight() const
   {
     return this->kHeight;
   }
 
   // Documentation inherited
-  public: virtual double KTorsoHeight()
+  public: virtual double KTorsoHeight() const
   {
     return this->kTorsoHeight;
   }
 
   // Documentation inherited
-  public: virtual std::map<std::string, std::string> KBodyPartMap()
+  public: virtual std::map<std::string, std::string> KBodyPartMap() const
   {
     return this->kBodyPartMap;
   }
 
   // Documentation inherited
   public: virtual
-  std::map<std::string, std::string> HingeJointEffectorMap()
+  std::map<std::string, std::string> HingeJointEffectorMap() const
   {
     return this->hingeJointEffectorMap;
   }
 
   // Documentation inherited
   public: virtual std::map<std::string, std::string>
-  HingeJointPerceptorMap()
+  HingeJointPerceptorMap() const
   {
     return this->hingeJointPerceptorMap;
   }
 
   // Documentation inherited
-  public: virtual std::string KCameraLinkName()
+  public: virtual std::string KCameraLinkName() const
   {
     return this->kCameraLinkName;
   }
 
   // Documentation inherited
-  public: virtual std::string KTorsoLinkName()
+  public: virtual std::string KTorsoLinkName() const
   {
     return this->kTorsoLinkName;
   }
 
   // Documentation inherited
-  public: virtual std::string KLeftFootLinkName()
+  public: virtual std::string KLeftFootLinkName() const
   {
     return this->kLeftFootLinkName;
   }
 
   // Documentation inherited
-  public: virtual std::string KRightFootLinkName()
+  public: virtual std::string KRightFootLinkName() const
   {
     return this->kRightFootLinkName;
   }
 
   // Documentation inherited
-  public: virtual std::string KDefaultModelName()
+  public: virtual std::string KDefaultModelName() const
   {
     return this->kDefaultModelName;
   }
