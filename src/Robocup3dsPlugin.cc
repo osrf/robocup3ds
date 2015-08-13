@@ -71,7 +71,7 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   monitorServer(std::make_shared<RCPServer>(
                   Robocup3dsPlugin::monitorPort,
                   this->monitorEffector)),
-  lastUpdateTime(-GameState::counterCycleTime)
+  lastUpdateTime(-GameState::kCounterCycleTime)
 {
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
 
@@ -229,7 +229,7 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
   // checks if enough time has elapsed to update gameState and send out
   // information
   if (this->world->GetSimTime().Double() - this->lastUpdateTime <
-      GameState::counterCycleTime)
+      GameState::kCounterCycleTime)
   {
     return;
   }
@@ -521,7 +521,7 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
         && lastBallContact->uNum == uNum
         && lastBallContact->side == teamSide[teamName]
         && gameState->GetGameTime() - lastBallContact->contactTime
-        < GameState::ballContactInterval
+        < GameState::kBallContactInterval
         && gameState->GetCurrentState()->name == lastBallContact->playMode)
     {
       lastBallContact->contactTime = gameState->GetGameTime();

@@ -78,10 +78,11 @@ double GameState::HFov = 120;
 double GameState::VFov = 120;
 bool   GameState::restrictVision = true;
 bool   GameState::groundTruthInfo = false;
-const double GameState::counterCycleTime = 0.02;
-const double GameState::dropBallRadiusMargin = 0.5;
-const double GameState::beamNoise = 0.1;
-const double GameState::ballContactInterval = 0.1;
+const double GameState::kCounterCycleTime = 0.02;
+const double GameState::kDropBallRadiusMargin = 0.5;
+const double GameState::kBeamNoise = 0.1;
+const std::string GameState::kDefaultTeamName = "------------";
+const double GameState::kBallContactInterval = 0.1;
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -141,10 +142,10 @@ GameState::GameState():
   this->SetCurrent(beforeKickOffState);
 
   this->teams.push_back(std::make_shared<Team>(
-                          "--------", Team::Side::LEFT, 0,
+                          GameState::kDefaultTeamName, Team::Side::LEFT, 0,
                           GameState::playerLimit));
   this->teams.push_back(std::make_shared<Team>(
-                          "--------", Team::Side::RIGHT, 0,
+                          GameState::kDefaultTeamName, Team::Side::RIGHT, 0,
                           GameState::playerLimit));
 }
 
@@ -261,7 +262,7 @@ void GameState::Update()
   this->cycleCounter++;
   if (GameState::useCounterForGameTime)
   {
-    this->gameTime = this->cycleCounter * GameState::counterCycleTime;
+    this->gameTime = this->cycleCounter * GameState::kCounterCycleTime;
   }
   this->lastCycleTimeLength = this->gameTime - this->prevCycleGameTime;
 
@@ -353,7 +354,7 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
           math::Vector3<double> newPos2;
           newPos2.Set(0, 0, beamHeight);
           if (Geometry::IntersectionCircunferenceLine(line, this->ballPos,
-              GameState::dropBallRadiusMargin +
+              GameState::kDropBallRadiusMargin +
               GameState::dropBallRadius, newPos, newPos2))
           {
             if (agent.pos.Distance(newPos) < agent.pos.Distance(newPos2))
@@ -871,11 +872,11 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                                const double _yaw) const
 {
   double offsetX = (static_cast<double>(random()) / (RAND_MAX)) *
-                   (2 * GameState::beamNoise) - GameState::beamNoise;
+                   (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
   double offsetY = (static_cast<double>(random()) / (RAND_MAX)) *
-                   (2 * GameState::beamNoise) - GameState::beamNoise;
+                   (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
   double offsetYaw = (static_cast<double>(random()) / (RAND_MAX)) *
-                     (2 * GameState::beamNoise) - GameState::beamNoise;
+                     (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
   _agent.pos.Set(_x + offsetX, _y + offsetY, GameState::beamHeight);
   _agent.rot.Euler(0, 0, _yaw + offsetYaw);
   _agent.updatePose = true;
@@ -1052,7 +1053,8 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
   {
     for (auto &team : this->teams)
     {
-      if (team->name == "--------" && team->members.size() == 0)
+      if (team->name == GameState::kDefaultTeamName
+          && team->members.size() == 0)
       {
         teamToAdd = team;
         team->name = _teamName;
@@ -1226,7 +1228,7 @@ void GameState::SetCycleCounter(const int _cycleCounter)
 
   if (GameState::useCounterForGameTime)
   {
-    double newGameTime = GameState::counterCycleTime * cycleCounter;
+    double newGameTime = GameState::kCounterCycleTime * cycleCounter;
     double offsetTime = newGameTime - gameTime;
     this->prevCycleGameTime += offsetTime;
     this->gameTime = newGameTime;

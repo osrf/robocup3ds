@@ -90,13 +90,16 @@ TEST_F(IntegrationTest, TestLoadWorldPlugin)
   SUCCEED();
 }
 
-/// \brief This tests whether agent can successfully connect, init, and beam
+/// \brief This tests whether two agents can successfully connect,
+/// init, and beam
 TEST_F(IntegrationTest, TestLoadConnectAgent)
 {
   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
   this->Wait();
   this->agent->InitAndBeam(1, 1, 90);
   this->agent->Start();
+  this->oppAgent->InitAndBeam(-1, -1, 45);
+  this->oppAgent->Start();
 
   while (this->agent->allMsgs.size() == 0u)
   {
@@ -107,7 +110,7 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
   EXPECT_TRUE(this->agent->connected);
 
   EXPECT_GT(this->agent->allMsgs.size(), 0u);
-  const auto &lastMsg = this->agent->allMsgs.back();
+  auto lastMsg = this->agent->allMsgs.back();
   cerr << lastMsg << endl;
   EXPECT_NE(lastMsg.find("GS"), string::npos);
   EXPECT_NE(lastMsg.find("BeforeKickOff"), string::npos);
@@ -117,6 +120,28 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
 
   bool see = false;
   for (const auto &msg : this->agent->allMsgs)
+  {
+    if (msg.find("See"))
+    {
+      see = true;
+    }
+  }
+  EXPECT_TRUE(see);
+
+  EXPECT_TRUE(this->oppAgent->running);
+  EXPECT_TRUE(this->oppAgent->connected);
+
+  EXPECT_GT(this->oppAgent->allMsgs.size(), 0u);
+  lastMsg = this->oppAgent->allMsgs.back();
+  cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("GS"), string::npos);
+  EXPECT_NE(lastMsg.find("BeforeKickOff"), string::npos);
+  EXPECT_NE(lastMsg.find("myorien"), string::npos);
+  EXPECT_NE(lastMsg.find("mypos"), string::npos);
+  EXPECT_NE(lastMsg.find("ballpos"), string::npos);
+
+  see = false;
+  for (const auto &msg : this->oppAgent->allMsgs)
   {
     if (msg.find("See"))
     {

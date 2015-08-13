@@ -560,18 +560,21 @@ class GameState
   public: static bool groundTruthInfo;
 
   /// \brief How long in game time is each cycle
-  public: static const double counterCycleTime;
+  public: static const double kCounterCycleTime;
 
   /// \brief Safety margin when beaming players during dropball
-  public: static const double dropBallRadiusMargin;
+  public: static const double kDropBallRadiusMargin;
 
   /// \brief Noise added to beams
-  public: static const double beamNoise;
+  public: static const double kBeamNoise;
+
+  /// \brief Default name used for teams when plugin starts
+  public: static const std::string kDefaultTeamName;
 
   /// \brief If less than ballContactInterval time has passed since the last
   /// ball contact by the same agent, then it will not count as a new ball
   /// contact (the time of the last ball contact is update instead)
-  public: static const double ballContactInterval;
+  public: static const double kBallContactInterval;
 
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;

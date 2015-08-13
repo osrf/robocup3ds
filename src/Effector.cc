@@ -335,7 +335,7 @@ void Effector::ParseInit(sexp_t *_exp)
         double temp;
         if (S2D(ptr->list->next->val, temp))
         {
-          playerNum = static_cast<double>(temp);
+          playerNum = static_cast<int>(temp);
         }
       }
       else if (!strcmp(ptr->list->val, "teamname") && ptr->list->next)
@@ -350,8 +350,16 @@ void Effector::ParseInit(sexp_t *_exp)
                       playerNum, teamName, this->currSocketId);
   if (this->currAgent)
   {
-    // std::cerr << "added: " << this->currAgent->GetName() << std::endl;
     this->agentsToAdd.push_back(this->currAgent->GetName());
+    gzmsg << "(" << this->gameState->GetGameTime() <<
+          ") agent added to game state: " << this->currAgent->GetName()
+          << std::endl;
+  }
+  else
+  {
+    gzmsg << "(" << this->gameState->GetGameTime() <<
+          ") failed to add agent to game state: " <<
+          Agent::GetName(playerNum, teamName) << std::endl;
   }
 }
 
@@ -537,7 +545,7 @@ void MonitorEffector::ParseMoveAgent(sexp_t *_exp)
         double temp;
         if (S2D(ptr->list->next->val, temp))
         {
-          uNum = static_cast<double>(temp);
+          uNum = static_cast<int>(temp);
         }
         pUNum = true;
       }
@@ -688,7 +696,7 @@ void MonitorEffector::ParseRemoveAgent(sexp_t *_exp)
         double temp;
         if (S2D(ptr->list->next->val, temp))
         {
-          uNum = static_cast<double>(temp);
+          uNum = static_cast<int>(temp);
         }
         pUNum = true;
       }

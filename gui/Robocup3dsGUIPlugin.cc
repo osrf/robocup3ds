@@ -62,7 +62,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
   this->setLayout(mainLayout);
 
   // Position and resize this widget
-  this->move(50, 10);
+  this->move(12, 12);
   this->resize(1300, 30);
 
   // Create a node for transportation
