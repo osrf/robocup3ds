@@ -18,6 +18,7 @@
 #ifndef _GAZEBO_ROBOCUP3DS_AGENT_HH_
 #define _GAZEBO_ROBOCUP3DS_AGENT_HH_
 
+#include <boost/any.hpp>
 #include <ignition/math.hh>
 #include <map>
 #include <memory>
@@ -226,9 +227,11 @@ class Agent
   /// \param[in] _team Pointer to team of the agent
   /// \param[in] _socketID Socket ID for agent
   public: Agent(const int _uNum, const std::shared_ptr<Team> &_team,
+    const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoOfficialBT>(),
     const int _socketID = -1):
     uNum(_uNum),
-    team(_team)
+    team(_team),
+    bodyType(_bodyType)
   {
     this->socketID = _socketID;
     this->isSynced = false;
@@ -240,7 +243,7 @@ class Agent
     this->timeImmobilized = 0;
     this->timeFallen = 0;
     this->pos.Set(0, SoccerField::kHalfFieldHeight,
-      NaoRobot::kTorsoHeight + 0.05);
+      this->bodyType->KTorsoHeight() + 0.05);
 
     if (!this->team)
       this->name = std::to_string(this->uNum);
@@ -379,6 +382,9 @@ class Agent
 
   /// \brief Name of agent
   public: std::string name;
+
+  /// \brief Body type of nao
+  public: std::shared_ptr<NaoBT> bodyType;
 };
 
 /// \brief Container that contains info for say effector

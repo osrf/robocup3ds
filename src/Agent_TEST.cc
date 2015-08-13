@@ -21,9 +21,10 @@
 #include "gtest/gtest.h"
 
 #include "robocup3ds/Agent.hh"
+#include "robocup3ds/Nao.hh"
 
 /// \brief Test that methods of Team class work
-TEST(AgentTest, TeamMethods)
+TEST(AgentTest, TeamMethodsTest)
 {
   EXPECT_EQ("left", Team::GetSideAsString(Team::Side::LEFT));
   EXPECT_EQ("right", Team::GetSideAsString(Team::Side::RIGHT));
@@ -42,7 +43,7 @@ TEST(AgentTest, TeamMethods)
 }
 
 /// \brief Test that methods of Team class work
-TEST(AgentTest, AgentMethods)
+TEST(AgentTest, AgentMethodsTest)
 {
   std::shared_ptr<Team> t1 =
     std::make_shared<Team>("red", Team::Side::LEFT, 0, 11);
@@ -76,6 +77,20 @@ TEST(AgentTest, AgentMethods)
   EXPECT_EQ(a3.GetName(), "4");
   AgentId agentId2(4, "");
   EXPECT_EQ(agentId2, a3.GetAgentID());
+}
+
+/// \brief Test that body type parameters are correct
+TEST(AgentTest, BodyTypeTest)
+{
+  std::shared_ptr<Team> t1 =
+    std::make_shared<Team>("red", Team::Side::LEFT, 0, 11);
+  Agent a1(1, t1);
+
+  // std::cout << a1.bodyType->kHeight << std::endl;
+  EXPECT_DOUBLE_EQ(a1.bodyType->KHeight(), 0.57);
+  EXPECT_DOUBLE_EQ(a1.bodyType->KTorsoHeight(), 0.57 * 0.5);
+  EXPECT_EQ(a1.bodyType->HingeJointEffectorMap()["lae3"], "LElbowYaw");
+  EXPECT_EQ(a1.bodyType->KDefaultModelName(), "naoH25V40");
 }
 
 int main(int argc, char **argv)

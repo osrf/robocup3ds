@@ -22,17 +22,134 @@
 #include <map>
 #include <vector>
 
-namespace NaoRobot
+/// \brief Base Class for Nao body types. All other Nao body types derive
+/// from this
+class NaoBT
 {
-  /// \brief Height of Nao robot in meters
-  static const double kHeight = 0.57;
+  /// \brief Nao constructor
+  public: NaoBT() = default;
 
-  /// \brief Height of Nao robot's torso in meters
-  static const double kTorsoHeight = kHeight * 0.5;
+  /// \brief Nao destructor
+  public: ~NaoBT() = default;
+
+  /// \brief Returns height of Nao
+  /// \return Height in meters
+  public: virtual double KHeight() = 0;
+
+  /// \brief Returns height of Nao's torso
+  /// \return Height in meters
+  public: virtual double KTorsoHeight() = 0;
 
   /// \brief A map of link names in Nao model's SDF file and names sent
   /// by server to client
-  static const std::map<std::string, std::string> kBodyPartMap =
+  /// \return Mentioned above
+  public: virtual std::map<std::string, std::string> KBodyPartMap() = 0;
+
+  /// \brief A map of joint names sent received by server from client and
+  /// joint names in Nao model's SDF file
+  /// \return Mentioned above
+  public: virtual
+  std::map<std::string, std::string> HingeJointEffectorMap() = 0;
+
+  /// \brief A map of joint names sent received by server from client and
+  /// joint names in Nao model's SDF file
+  /// \return Mentioned above
+  public: virtual std::map<std::string, std::string>
+  HingeJointPerceptorMap() = 0;
+
+  /// \brief Name of link in Nao model that is used for camera position
+  /// \return Mentioned above
+  public: virtual std::string KCameraLinkName() = 0;
+
+  /// \brief Name of link that is torso
+  /// \return Mentioned above
+  public: virtual std::string KTorsoLinkName() = 0;
+
+  /// \brief Name of link for left foot
+  /// \return Mentioned above
+  public: virtual std::string KLeftFootLinkName() = 0;
+
+  /// \brief Name of link for right foot
+  /// \return Mentioned above
+  public: virtual std::string KRightFootLinkName() = 0;
+
+  /// \brief Default name of Nao model
+  /// \return Mentioned above
+  public: virtual std::string KDefaultModelName() = 0;
+};
+
+class NaoOfficialBT : public NaoBT
+{
+  // Documentation inherited
+  public: virtual double KHeight()
+  {
+    return this->kHeight;
+  }
+
+  // Documentation inherited
+  public: virtual double KTorsoHeight()
+  {
+    return this->kTorsoHeight;
+  }
+
+  // Documentation inherited
+  public: virtual std::map<std::string, std::string> KBodyPartMap()
+  {
+    return this->kBodyPartMap;
+  }
+
+  // Documentation inherited
+  public: virtual
+  std::map<std::string, std::string> HingeJointEffectorMap()
+  {
+    return this->hingeJointEffectorMap;
+  }
+
+  // Documentation inherited
+  public: virtual std::map<std::string, std::string>
+  HingeJointPerceptorMap()
+  {
+    return this->hingeJointPerceptorMap;
+  }
+
+  // Documentation inherited
+  public: virtual std::string KCameraLinkName()
+  {
+    return this->kCameraLinkName;
+  }
+
+  // Documentation inherited
+  public: virtual std::string KTorsoLinkName()
+  {
+    return this->kTorsoLinkName;
+  }
+
+  // Documentation inherited
+  public: virtual std::string KLeftFootLinkName()
+  {
+    return this->kLeftFootLinkName;
+  }
+
+  // Documentation inherited
+  public: virtual std::string KRightFootLinkName()
+  {
+    return this->kRightFootLinkName;
+  }
+
+  // Documentation inherited
+  public: virtual std::string KDefaultModelName()
+  {
+    return this->kDefaultModelName;
+  }
+
+  // Documentation inherited
+  protected: const double kHeight = 0.57;
+
+  // Documentation inherited
+  protected: const double kTorsoHeight = kHeight * 0.5;
+
+  // Documentation inherited
+  protected: const std::map<std::string, std::string> kBodyPartMap =
   {
     {"head", "Head"},
     {"llowerarm", "LForeArm"},
@@ -41,9 +158,9 @@ namespace NaoRobot
     {"rfoot", "RSole"}
   };
 
-  /// \brief A map of joint names sent received by server from client and
-  /// joint names in Nao model's SDF file
-  static const std::map<std::string, std::string> hingeJointEffectorMap =
+  // Documentation inherited
+  protected: const
+  std::map<std::string, std::string> hingeJointEffectorMap =
   {
     {"he1", "HeadYaw"},
     {"he2", "HeadPitch"},
@@ -69,9 +186,9 @@ namespace NaoRobot
     {"rae4", "RElbowRoll"}
   };
 
-  /// \brief A map of joint names sent received by server from client and
-  /// joint names in Nao model's SDF file
-  static const std::map<std::string, std::string> hingeJointPerceptorMap =
+  // Documentation inherited
+  protected: const std::map<std::string, std::string>
+  hingeJointPerceptorMap =
   {
     {"hj1", "HeadYaw"},
     {"hj2", "HeadPitch"},
@@ -97,21 +214,20 @@ namespace NaoRobot
     {"raj4", "RElbowRoll"}
   };
 
+  // Documentation inherited
+  protected: const std::string kCameraLinkName = "Head";
 
-  /// \brief Name of link in Nao model that is used for camera position
-  static const std::string kCameraLinkName = "Head";
+  // Documentation inherited
+  protected: const std::string kTorsoLinkName = "Torso";
 
-  /// \brief Name of link that is torso
-  static const std::string kTorsoLinkName = "Torso";
+  // Documentation inherited
+  protected: const std::string kLeftFootLinkName = "LSole";
 
-  /// \brief Name of link for left foot
-  static const std::string kLeftFootLinkName = "LSole";
+  // Documentation inherited
+  protected: const std::string kRightFootLinkName = "RSole";
 
-  /// \brief Name of link for right foot
-  static const std::string kRightFootLinkName = "RSole";
-
-  /// \brief Default name of Nao model
-  static const std::string kDefaultModelName = "naoH25V40";
-}
+  // Documentation inherited
+  protected: const std::string kDefaultModelName = "naoH25V40";
+};
 
 #endif
