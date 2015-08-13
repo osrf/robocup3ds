@@ -168,7 +168,7 @@ class GameState
     const std::map<std::string, std::string> &_config) const;
 
   /// \brief Destructor.
-  public: virtual ~GameState();
+  public: virtual ~GameState() = default;
 
   /// \brief Clears the history of ball contacts
   public: void ClearBallContactHistory();

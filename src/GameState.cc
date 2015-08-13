@@ -150,11 +150,6 @@ GameState::GameState():
 }
 
 /////////////////////////////////////////////////
-GameState::~GameState()
-{
-}
-
-/////////////////////////////////////////////////
 void GameState::LoadConfiguration(
   const std::map<std::string, std::string> &_config) const
 {
@@ -1155,7 +1150,14 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
       {
         if (agent.uNum == _uNum)
         {
-          this->MoveAgentNoisy(agent, _x, _y, RAD(_rot));
+          if (team->side == Team::Side::LEFT)
+          {
+            this->MoveAgentNoisy(agent, _x, _y, RAD(_rot));
+          }
+          else
+          {
+            this->MoveAgentNoisy(agent, -_x, -_y, RAD(_rot));
+          }
           return true;
         }
       }
