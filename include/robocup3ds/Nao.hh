@@ -40,41 +40,41 @@ class NaoBT
   /// \return Height in meters
   public: virtual double KTorsoHeight() = 0;
 
-  /// \brief A map of link names in Nao model's SDF file and names sent
+  /// \brief Returns a map of link names in Nao model's SDF file and names sent
   /// by server to client
-  /// \return Mentioned above
+  /// \return Map mentioned above
   public: virtual std::map<std::string, std::string> KBodyPartMap() = 0;
 
-  /// \brief A map of joint names sent received by server from client and
-  /// joint names in Nao model's SDF file
-  /// \return Mentioned above
+  /// \brief Returns a map of joint names sent received by server from client
+  /// and joint names in Nao model's SDF file
+  /// \return Map mentioned above
   public: virtual
   std::map<std::string, std::string> HingeJointEffectorMap() = 0;
 
-  /// \brief A map of joint names sent received by server from client and
-  /// joint names in Nao model's SDF file
-  /// \return Mentioned above
+  /// \brief Returns a map of joint names sent received by server from client
+  /// and joint names in Nao model's SDF file
+  /// \return Map mentioned above
   public: virtual std::map<std::string, std::string>
   HingeJointPerceptorMap() = 0;
 
-  /// \brief Name of link in Nao model that is used for camera position
-  /// \return Mentioned above
+  /// \brief Returns name of link in Nao model that is used for camera position
+  /// \return Name mentioned above
   public: virtual std::string KCameraLinkName() = 0;
 
-  /// \brief Name of link that is torso
-  /// \return Mentioned above
+  /// \brief Returns name of link that is torso
+  /// \return Name mentioned above
   public: virtual std::string KTorsoLinkName() = 0;
 
-  /// \brief Name of link for left foot
-  /// \return Mentioned above
+  /// \brief Returns name of link for left foot
+  /// \return Name mentioned above
   public: virtual std::string KLeftFootLinkName() = 0;
 
-  /// \brief Name of link for right foot
-  /// \return Mentioned above
+  /// \brief Returns name of link for right foot
+  /// \return Name mentioned above
   public: virtual std::string KRightFootLinkName() = 0;
 
-  /// \brief Default name of Nao model
-  /// \return Mentioned above
+  /// \brief Returns default name of Nao model
+  /// \return Name mentioned above
   public: virtual std::string KDefaultModelName() = 0;
 };
 
