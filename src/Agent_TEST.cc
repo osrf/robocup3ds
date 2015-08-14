@@ -86,7 +86,6 @@ TEST(AgentTest, BodyTypeTest)
     std::make_shared<Team>("red", Team::Side::LEFT, 0, 11);
   Agent a1(1, t1);
 
-  // std::cout << a1.bodyType->kHeight << std::endl;
   EXPECT_DOUBLE_EQ(a1.bodyType->KHeight(), 0.57);
   EXPECT_DOUBLE_EQ(a1.bodyType->KTorsoHeight(), 0.57 * 0.5);
   EXPECT_EQ(a1.bodyType->HingeJointEffectorMap()["lae3"], "LElbowYaw");

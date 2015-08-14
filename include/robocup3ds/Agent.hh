@@ -225,6 +225,7 @@ class Agent
   /// \brief Constructor for Agent object
   /// \param[in] _uNum Unique identifier for agent
   /// \param[in] _team Pointer to team of the agent
+  /// \param[in] _bodyType Pointer to body type object of agent
   /// \param[in] _socketID Socket ID for agent
   public: Agent(const int _uNum, const std::shared_ptr<Team> &_team,
     const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoOfficialBT>(),
