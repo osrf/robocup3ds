@@ -30,6 +30,7 @@
 using namespace ignition;
 
 int          Perceptor::updateVisualFreq  = 3;
+int          Perceptor::updateHearFreq    = 2;
 bool         Perceptor::useNoise          = true;
 const double Perceptor::kDistNoiseScale   = 0.01;
 const double Perceptor::kHearDist         = 50.0;
@@ -90,6 +91,25 @@ bool Perceptor::UpdatePerception() const
 }
 
 /////////////////////////////////////////////////
+Team::Side Perceptor::SideToSpeak() const
+{
+  if (this->gameState->GetCycleCounter()
+      % Perceptor::updateHearFreq == 0)
+  {
+    return Team::Side::LEFT;
+  }
+  else if (this->gameState->GetCycleCounter()
+           % Perceptor::updateHearFreq == 1)
+  {
+    return Team::Side::RIGHT;
+  }
+  else
+  {
+    return Team::Side::NEITHER;
+  }
+}
+
+/////////////////////////////////////////////////
 void Perceptor::Update()
 {
   for (auto &team : this->gameState->teams)
@@ -130,14 +150,19 @@ void Perceptor::Update()
           }
         }
       }
-
       // update agent hear
       this->UpdateAgentHear(agent);
     }
   }
 
-  // after processing say, set it to false
-  this->gameState->say.isValid = false;
+  // after calling UpdateAgentHear() for all agents, set team say to false
+  for (const auto &team : this->gameState->teams)
+  {
+    if (this->SideToSpeak() == team->side)
+    {
+      team->say.isValid = false;
+    }
+  }
 }
 
 /////////////////////////////////////////////////
@@ -221,15 +246,22 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
 /////////////////////////////////////////////////
 void Perceptor::UpdateAgentHear(Agent &_agent) const
 {
-  const AgentSay &say = this->gameState->say;
-  AgentHear &hear = _agent.percept.hear;
+  const AgentSay* say;
+  for (const auto &team : this->gameState->teams)
+  {
+    if (this->SideToSpeak() == team->side)
+    {
+      say = &team->say;
+    }
+  }
 
+  AgentHear &hear = _agent.percept.hear;
   hear.isValid = false;
-  if (!say.isValid)
+  if (!say->isValid)
   {
     return;
   }
-  math::Vector3<double> relPos = this->G2LMat.TransformAffine(say.pos);
+  math::Vector3<double> relPos = this->G2LMat.TransformAffine(say->pos);
   if (relPos.Length() > Perceptor::kHearDist)
   {
     return;
@@ -238,9 +270,8 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
   hear.isValid = true;
   hear.gameTime = gameState->GetElapsedGameTime();
   hear.yaw = atan2(relPos.Y(), relPos.X());
-  AgentId agentId(_agent.uNum, _agent.team->name);
-  hear.self = say.agentId == agentId;
-  hear.msg = say.msg;
+  hear.self = (say->agentId == AgentId(_agent.uNum, _agent.team->name));
+  hear.msg = say->msg;
 }
 
 /////////////////////////////////////////////////

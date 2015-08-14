@@ -592,10 +592,6 @@ class GameState
   /// \brief Flag whether to update ball position in world to match game state.
   public: bool updateBallPose;
 
-  /// \brief Message that will be broadcast to all players within
-  /// certain range
-  public: AgentSay say;
-
   /// \brief Position of soccer ball
   private: ignition::math::Vector3<double> ballPos;
 

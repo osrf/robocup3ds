@@ -35,6 +35,29 @@ using AgentBodyMap = std::map<std::string, ignition::math::Vector3<double>>;
 /// \brief Typedef for uNum, teamName pairs for identifying agents
 using AgentId = std::pair<int, std::string>;
 
+/// \brief Container that contains info for say effector
+class AgentSay
+{
+  /// \brief AgentSay constructor
+  public: AgentSay():
+    agentId(std::make_pair(-1, "")),
+    isValid(false)
+  {
+  }
+
+  /// \brief AgentId of agent who said message
+  public: AgentId agentId;
+
+  /// \brief Where the agent said the message
+  public: ignition::math::Vector3<double> pos;
+
+  /// \brief Message string
+  public: std::string msg;
+
+  /// \brief Whether message is valid
+  public: bool isValid;
+};
+
 /// \brief Team class for GameState
 class Team
 {
@@ -116,6 +139,9 @@ class Team
 
   /// \brief Can score goal or not
   public: bool canScore;
+
+  /// \brief Message to broadcast this cycle
+  public: AgentSay say;
 };
 
 /// \brief Container that contains info for hear perceptor
@@ -355,29 +381,6 @@ class Agent
   /// \brief Flag whether the agent has been successfully load into gazebo
   /// simulation world
   public: bool inSimWorld;
-};
-
-/// \brief Container that contains info for say effector
-class AgentSay
-{
-  /// \brief AgentSay constructor
-  public: AgentSay():
-    agentId(std::make_pair(-1, "")),
-    isValid(false)
-  {
-  }
-
-  /// \brief AgentId of agent who said message
-  public: AgentId agentId;
-
-  /// \brief Where the agent said the message
-  public: ignition::math::Vector3<double> pos;
-
-  /// \brief Message string
-  public: std::string msg;
-
-  /// \brief Whether message is valid
-  public: bool isValid;
 };
 
 /// \brief Struct for helping to sort agents by their distances,

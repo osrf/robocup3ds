@@ -280,6 +280,12 @@ void Effector::ParseSay(sexp_t *_exp)
   {
     return;
   }
+  // If there is already a valid message, dont overwrite current message with
+  // new one
+  if (this->currAgent->team->say.isValid)
+  {
+    return;
+  }
 
   // Accept the say message that does not contains the white space
   // characters and S-expression phrases
@@ -305,8 +311,10 @@ void Effector::ParseSay(sexp_t *_exp)
     }
 
     // Update the say message container
-    gameState->say.isValid = true;
-    gameState->say.msg = message;
+    this->currAgent->team->say.isValid = true;
+    this->currAgent->team->say.msg = message;
+    this->currAgent->team->say.agentId = this->currAgent->GetAgentID();
+    this->currAgent->team->say.pos = this->currAgent->pos;
   }
 }
 

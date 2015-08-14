@@ -110,21 +110,32 @@ class Perceptor
   /// \return True if current cycle is right cycle to update perception
   private: bool UpdatePerception() const;
 
-  /// \Brief Size of buffer used to store message sent to server
-  // public: static const int kBufferSize;
+  /// \brief Indicates which side should speak this game cycle
+  /// \return Side whose team can speak
+  private: Team::Side SideToSpeak() const;
+
+  /// \brief Indicates whether current cycle requires updating hearing info and
+  /// sending to server
+  /// \param[in] _team Team object
+  /// \return True if current cycle is right cycle to update hearing
+  private: bool UpdateHear(const Team &_team) const;
+
+  /// \brief Frequency at which we update the visualization
+  /// (every x gamestate cycles)
+  public: static int updateVisualFreq;
+
+  /// \brief Frequency at which we update the hearing
+  /// (every x gamestate cycles)
+  public: static int updateHearFreq;
+
+  /// \brief Flag whether to add noise to observations or not
+  public: static bool useNoise;
 
   /// \brief Distance of message where it still can be heard
   public: static const double kHearDist;
 
   /// \brief Multiplier for the distance noise
   public: static const double kDistNoiseScale;
-
-  /// \brief Frequency at which we update the visualization
-  /// (every x gamestate cycles)
-  public: static int updateVisualFreq;
-
-  /// \brief Flag whether to add noise to observations or not
-  public: static bool useNoise;
 
   /// \brief A constant noise that is added to all observations
   private: static const ignition::math::Vector3<double> kFixedNoise;

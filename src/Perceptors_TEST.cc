@@ -140,7 +140,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
 {
   math::Line3<double> origLine, gdLine, testLine;
   GameState::restrictVision = false;
-  perceptor->useNoise = false;
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -188,7 +188,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Restrictvis)
   GameState::HFov = 90;
   GameState::VFov = 90;
   perceptor->SetViewFrustum();
-  perceptor->useNoise = false;
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -237,7 +237,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
 {
   math::Vector3<double> origLandmark, gdLandmark, testLandmark;
   GameState::restrictVision = false;
-  perceptor->useNoise = false;
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -276,7 +276,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
   GameState::HFov = 90;
   GameState::VFov = 90;
   perceptor->SetViewFrustum();
-  perceptor->useNoise = false;
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -313,7 +313,7 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
   GameState::HFov = 90;
   GameState::VFov = 90;
   perceptor->SetViewFrustum();
-  perceptor->useNoise = false;
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   gameState->AddAgent(1, "red");
   Agent &agent1 = gameState->teams.at(0)->members.at(0);
@@ -357,16 +357,17 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
 {
   gameState->AddAgent(1, "red");
   gameState->AddAgent(2, "red");
-  auto team = gameState->teams.at(0);
+  gameState->SetCycleCounter(0);
+  const auto &team = gameState->teams.at(0);
   Agent &agent1 = team->members.at(0);
   Agent &agent2 = team->members.at(1);
   agent1.cameraPos.Set(5, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
   agent2.cameraPos.Set(0, 100, 0);
-  gameState->say.agentId = std::make_pair(5, "red");
-  gameState->say.pos.Set(0, 0, 0);
-  gameState->say.msg = "hello";
-  gameState->say.isValid = true;
+  team->say.agentId = std::make_pair(5, "red");
+  team->say.pos.Set(0, 0, 0);
+  team->say.msg = "hello";
+  team->say.isValid = true;
 
   perceptor->SetG2LMat(agent1);
   perceptor->UpdateAgentHear(agent1);
@@ -377,20 +378,20 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
   EXPECT_FALSE(agent1.percept.hear.self);
   EXPECT_EQ(agent1.percept.hear.msg, "hello");
 
-  gameState->say.agentId = std::make_pair(1, "red");
+  team->say.agentId = std::make_pair(1, "red");
   perceptor->UpdateAgentHear(agent1);
   EXPECT_TRUE(agent1.percept.hear.self);
 
-  gameState->say.isValid = false;
+  team->say.isValid = false;
   perceptor->UpdateAgentHear(agent1);
   EXPECT_FALSE(agent1.percept.hear.isValid);
 
   perceptor->SetG2LMat(agent2);
-  gameState->say.isValid = true;
+  team->say.isValid = true;
   perceptor->UpdateAgentHear(agent2);
   EXPECT_FALSE(agent2.percept.hear.isValid);
 
-  gameState->say.isValid = false;
+  team->say.isValid = false;
   perceptor->UpdateAgentHear(agent2);
   EXPECT_FALSE(agent2.percept.hear.isValid);
 }
@@ -408,13 +409,15 @@ TEST_F(PerceptorTest, Percepter_Update)
       agent.selfBodyMap["BODY"] = agent.pos;
     }
   }
-  gameState->say.agentId = std::make_pair(1, "blue");
-  gameState->say.pos.Set(0, 0, 0);
-  gameState->say.msg = "hello";
-  gameState->say.isValid = true;
+  gameState->SetCycleCounter(0);
+  const auto &team = gameState->teams.at(0);
+  team->say.agentId = std::make_pair(1, "blue");
+  team->say.pos.Set(0, 0, 0);
+  team->say.msg = "hello";
+  team->say.isValid = true;
 
   GameState::restrictVision = false;
-  perceptor->useNoise = false;
+  Perceptor::useNoise = false;
   perceptor->Update();
   for (int i = 0; i < 2; ++i)
   {
@@ -465,11 +468,14 @@ TEST_F(PerceptorTest, Percepter_Serialize)
     }
   }
   GameState::restrictVision = true;
-  gameState->say.agentId = std::make_pair(1, "blue");
-  gameState->say.pos.Set(5.0, 1.0, GameState::beamHeight);
-  gameState->say.msg = "hello";
-  gameState->say.isValid = true;
-  perceptor->useNoise = false;
+  gameState->SetCycleCounter(1);
+  const auto &team = gameState->teams.at(1);
+  team->say.agentId = std::make_pair(1, "blue");
+  team->say.pos.Set(5.0, 1.0, GameState::beamHeight);
+  team->say.msg = "hello";
+  team->say.isValid = true;
+  Perceptor::useNoise = false;
+  Perceptor::updateVisualFreq = 1;
   GameState::HFov = 90;
   GameState::VFov = 90;
   perceptor->SetViewFrustum();
