@@ -215,7 +215,7 @@ void Robocup3dsPlugin::UpdateGUIPlaymode(ConstGzStringPtr &_msg)
 {
   const std::string playModeStr = _msg->data();
   this->gameState->SetCurrent(this->gameState->playModeNameMap[playModeStr]);
-  gzmsg << "GUI changed playmode!" << std::endl;
+  // gzmsg << "GUI changed playmode!" << std::endl;
 }
 
 /////////////////////////////////////////////////
