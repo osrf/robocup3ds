@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <map>
 #include <memory>
+#include <string>
 #include <gazebo/common/ModelDatabase.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/Collision.hh>
@@ -28,11 +29,9 @@
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/physics/World.hh>
-#include "gazebo/physics/JointController.hh"
+#include <gazebo/physics/JointController.hh>
 #include <ignition/math.hh>
-#include <string>
 #include <sdf/sdf.hh>
-
 #include "robocup3ds/Effector.hh"
 #include "robocup3ds/GameState.hh"
 #include "robocup3ds/Nao.hh"
@@ -99,7 +98,8 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   // set world sdf and nao sdf
   this->world = _world;
   this->sdf = _sdf;
-  std::string filePath = ModelDatabase::Instance()->GetModelFile("model://nao_type_zero");
+  std::string filePath = ModelDatabase::
+      Instance()->GetModelFile("model://nao_type_zero");
   // gzmsg << "nao filepath: " << filePath << std::endl;
   const sdf::SDFPtr naoSDF(new sdf::SDF());
   sdf::init(naoSDF);
@@ -295,7 +295,6 @@ void Robocup3dsPlugin::UpdateEffector()
       // Joint Effectors are Joints target speed in Radial/Second
       for (auto &kv : agent.action.jointEffectors)
       {
-
         // Get the Joint name
         std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
             std::string(kv.first))->second;
@@ -310,11 +309,11 @@ void Robocup3dsPlugin::UpdateEffector()
 
         double targetSpeed = kv.second;
 
-        if(targetSpeed >= 6.13)
+        if (targetSpeed >= 6.13)
         {
           targetSpeed = 6.13;
         }
-        else if ( targetSpeed <= -6.13 )
+        else if (targetSpeed <= -6.13)
         {
           targetSpeed = -6.13;
         }
@@ -324,19 +323,19 @@ void Robocup3dsPlugin::UpdateEffector()
 
 
         // Set the Position PID Values
-        if(naoJointName == "LAnklePitch" || naoJointName == "RAnklePitch")
+        if (naoJointName == "LAnklePitch" || naoJointName == "RAnklePitch")
         {
           jointController->SetPositionPID(
           model->GetJoint(naoJointName)->GetScopedName(),
           common::PID(4000, 4000, 0));
         }
-        else if(naoJointName == "LKneePitch" || naoJointName == "RKneePitch")
+        else if (naoJointName == "LKneePitch" || naoJointName == "RKneePitch")
         {
           jointController->SetPositionPID(
           model->GetJoint(naoJointName)->GetScopedName(),
           common::PID(4000, 4000, 0));
         }
-        else if(naoJointName == "LHipPitch" || naoJointName == "RHipPitch")
+        else if (naoJointName == "LHipPitch" || naoJointName == "RHipPitch")
         {
           jointController->SetPositionPID(
           model->GetJoint(naoJointName)->GetScopedName(),
@@ -353,9 +352,7 @@ void Robocup3dsPlugin::UpdateEffector()
         jointController->SetPositionTarget(
                      model->GetJoint(naoJointName)-> GetScopedName(), target);
 
-
         jointController->Update();
-
       }
 
       agent.action.jointEffectors.clear();
