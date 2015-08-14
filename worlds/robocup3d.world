@@ -1,25 +1,37 @@
 <?xml version="1.0" ?>
-<sdf version="1.4">
+<sdf version="1.5">
   <world name="default">
 
     <physics type="ode">
-      <max_step_size>0.004</max_step_size>
+      <max_step_size>0.01</max_step_size>
     </physics>
 
     <!-- Remove the grid -->
     <scene>
       <grid>false</grid>
+      <origin_visual>false</origin_visual>
+      <sky></sky>
     </scene>
 
     <!-- A global light source -->
-    <include>
-      <uri>model://sun</uri>
-    </include>
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 1000 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
 
     <!-- A ground plane -->
-    <include>
+<!--     <include>
       <uri>model://ground_plane</uri>
-    </include>
+    </include> -->
 
     <!-- RoboCup 3D simulator field -->
     <include>
@@ -42,14 +54,12 @@
     <include>
       <pose>0 0 0 0 0 0</pose>
       <uri>model://robocup_3Dsim_ball</uri>
-      <name>soccer_ball</name>
     </include>
 
     <!-- Load the plugin for Razer Hydra -->
     <!--<plugin name="hydra" filename="libHydraPlugin.so"></plugin>-->
 
-    <plugin name="game_controller" filename="librobocup3dsPlugin.so">
-      <ball>soccer_ball</ball>
+    <plugin name="robocup3dplugin" filename="librobocup3dsPlugin.so">
     </plugin>
   </world>
 </sdf>
