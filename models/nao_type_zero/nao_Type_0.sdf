@@ -794,7 +794,7 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
-            <scale>0.16 0.1 0.1</scale>
+            <scale>0.15 0.1 0.1</scale>
             <uri>model://nao/meshes/meshes/V40/LWristYaw.dae</uri>
           </mesh>
         </geometry>

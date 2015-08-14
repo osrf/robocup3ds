@@ -1,5 +1,6 @@
 set (folders
   nao
+  nao_type_zero	
   robocup_3Dsim_goal
   robocup_3Dsim_field
   robocup_3Dsim_ball

@@ -26,7 +26,7 @@ namespace NaoRobot
 {
   static const double height = 0.6;
 
-  static const double torsoHeight = 0.3;
+  static const double torsoHeight = 0.37;
 
   static const std::map<std::string, std::string> bodyPartMap =
   {

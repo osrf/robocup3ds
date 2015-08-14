@@ -99,7 +99,7 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   // set world sdf and nao sdf
   this->world = _world;
   this->sdf = _sdf;
-  std::string filePath = ModelDatabase::Instance()->GetModelFile("model://nao");
+  std::string filePath = ModelDatabase::Instance()->GetModelFile("model://nao_type_zero");
   // gzmsg << "nao filepath: " << filePath << std::endl;
   const sdf::SDFPtr naoSDF(new sdf::SDF());
   sdf::init(naoSDF);
@@ -264,10 +264,15 @@ void Robocup3dsPlugin::UpdateEffector()
         {
           // Increase the actuators damping to 1
           model->GetJoint(jointName.second)->SetDamping(0, 1);
+          model->GetJoint(jointName.second)->SetAngle(0, 0);
 
+
+          /*
           // Initial the Joint Controller;
           physics::JointControllerPtr jointController(
                             new physics::JointController(model));
+          jointController -> Reset();
+
 
           jointController -> AddJoint(model->GetJoint(jointName.second));
 
@@ -281,7 +286,7 @@ void Robocup3dsPlugin::UpdateEffector()
                        model->GetJoint(jointName.second)-> GetScopedName(), 0);
 
           jointController->Update();
-
+        */
         }
         continue;
       }
@@ -299,12 +304,24 @@ void Robocup3dsPlugin::UpdateEffector()
         physics::JointControllerPtr jointController(
                           new physics::JointController(model));
 
+        jointController -> Reset();
+
         jointController -> AddJoint(model->GetJoint(naoJointName));
 
+        double targetSpeed = kv.second;
 
+        if(targetSpeed >= 6.13)
+        {
+          targetSpeed = 6.13;
+        }
+        else if ( targetSpeed <= -6.13 )
+        {
+          targetSpeed = -6.13;
+        }
         // Calculate the target degree based on the target Speed
         double target = (kv.second*GameState::counterCycleTime)
             + model->GetJoint(naoJointName)->GetAngle(0).Radian();
+
 
         // Set the Position PID Values
         if(naoJointName == "LAnklePitch" || naoJointName == "RAnklePitch")
