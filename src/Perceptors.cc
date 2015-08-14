@@ -246,7 +246,7 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
 /////////////////////////////////////////////////
 void Perceptor::UpdateAgentHear(Agent &_agent) const
 {
-  const AgentSay* say;
+  const AgentSay *say;
   for (const auto &team : this->gameState->teams)
   {
     if (this->SideToSpeak() == team->side)
@@ -400,12 +400,28 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   if (GameState::groundTruthInfo)
   {
     const auto &ballPos = this->gameState->GetBall();
-    cx += snprintf(_string + cx, _size - cx,
-                   " (mypos %.2f %.2f %.2f) (myorien %.2f)"
-                   " (ballpos %.2f %.2f %.2f)",
-                   _agent.pos.X(), _agent.pos.Y(), _agent.pos.Z(),
-                   DEG(_agent.rot.Euler().Z()),
-                   ballPos.X(), ballPos.Y(), ballPos.Z());
+    if (_agent.team->side == Team::Side::LEFT)
+    {
+      cx += snprintf(_string + cx, _size - cx,
+                     " (mypos %.2f %.2f %.2f) (myorien %.2f)"
+                     " (ballpos %.2f %.2f %.2f)",
+                     _agent.pos.X(), _agent.pos.Y(), _agent.pos.Z(),
+                     DEG(_agent.rot.Euler().Z()),
+                     ballPos.X(), ballPos.Y(), ballPos.Z());
+    }
+    else
+    {
+      double rot = DEG(_agent.rot.Euler().Z()) + 180.0;
+      if (rot >= 360.0)
+      {
+        rot -= 360.0;
+      }
+      cx += snprintf(_string + cx, _size - cx,
+                     " (mypos %.2f %.2f %.2f) (myorien %.2f)"
+                     " (ballpos %.2f %.2f %.2f)",
+                     -_agent.pos.X(), -_agent.pos.Y(), _agent.pos.Z(),
+                     rot, -ballPos.X(), -ballPos.Y(), ballPos.Z());
+    }
   }
 
   return cx;

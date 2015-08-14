@@ -1156,7 +1156,12 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
           }
           else
           {
-            this->MoveAgentNoisy(agent, -_x, -_y, RAD(_rot));
+            double rot = _rot + 180.0;
+            if (rot > 360.0)
+            {
+              rot -= 360.0;
+            }
+            this->MoveAgentNoisy(agent, -_x, -_y, RAD(rot));
           }
           return true;
         }
