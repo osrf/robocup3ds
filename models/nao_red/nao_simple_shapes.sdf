@@ -28,7 +28,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/Torso.dae</uri>
+            <uri>model://nao_red/meshes/V40/Torso.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -55,7 +55,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/HeadYaw.dae</uri>
+            <uri>model://nao_red/meshes/V40/HeadYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -132,7 +132,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/HeadPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/HeadPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -190,7 +190,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LHipYawPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LHipYawPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -247,7 +247,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LHipRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/LHipRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -324,7 +324,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LHipPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LHipPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -401,7 +401,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LKneePitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LKneePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -458,7 +458,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LAnklePitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LAnklePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -538,7 +538,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LAnkleRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/LAnkleRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -595,7 +595,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LShoulderPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LShoulderPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -672,7 +672,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LShoulderRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/LShoulderRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -797,7 +797,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LElbowRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/LElbowRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -873,7 +873,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LWristYaw.dae</uri>
+            <uri>model://nao_red/meshes/V40/LWristYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -930,7 +930,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LFinger11.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger11.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -987,7 +987,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LFinger12.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger12.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1044,7 +1044,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LFinger13.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger13.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1101,7 +1101,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LFinger21.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger21.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1158,7 +1158,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LFinger22.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger22.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1215,7 +1215,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LFinger23.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger23.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1320,7 +1320,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LThumb1.dae</uri>
+            <uri>model://nao_red/meshes/V40/LThumb1.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1377,7 +1377,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/LThumb2.dae</uri>
+            <uri>model://nao_red/meshes/V40/LThumb2.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1454,7 +1454,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RHipYawPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RHipYawPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1511,7 +1511,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RHipRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/RHipRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1568,7 +1568,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RHipPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RHipPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1645,7 +1645,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RKneePitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RKneePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1702,7 +1702,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RAnklePitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RAnklePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1782,7 +1782,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RAnkleRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/RAnkleRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1839,7 +1839,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RShoulderPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RShoulderPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1916,7 +1916,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RShoulderRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/RShoulderRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2041,7 +2041,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RElbowRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/RElbowRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2117,7 +2117,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RWristYaw.dae</uri>
+            <uri>model://nao_red/meshes/V40/RWristYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2174,7 +2174,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RFinger11.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger11.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2231,7 +2231,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RFinger12.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger12.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2288,7 +2288,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RFinger13.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger13.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2345,7 +2345,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RFinger21.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger21.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2402,7 +2402,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RFinger22.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger22.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2459,7 +2459,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RFinger23.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger23.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2564,7 +2564,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RThumb1.dae</uri>
+            <uri>model://nao_red/meshes/V40/RThumb1.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2621,7 +2621,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/V40/RThumb2.dae</uri>
+            <uri>model://nao_red/meshes/V40/RThumb2.dae</uri>
           </mesh>
         </geometry>
       </visual>
