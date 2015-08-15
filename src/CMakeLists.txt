@@ -2,12 +2,14 @@ set(PARSER_SOURCE ../lib/sexpLibrary/parser.c ../lib/sexpLibrary/sexp.c ../lib/s
 Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/sexpLibrary/faststack.h ../lib/sexpLibrary/sexp_errors.h ../lib/sexpLibrary/sexp_ops.h ../lib/sexp_memory.h)
 
 set (sources
+  Geometry.cc
   Robocup3dsPlugin.cc
   Server.cc
   Util.cc
 )
 
 set (gtest_sources
+  Geometry_TEST.cc
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
   Util_TEST.cc
