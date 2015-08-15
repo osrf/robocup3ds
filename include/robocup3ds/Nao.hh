@@ -34,16 +34,16 @@ class NaoBT
 
   /// \brief Returns height of Nao
   /// \return Height in meters
-  public: virtual double KHeight() const = 0;
+  public: virtual double Height() const = 0;
 
   /// \brief Returns height of Nao's torso
   /// \return Height in meters
-  public: virtual double KTorsoHeight() const = 0;
+  public: virtual double TorsoHeight() const = 0;
 
   /// \brief Returns a map of link names in Nao model's SDF file and names sent
   /// by server to client
   /// \return Map mentioned above
-  public: virtual std::map<std::string, std::string> KBodyPartMap() const = 0;
+  public: virtual std::map<std::string, std::string> BodyPartMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
@@ -59,42 +59,42 @@ class NaoBT
 
   /// \brief Returns name of link in Nao model that is used for camera position
   /// \return Name mentioned above
-  public: virtual std::string KCameraLinkName() const = 0;
+  public: virtual std::string CameraLinkName() const = 0;
 
   /// \brief Returns name of link that is torso
   /// \return Name mentioned above
-  public: virtual std::string KTorsoLinkName() const = 0;
+  public: virtual std::string TorsoLinkName() const = 0;
 
   /// \brief Returns name of link for left foot
   /// \return Name mentioned above
-  public: virtual std::string KLeftFootLinkName() const = 0;
+  public: virtual std::string LeftFootLinkName() const = 0;
 
   /// \brief Returns name of link for right foot
   /// \return Name mentioned above
-  public: virtual std::string KRightFootLinkName() const = 0;
+  public: virtual std::string RightFootLinkName() const = 0;
 
   /// \brief Returns default name of Nao model
   /// \return Name mentioned above
-  public: virtual std::string KDefaultModelName() const = 0;
+  public: virtual std::string DefaultModelName() const = 0;
 };
 
 /// \brief The official Nao body type from Aldebaran
 class NaoOfficialBT : public NaoBT
 {
   // Documentation inherited
-  public: virtual double KHeight() const
+  public: virtual double Height() const
   {
     return this->kHeight;
   }
 
   // Documentation inherited
-  public: virtual double KTorsoHeight() const
+  public: virtual double TorsoHeight() const
   {
     return this->kTorsoHeight;
   }
 
   // Documentation inherited
-  public: virtual std::map<std::string, std::string> KBodyPartMap() const
+  public: virtual std::map<std::string, std::string> BodyPartMap() const
   {
     return this->kBodyPartMap;
   }
@@ -114,37 +114,37 @@ class NaoOfficialBT : public NaoBT
   }
 
   // Documentation inherited
-  public: virtual std::string KCameraLinkName() const
+  public: virtual std::string CameraLinkName() const
   {
     return this->kCameraLinkName;
   }
 
   // Documentation inherited
-  public: virtual std::string KTorsoLinkName() const
+  public: virtual std::string TorsoLinkName() const
   {
     return this->kTorsoLinkName;
   }
 
   // Documentation inherited
-  public: virtual std::string KLeftFootLinkName() const
+  public: virtual std::string LeftFootLinkName() const
   {
     return this->kLeftFootLinkName;
   }
 
   // Documentation inherited
-  public: virtual std::string KRightFootLinkName() const
+  public: virtual std::string RightFootLinkName() const
   {
     return this->kRightFootLinkName;
   }
 
   // Documentation inherited
-  public: virtual std::string KDefaultModelName() const
+  public: virtual std::string DefaultModelName() const
   {
     return this->kDefaultModelName;
   }
 
   // Documentation inherited
-  protected: const double kHeight = 0.57;
+  protected: const double kHeight = 0.6;
 
   // Documentation inherited
   protected: const double kTorsoHeight = kHeight * 0.5;

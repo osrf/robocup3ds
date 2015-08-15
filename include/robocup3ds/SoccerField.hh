@@ -129,13 +129,13 @@ namespace SoccerField
 
   /// \brief Bounding box around left side of field
   static const ignition::math::Box FieldLeft(ignition::math::Vector3<double>
-      (-SoccerField::kHalfFieldHeight, -SoccerField::kHalfFieldWidth, -10),
-      ignition::math::Vector3<double>(0, SoccerField::kHalfFieldWidth, 10));
+      (-kHalfFieldHeight, -kHalfFieldWidth, -10),
+      ignition::math::Vector3<double>(0, kHalfFieldWidth, 10));
 
   /// \brief Bounding box around right side of field
   static const ignition::math::Box FieldRight(ignition::math::Vector3<double>
-      (0, -SoccerField::kHalfFieldWidth, -10), ignition::math::Vector3<double>
-      (SoccerField::kHalfFieldHeight, SoccerField::kHalfFieldWidth, 10));
+      (0, -kHalfFieldWidth, -10), ignition::math::Vector3<double>
+      (kHalfFieldHeight, kHalfFieldWidth, 10));
 
   /// \brief Vector of all the field lines on field
   static const std::vector<ignition::math::Line3<double> > kFieldLines =
@@ -178,14 +178,38 @@ namespace SoccerField
   static const std::map<std::string, ignition::math::Vector3<double>>
       kLandMarks =
   {
-    {"F1L", ignition::math::Vector3<double>(-15, 10, 0)},
-    {"F1R", ignition::math::Vector3<double>(15, 10, 0)},
-    {"F2R", ignition::math::Vector3<double>(15, -10, 0)},
-    {"F2L", ignition::math::Vector3<double>(-15, -10, 0)},
-    {"G1L", ignition::math::Vector3<double>(-15, 1.05, 0.8)},
-    {"G1R", ignition::math::Vector3<double>(15, 1.05, 0.8)},
-    {"G2L", ignition::math::Vector3<double>(-15, -1.05, 0.8)},
-    {"G2R", ignition::math::Vector3<double>(15, -1.05, 0.8)}
+    {
+      "F1L", ignition::math::Vector3<double>(
+        -kHalfFieldWidth, kHalfFieldHeight, 0)
+    },
+    {
+      "F1R", ignition::math::Vector3<double>(
+        kHalfFieldWidth, kHalfFieldHeight, 0)
+    },
+    {
+      "F2R", ignition::math::Vector3<double>(
+        kHalfFieldWidth, -kHalfFieldHeight, 0)
+    },
+    {
+      "F2L", ignition::math::Vector3<double>(
+        -kHalfFieldWidth, -kHalfFieldHeight, 0)
+    },
+    {
+      "G1L", ignition::math::Vector3<double>(
+        -kHalfFieldWidth, kHalfGoalWidth, kGoalHeight)
+    },
+    {
+      "G1R", ignition::math::Vector3<double>(
+        kHalfFieldWidth, kHalfGoalWidth, kGoalHeight)
+    },
+    {
+      "G2L", ignition::math::Vector3<double>(
+        -kHalfFieldWidth, -kHalfGoalWidth, kGoalHeight)
+    },
+    {
+      "G2R", ignition::math::Vector3<double>(
+        kHalfFieldWidth, -kHalfGoalWidth, kGoalHeight)
+    }
   };
 
   /// \brief Name of ball model

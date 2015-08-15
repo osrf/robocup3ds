@@ -5,6 +5,7 @@ set (sources
   Robocup3dsPlugin.cc
   Server.cc
   Util.cc
+  Geometry.cc
 )
 
 set (gtest_sources

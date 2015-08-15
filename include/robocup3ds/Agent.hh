@@ -121,7 +121,8 @@ class Team
   /// \brief Team score
   public: int score;
 
-  /// \brief Number players in penalty area
+  /// \brief Number players belonging to this team in penalty area
+  /// in current game state
   public: int numPlayersInPenaltyBox;
 
   /// \brief Can score goal or not
@@ -156,7 +157,7 @@ class AgentHear
   public: bool isValid;
 };
 
-/// \brief This class serves as an container for the information sent to
+/// \brief This class serves as a container for the information sent to
 /// the agent
 class AgentPerceptions
 {
@@ -199,7 +200,7 @@ class AgentPerceptions
     ignition::math::Vector3<double>> rightFootFR;
 };
 
-/// \brief This class serves as an container for the information by the
+/// \brief This class serves as a container for the information sent by the
 /// the agent
 class AgentActions
 {
@@ -223,7 +224,7 @@ class Agent
   };
 
   /// \brief Constructor for Agent object
-  /// \param[in] _uNum Unique identifier for agent
+  /// \param[in] _uNum Uniform number for agent
   /// \param[in] _team Pointer to team of the agent
   /// \param[in] _bodyType Pointer to body type object of agent
   /// \param[in] _socketID Socket ID for agent
@@ -244,7 +245,7 @@ class Agent
     this->timeImmobilized = 0;
     this->timeFallen = 0;
     this->pos.Set(0, SoccerField::kHalfFieldHeight,
-      this->bodyType->KTorsoHeight() + 0.05);
+      this->bodyType->TorsoHeight() + 0.05);
 
     if (!this->team)
       this->name = std::to_string(this->uNum);
@@ -285,13 +286,13 @@ class Agent
   }
 
   /// \brief Return name of agent
-  /// \param[in] _uNum uNum of agent
+  /// \param[in] _uNum Uniform number of agent
   /// \param[in] _teamname Teamname of agent
   /// \return A String that is composed of unum and team name
-  public: static std::string GetName(const int uNum,
+  public: static std::string GetName(const int _uNum,
     const std::string &_teamName)
   {
-    return std::to_string(uNum) + "_" + _teamName;
+    return std::to_string(_uNum) + "_" + _teamName;
   }
 
 

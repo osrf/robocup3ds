@@ -86,10 +86,10 @@ TEST(AgentTest, BodyTypeTest)
     std::make_shared<Team>("red", Team::Side::LEFT, 0, 11);
   Agent a1(1, t1);
 
-  EXPECT_DOUBLE_EQ(a1.bodyType->KHeight(), 0.57);
-  EXPECT_DOUBLE_EQ(a1.bodyType->KTorsoHeight(), 0.57 * 0.5);
+  EXPECT_DOUBLE_EQ(a1.bodyType->Height(), 0.57);
+  EXPECT_DOUBLE_EQ(a1.bodyType->TorsoHeight(), 0.57 * 0.5);
   EXPECT_EQ(a1.bodyType->HingeJointEffectorMap()["lae3"], "LElbowYaw");
-  EXPECT_EQ(a1.bodyType->KDefaultModelName(), "naoH25V40");
+  EXPECT_EQ(a1.bodyType->DefaultModelName(), "naoH25V40");
 }
 
 int main(int argc, char **argv)
