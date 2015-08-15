@@ -127,16 +127,6 @@ namespace SoccerField
     ignition::math::Vector3<double>
     (kHalfFieldWidth - kPenaltyBoxDepth, kHalfPenaltyBoxWidth, 10));
 
-  /// \brief Bounding box around left side of field
-  static const ignition::math::Box FieldLeft(ignition::math::Vector3<double>
-      (-kHalfFieldHeight, -kHalfFieldWidth, -10),
-      ignition::math::Vector3<double>(0, kHalfFieldWidth, 10));
-
-  /// \brief Bounding box around right side of field
-  static const ignition::math::Box FieldRight(ignition::math::Vector3<double>
-      (0, -kHalfFieldWidth, -10), ignition::math::Vector3<double>
-      (kHalfFieldHeight, kHalfFieldWidth, 10));
-
   /// \brief Vector of all the field lines on field
   static const std::vector<ignition::math::Line3<double> > kFieldLines =
   {
