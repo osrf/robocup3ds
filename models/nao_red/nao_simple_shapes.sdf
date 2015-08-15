@@ -41,7 +41,7 @@
       <pose>0 0 0.1265 0 -0 0</pose>
       <inertial>
         <pose>-1e-05 0 -0.02742 0 -0 0</pose>
-        <mass>0.0644*2</mass>
+        <mass>0.06442</mass>
         <inertia>
           <ixx>7.4993e-05</ixx>
           <ixy>1.57e-09</ixy>
