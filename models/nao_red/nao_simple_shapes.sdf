@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <sdf version='1.5'>
   <model name='naoH25V40'>
+    <pose>0 0 0.35 0 0 0</pose>
     <link name='Torso'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>
@@ -40,7 +41,7 @@
       <pose>0 0 0.1265 0 -0 0</pose>
       <inertial>
         <pose>-1e-05 0 -0.02742 0 -0 0</pose>
-        <mass>0.06442</mass>
+        <mass>0.0644*2</mass>
         <inertia>
           <ixx>7.4993e-05</ixx>
           <ixy>1.57e-09</ixy>
