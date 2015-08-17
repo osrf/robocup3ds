@@ -303,12 +303,12 @@ void Robocup3dsPlugin::UpdateEffector()
         physics::JointControllerPtr jointController(
                           new physics::JointController(model));
 
-        jointController -> Reset();
-
         jointController -> AddJoint(model->GetJoint(naoJointName));
 
         double targetSpeed = kv.second;
 
+        // In simspark the target speed should be in the range
+        // of [-6.13, 6.13]
         if (targetSpeed >= 6.13)
         {
           targetSpeed = 6.13;
