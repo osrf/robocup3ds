@@ -95,7 +95,7 @@ namespace SoccerField
   /// \brief Left goal plane, if ball travels through the plane,
   /// it counts as a goal
   static const ignition::math::Plane<double> GoalPlaneRight(
-    ignition::math::Vector3<double>(1, 0, 0), -kHalfFieldWidth);
+    ignition::math::Vector3<double>(-1, 0, 0), kHalfFieldWidth);
 
   /// \brief Left goal box, if ball is inside box
   /// it counts as a goal
