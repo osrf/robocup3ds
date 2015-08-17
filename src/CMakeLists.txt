@@ -23,7 +23,8 @@ set (sources
 )
 
 set (gtest_sources
-  Effector_TEST.cc
+  Agent_TEST.cc
+  Geometry_TEST.cc
   Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
   Util_TEST.cc

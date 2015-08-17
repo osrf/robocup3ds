@@ -1,6 +1,8 @@
+<?xml version="1.0" ?>
 <sdf version='1.5'>
   <model name='naoH25V40'>
-    <link name='base_link'>
+    <pose>0 0 0.35 0 0 0</pose>
+    <link name='Torso'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>
         <pose>-0.00413 0 0.04342 0 -0 0</pose>
@@ -14,7 +16,7 @@
           <izz>0.0016103</izz>
         </inertia>
       </inertial>
-      <collision name='base_link_collision'>
+      <collision name='Torso_collision'>
         <pose>0 0 0.01 0 -0 0</pose>
         <geometry>
           <box>
@@ -22,12 +24,12 @@
           </box>
         </geometry>
       </collision>
-      <visual name='base_link_visual'>
+      <visual name='Torso_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/Torso.dae</uri>
+            <uri>model://nao_red/meshes/V40/Torso.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -54,7 +56,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/HeadYaw.dae</uri>
+            <uri>model://nao_red/meshes/V40/HeadYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -64,7 +66,7 @@
     </link>
     <joint name='HeadYaw' type='revolute'>
       <child>Neck</child>
-      <parent>base_link</parent>
+      <parent>Torso</parent>
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
@@ -131,7 +133,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/HeadPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/HeadPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -189,7 +191,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LHipYawPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LHipYawPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -199,7 +201,7 @@
     </link>
     <joint name='LHipYawPitch' type='revolute'>
       <child>LPelvis</child>
-      <parent>base_link</parent>
+      <parent>Torso</parent>
       <axis>
         <xyz>0 0.707106 -0.707106</xyz>
         <limit>
@@ -246,7 +248,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LHipRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/LHipRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -323,7 +325,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LHipPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LHipPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -400,7 +402,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LKneePitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LKneePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -438,7 +440,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='l_ankle'>
+    <link name='LAnkle'>
       <pose>0 0.05 -0.2879 0 -0 0</pose>
       <inertial>
         <pose>0.00045 0.00029 0.00685 0 -0 0</pose>
@@ -452,12 +454,12 @@
           <izz>5.48654e-05</izz>
         </inertia>
       </inertial>
-      <visual name='l_ankle_visual'>
+      <visual name='LAnkle_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LAnklePitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LAnklePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -466,7 +468,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LAnklePitch' type='revolute'>
-      <child>l_ankle</child>
+      <child>LAnkle</child>
       <parent>LTibia</parent>
       <axis>
         <xyz>0 1 0</xyz>
@@ -495,7 +497,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='l_sole'>
+    <link name='LSole'>
       <pose>0 0.05 -0.2879 0 -0 0</pose>
       <inertial>
         <pose>0.02542 0.0033 -0.03239 0 -0 0</pose>
@@ -509,7 +511,7 @@
           <izz>0.000525757</izz>
         </inertia>
       </inertial>
-      <collision name='l_sole_collision'>
+      <collision name='LSole_collision'>
         <pose>0.02 0.005 -0.037 0 -0 0</pose>
         <geometry>
           <box>
@@ -532,12 +534,12 @@
           </friction>
         </surface>
       </collision>
-      <visual name='l_sole_visual'>
+      <visual name='LSole_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LAnkleRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/LAnkleRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -546,8 +548,8 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LAnkleRoll' type='revolute'>
-      <child>l_sole</child>
-      <parent>l_ankle</parent>
+      <child>LSole</child>
+      <parent>LAnkle</parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -594,7 +596,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LShoulderPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/LShoulderPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -604,7 +606,7 @@
     </link>
     <joint name='LShoulderPitch' type='revolute'>
       <child>LShoulder</child>
-      <parent>base_link</parent>
+      <parent>Torso</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -671,7 +673,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LShoulderRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/LShoulderRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -796,7 +798,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LElbowRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/LElbowRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -834,7 +836,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='l_wrist'>
+    <link name='LWrist'>
       <pose>0.16095 0.113 0.1 0 -0 0</pose>
       <inertial>
         <pose>0.03434 -0.00088 0.00308 0 -0 0</pose>
@@ -848,7 +850,7 @@
           <izz>0.000351919</izz>
         </inertia>
       </inertial>
-      <collision name='l_wrist_collision'>
+      <collision name='LWrist_collision'>
         <pose>0.039 0 0 1.27 -0 1.57</pose>
         <geometry>
           <box>
@@ -867,12 +869,12 @@
           </friction>
         </surface>
       </collision>
-      <visual name='l_wrist_visual'>
+      <visual name='LWrist_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LWristYaw.dae</uri>
+            <uri>model://nao_red/meshes/V40/LWristYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -881,7 +883,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LWristYaw' type='revolute'>
-      <child>l_wrist</child>
+      <child>LWrist</child>
       <parent>LForeArm</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -929,7 +931,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LFinger11.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger11.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -939,7 +941,7 @@
     </link>
     <joint name='LFinger1' type='revolute'>
       <child>LFinger11</child>
-      <parent>l_wrist</parent>
+      <parent>LWrist</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -986,7 +988,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LFinger12.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger12.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1043,7 +1045,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LFinger13.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger13.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1100,7 +1102,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LFinger21.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger21.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1110,7 +1112,7 @@
     </link>
     <joint name='LFinger2' type='revolute'>
       <child>LFinger21</child>
-      <parent>l_wrist</parent>
+      <parent>LWrist</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -1157,7 +1159,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LFinger22.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger22.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1214,7 +1216,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LFinger23.dae</uri>
+            <uri>model://nao_red/meshes/V40/LFinger23.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1252,7 +1254,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='l_gripper'>
+    <link name='LGripper'>
       <pose>0.2187 0.113 0.08769 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
@@ -1271,8 +1273,8 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LHand' type='revolute'>
-      <child>l_gripper</child>
-      <parent>l_wrist</parent>
+      <child>LGripper</child>
+      <parent>LWrist</parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -1319,7 +1321,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LThumb1.dae</uri>
+            <uri>model://nao_red/meshes/V40/LThumb1.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1329,7 +1331,7 @@
     </link>
     <joint name='LThumb1_joint' type='revolute'>
       <child>LThumb1</child>
-      <parent>l_wrist</parent>
+      <parent>LWrist</parent>
       <axis>
         <xyz>-0 -1 -0</xyz>
         <limit>
@@ -1376,7 +1378,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LThumb2.dae</uri>
+            <uri>model://nao_red/meshes/V40/LThumb2.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1453,7 +1455,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RHipYawPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RHipYawPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1463,7 +1465,7 @@
     </link>
     <joint name='RHipYawPitch' type='revolute'>
       <child>RPelvis</child>
-      <parent>base_link</parent>
+      <parent>Torso</parent>
       <axis>
         <xyz>0 0.707106 0.707106</xyz>
         <limit>
@@ -1510,7 +1512,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RHipRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/RHipRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1567,7 +1569,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RHipPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RHipPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1644,7 +1646,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RKneePitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RKneePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1682,7 +1684,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='r_ankle'>
+    <link name='RAnkle'>
       <pose>0 -0.05 -0.2879 0 -0 0</pose>
       <inertial>
         <pose>0.00045 -0.00029 0.00685 0 -0 0</pose>
@@ -1696,12 +1698,12 @@
           <izz>5.49131e-05</izz>
         </inertia>
       </inertial>
-      <visual name='r_ankle_visual'>
+      <visual name='RAnkle_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RAnklePitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RAnklePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1710,7 +1712,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RAnklePitch' type='revolute'>
-      <child>r_ankle</child>
+      <child>RAnkle</child>
       <parent>RTibia</parent>
       <axis>
         <xyz>0 1 0</xyz>
@@ -1739,7 +1741,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='r_sole'>
+    <link name='RSole'>
       <pose>0 -0.05 -0.2879 0 -0 0</pose>
       <inertial>
         <pose>0.02542 -0.0033 -0.03239 0 -0 0</pose>
@@ -1753,7 +1755,7 @@
           <izz>0.000525035</izz>
         </inertia>
       </inertial>
-      <collision name='r_sole_collision'>
+      <collision name='RSole_collision'>
         <pose>0.02 -0.005 -0.037 0 -0 0</pose>
         <geometry>
           <box>
@@ -1776,12 +1778,12 @@
           </friction>
         </surface>
       </collision>
-      <visual name='r_sole_visual'>
+      <visual name='RSole_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RAnkleRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/RAnkleRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1790,8 +1792,8 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RAnkleRoll' type='revolute'>
-      <child>r_sole</child>
-      <parent>r_ankle</parent>
+      <child>RSole</child>
+      <parent>RAnkle</parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -1838,7 +1840,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RShoulderPitch.dae</uri>
+            <uri>model://nao_red/meshes/V40/RShoulderPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1848,7 +1850,7 @@
     </link>
     <joint name='RShoulderPitch' type='revolute'>
       <child>RShoulder</child>
-      <parent>base_link</parent>
+      <parent>Torso</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -1915,7 +1917,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RShoulderRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/RShoulderRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2040,7 +2042,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RElbowRoll.dae</uri>
+            <uri>model://nao_red/meshes/V40/RElbowRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2078,7 +2080,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='r_wrist'>
+    <link name='RWrist'>
       <pose>0.16095 -0.113 0.1 0 -0 0</pose>
       <inertial>
         <pose>0.03434 0.00088 0.00308 0 -0 0</pose>
@@ -2092,7 +2094,7 @@
           <izz>0.000351919</izz>
         </inertia>
       </inertial>
-      <collision name='r_wrist_collision'>
+      <collision name='RWrist_collision'>
         <pose>0.039 0 0 1.27 -0 1.57</pose>
         <geometry>
           <box>
@@ -2111,12 +2113,12 @@
           </friction>
         </surface>
       </collision>
-      <visual name='r_wrist_visual'>
+      <visual name='RWrist_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RWristYaw.dae</uri>
+            <uri>model://nao_red/meshes/V40/RWristYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2125,7 +2127,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RWristYaw' type='revolute'>
-      <child>r_wrist</child>
+      <child>RWrist</child>
       <parent>RForeArm</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -2173,7 +2175,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RFinger11.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger11.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2183,7 +2185,7 @@
     </link>
     <joint name='RFinger1' type='revolute'>
       <child>RFinger11</child>
-      <parent>r_wrist</parent>
+      <parent>RWrist</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -2230,7 +2232,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RFinger12.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger12.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2287,7 +2289,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RFinger13.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger13.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2344,7 +2346,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RFinger21.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger21.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2354,7 +2356,7 @@
     </link>
     <joint name='RFinger2' type='revolute'>
       <child>RFinger21</child>
-      <parent>r_wrist</parent>
+      <parent>RWrist</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
@@ -2401,7 +2403,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RFinger22.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger22.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2458,7 +2460,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RFinger23.dae</uri>
+            <uri>model://nao_red/meshes/V40/RFinger23.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2496,7 +2498,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='r_gripper'>
+    <link name='RGripper'>
       <pose>0.2187 -0.113 0.08769 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
@@ -2515,8 +2517,8 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RHand' type='revolute'>
-      <child>r_gripper</child>
-      <parent>r_wrist</parent>
+      <child>RGripper</child>
+      <parent>RWrist</parent>
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
@@ -2563,7 +2565,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RThumb1.dae</uri>
+            <uri>model://nao_red/meshes/V40/RThumb1.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2573,7 +2575,7 @@
     </link>
     <joint name='RThumb1_joint' type='revolute'>
       <child>RThumb1</child>
-      <parent>r_wrist</parent>
+      <parent>RWrist</parent>
       <axis>
         <xyz>-0 -1 -0</xyz>
         <limit>
@@ -2620,7 +2622,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RThumb2.dae</uri>
+            <uri>model://nao_red/meshes/V40/RThumb2.dae</uri>
           </mesh>
         </geometry>
       </visual>

@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 
+#include "robocup3ds/Nao.hh"
 #include "robocup3ds/SoccerField.hh"
 
 class Agent;
@@ -91,13 +92,21 @@ class Team
   /// \brief Equality operator for teams
   /// \param[in] _team Team compared against
   /// \return True if they are equal
-  public: bool operator==(const Team &_team)
+  public: bool operator==(const Team &_team) const
   {
     return this == &_team;
   }
 
+  /// \brief Inequality operator for teams
+  /// \param[in] _team Team compared against
+  /// \return True if they are not equal
+  public: bool operator!=(const Team &_team) const
+  {
+    return !(*this == _team);
+  }
+
   /// \brief Get the string version of side
-  /// \brief _side Enum version of side
+  /// \param[in] _side Enum version of side
   /// \return String version of side
   public: static std::string GetSideAsString(const Side _side)
   {
@@ -134,7 +143,8 @@ class Team
   /// \brief Team score
   public: int score;
 
-  /// \brief Number players in penalty area
+  /// \brief Number players belonging to this team in penalty area
+  /// in current game state
   public: int numPlayersInPenaltyBox;
 
   /// \brief Can score goal or not
@@ -172,21 +182,21 @@ class AgentHear
   public: bool isValid;
 };
 
-/// \brief This class serves as an container for the information sent to
+/// \brief This class serves as a container for the information sent to
 /// the agent
 class AgentPerceptions
 {
   /// \brief AgentPerception constructor
   public: AgentPerceptions()
   {
-    this->fieldLines.reserve(SoccerField::FieldLines.size());
+    this->fieldLines.reserve(SoccerField::kFieldLines.size());
   }
 
-  /// \brief Map of landmarks that have been transformed to agent's cood
+  /// \brief Map of landmarks that have been transformed to agent's coordinate
   /// frame
   public: std::map<std::string, ignition::math::Vector3<double>> landMarks;
 
-  /// \brief Vector of lines that have been transformed to agent's cood
+  /// \brief Vector of lines that have been transformed to agent's coordinate
   /// frame
   public: std::vector<ignition::math::Line3<double>> fieldLines;
 
@@ -197,7 +207,7 @@ class AgentPerceptions
   /// \brief Hear perceptor
   public: AgentHear hear;
 
-  /// \brief Map of hinge joints and their angles
+  /// \brief Map of hinge joint names and their angles
   public: std::map<std::string, double> hingeJoints;
 
   /// \brief Gyro information of torso
@@ -206,23 +216,23 @@ class AgentPerceptions
   /// \brief Acceleration of torso
   public: ignition::math::Vector3<double> accel;
 
-  /// \brief Force information for left foot of nao
+  /// \brief Position of left foot of Agent and force exerted on it
   public: std::pair<ignition::math::Vector3<double>,
   ignition::math::Vector3<double>> leftFootFR;
 
-  /// \brief Force information for right foot of nao
+  /// \brief Position of right foot of Agent and force exerted on it
   public: std::pair<ignition::math::Vector3<double>,
   ignition::math::Vector3<double>> rightFootFR;
 };
 
-/// \brief This class serves as an container for the information by the
+/// \brief This class serves as a container for the information sent by the
 /// the agent
 class AgentActions
 {
   /// \brief Constructor
-  public: AgentActions() {}
+  public: AgentActions() = default;
 
-  /// \brief Stores the velocity and angle information
+  /// \brief Map of hinge joint names and their velocities
   public: std::map<std::string, double> jointEffectors;
 };
 
@@ -239,16 +249,19 @@ class Agent
   };
 
   /// \brief Constructor for Agent object
-  /// \param[in] _uNum Unique identifier for agent
+  /// \param[in] _uNum Uniform number for agent
   /// \param[in] _team Pointer to team of the agent
+  /// \param[in] _bodyType Pointer to body type object of agent
   /// \param[in] _socketID Socket ID for agent
   public: Agent(const int _uNum, const std::shared_ptr<Team> &_team,
+    const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoOfficialBT>(),
     const int _socketID = -1):
     uNum(_uNum),
-    team(_team)
+    team(_team),
+    bodyType(_bodyType)
   {
     this->socketID = _socketID;
-    this->syn = false;
+    this->isSynced = false;
     this->inSimWorld = false;
     this->status = Status::RELEASED;
     this->prevStatus = this->status;
@@ -256,7 +269,13 @@ class Agent
     this->inPenaltyBox = false;
     this->timeImmobilized = 0;
     this->timeFallen = 0;
-    this->pos.Set(0, SoccerField::HalfFieldHeight, 1);
+    this->pos.Set(0, SoccerField::kHalfFieldHeight,
+      this->bodyType->TorsoHeight() + 0.05);
+
+    if (!this->team)
+      this->name = std::to_string(this->uNum);
+    else
+      this->name = std::to_string(this->uNum) + "_" + this->team->name;
   }
 
   /// \brief Equality operator for agents
@@ -265,6 +284,14 @@ class Agent
   public: bool operator==(const Agent &_agent) const
   {
     return this == &_agent;
+  }
+
+  /// \brief Inequality operator for agents
+  /// \param[in] _agent Agent compared against
+  /// \return True if they are not equal
+  public: bool operator!=(const Agent &_agent) const
+  {
+    return !(*this == _agent);
   }
 
   /// \brief Return AgentId of agent
@@ -280,19 +307,17 @@ class Agent
   /// \return A String that is composed of unum and team name
   public: std::string GetName() const
   {
-    if (!this->team)
-      return std::to_string(this->uNum);
-    return std::to_string(this->uNum) + "_" + this->team->name;
+    return this->name;
   }
 
   /// \brief Return name of agent
-  /// \param[in] _uNum uNum of agent
+  /// \param[in] _uNum Uniform number of agent
   /// \param[in] _teamname Teamname of agent
   /// \return A String that is composed of unum and team name
-  public: static std::string GetName(const int uNum,
+  public: static std::string GetName(const int _uNum,
     const std::string &_teamName)
   {
-    return std::to_string(uNum) + "_" + _teamName;
+    return std::to_string(_uNum) + "_" + _teamName;
   }
 
 
@@ -308,7 +333,7 @@ class Agent
     {
       size_t sepIndex = _agentName.find_first_of("_");
       _uNum = std::stoi(_agentName.substr(0, sepIndex));
-      _teamName = _agentName.substr(0, sepIndex + 1);
+      _teamName = _agentName.substr(sepIndex + 1, _agentName.length());
       return true;
     }
     catch (const std::exception &exc)
@@ -376,11 +401,17 @@ class Agent
   public: double timeFallen;
 
   /// \brief Flag whether agent has finished syncing messages
-  public: bool syn;
+  public: bool isSynced;
 
   /// \brief Flag whether the agent has been successfully load into gazebo
   /// simulation world
   public: bool inSimWorld;
+
+  /// \brief Name of agent
+  public: std::string name;
+
+  /// \brief Body type of nao
+  public: std::shared_ptr<NaoBT> bodyType;
 };
 
 /// \brief Struct for helping to sort agents by their distances,
