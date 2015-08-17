@@ -16,6 +16,15 @@
 */
 
 #include "robocup3ds/GameState.hh"
+#include "robocup3ds/states/BeforeKickOffState.hh"
+#include "robocup3ds/states/CornerKickState.hh"
+#include "robocup3ds/states/FreeKickState.hh"
+#include "robocup3ds/states/GameOverState.hh"
+#include "robocup3ds/states/GoalKickState.hh"
+#include "robocup3ds/states/GoalState.hh"
+#include "robocup3ds/states/KickInState.hh"
+#include "robocup3ds/states/KickOffState.hh"
+#include "robocup3ds/states/PlayOnState.hh"
 
 double GameState::SecondsGoalPause = 0;
 
