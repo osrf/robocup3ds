@@ -320,6 +320,9 @@ TEST(RCPServer, NewClientNoDisconnect)
 
   if (clientThread.joinable())
     clientThread.join();
+
+  // expect to return false on nonexistent socket id
+  EXPECT_FALSE(server.DisconnectClient(-1337));
 }
 
 ////////////////////////////////////////////////

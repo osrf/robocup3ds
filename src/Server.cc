@@ -66,6 +66,8 @@ void RCPServer::Start()
 //////////////////////////////////////////////////
 bool RCPServer::DisconnectClient(const int _socket)
 {
+  std::lock_guard<std::mutex> lock(this->mutex);
+
   for (size_t i = 0; i < this->pollSockets.size(); ++i)
   {
     if (_socket == this->pollSockets.at(i).fd)
