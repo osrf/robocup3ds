@@ -29,11 +29,6 @@
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
-    <!-- A ground plane -->
-<!--     <include>
-      <uri>model://ground_plane</uri>
-    </include> -->
-
     <!-- RoboCup 3D simulator field -->
     <include>
       <uri>model://robocup_3Dsim_field</uri>
