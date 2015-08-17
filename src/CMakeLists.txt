@@ -4,6 +4,16 @@ Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/
 set (sources
   Geometry.cc
   Robocup3dsPlugin.cc
+  states/BeforeKickOffState.cc
+  states/CornerKickState.cc
+  states/FreeKickState.cc
+  states/GameOverState.cc
+  states/GoalKickState.cc
+  states/GoalState.cc
+  states/KickInState.cc
+  states/KickOffState.cc
+  states/PlayOnState.cc
+  states/State.cc
   Server.cc
   Util.cc
 )
