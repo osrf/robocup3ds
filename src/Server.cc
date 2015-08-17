@@ -62,6 +62,12 @@ void RCPServer::Start()
 }
 
 //////////////////////////////////////////////////
+bool RCPServer::DisconnectClient(const int _socket)
+{
+  return close(_socket) == 0;
+}
+
+//////////////////////////////////////////////////
 bool RCPServer::Send(const int _socket, const char *_data, const size_t _len)
 {
   if (!this->enabled)
