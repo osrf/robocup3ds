@@ -381,6 +381,7 @@ void Effector::ParseInit(sexp_t *_exp)
   }
   else
   {
+    this->socketsToDisconnect.push_back(this->currSocketId);
     gzmsg << "(" << this->gameState->GetGameTime() <<
           ") failed to add agent to game state: " <<
           Agent::GetName(playerNum, teamName) << std::endl;
@@ -413,6 +414,8 @@ void Effector::Update()
   // clear data structures
   this->agentsToAdd.clear();
   this->agentsToRemove.clear();
+  this->socketsToDisconnect.clear();
+
   std::map <int, Agent *> socketIdAgentMap;
 
   for (const auto &team : this->gameState->teams)
@@ -469,8 +472,9 @@ MonitorEffector::MonitorEffector(GameState *const _gameState):
 //////////////////////////////////////////////////
 void MonitorEffector::Update()
 {
-  this->agentsToRemove.clear();
-  this->agentsToAdd.clear();
+  // this->agentsToRemove.clear();
+  // this->agentsToAdd.clear();
+  // this->socketsToDisconnect.clear();
 
   std::lock_guard<std::mutex> lock(this->mutex);
 

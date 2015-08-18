@@ -418,6 +418,12 @@ void Robocup3dsPlugin::UpdateEffector()
           ") agent removed from game world by client: " <<
           agentName << std::endl;
   }
+
+  // disconnect sockets for failed clients
+  for (const auto &socketId : this->effector->socketsToDisconnect)
+  {
+    // this->clientServer->Disconnect
+  }
   /*
     // set joint velocities of agent model
     for (const auto &team : this->gameState->teams)

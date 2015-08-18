@@ -99,6 +99,9 @@ class Effector: public SocketParser
   /// \brief List of agent names to remove from gazebo world this update cycle.
   public: std::vector<std::string> agentsToRemove;
 
+  /// \brief List of sockets to disconnect this update cycle
+  public: std::vector<int> socketsToDisconnect;
+
   /// \brief Map of socket ids and agent body types strings
   public: std::map<int, std::shared_ptr<NaoBT>> socketIDbodyTypeMap;
 
