@@ -649,7 +649,7 @@ class GameState
   public: static int penaltyBoxLimit;
 
   /// \brief Beam height
-  public: static double beamHeight;
+  public: static double beamHeightOffset;
 
   /// \brief Distance when to enable crowding rules
   public: static double crowdingEnableRadius;
@@ -694,6 +694,13 @@ class GameState
   /// ball contact by the same agent, then it will not count as a new ball
   /// contact (the time of the last ball contact is update instead)
   public: static const double kBallContactInterval;
+
+  /// \brief Map of agent body type names and associated body types
+  public: const std::map<std::string,
+  std::shared_ptr<NaoBT>> agentBodyTypeMap;
+
+  /// \brief The default body type to use when creating agent
+  public: const std::shared_ptr<NaoBT> defaultBodyType;
 
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;

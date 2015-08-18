@@ -53,6 +53,7 @@ void CornerKickState::Update()
   }
 
   this->gameState->DropBallImpl(this->side);
+  State::Update();
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickIn)

@@ -18,9 +18,9 @@
 #ifndef _GAZEBO_ROBOCUP3DS_STATE_PLUGIN_HH_
 #define _GAZEBO_ROBOCUP3DS_STATE_PLUGIN_HH_
 
-#include <ignition/math.hh>
 #include <memory>
 #include <string>
+#include <ignition/math.hh>
 
 #include "robocup3ds/Agent.hh"
 
