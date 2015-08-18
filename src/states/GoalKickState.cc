@@ -60,11 +60,11 @@ void GoalKickState::Update()
   math::Box penaltyBox;
   if (this->side == Team::Side::LEFT)
   {
-    penaltyBox = SoccerField::PenaltyBoxLeft;
+    penaltyBox = SoccerField::kPenaltyBoxLeft;
   }
   else
   {
-    penaltyBox = SoccerField::PenaltyBoxRight;
+    penaltyBox = SoccerField::kPenaltyBoxRight;
   }
   State::Update();
 

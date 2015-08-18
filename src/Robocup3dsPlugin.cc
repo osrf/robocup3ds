@@ -178,8 +178,8 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
 
   // create ball collision filter for contact manager
   const auto &contactMgr = this->world->GetPhysicsEngine()->GetContactManager();
-  const auto &ball = this->world->GetModel(SoccerField::ballName);
-  const auto &ballLink = ball->GetLink(SoccerField::ballLinkName);
+  const auto &ball = this->world->GetModel(SoccerField::kBallName);
+  const auto &ballLink = ball->GetLink(SoccerField::kBallLinkName);
 
   contactMgr->CreateFilter(
     ball->GetName(), ballLink->GetCollision("collision")->GetScopedName());
@@ -253,7 +253,7 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
   {
     for (const auto &agent : team->members)
     {
-      if (!agent.syn)
+      if (!agent.isSynced)
       {
         return;
       }
@@ -265,7 +265,7 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
   {
     for (auto &agent : team->members)
     {
-      agent.syn = false;
+      agent.isSynced = false;
     }
   }
 
@@ -307,7 +307,7 @@ void Robocup3dsPlugin::KeepEffectorsState()
       }
       for (const auto &jointEffector : agent.action.jointEffectors)
       {
-        std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
+        std::string naoJointName = agent.bodyType->HingeJointEffectorMap().find(
                                      jointEffector.first)->second;
         gazebo::physics::JointPtr joint = model->GetJoint(naoJointName);
         if (!joint)
@@ -402,7 +402,7 @@ void Robocup3dsPlugin::UpdateEffector()
     modelSDF.Root(modelRootNode);
 
     this->world->InsertModelSDF(modelSDF);
-    // const auto &model = this->world->GetModel(NaoRobot::defaultModelName);
+    // const auto &model = this->world->GetModel(NaoBT::defaultModelName);
     // model->SetName(agentName);
   }
 
@@ -428,7 +428,7 @@ void Robocup3dsPlugin::UpdateEffector()
 
         for (auto &kv : agent.action.jointEffectors)
         {
-          std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
+          std::string naoJointName = NaoBT::hingeJointEffectorMap.find(
                                        std::string(kv.first))->second;
           model->GetJoint(naoJointName)->SetVelocity(0, kv.second);
         }
@@ -494,14 +494,14 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
     }
     physics::ModelPtr ballModel;
     physics::ModelPtr playerModel;
-    if (model1->GetName() == SoccerField::ballName
+    if (model1->GetName() == SoccerField::kBallName
         && Agent::CheckAgentName(model2->GetName(), uNum, teamName))
     {
       ballModel = model1;
       playerModel = model2;
     }
     else if (Agent::CheckAgentName(model1->GetName(), uNum, teamName)
-             && model2->GetName() == SoccerField::ballName)
+             && model2->GetName() == SoccerField::kBallName)
     {
       ballModel = model2;
       playerModel = model1;
@@ -583,7 +583,7 @@ void Robocup3dsPlugin::UpdateGameState()
   }
 
   // find ball in gazebo world and use it to update gameState
-  const auto &ball = this->world->GetModel(SoccerField::ballName);
+  const auto &ball = this->world->GetModel(SoccerField::kBallName);
   auto &ballPose = ball->GetWorldPose();
   if (!this->gameState->updateBallPose)
   {
@@ -615,7 +615,7 @@ void Robocup3dsPlugin::UpdateGameState()
       // const auto &modelPose = model->GetWorldPose();
       // bool correctModelDrift = agent.status == Agent::Status::STOPPED
       //                          && agent.pos.Distance(G2I(modelPose.pos))
-      //                          > NaoRobot::torsoHeight;
+      //                          > NaoBT::torsoHeight;
 
       // if (!agent.updatePose && agent.status != Agent::Status::STOPPED)
       if (!agent.updatePose)
@@ -679,26 +679,26 @@ void Robocup3dsPlugin::UpdatePerceptor()
       const auto &model = this->world->GetModel(agent.GetName());
 
       // update agent's camera pose
-      auto &cameraPose = model->GetLink(NaoRobot::cameraLinkName)->
+      auto &cameraPose = model->GetLink(agent.bodyType->CameraLinkName())->
                          GetWorldPose();
       agent.cameraPos = G2I(cameraPose.pos);
       agent.cameraRot = G2I(cameraPose.rot);
 
       // update agent's self body map
-      for (auto &kv : NaoRobot::bodyPartMap)
+      for (auto &kv : agent.bodyType->BodyPartMap())
       {
         agent.selfBodyMap[kv.first] =
           G2I(model->GetLink(kv.second)->GetWorldPose().pos);
       }
       // update agent's percept joints angles
-      for (auto &kv : NaoRobot::hingeJointPerceptorMap)
+      for (auto &kv : agent.bodyType->HingeJointPerceptorMap())
       {
         agent.percept.hingeJoints[kv.first] =
           model->GetJoint(kv.second)->GetAngle(0).Degree();
       }
 
       // update agent's percept gyro rate
-      const auto &torsoLink = model->GetLink(NaoRobot::torsoLinkName);
+      const auto &torsoLink = model->GetLink(agent.bodyType->TorsoLinkName());
       agent.percept.gyroRate = G2I(torsoLink->GetWorldAngularVel());
 
       // update agent's percept acceleration
@@ -707,13 +707,17 @@ void Robocup3dsPlugin::UpdatePerceptor()
       // update agent's percept left and right foot force info
       agent.percept.leftFootFR =
         std::make_pair(
-          G2I(model->GetLink(NaoRobot::leftFootLinkName)->GetWorldPose().pos),
-          G2I(model->GetLink(NaoRobot::leftFootLinkName)->GetWorldForce()));
+          G2I(model->GetLink(agent.bodyType->LeftFootLinkName())->
+              GetWorldPose().pos),
+          G2I(model->GetLink(agent.bodyType->LeftFootLinkName())->
+              GetWorldForce()));
 
       agent.percept.rightFootFR =
         std::make_pair(
-          G2I(model->GetLink(NaoRobot::rightFootLinkName)->GetWorldPose().pos),
-          G2I(model->GetLink(NaoRobot::rightFootLinkName)->GetWorldForce()));
+          G2I(model->GetLink(agent.bodyType->RightFootLinkName())->
+              GetWorldPose().pos),
+          G2I(model->GetLink(agent.bodyType->RightFootLinkName())->
+              GetWorldForce()));
     }
   }
   // call update function

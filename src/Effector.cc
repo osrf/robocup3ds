@@ -22,8 +22,10 @@
 #include <iostream>
 #include <ignition/math.hh>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <string>
+
 #include "robocup3ds/Agent.hh"
 #include "robocup3ds/Nao.hh"
 #include "robocup3ds/GameState.hh"
@@ -39,7 +41,8 @@ const int Effector::kBufferSize = 16384;
 Effector::Effector(GameState *const _gameState):
   gameState(_gameState),
   currAgent(NULL),
-  currSocketId(-1)
+  currSocketId(-1),
+  currentBodyType(nullptr)
 {
   // Initialize global variables
   this->buffer = new char[Effector::kBufferSize];
@@ -189,7 +192,7 @@ void Effector::ParseSexp(sexp_t *_exp)
   if (!strcmp(v, "syn") && this->currAgent)
   {
     // std::cerr << "(syn) parsed" << std::endl;
-    this->currAgent->syn = true;
+    this->currAgent->isSynced = true;
   }
   else if (!strcmp(v, "beam"))
   {
@@ -207,8 +210,10 @@ void Effector::ParseSexp(sexp_t *_exp)
   {
     this->ParseSay(_exp);
   }
-  else if (NaoRobot::hingeJointEffectorMap.find(std::string(v))
-           != NaoRobot::hingeJointEffectorMap.end())
+  else if (this->currAgent
+           && this->currAgent->bodyType->HingeJointEffectorMap().find(
+             std::string(v))
+           != this->currAgent->bodyType->HingeJointEffectorMap().end())
   {
     this->ParseHingeJoint(_exp);
   }
@@ -239,14 +244,22 @@ void Effector::ParseScene(sexp_t *_exp)
 {
   // this is the case where we already have an agent in gameState,
   // then no need to use the Scene message
-  if (this->currAgent)
+  if (this->currAgent || this->currentBodyType)
   {
     return;
   }
 
-  std::string address;
-  address = _exp->list->next->val;
-  address.clear();
+  const std::string bodyType = _exp->list->next->val;
+  if (GameState::kAgentBodyTypeMap.find(bodyType) !=
+      GameState::kAgentBodyTypeMap.end())
+  {
+    this->currentBodyType = GameState::kAgentBodyTypeMap.at(bodyType);
+  }
+  else
+  {
+    // use default body type if bodyType string is not recognized
+    this->currentBodyType = GameState::kDefaultBodyType;
+  }
 
   this->sceneMessagesSocketIDs.push_back(this->currSocketId);
 }
@@ -324,7 +337,7 @@ void Effector::ParseInit(sexp_t *_exp)
 {
   // this is the case where we already have an agent in gameState,
   // then no need for init
-  if (this->currAgent)
+  if (this->currAgent || !this->currentBodyType)
   {
     return;
   }
@@ -355,7 +368,8 @@ void Effector::ParseInit(sexp_t *_exp)
   }
 
   this->currAgent = this->gameState->AddAgent(
-                      playerNum, teamName, this->currSocketId);
+                      playerNum, teamName,
+                      this->currentBodyType, this->currSocketId);
   if (this->currAgent)
   {
     this->agentsToAdd.push_back(this->currAgent->GetName());
@@ -415,7 +429,7 @@ void Effector::Update()
        kv != this->socketIDMessageMap.end();)
   {
     this->currSocketId = kv->first;
-    this->currAgent = NULL;
+    this->currAgent = nullptr;
     if (socketIdAgentMap.find(this->currSocketId) != socketIdAgentMap.end())
     {
       this->currAgent = socketIdAgentMap[this->currSocketId];
@@ -444,6 +458,7 @@ void Effector::Update()
 
   this->currSocketId = -1;
   this->currAgent = NULL;
+  this->currentBodyType = nullptr;
 }
 
 //////////////////////////////////////////////////

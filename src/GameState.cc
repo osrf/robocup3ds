@@ -67,7 +67,7 @@ double GameState::SecondsKickOff = 15;
 bool   GameState::useCounterForGameTime = false;
 int    GameState::playerLimit = 11;
 int    GameState::penaltyBoxLimit = 3;
-double GameState::beamHeight = NaoRobot::torsoHeight + 0.05;
+double GameState::beamHeightOffset = 0.05;
 double GameState::crowdingEnableRadius = 0.8;
 double GameState::innerCrowdingRadius = 0.4;
 double GameState::outerCrowdingRadius = 1.0;
@@ -83,6 +83,13 @@ const double GameState::kDropBallRadiusMargin = 0.5;
 const double GameState::kBeamNoise = 0.1;
 const std::string GameState::kDefaultTeamName = "------------";
 const double GameState::kBallContactInterval = 0.1;
+const std::map<std::string, std::shared_ptr<NaoBT>>
+    GameState::kAgentBodyTypeMap =
+{
+  {"NaoOfficialBT", std::shared_ptr<NaoOfficialBT>()}
+};
+const std::shared_ptr<NaoBT> GameState::kDefaultBodyType
+  = GameState::kAgentBodyTypeMap.at("NaoOfficialBT");
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -202,9 +209,9 @@ void GameState::LoadConfiguration(
   {
     GameState::penaltyBoxLimit = static_cast<int>(value);
   }
-  if (LoadConfigParameter(_config, "gamestate_beamheight", value))
+  if (LoadConfigParameter(_config, "gamestate_beamheightoffset", value))
   {
-    GameState::beamHeight = value;
+    GameState::beamHeightOffset = value;
   }
   if (LoadConfigParameter(_config, "gamestate_crowdingenableradius", value))
   {
@@ -345,10 +352,12 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
           }
           math::Line3<double> line(agent.pos, this->ballPos);
           math::Vector3<double> newPos;
-          newPos.Set(0, 0, beamHeight);
+          newPos.Set(0, 0, agent.bodyType->TorsoHeight() +
+                     GameState::beamHeightOffset);
           math::Vector3<double> newPos2;
-          newPos2.Set(0, 0, beamHeight);
-          if (Geometry::IntersectionCircunferenceLine(line, this->ballPos,
+          newPos2.Set(0, 0, agent.bodyType->TorsoHeight() +
+                      GameState::beamHeightOffset);
+          if (Geometry::IntersectionCircumferenceLine(line, this->ballPos,
               GameState::kDropBallRadiusMargin +
               GameState::dropBallRadius, newPos, newPos2))
           {
@@ -405,13 +414,13 @@ bool GameState::IsBallInGoal(Team::Side _side)
   math::Plane<double> goalPlane;
   if (_side == Team::Side::LEFT)
   {
-    goalBox = SoccerField::GoalBoxLeft;
-    goalPlane = SoccerField::GoalPlaneLeft;
+    goalBox = SoccerField::kGoalBoxLeft;
+    goalPlane = SoccerField::kGoalPlaneLeft;
   }
   else
   {
-    goalBox = SoccerField::GoalBoxRight;
-    goalPlane = SoccerField::GoalPlaneRight;
+    goalBox = SoccerField::kGoalBoxRight;
+    goalPlane = SoccerField::kGoalPlaneRight;
   }
 
   if (goalBox.Contains(this->ballPos))
@@ -425,8 +434,8 @@ bool GameState::IsBallInGoal(Team::Side _side)
     this->ballPos - (this->GetElapsedCycleGameTime() * this->ballVel),
     this->ballPos);
   bool intersect = Geometry::IntersectionPlaneLine(ballLine, goalPlane, t, pt);
-  if (intersect && t > 0 && t < 1 && fabs(pt.Y()) < SoccerField::HalfGoalWidth
-      && pt.Z() > 0 && pt.Z() < SoccerField::GoalHeight)
+  if (intersect && t > 0 && t < 1 && fabs(pt.Y()) < SoccerField::kHalfGoalWidth
+      && pt.Z() > 0 && pt.Z() < SoccerField::kGoalHeight)
   {
     return true;
   }
@@ -468,8 +477,8 @@ void GameState::CheckBall()
     // The ball is inside the right goal.
     this->SetCurrent(goalLeftState);
   }
-  else if (fabs(this->ballPos.Y()) > SoccerField::HalfFieldHeight +
-           SoccerField::OutofBoundsTol)
+  else if (fabs(this->ballPos.Y()) > SoccerField::kHalfFieldHeight +
+           SoccerField::kOutofBoundsTol)
   {
     // The ball is outside of the sideline.
     // Choose team
@@ -482,8 +491,8 @@ void GameState::CheckBall()
       this->SetCurrent(kickInLeftState);
     }
   }
-  else if (fabs(this->ballPos.X()) > SoccerField::HalfFieldWidth +
-           SoccerField::OutofBoundsTol)
+  else if (fabs(this->ballPos.X()) > SoccerField::kHalfFieldWidth +
+           SoccerField::kOutofBoundsTol)
   {
     // The ball is outside of the field
     // over the defensive team's goal line.
@@ -520,11 +529,11 @@ void GameState::CheckGoalKickIllegalDefense(const Team::Side _teamAllowed)
   math::Box penaltyBox;
   if (_teamAllowed == Team::Side::LEFT)
   {
-    penaltyBox = SoccerField::PenaltyBoxLeft;
+    penaltyBox = SoccerField::kPenaltyBoxLeft;
   }
   else
   {
-    penaltyBox = SoccerField::PenaltyBoxRight;
+    penaltyBox = SoccerField::kPenaltyBoxRight;
   }
 
   for (auto &team : this->teams)
@@ -552,13 +561,13 @@ void GameState::CheckIllegalDefense()
   {
     if (team->side == Team::Side::LEFT)
     {
-      penaltyBox = SoccerField::PenaltyBoxLeft;
-      goalCenter = SoccerField::GoalCenterLeft;
+      penaltyBox = SoccerField::kPenaltyBoxLeft;
+      goalCenter = SoccerField::kGoalCenterLeft;
     }
     else
     {
-      penaltyBox = SoccerField::PenaltyBoxRight;
-      goalCenter = SoccerField::GoalCenterRight;
+      penaltyBox = SoccerField::kPenaltyBoxRight;
+      goalCenter = SoccerField::kGoalCenterRight;
     }
 
     // do bookkeeping for agents that leave penalty box
@@ -722,7 +731,7 @@ void GameState::CheckImmobility()
         agent.timeImmobilized = 0;
       }
 
-      if (agent.pos.Z() < NaoRobot::torsoHeight * 0.5)
+      if (agent.pos.Z() < agent.bodyType->TorsoHeight() * 0.5)
       {
         agent.timeFallen += this->GetElapsedCycleGameTime();
       }
@@ -793,8 +802,8 @@ void GameState::CheckCanScore()
             || (lastBallContact->side == team->side
                 && this->touchBallKickoff->uNum != lastBallContact->uNum
                 && lastBallContact->contactPos.Distance(
-                  SoccerField::CenterOfField) >
-                SoccerField::CenterCircleRadius)))
+                  SoccerField::kCenterOfField) >
+                SoccerField::kCenterCircleRadius)))
     {
       team->canScore = true;
     }
@@ -823,8 +832,8 @@ void GameState::CheckOffSidesOnKickOff(const Team::Side _kickingSide)
       // if on kicking team, must stay in circle or cannot cross line.
       if (team->side == _kickingSide && (isOffSide &&
                                          agentPosNoZ.Distance(
-                                           SoccerField::CenterOfField) >
-                                         SoccerField::CenterCircleRadius))
+                                           SoccerField::kCenterOfField) >
+                                         SoccerField::kCenterCircleRadius))
       {
         // move them to side of field for now
         gzmsg << "CheckOffSidesOnKickOff() violation" << std::endl;
@@ -833,8 +842,8 @@ void GameState::CheckOffSidesOnKickOff(const Team::Side _kickingSide)
         // if on defending team, cannot cross line and go inside circle.
       }
       else if (team->side != _kickingSide &&
-               (isOffSide || agentPosNoZ.Distance(SoccerField::CenterOfField)
-                < SoccerField::CenterCircleRadius))
+               (isOffSide || agentPosNoZ.Distance(SoccerField::kCenterOfField)
+                < SoccerField::kCenterCircleRadius))
       {
         // move them to side of field for now
         gzmsg << "CheckOffSidesOnKickOff() violation" << std::endl;
@@ -857,7 +866,8 @@ void GameState::MoveAgent(Agent &_agent,
 void GameState::MoveAgent(Agent &_agent, const double _x, const double _y,
                           const double _yaw) const
 {
-  _agent.pos.Set(_x, _y, GameState::beamHeight);
+  _agent.pos.Set(_x, _y, _agent.bodyType->TorsoHeight() +
+                 GameState::beamHeightOffset);
   _agent.rot.Euler(0, 0, _yaw);
   _agent.updatePose = true;
 }
@@ -872,7 +882,9 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                    (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
   double offsetYaw = (static_cast<double>(random()) / (RAND_MAX)) *
                      (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
-  _agent.pos.Set(_x + offsetX, _y + offsetY, GameState::beamHeight);
+  _agent.pos.Set(_x + offsetX, _y + offsetY,
+                 _agent.bodyType->TorsoHeight() +
+                 GameState::beamHeightOffset);
   _agent.rot.Euler(0, 0, _yaw + offsetYaw);
   _agent.updatePose = true;
   // std::cerr << "MoveAgentNoisy to X:" << _agent.pos.X() <<
@@ -893,14 +905,15 @@ void GameState::MoveAgentToSide(Agent &_agent) const
   double newY;
   if (_agent.pos.Y() > 0)
   {
-    newY = -SoccerField::HalfFieldHeight;
+    newY = -SoccerField::kHalfFieldHeight;
   }
   else
   {
-    newY = SoccerField::HalfFieldHeight;
+    newY = SoccerField::kHalfFieldHeight;
   }
   _agent.pos = math::Vector3<double>(_agent.pos.X(), newY,
-                                     GameState::beamHeight);
+                                     _agent.bodyType->TorsoHeight() +
+                                     GameState::beamHeightOffset);
   _agent.updatePose = true;
 }
 
@@ -908,13 +921,15 @@ void GameState::MoveOffSideAgent(Agent &_agent) const
 {
   if (_agent.team->side == Team::Side::LEFT)
   {
-    _agent.pos.Set(-(SoccerField::CenterCircleRadius + 0.5), _agent.pos.Y(),
-                   GameState::beamHeight);
+    _agent.pos.Set(-(SoccerField::kCenterCircleRadius + 0.5), _agent.pos.Y(),
+                   _agent.bodyType->TorsoHeight() +
+                   GameState::beamHeightOffset);
   }
   else if (_agent.team->side == Team::Side::RIGHT)
   {
-    _agent.pos.Set(SoccerField::CenterCircleRadius + 0.5, _agent.pos.Y(),
-                   GameState::beamHeight);
+    _agent.pos.Set(SoccerField::kCenterCircleRadius + 0.5, _agent.pos.Y(),
+                   _agent.bodyType->TorsoHeight() +
+                   GameState::beamHeightOffset);
   }
   _agent.updatePose = true;
 }
@@ -928,7 +943,7 @@ math::Vector3<double> GameState::GetBall()
 /////////////////////////////////////////////////
 void GameState::MoveBallToCenter()
 {
-  this->ballPos = SoccerField::BallCenterPosition;
+  this->ballPos = SoccerField::kBallCenterPosition;
   this->ballVel = math::Vector3<double>(0, 0, 0);
   this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
@@ -937,12 +952,12 @@ void GameState::MoveBallToCenter()
 /////////////////////////////////////////////////
 void GameState::MoveBallForGoalKick()
 {
-  double newX = SoccerField::HalfFieldWidth - 1.0;
+  double newX = SoccerField::kHalfFieldWidth - 1.0;
   if (ballPos.X() < 0)
   {
     newX = -newX;
   }
-  this->ballPos = math::Vector3<double>(newX, 0, SoccerField::BallRadius);
+  this->ballPos = math::Vector3<double>(newX, 0, SoccerField::kBallRadius);
   this->ballVel = math::Vector3<double>(0, 0, 0);
   this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
@@ -953,10 +968,10 @@ void GameState::MoveBallToCorner()
 {
   this->ballPos = math::Vector3<double>(
                     (fabs(ballPos.X()) / ballPos.X()) *
-                    SoccerField::HalfFieldWidth,
+                    SoccerField::kHalfFieldWidth,
                     (fabs(ballPos.Y()) / ballPos.Y()) *
-                    SoccerField::HalfFieldHeight,
-                    SoccerField::BallRadius);
+                    SoccerField::kHalfFieldHeight,
+                    SoccerField::kBallRadius);
   this->ballVel = math::Vector3<double>(0, 0, 0);
   this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
@@ -965,11 +980,11 @@ void GameState::MoveBallToCorner()
 /////////////////////////////////////////////////
 void GameState::MoveBallInBounds()
 {
-  double newX = std::max(std::min(SoccerField::HalfFieldWidth, ballPos.X()),
-                         -SoccerField::HalfFieldWidth);
-  double newY = std::max(std::min(SoccerField::HalfFieldHeight, ballPos.Y()),
-                         -SoccerField::HalfFieldHeight);
-  this->ballPos.Set(newX, newY, SoccerField::BallRadius);
+  double newX = std::max(std::min(SoccerField::kHalfFieldWidth, ballPos.X()),
+                         -SoccerField::kHalfFieldWidth);
+  double newY = std::max(std::min(SoccerField::kHalfFieldHeight, ballPos.Y()),
+                         -SoccerField::kHalfFieldHeight);
+  this->ballPos.Set(newX, newY, SoccerField::kBallRadius);
   this->ballVel = math::Vector3<double>(0, 0, 0);
   this->ballAngVel = math::Vector3<double>(0, 0, 0);
   this->updateBallPose = true;
@@ -1019,6 +1034,7 @@ void GameState::Initialize()
 
 ////////////////////////////////////////////////
 Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
+                           const std::shared_ptr<NaoBT> &_bodyType,
                            const int _socketID)
 {
   if (this->currentState->GetName() != "BeforeKickOff")
@@ -1103,7 +1119,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
     // << std::endl;
     return nullptr;
   }
-  teamToAdd->members.push_back(Agent(uNum, teamToAdd, _socketID));
+  teamToAdd->members.push_back(Agent(uNum, teamToAdd, _bodyType, _socketID));
   return &teamToAdd->members.back();
 }
 
@@ -1152,7 +1168,7 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
         {
           if (team->side == Team::Side::LEFT)
           {
-            this->MoveAgentNoisy(agent, _x, _y, RAD(_rot));
+            this->MoveAgentNoisy(agent, _x, _y, IGN_DTOR(_rot));
           }
           else
           {
@@ -1161,7 +1177,7 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
             {
               rot -= 360.0;
             }
-            this->MoveAgentNoisy(agent, -_x, -_y, RAD(rot));
+            this->MoveAgentNoisy(agent, -_x, -_y, IGN_DTOR(rot));
           }
           return true;
         }

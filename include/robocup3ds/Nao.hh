@@ -20,6 +20,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include <vector>
 
 /// \brief Base Class for Nao body types. All other Nao body types derive

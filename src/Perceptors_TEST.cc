@@ -52,8 +52,8 @@ class PerceptorTest : public ::testing::Test
         return false;
       }
       _testLine.Set(
-        Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[0]),
-        Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[1]));
+        Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[0]),
+        Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[1]));
       return true;
     }
 
@@ -68,7 +68,7 @@ class PerceptorTest : public ::testing::Test
       {
         return false;
       }
-      _testLandmark = Geometry::PolarToCart(_agent.percept.landMarks["test"]);
+      _testLandmark = Geometry::SphereToCart(_agent.percept.landMarks["test"]);
       return true;
     }
 
@@ -310,8 +310,8 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
 /// intended
 TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
 {
-  GameState::HFov = 90;
-  GameState::VFov = 90;
+  GameState::HFov = 89;
+  GameState::VFov = 89;
   perceptor->SetViewFrustum();
   Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
@@ -337,10 +337,10 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
   EXPECT_NE(agent1.percept.otherAgentBodyMap[agent2Id].find("BODY"),
             agent1.percept.otherAgentBodyMap[agent2Id].end());
   EXPECT_EQ(
-    Geometry::PolarToCart(agent1.percept.otherAgentBodyMap[agent2Id]["HEAD"]),
+    Geometry::SphereToCart(agent1.percept.otherAgentBodyMap[agent2Id]["HEAD"]),
     math::Vector3<double>(1, -1, 1));
   EXPECT_EQ(
-    Geometry::PolarToCart(agent1.percept.otherAgentBodyMap[agent2Id]["BODY"]),
+    Geometry::SphereToCart(agent1.percept.otherAgentBodyMap[agent2Id]["BODY"]),
     math::Vector3<double>(1, -1, 0));
 
   // with restricted vision, other agent's body parts should not be visible
@@ -374,7 +374,7 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
   EXPECT_TRUE(agent1.percept.hear.isValid);
   EXPECT_DOUBLE_EQ(agent1.percept.hear.gameTime,
                    gameState->GetElapsedGameTime());
-  EXPECT_DOUBLE_EQ(agent1.percept.hear.yaw, RAD(90.0));
+  EXPECT_DOUBLE_EQ(agent1.percept.hear.yaw, IGN_DTOR(90.0));
   EXPECT_FALSE(agent1.percept.hear.self);
   EXPECT_EQ(agent1.percept.hear.msg, "hello");
 
@@ -425,9 +425,9 @@ TEST_F(PerceptorTest, Percepter_Update)
     {
       auto &agent = gameState->teams.at(i)->members.at(j);
       EXPECT_EQ(agent.percept.fieldLines.size(),
-                SoccerField::FieldLines.size());
+                SoccerField::kFieldLines.size());
       EXPECT_EQ(agent.percept.landMarks.size(),
-                SoccerField::LandMarks.size() + 1u);
+                SoccerField::kLandMarks.size() + 1u);
       EXPECT_NE(agent.percept.landMarks.find("B"),
                 agent.percept.landMarks.end());
       EXPECT_EQ(agent.percept.otherAgentBodyMap.size(), 21u);
@@ -461,7 +461,7 @@ TEST_F(PerceptorTest, Percepter_Serialize)
       if (i == 0 && j == 0)
       { continue; }
       gameState->MoveAgent(agent, math::Vector3<double>(5.0, 1.0,
-                           GameState::beamHeight));
+                           0.35));
       agent.selfBodyMap["BODY"] = agent.pos;
       agent.selfBodyMap["HEAD"] = agent.pos +
                                   math::Vector3<double>(0, 0, 1);
@@ -471,7 +471,7 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   gameState->SetCycleCounter(1);
   const auto &team = gameState->teams.at(1);
   team->say.agentId = std::make_pair(1, "blue");
-  team->say.pos.Set(5.0, 1.0, GameState::beamHeight);
+  team->say.pos.Set(5.0, 1.0, 0.35);
   team->say.msg = "hello";
   team->say.isValid = true;
   Perceptor::useNoise = false;

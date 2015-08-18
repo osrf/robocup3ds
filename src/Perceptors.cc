@@ -51,8 +51,8 @@ Perceptor::Perceptor(GameState *const _gameState):
 /////////////////////////////////////////////////
 void Perceptor::SetViewFrustum()
 {
-  double HFov = RAD(std::min(180.0, std::max(0.0, GameState::HFov)));
-  double VFov = RAD(std::min(180.0, std::max(0.0, GameState::VFov)));
+  double HFov = IGN_DTOR(std::min(180.0, std::max(0.0, GameState::HFov)));
+  double VFov = IGN_DTOR(std::min(180.0, std::max(0.0, GameState::VFov)));
 
   math::Vector3<double> origin = math::Vector3<double>::Zero;
   math::Vector3<double> upperRight(1.0, -tan(HFov / 2), tan(VFov / 2));
@@ -121,14 +121,14 @@ void Perceptor::Update()
       {
         // update line info
         agent.percept.fieldLines.clear();
-        for (auto &fieldLine : SoccerField::FieldLines)
+        for (auto &fieldLine : SoccerField::kFieldLines)
         {
           this->UpdateLine(agent, fieldLine);
         }
 
         // update landmark info
         agent.percept.landMarks.clear();
-        for (auto &kv : SoccerField::LandMarks)
+        for (auto &kv : SoccerField::kLandMarks)
         {
           this->UpdateLandmark(agent, kv.first, kv.second);
         }
@@ -187,8 +187,8 @@ void Perceptor::UpdateLine(Agent &_agent,
     }
   }
 
-  agentLine.Set(addNoise(Geometry::CartToPolar(agentLine[0])),
-                addNoise(Geometry::CartToPolar(agentLine[1])));
+  agentLine.Set(addNoise(Geometry::CartToSphere(agentLine[0])),
+                addNoise(Geometry::CartToSphere(agentLine[1])));
   _agent.percept.fieldLines.push_back(agentLine);
 }
 
@@ -213,7 +213,7 @@ void Perceptor::UpdateLandmark(Agent &_agent,
   }
 
   _agent.percept.landMarks[_landmarkname] =
-    addNoise(Geometry::CartToPolar(_agentLandMark));
+    addNoise(Geometry::CartToSphere(_agentLandMark));
 }
 
 /////////////////////////////////////////////////
@@ -239,7 +239,7 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
     AgentId otherAgentId(_otherAgent.uNum,
                          _otherAgent.team->name);
     _agent.percept.otherAgentBodyMap[otherAgentId][kv.first] =
-      addNoise(Geometry::CartToPolar(_otherAgentPart));
+      addNoise(Geometry::CartToSphere(_otherAgentPart));
   }
 }
 
@@ -406,12 +406,12 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
                      " (mypos %.2f %.2f %.2f) (myorien %.2f)"
                      " (ballpos %.2f %.2f %.2f)",
                      _agent.pos.X(), _agent.pos.Y(), _agent.pos.Z(),
-                     DEG(_agent.rot.Euler().Z()),
+                     IGN_RTOD(_agent.rot.Euler().Z()),
                      ballPos.X(), ballPos.Y(), ballPos.Z());
     }
     else
     {
-      double rot = DEG(_agent.rot.Euler().Z()) + 180.0;
+      double rot = IGN_RTOD(_agent.rot.Euler().Z()) + 180.0;
       if (rot >= 360.0)
       {
         rot -= 360.0;

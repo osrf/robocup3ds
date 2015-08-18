@@ -31,6 +31,7 @@
 #include "robocup3ds/Agent.hh"
 
 class GameState;
+class NaoBT;
 
 /// \brief This is a Effector class. It implemented Parse() method
 /// inherited from SocketParser class. Parse() method has been used
@@ -126,6 +127,8 @@ class Effector: public SocketParser
 
   /// \brief The socketID of currAgent
   protected: int currSocketId;
+
+  protected: std::shared_ptr<NaoBT> currentBodyType;
 };
 
 class MonitorEffector : public Effector

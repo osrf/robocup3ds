@@ -58,7 +58,7 @@ void BeforeKickOffState::Update()
   this->gameState->SetStartGameTime(this->gameState->GetGameTime());
 
   this->gameState->StopPlayers();
-  if (this->gameState->GetBall() != SoccerField::BallCenterPosition)
+  if (this->gameState->GetBall() != SoccerField::kBallCenterPosition)
   {
     this->gameState->MoveBallToCenter();
   }
