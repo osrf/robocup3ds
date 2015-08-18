@@ -472,7 +472,7 @@ MonitorEffector::MonitorEffector(GameState *const _gameState):
 //////////////////////////////////////////////////
 void MonitorEffector::Update()
 {
-  // this->agentsToRemove.clear();
+  this->agentsToRemove.clear();
   // this->agentsToAdd.clear();
   // this->socketsToDisconnect.clear();
 
