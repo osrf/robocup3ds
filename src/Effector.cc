@@ -367,14 +367,16 @@ void Effector::ParseInit(sexp_t *_exp)
     }
     ptr = ptr->next;
   }
+
   this->currAgent = this->gameState->AddAgent(
                       playerNum, teamName,
                       this->socketIDbodyTypeMap.at(this->currSocketId),
                       this->currSocketId);
+  this->socketIDbodyTypeMap.erase(this->currSocketId);
+
   if (this->currAgent)
   {
     this->agentsToAdd.push_back(this->currAgent);
-    this->socketIDbodyTypeMap.erase(this->currSocketId);
     gzmsg << "(" << this->gameState->GetGameTime() <<
           ") agent added to game state: " << this->currAgent->GetName()
           << std::endl;
