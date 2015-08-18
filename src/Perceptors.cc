@@ -246,7 +246,7 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
 /////////////////////////////////////////////////
 void Perceptor::UpdateAgentHear(Agent &_agent) const
 {
-  const AgentSay *say;
+  const AgentSay *say = NULL;
   for (const auto &team : this->gameState->teams)
   {
     if (this->SideToSpeak() == team->side)
@@ -257,7 +257,7 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
 
   AgentHear &hear = _agent.percept.hear;
   hear.isValid = false;
-  if (!say->isValid)
+  if (!say || !say->isValid)
   {
     return;
   }
