@@ -261,7 +261,7 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
   {
     return;
   }
-  math::Vector3<double> relPos = this->G2LMat.TransformAffine(say->pos);
+  const math::Vector3<double> relPos = this->G2LMat.TransformAffine(say->pos);
   if (relPos.Length() > Perceptor::kHearDist)
   {
     return;
