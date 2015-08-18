@@ -83,13 +83,6 @@ const double GameState::kDropBallRadiusMargin = 0.5;
 const double GameState::kBeamNoise = 0.1;
 const std::string GameState::kDefaultTeamName = "------------";
 const double GameState::kBallContactInterval = 0.1;
-const std::map<std::string, std::shared_ptr<NaoBT>>
-    GameState::kAgentBodyTypeMap =
-{
-  {"NaoOfficialBT", std::shared_ptr<NaoOfficialBT>()}
-};
-const std::shared_ptr<NaoBT> GameState::kDefaultBodyType
-  = GameState::kAgentBodyTypeMap.at("NaoOfficialBT");
 
 /////////////////////////////////////////////////
 GameState::GameState():
@@ -120,6 +113,8 @@ GameState::GameState():
                     Team::Side::LEFT)),
   freeKickRightState(std::make_shared<FreeKickState>(FreeKickRight, this,
                      Team::Side::RIGHT)),
+  agentBodyTypeMap({{"NaoOfficialBT", std::make_shared<NaoOfficialBT>()}}),
+  defaultBodyType(agentBodyTypeMap.at("NaoOfficialBT")),
   hasCurrentStateChanged(false),
   touchBallKickoff(nullptr),
   updateBallPose(false),

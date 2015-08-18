@@ -230,7 +230,8 @@ bool ClientAgent::Connect(const int &_port, int &_socketID)
 void ClientAgent::InitAndBeam(const double _x,
                               const double _y, const double _yaw)
 {
-  const auto msg = "(init (unum " + std::to_string(this->uNum)
+  const auto msg = "(scene NaoOfficialBT) "
+                   "(init (unum " + std::to_string(this->uNum)
                    + ") (teamname " + this->teamName + ")) (beam "
                    + std::to_string(_x)
                    + " " + std::to_string(_y) + " "

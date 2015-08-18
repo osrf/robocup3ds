@@ -41,8 +41,7 @@ const int Effector::kBufferSize = 16384;
 Effector::Effector(GameState *const _gameState):
   gameState(_gameState),
   currAgent(NULL),
-  currSocketId(-1),
-  currentBodyType(nullptr)
+  currSocketId(-1)
 {
   // Initialize global variables
   this->buffer = new char[Effector::kBufferSize];
@@ -244,24 +243,24 @@ void Effector::ParseScene(sexp_t *_exp)
 {
   // this is the case where we already have an agent in gameState,
   // then no need to use the Scene message
-  if (this->currAgent || this->currentBodyType)
+  if (this->currAgent)
   {
     return;
   }
 
   const std::string bodyType = _exp->list->next->val;
-  if (GameState::kAgentBodyTypeMap.find(bodyType) !=
-      GameState::kAgentBodyTypeMap.end())
+  if (this->gameState->agentBodyTypeMap.find(bodyType) !=
+     this->gameState->agentBodyTypeMap.end())
   {
-    this->currentBodyType = GameState::kAgentBodyTypeMap.at(bodyType);
+    this->socketIDbodyTypeMap[this->currSocketId] =
+     this->gameState->agentBodyTypeMap.at(bodyType);
   }
   else
   {
     // use default body type if bodyType string is not recognized
-    this->currentBodyType = GameState::kDefaultBodyType;
+    this->socketIDbodyTypeMap[this->currSocketId] =
+      this->gameState->defaultBodyType;
   }
-
-  this->sceneMessagesSocketIDs.push_back(this->currSocketId);
 }
 
 //////////////////////////////////////////////////
@@ -337,7 +336,9 @@ void Effector::ParseInit(sexp_t *_exp)
 {
   // this is the case where we already have an agent in gameState,
   // then no need for init
-  if (this->currAgent || !this->currentBodyType)
+  if (this->currAgent
+      || (this->socketIDbodyTypeMap.find(this->currSocketId)
+          == this->socketIDbodyTypeMap.end()))
   {
     return;
   }
@@ -366,13 +367,14 @@ void Effector::ParseInit(sexp_t *_exp)
     }
     ptr = ptr->next;
   }
-
   this->currAgent = this->gameState->AddAgent(
                       playerNum, teamName,
-                      this->currentBodyType, this->currSocketId);
+                      this->socketIDbodyTypeMap.at(this->currSocketId),
+                      this->currSocketId);
   if (this->currAgent)
   {
     this->agentsToAdd.push_back(this->currAgent->GetName());
+    this->socketIDbodyTypeMap.erase(this->currSocketId);
     gzmsg << "(" << this->gameState->GetGameTime() <<
           ") agent added to game state: " << this->currAgent->GetName()
           << std::endl;
@@ -411,7 +413,6 @@ void Effector::Update()
   // clear data structures
   this->agentsToAdd.clear();
   this->agentsToRemove.clear();
-  this->sceneMessagesSocketIDs.clear();
   std::map <int, Agent *> socketIdAgentMap;
 
   for (const auto &team : this->gameState->teams)
@@ -458,7 +459,6 @@ void Effector::Update()
 
   this->currSocketId = -1;
   this->currAgent = NULL;
-  this->currentBodyType = nullptr;
 }
 
 //////////////////////////////////////////////////

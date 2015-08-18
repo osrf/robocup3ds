@@ -578,11 +578,11 @@ class GameState
   public: static const double kBallContactInterval;
 
   /// \brief Map of agent body type names and associated body types
-  public: static const std::map<std::string,
-  std::shared_ptr<NaoBT>> kAgentBodyTypeMap;
+  public: const std::map<std::string,
+  std::shared_ptr<NaoBT>> agentBodyTypeMap;
 
   /// \brief The default body type to use when creating agent
-  public: static const std::shared_ptr<NaoBT> kDefaultBodyType;
+  public: const std::shared_ptr<NaoBT> defaultBodyType;
 
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;

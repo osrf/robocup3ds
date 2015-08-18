@@ -119,7 +119,8 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   // set world sdf and nao sdf
   this->world = _world;
   this->sdf = _sdf;
-  std::string filePath = ModelDatabase::Instance()->GetModelFile("model://nao");
+  std::string filePath = ModelDatabase::Instance()->
+                         GetModelFile("model://nao_blue");
   // gzmsg << "nao filepath: " << filePath << std::endl;
   const sdf::SDFPtr naoSDF(new sdf::SDF());
   sdf::init(naoSDF);
@@ -656,8 +657,9 @@ void Robocup3dsPlugin::UpdateGameState()
 void Robocup3dsPlugin::UpdatePerceptor()
 {
   // update send information to the agent that sends the Scene message
-  for (const auto &socketId : this->effector->sceneMessagesSocketIDs)
+  for (const auto &kv : this->effector->socketIDbodyTypeMap)
   {
+    const int socketId = kv.first;
     int len = snprintf(this->buffer + 4, Robocup3dsPlugin::kBufferSize - 4,
                        "(time (now %.2f))",
                        this->gameState->GetGameTime());

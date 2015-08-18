@@ -281,12 +281,14 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
                         -SoccerField::kHalfFieldHeight,
                         SoccerField::kBallRadius));
   fourCorners.push_back(math::Vector3<double>(-SoccerField::kHalfFieldWidth,
-                        SoccerField::kHalfFieldHeight, SoccerField::kBallRadius));
+                        SoccerField::kHalfFieldHeight,
+                        SoccerField::kBallRadius));
   fourCorners.push_back(math::Vector3<double>(SoccerField::kHalfFieldWidth,
                         -SoccerField::kHalfFieldHeight,
                         SoccerField::kBallRadius));
   fourCorners.push_back(math::Vector3<double>(SoccerField::kHalfFieldWidth,
-                        SoccerField::kHalfFieldHeight, SoccerField::kBallRadius));
+                        SoccerField::kHalfFieldHeight,
+                        SoccerField::kBallRadius));
 
   for (size_t i = 0; i < nearFourCorners.size(); ++i)
   {
@@ -1434,9 +1436,13 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     gameState.Update();
     EXPECT_EQ(ourAgent.pos, pos);
     if (i == 0)
-    { pos.Set(1, 0, 0.35); }
+    {
+      pos.Set(1, 0, 0.35);
+    }
     else
-    { pos.Set(-1, 0, 0.35); }
+    {
+      pos.Set(-1, 0, 0.35);
+    }
     gameState.MoveAgent(ourAgent, pos);
     gameState.Update();
     EXPECT_EQ(ourAgent.pos, pos);
@@ -1444,15 +1450,23 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     // Ensure that our agent is beamed back to its own side
     // if it violate sides and is not in circle
     if (i == 0)
-    { pos.Set(1, 4, 0.35); }
+    {
+      pos.Set(1, 4, 0.35);
+    }
     else
-    { pos.Set(-1, 4, 0.35); }
+    {
+      pos.Set(-1, 4, 0.35);
+    }
     gameState.MoveAgent(ourAgent, pos);
     gameState.Update();
     if (i == 0)
-    { EXPECT_LT(ourAgent.pos.X(), 0); }
+    {
+      EXPECT_LT(ourAgent.pos.X(), 0);
+    }
     else
-    { EXPECT_GT(ourAgent.pos.X(), 0); }
+    {
+      EXPECT_GT(ourAgent.pos.X(), 0);
+    }
 
     // Ensure that enemy agent in circle is moved back to its own side
     pos.Set(0, 0, 0.35);
@@ -1461,9 +1475,13 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     EXPECT_NE(theirAgent.pos, pos);
     EXPECT_GE(theirAgent.pos.Distance(pos), SoccerField::kCenterCircleRadius);
     if (i == 0)
-    { pos.Set(1, 0, 0.35); }
+    {
+      pos.Set(1, 0, 0.35);
+    }
     else
-    { pos.Set(-1, 0, 0.35); }
+    {
+      pos.Set(-1, 0, 0.35);
+    }
     gameState.MoveAgent(theirAgent, pos);
     gameState.Update();
     EXPECT_NE(theirAgent.pos, pos);
@@ -1473,15 +1491,23 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     // Ensure that enemy agent is beamed back to its own side
     // if it violate sides
     if (i == 0)
-    { pos.Set(-1, 4, 0.35); }
+    {
+      pos.Set(-1, 4, 0.35);
+    }
     else
-    { pos.Set(1, 4, 0.35); }
+    {
+      pos.Set(1, 4, 0.35);
+    }
     gameState.MoveAgent(theirAgent, pos);
     gameState.Update();
     if (i == 0)
-    { EXPECT_GT(theirAgent.pos.X(), 0); }
+    {
+      EXPECT_GT(theirAgent.pos.X(), 0);
+    }
     else
-    { EXPECT_LT(theirAgent.pos.X(), 0); }
+    {
+      EXPECT_LT(theirAgent.pos.X(), 0);
+    }
   }
 }
 

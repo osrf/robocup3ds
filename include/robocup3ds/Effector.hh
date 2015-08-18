@@ -99,8 +99,8 @@ class Effector: public SocketParser
   /// \brief List of agent names to remove from gazebo world this update cycle.
   public: std::vector<std::string> agentsToRemove;
 
-  /// \brief List of sockets that is received the Scene message.
-  public: std::vector<int> sceneMessagesSocketIDs;
+  /// \brief Map of socket ids and agent body types strings
+  public: std::map<int, std::shared_ptr<NaoBT>> socketIDbodyTypeMap;
 
   /// \brief Maximum size of each message received.
   protected: static const int kBufferSize;
@@ -127,8 +127,6 @@ class Effector: public SocketParser
 
   /// \brief The socketID of currAgent
   protected: int currSocketId;
-
-  protected: std::shared_ptr<NaoBT> currentBodyType;
 };
 
 class MonitorEffector : public Effector
