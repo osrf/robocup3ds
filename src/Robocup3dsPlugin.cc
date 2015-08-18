@@ -60,7 +60,6 @@ GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::Robocup3dsPlugin():
-  naoSdf(new sdf::Element()),
   gameState(std::make_shared<GameState>()),
   effector(std::make_shared<Effector>(this->gameState.get())),
   monitorEffector(std::make_shared<MonitorEffector>(this->gameState.get())),
@@ -119,13 +118,6 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   // set world sdf and nao sdf
   this->world = _world;
   this->sdf = _sdf;
-  std::string filePath = ModelDatabase::Instance()->
-                         GetModelFile("model://nao_blue");
-  // gzmsg << "nao filepath: " << filePath << std::endl;
-  const sdf::SDFPtr naoSDF(new sdf::SDF());
-  sdf::init(naoSDF);
-  sdf::readFile(filePath, naoSDF);
-  this->naoSdf->Copy(naoSDF->Root());
 
   // load config parameters
   std::map<std::string, std::string> config;
@@ -308,8 +300,9 @@ void Robocup3dsPlugin::KeepEffectorsState()
       }
       for (const auto &jointEffector : agent.action.jointEffectors)
       {
-        std::string naoJointName = agent.bodyType->HingeJointEffectorMap().find(
-                                     jointEffector.first)->second;
+        std::string naoJointName =
+          agent.bodyType->HingeJointEffectorMap()->find(
+            jointEffector.first)->second;
         gazebo::physics::JointPtr joint = model->GetJoint(naoJointName);
         if (!joint)
         {
@@ -392,19 +385,29 @@ void Robocup3dsPlugin::UpdateEffector()
   this->effector->Update();
 
   // insert models into world that need to be inserted
-  for (const auto &agentName : this->effector->agentsToAdd)
+  for (const auto &agentPtr : this->effector->agentsToAdd)
   {
-    sdf::ElementPtr modelRootNode(new sdf::Element());
-    modelRootNode->Copy(this->naoSdf);
+    std::string path;
+    if (agentPtr->team->side == Team::Side::LEFT)
+    {
+      path = agentPtr->bodyType->BlueModelPath();
+    }
+    else
+    {
+      path = agentPtr->bodyType->RedModelPath();
+    }
+
+    const sdf::SDFPtr modelSDF(new sdf::SDF());
+    sdf::init(modelSDF);
+    std::string filePath = ModelDatabase::Instance()->GetModelFile(path);
+    sdf::readFile(filePath, modelSDF);
+
+    sdf::ElementPtr modelRootNode = modelSDF->Root();
     const auto &nameAttribute =
       modelRootNode->GetElement("model")->GetAttribute("name");
-    nameAttribute->SetFromString(agentName);
-    sdf::SDF modelSDF;
-    modelSDF.Root(modelRootNode);
+    nameAttribute->SetFromString(agentPtr->GetName());
 
-    this->world->InsertModelSDF(modelSDF);
-    // const auto &model = this->world->GetModel(NaoBT::defaultModelName);
-    // model->SetName(agentName);
+    this->world->InsertModelSDF(*modelSDF.get());
   }
 
   // remove models that need to be removed from world
@@ -687,13 +690,13 @@ void Robocup3dsPlugin::UpdatePerceptor()
       agent.cameraRot = G2I(cameraPose.rot);
 
       // update agent's self body map
-      for (auto &kv : agent.bodyType->BodyPartMap())
+      for (auto &kv : (*agent.bodyType->BodyPartMap()))
       {
         agent.selfBodyMap[kv.first] =
           G2I(model->GetLink(kv.second)->GetWorldPose().pos);
       }
       // update agent's percept joints angles
-      for (auto &kv : agent.bodyType->HingeJointPerceptorMap())
+      for (auto &kv : (*agent.bodyType->HingeJointPerceptorMap()))
       {
         agent.percept.hingeJoints[kv.first] =
           model->GetJoint(kv.second)->GetAngle(0).Degree();

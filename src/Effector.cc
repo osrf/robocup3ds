@@ -210,9 +210,9 @@ void Effector::ParseSexp(sexp_t *_exp)
     this->ParseSay(_exp);
   }
   else if (this->currAgent
-           && this->currAgent->bodyType->HingeJointEffectorMap().find(
+           && this->currAgent->bodyType->HingeJointEffectorMap()->find(
              std::string(v))
-           != this->currAgent->bodyType->HingeJointEffectorMap().end())
+           != this->currAgent->bodyType->HingeJointEffectorMap()->end())
   {
     this->ParseHingeJoint(_exp);
   }
@@ -373,7 +373,7 @@ void Effector::ParseInit(sexp_t *_exp)
                       this->currSocketId);
   if (this->currAgent)
   {
-    this->agentsToAdd.push_back(this->currAgent->GetName());
+    this->agentsToAdd.push_back(this->currAgent);
     this->socketIDbodyTypeMap.erase(this->currSocketId);
     gzmsg << "(" << this->gameState->GetGameTime() <<
           ") agent added to game state: " << this->currAgent->GetName()
