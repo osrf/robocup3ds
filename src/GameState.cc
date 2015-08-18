@@ -392,7 +392,7 @@ void GameState::CheckTiming()
     this->startGameTime = this->gameTime;
     gzmsg << "first half over, switching to second half" << std::endl;
     this->SetHalf(Half::SECOND_HALF);
-    this->SetCurrent(kickOffRightState);
+    this->SetCurrent(beforeKickOffState);
   }
   else if ((this->half == Half::SECOND_HALF)
            && (elapsedGameTime >= SecondsEachHalf))

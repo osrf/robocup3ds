@@ -971,9 +971,12 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
                          GameState::SecondsBeforeKickOff;
   double firstHalfKickOffTime = GameState::SecondsBeforeKickOff +
                                 GameState::SecondsKickOff;
-  double secondHalfTime = GameState::SecondsBeforeKickOff +
+  double secondHalfTime = 2 * GameState::SecondsBeforeKickOff +
                           GameState::SecondsFullGame;
-  double secondHalfKickOffTime = GameState::SecondsKickOff + firstHalfTime;
+  double secondHalfBeforeKickOffTime = GameState::SecondsBeforeKickOff +
+                                       firstHalfTime;
+  double secondHalfKickOffTime = secondHalfBeforeKickOffTime +
+                                 GameState::SecondsKickOff;
 
   while (gameState.GetGameTime() < firstHalfTime)
   {
@@ -996,7 +999,6 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
     }
     gameState.Update();
   }
-  EXPECT_EQ("KickOffRight", gameState.GetCurrentState()->name);
   while (gameState.GetGameTime() < secondHalfTime)
   {
     EXPECT_TRUE(gameState.GetHalf() == GameState::Half::SECOND_HALF);
@@ -1004,7 +1006,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
                 && gameState.teams.at(1)->side ==
                 Team::Side::LEFT);
     EXPECT_TRUE(gameState.GetElapsedGameTime() < GameState::SecondsEachHalf);
-    if (gameState.GetGameTime() < secondHalfKickOffTime)
+    if (gameState.GetGameTime() < secondHalfBeforeKickOffTime)
+    {
+      EXPECT_EQ("BeforeKickOff", gameState.GetCurrentState()->name);
+    }
+    else if (gameState.GetGameTime() < secondHalfKickOffTime)
     {
       EXPECT_EQ("KickOffRight", gameState.GetCurrentState()->name);
     }
