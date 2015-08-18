@@ -1,4 +1,9 @@
 set (folders
+  nao_blue
+  nao_red
+  robocup_3Dsim_goal
+  robocup_3Dsim_field
+  robocup_3Dsim_ball
 )
 
 foreach (folder ${folders})
