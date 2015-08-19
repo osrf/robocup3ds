@@ -15,6 +15,7 @@
  *
 */
 
+#include <boost/algorithm/string.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <netinet/in.h>
@@ -111,6 +112,64 @@ void Robocup3dsPlugin::LoadConfiguration(
   {
     Robocup3dsPlugin::syncMode = boolValue;
   }
+
+  for (const auto &kv : this->gameState->agentBodyTypeMap)
+  {
+    const auto &bodyType = kv.second;
+    std::string bodyTypeName = kv.first;
+    boost::algorithm::to_lower(bodyTypeName);
+    for (auto &kv2 : bodyType->HingeJointPIDMap())
+    {
+      std::string jointName = kv2.first;
+      boost::algorithm::to_lower(jointName);
+      this->LoadPIDParams(kv2.second, bodyTypeName, jointName, _config);
+    }
+  }
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
+                                     const std::string &_bodyType,
+                                     const std::string &_jointName,
+                                     const std::map<std::string,
+                                     std::string> &_config) const
+{
+  std::stringstream ss;
+  std::vector<double> params;
+  try
+  {
+    const auto &keyName = "pid_" + _bodyType + "_" + _jointName;
+    ss << _config.at(keyName);
+    double i;
+    while (ss >> i)
+    {
+      params.push_back(i);
+      if (ss.peek() == ' ')
+      {
+        ss.ignore();
+      }
+    }
+  }
+  catch (const std::exception &exc)
+  {
+    return;
+  }
+
+  if (params.size() != 5u)
+  {
+    return;
+  }
+
+  gzmsg << "modifying PID params for joint " + _jointName + " in " + _bodyType
+        + " bodytype: " << params[0] << " " << params[1] << " " << params[2]
+        << " " << params[3] << " " << params[4] << std::endl;
+  _pid.SetPGain(params[0]);
+  _pid.SetIGain(params[1]);
+  _pid.SetDGain(params[2]);
+  _pid.SetIMax(params[3]);
+  _pid.SetIMin(-params[3]);
+  _pid.SetCmdMax(params[4]);
+  _pid.SetCmdMin(-params[4]);
 }
 
 /////////////////////////////////////////////////
@@ -325,8 +384,8 @@ void Robocup3dsPlugin::UpdateEffector()
       for (auto &kv : agent.action.jointEffectors)
       {
         const auto &joint = model->GetJoint(
-                                  agent.bodyType->HingeJointEffectorMap()
-                                  .at(kv.first));
+                              agent.bodyType->HingeJointEffectorMap()
+                              .at(kv.first));
         const auto &scopedJointName = joint->GetScopedName();
 
         // In simspark the target speed should be in the range
@@ -338,7 +397,7 @@ void Robocup3dsPlugin::UpdateEffector()
 
         // Calculate the target degree based on the target Speed
         const double target = (targetSpeed * elapsedTime)
-                        + joint->GetAngle(0).Radian();
+                              + joint->GetAngle(0).Radian();
 
 
         jointController->SetPositionTarget(scopedJointName, target);
@@ -354,7 +413,7 @@ void Robocup3dsPlugin::InitJointController(const Agent &_agent,
 {
   const auto &jointController = _model->GetJointController();
   jointController->Reset();
-  for (auto &kv : _agent.bodyType->HingeJointPIDMap())
+  for (const auto &kv : _agent.bodyType->HingeJointPIDMap())
   {
     const auto &scopedJointName = _model->GetJoint(kv.first)
                                   ->GetScopedName();

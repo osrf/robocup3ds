@@ -64,6 +64,18 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: void LoadConfiguration(
     const std::map<std::string, std::string> &_config) const;
 
+  /// \brief Helper function to load custom gains and limits for PID controllers
+  /// of each body type and joint
+  /// \param[out] _pid PIDs whose params to set
+  /// \param[in] _bodyType Name of bodytype
+  /// \param[in] _jointName Name of joint
+  /// \param[in] _config Map of configuration variables
+  private: void LoadPIDParams(gazebo::common::PID &_pid,
+                              const std::string &_bodyType,
+                              const std::string &_jointName,
+                              const std::map<std::string,
+                              std::string> &_config) const;
+
   /// \brief Copys contact objects from the world contact manager to contacts
   private: void UpdateContactManager();
 

@@ -56,8 +56,8 @@ class NaoBT
 
   /// \brief Returns a map of joint names and their corresponding PIDs
   /// \return Map mentioned above
-  public: virtual const std::map<std::string, gazebo::common::PID>&
-  HingeJointPIDMap() const = 0;
+  public: virtual std::map<std::string, gazebo::common::PID>&
+  HingeJointPIDMap() = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
@@ -130,8 +130,8 @@ class NaoOfficialBT : public NaoBT
   }
 
   // Documentation inherited
-  public: virtual const std::map<std::string, gazebo::common::PID>&
-  HingeJointPIDMap() const
+  public: virtual std::map<std::string, gazebo::common::PID>&
+  HingeJointPIDMap()
   {
     return this->hingeJointPIDMap;
   }
@@ -245,7 +245,7 @@ class NaoOfficialBT : public NaoBT
   };
 
   // documentation inherited
-  protected: const std::map<std::string, gazebo::common::PID>
+  protected: std::map<std::string, gazebo::common::PID>
   hingeJointPIDMap =
   {
     {"HeadYaw", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
