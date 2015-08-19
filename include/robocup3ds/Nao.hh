@@ -24,7 +24,8 @@
 #include <vector>
 
 /// \brief Base Class for Nao body types. All other Nao body types derive
-/// from this
+/// from this. By default and unless specified otherwise, the body type used
+// is NaoOfficialBT
 class NaoBT
 {
   /// \brief Nao constructor

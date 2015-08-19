@@ -182,7 +182,7 @@ class GameState
   /// \param[out] _agent Reference to agent object
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
-  /// \param[in] yaw New yaw of agent
+  /// \param[in] yaw New yaw of agent in radians
   public: void MoveAgent(Agent &_agent, const double _x, const double _y,
                          const double yaw) const;
 
@@ -190,14 +190,14 @@ class GameState
   /// \param[out] _agent Reference to agent object
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
-  /// \param[in] _yaw New yaw of agent
+  /// \param[in] _yaw New yaw of agent in radians
   public: void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                               const double _yaw) const;
 
   /// \brief Set the agent's position and orientation
   /// \param[out] _agent Reference to agent object
   /// \param[in] _pos New position of agent in meters
-  /// \param[in] _rot New orientation of agent
+  /// \param[in] _rot New orientation of agent in radians
   public: void MoveAgent(Agent &_agent,
                          const ignition::math::Vector3<double> &_pos,
                          const ignition::math::Quaternion<double> &_rot) const;
