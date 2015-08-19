@@ -399,7 +399,6 @@ void Robocup3dsPlugin::UpdateEffector()
         const double target = (targetSpeed * elapsedTime)
                               + joint->GetAngle(0).Radian();
 
-
         jointController->SetPositionTarget(scopedJointName, target);
       }
       agent.action.jointEffectors.clear();
@@ -415,8 +414,7 @@ void Robocup3dsPlugin::InitJointController(const Agent &_agent,
   jointController->Reset();
   for (const auto &kv : _agent.bodyType->HingeJointPIDMap())
   {
-    const auto &scopedJointName = _model->GetJoint(kv.first)
-                                  ->GetScopedName();
+    const auto &scopedJointName = _model->GetJoint(kv.first)->GetScopedName();
     jointController->SetPositionPID(scopedJointName, kv.second);
   }
 }
