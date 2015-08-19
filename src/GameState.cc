@@ -58,7 +58,7 @@ const std::string GameState::FreeKickLeft    = "FreeKickLeft";
 const std::string GameState::FreeKickRight   = "FreeKickRight";
 
 double GameState::SecondsFullGame = 600;
-double GameState::SecondsEachHalf = SecondsFullGame * 0.5;
+double GameState::SecondsEachHalf = GameState::SecondsFullGame * 0.5;
 double GameState::SecondsGoalPause = 3;
 double GameState::SecondsKickInPause = 1;
 double GameState::SecondsKickIn = 15;
@@ -113,18 +113,22 @@ GameState::GameState():
                     Team::Side::LEFT)),
   freeKickRightState(std::make_shared<FreeKickState>(FreeKickRight, this,
                      Team::Side::RIGHT)),
-  agentBodyTypeMap({{"NaoOfficialBT", std::make_shared<NaoOfficialBT>()}}),
-  defaultBodyType(agentBodyTypeMap.at("NaoOfficialBT")),
-  hasCurrentStateChanged(false),
-  touchBallKickoff(nullptr),
-  updateBallPose(false),
-  gameTime(0.0),
-  prevCycleGameTime(0.0),
-  lastCycleTimeLength(0.0),
-  startGameTime(0.0),
-  currentState(nullptr),
-  half(Half::FIRST_HALF),
-  cycleCounter(0)
+  agentBodyTypeMap(
+{
+  {"NaoOfficialBT", std::make_shared<NaoOfficialBT>()
+  }
+}),
+defaultBodyType(agentBodyTypeMap.at("NaoOfficialBT")),
+hasCurrentStateChanged(false),
+touchBallKickoff(nullptr),
+updateBallPose(false),
+gameTime(0.0),
+prevCycleGameTime(0.0),
+lastCycleTimeLength(0.0),
+startGameTime(0.0),
+currentState(nullptr),
+half(Half::FIRST_HALF),
+cycleCounter(0)
 {
   this->playModeNameMap[beforeKickOffState->name] = beforeKickOffState;
   this->playModeNameMap[kickOffLeftState->name] = kickOffLeftState;
@@ -356,14 +360,12 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
               GameState::kDropBallRadiusMargin +
               GameState::dropBallRadius, newPos, newPos2))
           {
+            auto closerPos = newPos2;
             if (agent.pos.Distance(newPos) < agent.pos.Distance(newPos2))
             {
-              this->MoveAgent(agent, newPos);
+              closerPos = newPos;
             }
-            else
-            {
-              this->MoveAgent(agent, newPos2);
-            }
+            this->MoveAgent(agent, closerPos);
           }
         }
       }

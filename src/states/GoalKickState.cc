@@ -55,8 +55,8 @@ void GoalKickState::Update()
     this->Initialize();
   }
 
-  this->gameState->DropBallImpl(this->side);
   this->gameState->CheckGoalKickIllegalDefense(this->side);
+  this->gameState->DropBallImpl(this->side);
   math::Box penaltyBox;
   if (this->side == Team::Side::LEFT)
   {
