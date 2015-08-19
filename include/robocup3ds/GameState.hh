@@ -197,7 +197,7 @@ class GameState
   /// \brief Set the agent's position and orientation
   /// \param[out] _agent Reference to agent object
   /// \param[in] _pos New position of agent in meters
-  /// \param[in] _rot New orientation of agent in meters
+  /// \param[in] _rot New orientation of agent
   public: void MoveAgent(Agent &_agent,
                          const ignition::math::Vector3<double> &_pos,
                          const ignition::math::Quaternion<double> &_rot) const;
@@ -206,7 +206,7 @@ class GameState
   /// \param[out] _agent Reference to agent object
   public: void MoveAgentToSide(Agent &_agent) const;
 
-  /// \brief Move agent back to their own side if they are offsides during kick
+  /// \brief Move agent back to their own side if there are offsides during kick
   /// offs
   /// \param[out] _agent Reference to agent object
   public: void MoveOffSideAgent(Agent &_agent) const;
