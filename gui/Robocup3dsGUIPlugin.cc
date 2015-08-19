@@ -123,6 +123,8 @@ void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
   _frameLayout->addSpacerItem(new QSpacerItem(0, 1, QSizePolicy::Expanding));
 
   QLabel *teamLabel = new QLabel();
+  teamLabel->setStyleSheet(
+    "QLabel { color : #99FFFF; }");
   _frameLayout->addWidget(teamLabel);
   connect(this, SIGNAL(SetTeam(QString)),
           teamLabel, SLOT(setText(QString)), Qt::QueuedConnection);
@@ -130,6 +132,8 @@ void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
   _frameLayout->addSpacerItem(new QSpacerItem(30, 1, QSizePolicy::Fixed));
 
   QLabel *teamLabel2 = new QLabel();
+  teamLabel2->setStyleSheet(
+    "QLabel { color : #FFCCFF; }");
   _frameLayout->addWidget(teamLabel2);
   connect(this, SIGNAL(SetTeam2(QString)),
           teamLabel2, SLOT(setText(QString)), Qt::QueuedConnection);

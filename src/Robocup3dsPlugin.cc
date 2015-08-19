@@ -387,12 +387,8 @@ void Robocup3dsPlugin::UpdateEffector()
   // insert models into world that need to be inserted
   for (const auto &agentPtr : this->effector->agentsToAdd)
   {
-    std::string path;
-    if (agentPtr->team->side == Team::Side::LEFT)
-    {
-      path = agentPtr->bodyType->BlueModelPath();
-    }
-    else
+    std::string path = agentPtr->bodyType->BlueModelPath();
+    if (this->gameState->teams.at(1) == agentPtr->team)
     {
       path = agentPtr->bodyType->RedModelPath();
     }
