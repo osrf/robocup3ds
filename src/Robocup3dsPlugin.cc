@@ -264,8 +264,11 @@ void Robocup3dsPlugin::UpdateEffector()
         {
           // Increase the actuators damping to 1
           model->GetJoint(jointName.second)->SetDamping(0, 1);
-          model->GetJoint(jointName.second)->SetAngle(0, 0);
 
+          if (jointName.second == "LShoulderPitch" || jointName.second == "RShoulderPitch")
+            model->GetJoint(jointName.second)->SetAngle(0, -1.5);
+          else
+            model->GetJoint(jointName.second)->SetAngle(0, 0);
 
           /*
           // Initial the Joint Controller;
@@ -317,6 +320,7 @@ void Robocup3dsPlugin::UpdateEffector()
         {
           targetSpeed = -6.13;
         }
+
         // Calculate the target degree based on the target Speed
         double target = (kv.second*GameState::counterCycleTime)
             + model->GetJoint(naoJointName)->GetAngle(0).Radian();

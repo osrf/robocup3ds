@@ -1,14 +1,14 @@
-<sdf version='1.4'>
+<sdf version='1.5'>
   <model name='naoType0'>
     <link name='base_link'>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>0 0 0 0 -0 0</pose>
       <inertial>
-        <pose>-0.00413 0 0.04342 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <mass>1.2171</mass>
         <inertia>
-          <ixx>0,00430042</ixx>
-          <iyy>0,0020285</iyy>
-          <izz>0,00430042</izz>
+          <ixx>0.0043004</ixx>
+          <iyy>0.0043004</iyy>
+          <izz>0.0020285</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -38,12 +38,12 @@
     <link name='Neck'>
       <pose>0 0 0.09 0 0 0</pose>
       <inertial>
-        <pose>-1e-05 0 -0.02742 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
         <inertia>
-          <ixx>0,000029479</ixx>
-          <iyy>0,000029479</iyy>
-          <izz>0,000005625</izz>
+          <ixx>0.000029479</ixx>
+          <iyy>0.000029479</iyy>
+          <izz>0.000005625</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -95,12 +95,12 @@
     <link name='Head'>
       <pose>0 0 0.155 0 0 0</pose>
       <inertial>
-        <pose>-0.00112 0 0.05258 0 -0 0</pose>
+        <pose>0.0 0 0 0 0 0</pose>
         <mass>0.35</mass>
         <inertia>
-          <ixx>0,0005915</ixx>
-          <iyy>0,0005915</iyy>
-          <izz>0,0005915</izz>
+          <ixx>0.0005915</ixx>
+          <iyy>0.0005915</iyy>
+          <izz>0.0005915</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -172,12 +172,12 @@
     <link name='LHip1'>
       <pose>0 0.055 -0.115 0 -0 0</pose>
       <inertial>
-        <pose>-0.00781 -0.01114 0.02661 0 -0 0</pose>
+        <pose>-0.0 0.0 0.0 0 -0 0</pose>
         <mass>0.09</mass>
         <inertia>
-          <ixx>0,0000036</ixx>
-          <iyy>0,0000036</iyy>
-          <izz>0,0000036</izz>
+          <ixx>0.0000036</ixx>
+          <iyy>0.0000036</iyy>
+          <izz>0.0000036</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -229,12 +229,12 @@
     <link name='LHip'>
       <pose>0 0.055 -0.115 0 -0 0</pose>
       <inertial>
-        <pose>-0.01549 0.00029 -0.00515 0 -0 0</pose>
+        <pose>0 0 -0 0 -0 0</pose>
         <mass>0.125</mass>
         <inertia>
-          <ixx>0,000005</ixx>
-          <iyy>0,000005</iyy>
-          <izz>0,000005</izz>
+          <ixx>0.000005</ixx>
+          <iyy>0.000005</iyy>
+          <izz>0.000005</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -289,16 +289,16 @@
         <pose>0.00138 0.00221 -0.05373 0 -0 0</pose>
         <mass>0.275</mass>
         <inertia>
-          <ixx>0,00056145</ixx>
-          <iyy>0,00022458</iyy>
-          <izz>0,00056145</izz>
+          <ixx>0.00056145</ixx>
+          <iyy>0.00056145</iyy>
+          <izz>0.00022458</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
         </inertia>
       </inertial>
       <collision name='LThigh_collision'>
-        <pose>0 0 -0.055 0 -0 0</pose>
+        <pose>0 0 -0.05 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.070 0.070 0.14</size>
@@ -359,21 +359,21 @@
         </ode>
       </physics>
     </joint>
-    <link name='LShank'>
+    <link name='LTibia'>
       <pose>0 0.055 -0.280 0 -0 0</pose>
       <inertial>
         <pose>0.00453 0.00225 -0.04936 0 -0 0</pose>
         <mass>0.225 </mass>
         <inertia>
-          <ixx>0,0003187</ixx>
-          <iyy>0,0002118</iyy>
-          <izz>0,0003468</izz>
+          <ixx>0.0003187</ixx>
+          <iyy>0.0003468</iyy>
+          <izz>0.0002118</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
         </inertia>
       </inertial>
-      <collision name='LShank_collision'>
+      <collision name='LTibia_collision'>
         <pose>0 0 -0.05 0 -0 0</pose>
         <geometry>
           <box>
@@ -392,7 +392,7 @@
           </friction>
         </surface>
       </collision>
-      <visual name='LShank_visual'>
+      <visual name='LTibia_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -406,7 +406,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='LKneePitch' type='revolute'>
-      <child>LShank</child>
+      <child>LTibia</child>
       <parent>LThigh</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -441,9 +441,9 @@
         <pose>0.00045 0.00029 0.00685 0 -0 0</pose>
         <mass>0.125 </mass>
         <inertia>
-          <ixx>0,000005</ixx>
-          <iyy>0,000005</iyy>
-          <izz>0,000005</izz>
+          <ixx>0.000005</ixx>
+          <iyy>0.000005</iyy>
+          <izz>0.000005</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -464,7 +464,7 @@
     </link>
     <joint name='LAnklePitch' type='revolute'>
       <child>l_ankle</child>
-      <parent>LShank</parent>
+      <parent>LTibia</parent>
       <axis>
         <xyz>0 -1 0</xyz>
         <limit>
@@ -498,9 +498,9 @@
         <pose>0.02542 0.0033 -0.03239 0 -0 0</pose>
         <mass>0.2</mass>
         <inertia>
-          <ixx>0,00011333</ixx>
-          <iyy>0,00053333</iyy>
-          <izz>0,00043333</izz>
+          <ixx>0.00011333</ixx>
+          <iyy>0.00043333</iyy>
+          <izz>0.00053333</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -578,12 +578,12 @@
         <pose>-0.00165 -0.02663 0.00014 0 -0 0</pose>
         <mass>0.07</mass>
         <inertia>
-          <ixx>8.42843e-05</ixx>
-          <ixy>-2.02802e-06</ixy>
-          <ixz>2.338e-08</ixz>
-          <iyy>1.41556e-05</iyy>
-          <iyz>-1.972e-08</iyz>
-          <izz>8.64195e-05</izz>
+          <ixx>0.0000028</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0000028</iyy>
+          <iyz>0</iyz>
+          <izz>0.0000028</izz>
         </inertia>
       </inertial>
       <visual name='LShoulder_visual'>
@@ -635,12 +635,12 @@
         <pose>0.02455 0.00563 0.0033 0 -0 0</pose>
         <mass>0.15</mass>
         <inertia>
-          <ixx>9.38999e-05</ixx>
-          <ixy>-4.71445e-05</ixy>
-          <ixz>-2.69947e-05</ixz>
-          <iyy>0.000371519</iyy>
-          <iyz>-2.45977e-06</iyz>
-          <izz>0.000341901</izz>
+          <ixx>0.00010625</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00014125</iyy>
+          <iyz>0</iyz>
+          <izz>0.000125</izz>
         </inertia>
       </inertial>
       <collision name='LBicep_collision'>
@@ -707,17 +707,17 @@
       </physics>
     </joint>
     <link name='LElbow'>
-      <pose>0.95 0.098 0.075 0 -0 0</pose>
+      <pose>0.095 0.098 0.075 0 -0 0</pose>
       <inertial>
         <pose>-0.02744 0 -0.00014 0 -0 0</pose>
         <mass>0.035</mass>
         <inertia>
-          <ixx>5.59715e-06</ixx>
-          <ixy>4.21e-09</ixy>
-          <ixz>4.319e-08</ixz>
-          <iyy>7.54331e-05</iyy>
-          <iyz>-1.84e-09</iyz>
-          <izz>7.64434e-05</izz>
+          <ixx>0.0000014</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0000014</iyy>
+          <iyz>0</iyz>
+          <izz>0.0000014</izz>
         </inertia>
       </inertial>
       <gravity>1</gravity>
@@ -755,17 +755,17 @@
       </physics>
     </joint>
     <link name='LForeArm'>
-      <pose>0.14 0.098 0.084 0 -0 0</pose>
+      <pose>0.14 0.098 0.075 0 -0 0</pose>
       <inertial>
         <pose>0.02556 0.00281 0.00076 0 -0 0</pose>
         <mass>0.2</mass>
         <inertia>
-          <ixx>2.53322e-05</ixx>
-          <ixy>-2.34271e-06</ixy>
-          <ixz>7.459e-08</ixz>
-          <iyy>8.91322e-05</iyy>
-          <iyz>-2.655e-08</iyz>
-          <izz>8.72873e-05</izz>
+          <ixx>0.000083333</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000243333</iyy>
+          <iyz>0</iyz>
+          <izz>0.000243333</izz>
         </inertia>
       </inertial>
       <collision name='LForeArm_collision'>
@@ -835,12 +835,12 @@
     <link name='RHip1'>
       <pose>0 -0.055 -0.115 0 -0 0</pose>
       <inertial>
-        <pose>-0.00781 0.01114 0.02661 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <mass>0.09</mass>
         <inertia>
-          <ixx>0,0000036</ixx>
-          <iyy>0,0000036</iyy>
-          <izz>0,0000036</izz>
+          <ixx>0.0000036</ixx>
+          <iyy>0.0000036</iyy>
+          <izz>0.0000036</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -893,12 +893,12 @@
     <link name='RHip'>
       <pose>0 -0.055 -0.115 0 -0 0</pose>
       <inertial>
-        <pose>-0.01549 -0.00029 -0.00515 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <mass>0.125</mass>
         <inertia>
-          <ixx>0,000005</ixx>
-          <iyy>0,000005</iyy>
-          <izz>0,000005</izz>
+          <ixx>0.000005</ixx>
+          <iyy>0.000005</iyy>
+          <izz>0.000005</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -953,9 +953,9 @@
         <pose>0.00138 -0.00221 -0.05373 0 -0 0</pose>
         <mass>0.275</mass>
         <inertia>
-          <ixx>0,00056145</ixx>
-          <iyy>0,00022458</iyy>
-          <izz>0,00056145</izz>
+          <ixx>0.00056145</ixx>
+          <iyy>0.00056145</iyy>
+          <izz>0.00022458</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -1004,21 +1004,21 @@
         </ode>
       </physics>
     </joint>
-    <link name='RShank'>
+    <link name='RTibia'>
       <pose>0 -0.055 -0.280 0 -0 0</pose>
       <inertial>
         <pose>0.00453 -0.00225 -0.04936 0 -0 0</pose>
         <mass>0.225 </mass>
         <inertia>
-          <ixx>0,0003187</ixx>
-          <iyy>0,0002118</iyy>
-          <izz>0,0003468</izz>
+          <ixx>0.0003187</ixx>
+          <iyy>0.0003468</iyy>
+          <izz>0.0002118</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
         </inertia>
       </inertial>
-      <collision name='RShank_collision'>
+      <collision name='RTibia_collision'>
         <pose>0 0 -0.05 0 -0 0</pose>
         <geometry>
           <box>
@@ -1037,7 +1037,7 @@
           </friction>
         </surface>
       </collision>
-      <visual name='RShank_visual'>
+      <visual name='RTibia_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -1051,7 +1051,7 @@
       <self_collide>0</self_collide>
     </link>
     <joint name='RKneePitch' type='revolute'>
-      <child>RShank</child>
+      <child>RTibia</child>
       <parent>RThigh</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -1086,9 +1086,9 @@
         <pose>0.00045 -0.00029 0.00685 0 -0 0</pose>
         <mass>0.125</mass>
         <inertia>
-          <ixx>0,000005</ixx>
-          <iyy>0,000005</iyy>
-          <izz>0,000005</izz>
+          <ixx>0.000005</ixx>
+          <iyy>0.000005</iyy>
+          <izz>0.000005</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -1109,7 +1109,7 @@
     </link>
     <joint name='RAnklePitch' type='revolute'>
       <child>r_ankle</child>
-      <parent>RShank</parent>
+      <parent>RTibia</parent>
       <axis>
         <xyz>0 -1 0</xyz>
         <limit>
@@ -1143,9 +1143,9 @@
         <pose>0.02542 -0.0033 -0.03239 0 -0 0</pose>
         <mass>0.2</mass>
         <inertia>
-          <ixx>0,00011333</ixx>
-          <iyy>0,00053333</iyy>
-          <izz>0,00043333</izz>
+          <ixx>0.00011333</ixx>
+          <iyy>0.00043333</iyy>
+          <izz>0.00053333</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyz>0</iyz>
@@ -1223,12 +1223,12 @@
         <pose>-0.00165 0.02663 0.00014 0 -0 0</pose>
         <mass>0.07</mass>
         <inertia>
-          <ixx>8.42843e-05</ixx>
-          <ixy>2.02802e-06</ixy>
-          <ixz>2.338e-08</ixz>
-          <iyy>1.41556e-05</iyy>
-          <iyz>1.972e-08</iyz>
-          <izz>8.64195e-05</izz>
+          <ixx>0,0000028</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0,0000028</iyy>
+          <iyz>0</iyz>
+          <izz>0,0000028</izz>
         </inertia>
       </inertial>
       <visual name='RShoulder_visual'>
@@ -1280,12 +1280,12 @@
         <pose>0.02455 -0.00563 0.0033 0 -0 0</pose>
         <mass>0.15</mass>
         <inertia>
-          <ixx>0.00011012</ixx>
-          <ixy>7.66913e-05</ixy>
-          <ixz>-2.60461e-05</ixz>
-          <iyy>0.000367577</iyy>
-          <iyz>1.20983e-05</iyz>
-          <izz>0.000354618</izz>
+          <ixx>0.00010625</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00014125</iyy>
+          <iyz>0</iyz>
+          <izz>0.000125</izz>
         </inertia>
       </inertial>
       <collision name='RBicep_collision'>
@@ -1352,17 +1352,17 @@
       </physics>
     </joint>
     <link name='RElbow'>
-      <pose>0.95 -0.098 0.075 0 -0 0</pose>
+      <pose>0.095 -0.098 0.075 0 -0 0</pose>
       <inertial>
         <pose>-0.02744 0 -0.00014 0 -0 0</pose>
         <mass>0.035</mass>
         <inertia>
-          <ixx>5.59715e-06</ixx>
-          <ixy>4.21e-09</ixy>
-          <ixz>4.319e-08</ixz>
-          <iyy>7.54331e-05</iyy>
-          <iyz>-1.84e-09</iyz>
-          <izz>7.64434e-05</izz>
+          <ixx>0.0000014</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0000014</iyy>
+          <iyz>0</iyz>
+          <izz>0.0000014</izz>
         </inertia>
       </inertial>
       <gravity>1</gravity>
@@ -1400,17 +1400,17 @@
       </physics>
     </joint>
     <link name='RForeArm'>
-      <pose>0.14 -0.098 0.084 0 -0 0</pose>
+      <pose>0.14 -0.098 0.075 0 -0 0</pose>
       <inertial>
         <pose>0.02556 -0.00281 0.00076 0 -0 0</pose>
         <mass>0.2</mass>
         <inertia>
-          <ixx>2.53907e-05</ixx>
-          <ixy>2.33243e-06</ixy>
-          <ixz>-6.0117e-07</ixz>
-          <iyy>8.92204e-05</iyy>
-          <iyz>2.694e-08</iyz>
-          <izz>8.72484e-05</izz>
+          <ixx>0.000083333</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000243333</iyy>
+          <iyz>0</iyz>
+          <izz>0.000243333</izz>
         </inertia>
       </inertial>
       <collision name='RForeArm_collision'>
