@@ -1,7 +1,14 @@
 include (${project_cmake_dir}/Utils.cmake)
 
 set (headers
+  Agent.hh
+  Geometry.hh
+  Nao.hh
   Robocup3dsPlugin.hh
+  Server.hh
+  SoccerField.hh
+  SocketParser.hh
+  Util.hh
 )
 
 set (robocup3ds_headers "" CACHE INTERNAL "RoboCup 3DS headers" FORCE)
