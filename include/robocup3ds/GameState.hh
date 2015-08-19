@@ -84,6 +84,7 @@ class GameState
     /// \param[in] _side side which touched ball
     /// \param[in] _contactTime time when ball was touched
     /// \param[in] _contactPos position where ball was touched
+    /// \param[in] _playMode The playmode where ball was touched
     public: BallContact(const int _uNum, const Team::Side _side,
                         const double _contactTime,
                         const ignition::math::Vector3<double> &_contactPos,
