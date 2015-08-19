@@ -158,9 +158,6 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Vector of all contacts received from contact manager
   private: std::vector<gazebo::physics::Contact> contacts;
 
-  /// \brief Used by our PID controller to keep track of the error.
-  private: std::map<std::string, double> qp;
-
   /// \brief Game state publisher.
   private: gazebo::transport::PublisherPtr statePub;
 
