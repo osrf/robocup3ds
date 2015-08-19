@@ -20,6 +20,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include <vector>
 
 /// \brief Base Class for Nao body types. All other Nao body types derive
@@ -43,18 +44,19 @@ class NaoBT
   /// \brief Returns a map of link names in Nao model's SDF file and names sent
   /// by server to client
   /// \return Map mentioned above
-  public: virtual std::map<std::string, std::string> BodyPartMap() const = 0;
+  public: virtual const
+  std::map<std::string, std::string>* BodyPartMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
   /// \return Map mentioned above
-  public: virtual
-  std::map<std::string, std::string> HingeJointEffectorMap() const = 0;
+  public: virtual const
+  std::map<std::string, std::string>* HingeJointEffectorMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
   /// \return Map mentioned above
-  public: virtual std::map<std::string, std::string>
+  public: virtual const std::map<std::string, std::string>*
   HingeJointPerceptorMap() const = 0;
 
   /// \brief Returns name of link in Nao model that is used for camera position
@@ -76,6 +78,14 @@ class NaoBT
   /// \brief Returns default name of Nao model
   /// \return Name mentioned above
   public: virtual std::string DefaultModelName() const = 0;
+
+  /// \brief Returns URI of blue model used by this body type
+  /// \return URI mentioned above
+  public: virtual std::string BlueModelPath() const = 0;
+
+  /// \brief Returns URI of red model used by this body type
+  /// \return URI mentioned above
+  public: virtual std::string RedModelPath() const = 0;
 };
 
 /// \brief The official Nao body type from Aldebaran
@@ -84,70 +94,76 @@ class NaoOfficialBT : public NaoBT
   // Documentation inherited
   public: virtual double Height() const
   {
-    return this->kHeight;
+    return 0.6;
   }
 
   // Documentation inherited
   public: virtual double TorsoHeight() const
   {
-    return this->kTorsoHeight;
+    return this->Height() * 0.5;
   }
 
   // Documentation inherited
-  public: virtual std::map<std::string, std::string> BodyPartMap() const
+  public: virtual const std::map<std::string, std::string>* BodyPartMap() const
   {
-    return this->kBodyPartMap;
+    return &(this->kBodyPartMap);
   }
 
   // Documentation inherited
   public: virtual
-  std::map<std::string, std::string> HingeJointEffectorMap() const
+  const std::map<std::string, std::string>* HingeJointEffectorMap() const
   {
-    return this->hingeJointEffectorMap;
+    return &(this->hingeJointEffectorMap);
   }
 
   // Documentation inherited
-  public: virtual std::map<std::string, std::string>
+  public: virtual const std::map<std::string, std::string>*
   HingeJointPerceptorMap() const
   {
-    return this->hingeJointPerceptorMap;
+    return &(this->hingeJointPerceptorMap);
   }
 
   // Documentation inherited
   public: virtual std::string CameraLinkName() const
   {
-    return this->kCameraLinkName;
+    return "Head";
   }
 
   // Documentation inherited
   public: virtual std::string TorsoLinkName() const
   {
-    return this->kTorsoLinkName;
+    return "Torso";
   }
 
   // Documentation inherited
   public: virtual std::string LeftFootLinkName() const
   {
-    return this->kLeftFootLinkName;
+    return "LSole";
   }
 
   // Documentation inherited
   public: virtual std::string RightFootLinkName() const
   {
-    return this->kRightFootLinkName;
+    return "RSole";
   }
 
   // Documentation inherited
   public: virtual std::string DefaultModelName() const
   {
-    return this->kDefaultModelName;
+    return "naoH25V40";
   }
 
   // Documentation inherited
-  protected: const double kHeight = 0.6;
+  public: virtual std::string BlueModelPath() const
+  {
+    return "model://nao_blue";
+  }
 
   // Documentation inherited
-  protected: const double kTorsoHeight = kHeight * 0.5;
+  public: virtual std::string RedModelPath() const
+  {
+    return "model://nao_red";
+  }
 
   // Documentation inherited
   protected: const std::map<std::string, std::string> kBodyPartMap =
@@ -214,21 +230,6 @@ class NaoOfficialBT : public NaoBT
     {"raj3", "RElbowYaw"},
     {"raj4", "RElbowRoll"}
   };
-
-  // Documentation inherited
-  protected: const std::string kCameraLinkName = "Head";
-
-  // Documentation inherited
-  protected: const std::string kTorsoLinkName = "Torso";
-
-  // Documentation inherited
-  protected: const std::string kLeftFootLinkName = "LSole";
-
-  // Documentation inherited
-  protected: const std::string kRightFootLinkName = "RSole";
-
-  // Documentation inherited
-  protected: const std::string kDefaultModelName = "naoH25V40";
 };
 
 #endif
