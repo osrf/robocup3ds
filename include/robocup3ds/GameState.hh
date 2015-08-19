@@ -271,6 +271,7 @@ class GameState
   /// \brief Add agent to game state
   /// \param[out] _uNum Agent number assigned
   /// \param[in] _teamName Agent name
+  /// \param[in] _bodyType Body type used for agent
   /// \param[in] _socketID SocketID associated with agent
   /// \return Pointer to the agent object created
   public: Agent* AddAgent(const int _uNum, const std::string &_teamName,
