@@ -932,7 +932,7 @@ void GameState::MoveOffSideAgent(Agent &_agent) const
 }
 
 /////////////////////////////////////////////////
-math::Vector3<double> GameState::GetBall()
+math::Vector3<double> GameState::GetBall() const
 {
   return this->ballPos;
 }
