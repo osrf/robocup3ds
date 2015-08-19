@@ -50,8 +50,7 @@ namespace states
 /// 1) Use the simulation world model to update the pose of all
 /// the players and ball. Also, check for collisions in simulation world model
 /// and update ballContactHistory member variable if necessary
-/// 2) Call the Effector object's Update() method
-/// 3) Call the Update() method, which turn calls the current state's Update()
+/// 2) Call the Update() method, which turn calls the current state's Update()
 /// method. The state's update method calls the following functions:
 /// CheckTiming()
 /// CheckDoubleTouch()
@@ -61,7 +60,8 @@ namespace states
 /// CheckImmobility()
 /// These functions check for rule violations and check whether the necessary
 /// conditions for a play mode transition is satisfied.
-/// 4) Call the Perceptor object's Update() method
+/// 3) Call the Perceptor object's Update() method
+/// 4) Call the Effector object's Update() method
 /// 5) If the GameState object modifies the pose of any of the players and or
 /// ball (by checking the updatePose flag), update the simulation world model
 /// to match poses stored in the GameState object
@@ -104,7 +104,7 @@ class GameState
     public: Team::Side side;
 
     /// \brief Time when agent stopped contacting the ball
-    /// (if contact is longer than an instant)
+    /// (if contact is longer than an iteration)
     public: double contactTime;
 
     /// \brief Position where agent contacted ball
@@ -145,7 +145,8 @@ class GameState
   public: void StopPlayers();
 
   /// \brief Set the current game state. If the new state is the same than
-  /// the current one, the operation does not have any effect.
+  /// the current one, the operation does not have any effect unless
+  /// reset flag is set to true
   /// \param[in] _newState New state to replace current state
   /// \param[in] _resetState When new state is the same as current state,
   /// setting this flag to true will reset the state
@@ -233,7 +234,7 @@ class GameState
 
   /// \brief Get the ball position in the field.
   /// \return The position of the ball.
-  public: ignition::math::Vector3<double> GetBall();
+  public: const ignition::math::Vector3<double> GetBall();
 
   /// \brief Move the ball to the center of field.
   public: void MoveBallToCenter();
@@ -274,7 +275,7 @@ class GameState
   /// \param[in] _bodyType Body type used for agent
   /// \param[in] _socketID SocketID associated with agent
   /// \return Pointer to the agent object created
-  public: Agent* AddAgent(const int _uNum, const std::string &_teamName,
+  public: Agent *AddAgent(const int _uNum, const std::string &_teamName,
     const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoOfficialBT>(),
     const int _socketID = -1);
 
