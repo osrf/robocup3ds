@@ -46,18 +46,18 @@ class NaoBT
   /// by server to client
   /// \return Map mentioned above
   public: virtual const
-  std::map<std::string, std::string>* BodyPartMap() const = 0;
+  std::map<std::string, std::string>& BodyPartMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
   /// \return Map mentioned above
   public: virtual const
-  std::map<std::string, std::string>* HingeJointEffectorMap() const = 0;
+  std::map<std::string, std::string>& HingeJointEffectorMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
   /// \return Map mentioned above
-  public: virtual const std::map<std::string, std::string>*
+  public: virtual const std::map<std::string, std::string>&
   HingeJointPerceptorMap() const = 0;
 
   /// \brief Returns name of link in Nao model that is used for camera position
@@ -105,23 +105,23 @@ class NaoOfficialBT : public NaoBT
   }
 
   // Documentation inherited
-  public: virtual const std::map<std::string, std::string>* BodyPartMap() const
+  public: virtual const std::map<std::string, std::string>& BodyPartMap() const
   {
-    return &(this->kBodyPartMap);
+    return this->kBodyPartMap;
   }
 
   // Documentation inherited
   public: virtual
-  const std::map<std::string, std::string>* HingeJointEffectorMap() const
+  const std::map<std::string, std::string>& HingeJointEffectorMap() const
   {
-    return &(this->hingeJointEffectorMap);
+    return this->hingeJointEffectorMap;
   }
 
   // Documentation inherited
-  public: virtual const std::map<std::string, std::string>*
+  public: virtual const std::map<std::string, std::string>&
   HingeJointPerceptorMap() const
   {
-    return &(this->hingeJointPerceptorMap);
+    return this->hingeJointPerceptorMap;
   }
 
   // Documentation inherited
