@@ -18,6 +18,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <netinet/in.h>
+#include <algorithm>
 #include <cstdlib>
 #include <map>
 #include <memory>
@@ -26,6 +27,7 @@
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/physics/Contact.hh>
 #include <gazebo/physics/ContactManager.hh>
+#include <gazebo/physics/JointController.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
@@ -214,10 +216,7 @@ void Robocup3dsPlugin::UpdateGUIPlaymode(ConstGzStringPtr &_msg)
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 {
-  // We only apply new user commands every cycle time, but internally,
-  // we still need to make sure the robot is not let loose and falls to
-  // gravity and other dynamic effects.
-  this->KeepEffectorsState();
+  this->UpdateStoppedAgents();
   this->UpdateContactManager();
   // checks if enough time has elapsed to update gameState and send out
   // information
@@ -226,9 +225,6 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
   {
     return;
   }
-
-  // gzerr << "update() called at " << this->world->GetSimTime().Double()
-  //       << std::endl;
 
   this->UpdateGameState();
   this->UpdatePerceptor();
@@ -242,6 +238,7 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
 {
   this->world->SetPaused(true);
   this->UpdateEffector();
+  this->UpdateMonitorEffector();
   for (const auto &team : this->gameState->teams)
   {
     for (const auto &agent : team->members)
@@ -262,120 +259,11 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
     }
   }
 
-  this->KeepEffectorsState();
+  this->UpdateStoppedAgents();
   this->UpdateContactManager();
-  this->UpdateMonitorEffector();
   this->UpdateGameState();
   this->UpdatePerceptor();
-  // gzerr << "updatesync() called at " << this->world->GetSimTime().Double()
-  //       << std::endl;
   this->lastUpdateTime = this->world->GetSimTime().Double();
-}
-
-/////////////////////////////////////////////////
-void Robocup3dsPlugin::KeepEffectorsState()
-{
-  common::Time currTime = this->world->GetSimTime();
-  common::Time stepTime = currTime - this->prevPIDUpdateTime;
-  this->prevPIDUpdateTime = currTime;
-  double dt = stepTime.Double();
-
-  // set joint velocities of agent model
-  for (const auto &team : this->gameState->teams)
-  {
-    for (auto &agent : team->members)
-    {
-      if (!agent.inSimWorld)
-      {
-        continue;
-      }
-      const auto &model = this->world->GetModel(agent.GetName());
-      if (agent.status == Agent::Status::STOPPED)
-      {
-        model->ResetPhysicsStates();
-        // Why is this pose jittering?
-        ignition::math::Pose3<double> pose(agent.pos, agent.rot);
-        model->SetWorldPose(I2G(pose));
-        continue;
-      }
-      for (const auto &jointEffector : agent.action.jointEffectors)
-      {
-        std::string naoJointName =
-          agent.bodyType->HingeJointEffectorMap()->find(
-            jointEffector.first)->second;
-        gazebo::physics::JointPtr joint = model->GetJoint(naoJointName);
-        if (!joint)
-        {
-          continue;
-        }
-
-        ////////////////////////////////////////
-        // Using joint position
-        //
-        // Setting joint positions directly keeps the robot at that exact
-        // configuration.
-        // Not recommended to be used during games because we override physical
-        // effects (robot might float instead of falling due to gravity,
-        // penetration to other robots might happen.
-        ////////////////////////////////////////
-        /*
-                 double targetPos = joint->GetAngle(0).Radian() + jointEffector.second * dt;
-                 joint->SetPosition(0, targetPos);
-        */
-        ////////////////////////////////////////
-        // Using ODE joint control
-        //
-        // Warning: This is deprecated behaviour, may be gone on gazebo7
-        // The ODE physics engine will control the joint to achieve the goal
-        // velocity while respecting the maximum force. We don't need to set
-        // any other parameters.
-        // SetVelocity sets the joint state for the current iteration only,
-        // while this applies a force to the joint trying to fix the velocity.
-        ////////////////////////////////////////
-        /*
-                joint->SetParam("fmax", 0, 1000.0);
-                // joint->SetParam("vel", 0, jointEffector.second);
-                joint->SetParam("vel", 0, 0.0);
-        */
-        ////////////////////////////////////////
-        // Using SetVelocity
-        //
-        // Robot flies - what's happening?
-        ////////////////////////////////////////
-        /*
-                joint->SetVelocity(0, jointEffector.second);
-        */
-        ////////////////////////////////////////
-        // Using our own PID
-        //
-        // PID position control based on sphere_atlas_demo.world
-        // Requires parameter fine tuning for each joint
-        ////////////////////////////////////////
-
-        double jointKp = 480;
-        double jointKd = 100;
-
-        if (this->qp.find(joint->GetName()) == this->qp.end())
-        {
-          this->qp[joint->GetName()] = 0;
-        }
-
-        double p = joint->GetAngle(0).Radian();
-
-        // Target position
-        double targetPos = joint->GetAngle(0).Radian() +
-                           jointEffector.second * dt;
-
-        double pError = targetPos - p;
-        double dError = (pError - this->qp[joint->GetName()]) / dt;
-        this->qp[joint->GetName()] = pError;  // save qp
-        double force = jointKp * pError +
-                       jointKd * dError;
-
-        joint->SetForce(0, force);
-      }
-    }
-  }
 }
 
 /////////////////////////////////////////////////
@@ -420,28 +308,58 @@ void Robocup3dsPlugin::UpdateEffector()
   {
     this->clientServer->DisconnectClient(socketId);
   }
-  /*
-    // set joint velocities of agent model
-    for (const auto &team : this->gameState->teams)
-    {
-      for (auto &agent : team->members)
-      {
-        const auto &model = this->world->GetModel(agent.GetName());
-        if (agent.status == Agent::Status::STOPPED || !agent.inSimWorld)
-        {
-          continue;
-        }
 
-        for (auto &kv : agent.action.jointEffectors)
-        {
-          std::string naoJointName = NaoBT::hingeJointEffectorMap.find(
-                                       std::string(kv.first))->second;
-          model->GetJoint(naoJointName)->SetVelocity(0, kv.second);
-        }
-        agent.action.jointEffectors.clear();
+  // set joint velocities of agent model
+  for (const auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      if (!agent.inSimWorld || agent.status == Agent::Status::STOPPED)
+      {
+        continue;
       }
+
+      const auto &model = this->world->GetModel(agent.GetName());
+      const auto &jointController = model->GetJointController();
+
+      for (auto &kv : agent.action.jointEffectors)
+      {
+        const auto &joint = model->GetJoint(
+                                  agent.bodyType->HingeJointEffectorMap()
+                                  .at(kv.first));
+        const auto &scopedJointName = joint->GetScopedName();
+
+        // In simspark the target speed should be in the range
+        // of [-6.13, 6.13]
+        const double targetSpeed = std::min(std::max(kv.second, -6.13), 6.13);
+
+        const double elapsedTime =
+          this->world->GetSimTime().Double() - this->lastUpdateTime;
+
+        // Calculate the target degree based on the target Speed
+        const double target = (targetSpeed * elapsedTime)
+                        + joint->GetAngle(0).Radian();
+
+
+        jointController->SetPositionTarget(scopedJointName, target);
+      }
+      agent.action.jointEffectors.clear();
     }
-  */
+  }
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::InitJointController(const Agent &_agent,
+    const physics::ModelPtr &_model)
+{
+  const auto &jointController = _model->GetJointController();
+  jointController->Reset();
+  for (auto &kv : _agent.bodyType->HingeJointPIDMap())
+  {
+    const auto &scopedJointName = _model->GetJoint(kv.first)
+                                  ->GetScopedName();
+    jointController->SetPositionPID(scopedJointName, kv.second);
+  }
 }
 
 /////////////////////////////////////////////////
@@ -571,6 +489,7 @@ void Robocup3dsPlugin::UpdateGameState()
       if (model && !agent.inSimWorld)
       {
         agent.inSimWorld = true;
+        this->InitJointController(agent, model);
         gzmsg << "(" << this->world->GetSimTime().Double() <<
               ") agent added to game world: " <<
               model->GetName() << std::endl;
@@ -609,40 +528,15 @@ void Robocup3dsPlugin::UpdateGameState()
   {
     for (auto &agent : team->members)
     {
-      if (!agent.inSimWorld)
+      if (!agent.inSimWorld || !agent.updatePose)
       {
         continue;
       }
-
       const auto &model = this->world->GetModel(agent.GetName());
-
-      // if agent is in STOPPED state but somehow the model drifts from its
-      // gamestate position, it gets moved back
-      // const auto &modelPose = model->GetWorldPose();
-      // bool correctModelDrift = agent.status == Agent::Status::STOPPED
-      //                          && agent.pos.Distance(G2I(modelPose.pos))
-      //                          > NaoBT::torsoHeight;
-
-      // if (!agent.updatePose && agent.status != Agent::Status::STOPPED)
-      if (!agent.updatePose)
-      {
-        continue;
-      }
 
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
       model->SetWorldPose(I2G(pose));
       agent.updatePose = false;
-
-      // if (agent.status == Agent::Status::STOPPED)
-      // {
-      // reset joint angles, velocity, and acceleration to zero
-      // gzmsg << "resetting model!" << std::endl;
-      // model->ResetPhysicsStates();
-      // for (const auto &joint : model->GetJoints())
-      // {
-      //   joint->Reset();
-      // }
-      // }
     }
   }
 
@@ -655,6 +549,34 @@ void Robocup3dsPlugin::UpdateGameState()
     ball->SetAngularVel(I2G(this->gameState->GetBallAngVel()));
     ball->SetLinearVel(I2G(this->gameState->GetBallVel()));
     this->gameState->updateBallPose = false;
+  }
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateStoppedAgents()
+{
+  for (const auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      if (!agent.inSimWorld || agent.status != Agent::Status::STOPPED)
+      {
+        continue;
+      }
+      const auto &model = this->world->GetModel(agent.GetName());
+
+      model->GetJointController()->Reset();
+      for (const auto &joint : model->GetJoints())
+      {
+        joint->Reset();
+      }
+      model->ResetPhysicsStates();
+      this->gameState->MoveAgent(agent, agent.pos.X(), agent.pos.Y(),
+                                 agent.rot.Euler().Z());
+      ignition::math::Pose3<double> pose(agent.pos, agent.rot);
+      model->SetWorldPose(I2G(pose));
+      agent.updatePose = false;
+    }
   }
 }
 
@@ -692,13 +614,13 @@ void Robocup3dsPlugin::UpdatePerceptor()
       agent.cameraRot = G2I(cameraPose.rot);
 
       // update agent's self body map
-      for (auto &kv : (*agent.bodyType->BodyPartMap()))
+      for (auto &kv : agent.bodyType->BodyPartMap())
       {
         agent.selfBodyMap[kv.first] =
           G2I(model->GetLink(kv.second)->GetWorldPose().pos);
       }
       // update agent's percept joints angles
-      for (auto &kv : (*agent.bodyType->HingeJointPerceptorMap()))
+      for (auto &kv : agent.bodyType->HingeJointPerceptorMap())
       {
         agent.percept.hingeJoints[kv.first] =
           model->GetJoint(kv.second)->GetAngle(0).Degree();

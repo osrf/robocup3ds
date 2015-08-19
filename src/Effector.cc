@@ -210,9 +210,9 @@ void Effector::ParseSexp(sexp_t *_exp)
     this->ParseSay(_exp);
   }
   else if (this->currAgent
-           && this->currAgent->bodyType->HingeJointEffectorMap()->find(
+           && this->currAgent->bodyType->HingeJointEffectorMap().find(
              std::string(v))
-           != this->currAgent->bodyType->HingeJointEffectorMap()->end())
+           != this->currAgent->bodyType->HingeJointEffectorMap().end())
   {
     this->ParseHingeJoint(_exp);
   }
@@ -250,10 +250,10 @@ void Effector::ParseScene(sexp_t *_exp)
 
   const std::string bodyType = _exp->list->next->val;
   if (this->gameState->agentBodyTypeMap.find(bodyType) !=
-     this->gameState->agentBodyTypeMap.end())
+      this->gameState->agentBodyTypeMap.end())
   {
     this->socketIDbodyTypeMap[this->currSocketId] =
-     this->gameState->agentBodyTypeMap.at(bodyType);
+      this->gameState->agentBodyTypeMap.at(bodyType);
   }
   else
   {
@@ -280,8 +280,8 @@ void Effector::ParseBeam(sexp_t *_exp)
   {
     this->gameState->BeamAgent(this->currAgent->uNum,
                                this->currAgent->team->name, x, y, yaw);
-
-    // std::cerr << "beamed to " << x << "," << y << "," << yaw << std::endl;
+    // gzmsg << "beamed agent (" << x << "," << y << "," << yaw
+    //       << "): " << this->currAgent->GetName() << std::endl;
   }
 }
 

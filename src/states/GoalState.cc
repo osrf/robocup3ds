@@ -39,7 +39,6 @@ void GoalState::Initialize()
   this->validGoal = true;
 
   // Register the left team goal.
-  gzmsg << "ball in goal, current score:" << std::endl;
   for (auto &team : this->gameState->teams)
   {
     if (team->side == this->side)
@@ -52,7 +51,9 @@ void GoalState::Initialize()
       {
         this->validGoal = false;
       }
-      gzmsg << team->name << ": " << team->score << std::endl;
+      gzmsg << team->name << " has kicked ball into enemy goal!" << std::endl;
+      gzmsg << "current score for " << team->name << ": "
+            << team->score << std::endl;
     }
   }
   State::Initialize();
@@ -69,8 +70,12 @@ void GoalState::Update()
   if (this->GetElapsedTime() >= GameState::SecondsGoalPause || !validGoal)
   {
     if (this->side == Team::Side::LEFT)
-    { this->gameState->SetCurrent(this->gameState->kickOffRightState); }
+    {
+      this->gameState->SetCurrent(this->gameState->kickOffRightState);
+    }
     else
-    { this->gameState->SetCurrent(this->gameState->kickOffLeftState); }
+    {
+      this->gameState->SetCurrent(this->gameState->kickOffLeftState);
+    }
   }
 }

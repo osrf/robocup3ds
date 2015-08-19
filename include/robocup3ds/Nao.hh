@@ -18,9 +18,10 @@
 #ifndef _GAZEBO_ROBOCUP3DS_NAO_HH_
 #define _GAZEBO_ROBOCUP3DS_NAO_HH_
 
-#include <string>
+#include <gazebo/common/PID.hh>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 /// \brief Base Class for Nao body types. All other Nao body types derive
@@ -45,18 +46,23 @@ class NaoBT
   /// by server to client
   /// \return Map mentioned above
   public: virtual const
-  std::map<std::string, std::string>* BodyPartMap() const = 0;
+  std::map<std::string, std::string>& BodyPartMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
   /// \return Map mentioned above
   public: virtual const
-  std::map<std::string, std::string>* HingeJointEffectorMap() const = 0;
+  std::map<std::string, std::string>& HingeJointEffectorMap() const = 0;
+
+  /// \brief Returns a map of joint names and their corresponding PIDs
+  /// \return Map mentioned above
+  public: virtual const std::map<std::string, gazebo::common::PID>&
+  HingeJointPIDMap() const = 0;
 
   /// \brief Returns a map of joint names sent received by server from client
   /// and joint names in Nao model's SDF file
   /// \return Map mentioned above
-  public: virtual const std::map<std::string, std::string>*
+  public: virtual const std::map<std::string, std::string>&
   HingeJointPerceptorMap() const = 0;
 
   /// \brief Returns name of link in Nao model that is used for camera position
@@ -104,23 +110,30 @@ class NaoOfficialBT : public NaoBT
   }
 
   // Documentation inherited
-  public: virtual const std::map<std::string, std::string>* BodyPartMap() const
+  public: virtual const std::map<std::string, std::string>& BodyPartMap() const
   {
-    return &(this->kBodyPartMap);
+    return this->kBodyPartMap;
   }
 
   // Documentation inherited
   public: virtual
-  const std::map<std::string, std::string>* HingeJointEffectorMap() const
+  const std::map<std::string, std::string>& HingeJointEffectorMap() const
   {
-    return &(this->hingeJointEffectorMap);
+    return this->hingeJointEffectorMap;
   }
 
   // Documentation inherited
-  public: virtual const std::map<std::string, std::string>*
+  public: virtual const std::map<std::string, std::string>&
   HingeJointPerceptorMap() const
   {
-    return &(this->hingeJointPerceptorMap);
+    return this->hingeJointPerceptorMap;
+  }
+
+  // Documentation inherited
+  public: virtual const std::map<std::string, gazebo::common::PID>&
+  HingeJointPIDMap() const
+  {
+    return this->hingeJointPIDMap;
   }
 
   // Documentation inherited
@@ -229,6 +242,34 @@ class NaoOfficialBT : public NaoBT
     {"raj2", "RShoulderRoll"},
     {"raj3", "RElbowYaw"},
     {"raj4", "RElbowRoll"}
+  };
+
+  // documentation inherited
+  protected: const std::map<std::string, gazebo::common::PID>
+  hingeJointPIDMap =
+  {
+    {"HeadYaw", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"HeadPitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LShoulderPitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LShoulderRoll", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LElbowYaw", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LElbowRoll", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LHipYawPitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LHipRoll", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LHipPitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LKneePitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LAnklePitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"LAnkleRoll", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RHipYawPitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RHipRoll", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RHipPitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RKneePitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RAnklePitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RAnkleRoll", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RShoulderPitch", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RShoulderRoll", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RElbowYaw", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)},
+    {"RElbowRoll", gazebo::common::PID(480, 48, 4.8, 1, -1, 1000, -1000)}
   };
 };
 

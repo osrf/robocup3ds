@@ -31,6 +31,7 @@ class GameState;
 class Effector;
 class MonitorEffector;
 class Perceptor;
+class Agent;
 
 class Robocup3dsPlugin : public gazebo::WorldPlugin
 {
@@ -70,10 +71,11 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// gazebo world
   private: void UpdateEffector();
 
-  /// \brief This is called every update cycle, not only the valid cycles.
-  /// It's used to make sure the agents' states are the desired ones in between
-  /// user-cycles.
-  private: void KeepEffectorsState();
+  /// \brief Sets the pids for the joint controller of agent's model
+  /// \param[in] _agent Agent object
+  /// \param[in] _model Pointer to agent's model
+  private: void InitJointController(const Agent &_agent,
+    const gazebo::physics::ModelPtr &_model);
 
   /// \brief Update the monitor effector
   private: void UpdateMonitorEffector();
@@ -87,6 +89,9 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Update the effector, use gazebo world joint information to update
   /// information sent to agents
   private: void UpdatePerceptor();
+
+  /// \brief Fix agents in place if they are stopped
+  private: void UpdateStoppedAgents();
 
   /// \brief Update the playmode based on msgs sent by the GUI plugin
   /// \param[in] _msg Message received from GUI
@@ -140,9 +145,6 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Vector of all contacts received from contact manager
   private: std::vector<gazebo::physics::Contact> contacts;
-
-  /// \brief Used by our PID controller to keep track of the time.
-  private: gazebo::common::Time prevPIDUpdateTime;
 
   /// \brief Used by our PID controller to keep track of the error.
   private: std::map<std::string, double> qp;
