@@ -79,6 +79,7 @@ void Perceptor::SetViewFrustum()
 }
 
 /////////////////////////////////////////////////
+const
 std::vector <ignition::math::Plane<double> > &Perceptor::GetViewFrustum()
 {
   return this->viewFrustum;
