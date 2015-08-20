@@ -1067,12 +1067,6 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
     return nullptr;
   }
 
-  // code below never reached
-  // if (static_cast<int>(teamToAdd->members.size()) > GameState::playerLimit)
-  // {
-  //   return false;
-  // }
-
   std::vector<bool> uNumArray;
   for (int i = 0; i < GameState::playerLimit; ++i)
   {

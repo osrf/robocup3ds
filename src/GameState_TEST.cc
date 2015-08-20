@@ -15,11 +15,11 @@
  *
 */
 
-#include <ignition/math.hh>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <ignition/math.hh>
 
 #include "gtest/gtest.h"
 #include "robocup3ds/Agent.hh"
@@ -544,21 +544,6 @@ class GameStateTest_fullTeams : public GameStateTest_basic
         }
       }
     }
-
-    // protected:
-    //   virtual void resetPositions(int _team)
-    //   {
-    //     if (_team != 0 || _team != 1)
-    //     {
-    //       return;
-    //     }
-    //     for (int j = 0; j < 11; ++j)
-    //     {
-    //       Agent &agent = gameState.teams.at(_team)->members.at(j);
-    //       gameState.MoveAgent(agent, math::Vector3<double>
-    //                           (0, 0, 0.35));
-    //     }
-    //   }
 };
 
 /// \brief Test for whether beforeKickOff play mode transitions correctly
