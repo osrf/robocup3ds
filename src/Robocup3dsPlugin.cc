@@ -152,15 +152,22 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
   }
   catch (const std::exception &exc)
   {
+    gzerr << "LoadPIDParams() cannot parse PID params for "
+          + _jointName + " in " + _bodyType
+          + " bodytype, using default values!" << std::endl;
     return;
   }
 
   if (params.size() != 5u)
   {
+    gzerr << "LoadPIDParams() cannot parse PID params for "
+          + _jointName + " in " + _bodyType
+          + " bodytype, using default values!" << std::endl;
     return;
   }
 
-  gzmsg << "modifying PID params for joint " + _jointName + " in " + _bodyType
+  gzmsg << "LoadPIDParams() set PID params for joint "
+        + _jointName + " in " + _bodyType
         + " bodytype: " << params[0] << " " << params[1] << " " << params[2]
         << " " << params[3] << " " << params[4] << std::endl;
   _pid.SetPGain(params[0]);
@@ -208,7 +215,6 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                boost::bind(&Robocup3dsPlugin::Update,
                                            this, _1));
-    // this->world->GetPhysicsEngine()->SetRealTimeUpdateRate(0.004);
   }
   else
   {

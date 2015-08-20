@@ -76,7 +76,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
                               const std::map<std::string,
                               std::string> &_config) const;
 
-  /// \brief Copys contact objects from the world contact manager to contacts
+  /// \brief Copies contact objects from the world contact manager to contacts
   private: void UpdateContactManager();
 
   /// \brief Update the effector, use collected joint information to update
