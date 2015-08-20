@@ -274,7 +274,7 @@ void Robocup3dsPlugin::UpdateEffector()
           else
             model->GetJoint(jointName.second)->SetAngle(0, 0);
 
-/*
+          /*
           // Initial the Joint Controller;
           physics::JointControllerPtr jointController(
                             new physics::JointController(model));
@@ -293,7 +293,7 @@ void Robocup3dsPlugin::UpdateEffector()
                        model->GetJoint(jointName.second)-> GetScopedName(), 0);
 
           jointController->Update();
-*/
+          */
         }
         continue;
       }
