@@ -267,10 +267,14 @@ void Robocup3dsPlugin::UpdateEffector()
 
           if (jointName.second == "LShoulderPitch" || jointName.second == "RShoulderPitch")
             model->GetJoint(jointName.second)->SetAngle(0, -1.5);
+          else if (jointName.second == "LShoulderRoll")
+            model->GetJoint(jointName.second)->SetAngle(0, 0.15);
+          else if (jointName.second == "RShoulderRoll")
+            model->GetJoint(jointName.second)->SetAngle(0, -0.15);
           else
             model->GetJoint(jointName.second)->SetAngle(0, 0);
 
-          /*
+/*
           // Initial the Joint Controller;
           physics::JointControllerPtr jointController(
                             new physics::JointController(model));
@@ -289,7 +293,7 @@ void Robocup3dsPlugin::UpdateEffector()
                        model->GetJoint(jointName.second)-> GetScopedName(), 0);
 
           jointController->Update();
-        */
+*/
         }
         continue;
       }
