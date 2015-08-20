@@ -58,7 +58,7 @@ const std::string GameState::FreeKickLeft    = "FreeKickLeft";
 const std::string GameState::FreeKickRight   = "FreeKickRight";
 
 double GameState::SecondsFullGame = 600;
-double GameState::SecondsEachHalf = SecondsFullGame * 0.5;
+double GameState::SecondsEachHalf = GameState::SecondsFullGame * 0.5;
 double GameState::SecondsGoalPause = 3;
 double GameState::SecondsKickInPause = 1;
 double GameState::SecondsKickIn = 15;
@@ -113,7 +113,11 @@ GameState::GameState():
                     Team::Side::LEFT)),
   freeKickRightState(std::make_shared<FreeKickState>(FreeKickRight, this,
                      Team::Side::RIGHT)),
-  agentBodyTypeMap({{"NaoOfficialBT", std::make_shared<NaoOfficialBT>()}}),
+  agentBodyTypeMap(
+{
+  {"NaoOfficialBT", std::make_shared<NaoOfficialBT>()
+  }
+}),
   defaultBodyType(agentBodyTypeMap.at("NaoOfficialBT")),
   hasCurrentStateChanged(false),
   touchBallKickoff(nullptr),
@@ -249,7 +253,6 @@ void GameState::LoadConfiguration(
 /////////////////////////////////////////////////
 void GameState::ClearBallContactHistory()
 {
-  // gzmsg << "ball contact history cleared!" << std::endl;
   this->ballContactHistory.clear();
 }
 
@@ -356,14 +359,12 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
               GameState::kDropBallRadiusMargin +
               GameState::dropBallRadius, newPos, newPos2))
           {
+            auto closerPos = newPos2;
             if (agent.pos.Distance(newPos) < agent.pos.Distance(newPos2))
             {
-              this->MoveAgent(agent, newPos);
+              closerPos = newPos;
             }
-            else
-            {
-              this->MoveAgent(agent, newPos2);
-            }
+            this->MoveAgent(agent, closerPos);
           }
         }
       }
@@ -882,9 +883,6 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                  GameState::beamHeightOffset);
   _agent.rot.Euler(0, 0, _yaw + offsetYaw);
   _agent.updatePose = true;
-  // std::cerr << "MoveAgentNoisy to X:" << _agent.pos.X() <<
-  //    " to Y:" << _agent.pos.Y() << " to Z:"
-  //      << _agent.pos.Z() << std::endl;
 }
 
 void GameState::MoveAgent(Agent &_agent, const math::Vector3<double> &_pos,
@@ -930,7 +928,7 @@ void GameState::MoveOffSideAgent(Agent &_agent) const
 }
 
 /////////////////////////////////////////////////
-math::Vector3<double> GameState::GetBall()
+math::Vector3<double> GameState::GetBall() const
 {
   return this->ballPos;
 }
@@ -1034,17 +1032,13 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
 {
   if (this->currentState->GetName() != "BeforeKickOff")
   {
-    // std::cout << "Incorrect play mode, unable to add agent!" << std::endl;
     return nullptr;
   }
 
   int uNum = _uNum;
-  // std::cout << "adding agent: " << uNum << " teamName: "
-  // << teamName << std::endl;
+
   if (uNum < 0 || uNum > GameState::playerLimit)
   {
-    // std::cout << "uNum " << uNum << " is invalid, cannot add agent to team "
-    // << teamName << "!" << std::endl;
     return nullptr;
   }
   std::shared_ptr<Team> teamToAdd(nullptr);
@@ -1070,17 +1064,8 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
   }
   if (!teamToAdd)
   {
-    // std::cout << uNum << " " << teamName.c_str() << std::endl;
-    // std::cout << "There already are two teams, cannot add agent into
-    // new team!" << std::endl;
     return nullptr;
   }
-
-  // code below never reached
-  // if (static_cast<int>(teamToAdd->members.size()) > GameState::playerLimit)
-  // {
-  //   return false;
-  // }
 
   std::vector<bool> uNumArray;
   for (int i = 0; i < GameState::playerLimit; ++i)
@@ -1092,8 +1077,6 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
     uNumArray.at(agent.uNum - 1) = false;
     if (uNum != 0 && agent.uNum == uNum)
     {
-      // std::cout << "Already have an agent with this unum: " << uNum <<
-      // ", cannot add agent to team!" << std::endl;
       return nullptr;
     }
   }
@@ -1110,8 +1093,6 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
   }
   if (uNum == 0)
   {
-    // std::cout << "No free uNums avaliable, cannot add agent to team!"
-    // << std::endl;
     return nullptr;
   }
   teamToAdd->members.push_back(Agent(uNum, teamToAdd, _bodyType, _socketID));
@@ -1138,7 +1119,6 @@ bool GameState::RemoveAgent(const int _uNum, const std::string &_teamName)
       }
     }
   }
-  // std::cout << "Agent not found, unable to remove agent!" << std::endl;
   return false;
 }
 
@@ -1150,7 +1130,6 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
       && this->currentState->GetName() != "GoalKickLeft"
       && this->currentState->GetName() != "GoalKickRight")
   {
-    // std::cout << "Incorrect play mode, unable to beam agent!" << std::endl;
     return false;
   }
   for (const auto &team : this->teams)
@@ -1179,7 +1158,6 @@ bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
       }
     }
   }
-  // std::cout << "Agent not found, unable to beam agent!" << std::endl;
   return false;
 }
 

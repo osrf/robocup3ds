@@ -18,12 +18,12 @@
 #ifndef _GAZEBO_ROBOCUP3DS_AGENT_HH_
 #define _GAZEBO_ROBOCUP3DS_AGENT_HH_
 
-#include <ignition/math.hh>
 #include <map>
 #include <memory>
 #include <utility>
 #include <vector>
 #include <string>
+#include <ignition/math.hh>
 
 #include "robocup3ds/Nao.hh"
 #include "robocup3ds/SoccerField.hh"

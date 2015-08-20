@@ -15,11 +15,11 @@
  *
 */
 
-#include <ignition/math.hh>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <ignition/math.hh>
 
 #include "gtest/gtest.h"
 #include "robocup3ds/Agent.hh"
@@ -100,17 +100,97 @@ TEST_F(GameStateTest_basic, GameState_LoadConfiguration)
 
   config["gamestate_playerlimit"] = "50";
   gameState.LoadConfiguration(config);
-  EXPECT_EQ(GameState::playerLimit, 50);
+  EXPECT_DOUBLE_EQ(GameState::playerLimit, 50);
   config["gamestate_playerlimit"] = "50.5";
   gameState.LoadConfiguration(config);
-  EXPECT_EQ(GameState::playerLimit, 50);
+  EXPECT_DOUBLE_EQ(GameState::playerLimit, 50);
 
-  config.clear();
-  config["gamestate_playerlimit"] = "11";
-  config["gamestate_usecounterforgametime"] = "true";
-  config["gamestate_secondsgoalpause"] = "3";
-  config["gamestate_secondsfullgame"] = "600";
+  config["gamestate_secondskickinpause"] = "5";
   gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::SecondsKickInPause, 5);
+
+  config["gamestate_secondskickin"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::SecondsKickIn, 5);
+
+  config["gamestate_secondsbeforekickoff"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::SecondsBeforeKickOff, 5);
+
+  config["gamestate_secondskickoff"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::SecondsKickOff, 5);
+
+  config["gamestate_dropballradius"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::dropBallRadius, 5);
+
+  config["gamestate_penaltyboxlimit"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::penaltyBoxLimit, 5);
+
+  config["gamestate_beamheightoffset"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::beamHeightOffset, 5);
+
+  config["gamestate_crowdingenableradius"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::crowdingEnableRadius, 5);
+
+  config["gamestate_innercrowdingradius"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::innerCrowdingRadius, 5);
+
+  config["gamestate_outercrowdingradius"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::outerCrowdingRadius, 5);
+
+  config["gamestate_immobilitytimelimit"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::immobilityTimeLimit, 5);
+
+  config["gamestate_fallentimelimit"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::fallenTimeLimit, 5);
+
+  config["percept_hfov"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::HFov, 5);
+
+  config["percept_vfov"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::VFov, 5);
+
+
+  config["percept_restrictvision"] = "true";
+  gameState.LoadConfiguration(config);
+  EXPECT_TRUE(GameState::restrictVision);
+
+  config["percept_groundtruthinfo"] = "true";
+  gameState.LoadConfiguration(config);
+  EXPECT_TRUE(GameState::groundTruthInfo);
+
+  GameState::SecondsFullGame = 600;
+  GameState::SecondsEachHalf = GameState::SecondsFullGame * 0.5;
+  GameState::SecondsGoalPause = 3;
+  GameState::SecondsKickInPause = 1;
+  GameState::SecondsKickIn = 15;
+  GameState::SecondsBeforeKickOff = 5;
+  GameState::SecondsKickOff = 15;
+  GameState::useCounterForGameTime = true;
+  GameState::playerLimit = 11;
+  GameState::penaltyBoxLimit = 3;
+  GameState::beamHeightOffset = 0.05;
+  GameState::crowdingEnableRadius = 0.8;
+  GameState::innerCrowdingRadius = 0.4;
+  GameState::outerCrowdingRadius = 1.0;
+  GameState::immobilityTimeLimit = 15;
+  GameState::fallenTimeLimit = 30;
+  GameState::dropBallRadius = 2;
+  GameState::HFov = 120;
+  GameState::VFov = 120;
+  GameState::restrictVision = true;
+  GameState::groundTruthInfo = false;
 }
 
 /// \brief Test for adding teams and agents
@@ -207,6 +287,30 @@ TEST_F(GameStateTest_basic, GameState_remove_agents)
       EXPECT_EQ(gameState.teams.at(i)->members.size(), 0u);
     }
   }
+}
+
+/// \brief Test miscellaneous getter and setter functions
+TEST_F(GameStateTest_basic, GameState_misc)
+{
+  EXPECT_DOUBLE_EQ(gameState.GetElapsedGameTime(true), 0);
+  gameState.SetHalf(GameState::Half::SECOND_HALF);
+  EXPECT_DOUBLE_EQ(gameState.GetElapsedGameTime(true),
+                   GameState::SecondsEachHalf);
+
+  gameState.SetGameTime(55);
+  EXPECT_DOUBLE_EQ(55, gameState.GetGameTime());
+
+  gameState.SetStartGameTime(33);
+  EXPECT_DOUBLE_EQ(33, gameState.GetStartGameTime());
+
+  gameState.SetCycleCounter(5);
+  EXPECT_EQ(5, gameState.GetCycleCounter());
+
+  gameState.SetBallVel(math::Vector3<double>(1, 2, 3));
+  EXPECT_EQ(gameState.GetBallVel(), math::Vector3<double>(1, 2, 3));
+
+  gameState.SetBallAngVel(math::Vector3<double>(6, 5, 4));
+  EXPECT_EQ(gameState.GetBallAngVel(), math::Vector3<double>(6, 5, 4));
 }
 
 /// \brief Test for add agent with uNum 0, which assigns it the next free uNum
@@ -368,8 +472,21 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
     EXPECT_LE(agent.pos.Distance(pos), 0.15);
     EXPECT_LE(fabs(agent.rot.Euler().Z() - rot.Euler().Z()), 0.1);
   }
+
+  gameState.AddAgent(1, "red");
+  Agent &agent2 = gameState.teams.at(1)->members.at(0);
+  pos.Set(-7, -8, 0.35);
+  rot.Euler(0, 0, IGN_DTOR(230));
+  for (int i = 0; i < 100; ++i)
+  {
+    bool result = gameState.BeamAgent(1, "red", 7, 8, 410);
+    EXPECT_TRUE(result);
+    EXPECT_LE(agent2.pos.Distance(pos), 0.15);
+    EXPECT_LE(fabs(agent2.rot.Euler().Z() - rot.Euler().Z()), 0.1);
+  }
+
   EXPECT_FALSE(gameState.BeamAgent(2, "blue", 7, 8, 1.25));
-  EXPECT_FALSE(gameState.BeamAgent(1, "red", 7, 8, 1.25));
+  EXPECT_FALSE(gameState.BeamAgent(2, "red", 7, 8, 1.25));
   gameState.SetCurrent(gameState.playOnState);
   EXPECT_FALSE(gameState.BeamAgent(1, "blue", 7, 8, 1.25));
 }
@@ -427,21 +544,6 @@ class GameStateTest_fullTeams : public GameStateTest_basic
         }
       }
     }
-
-    // protected:
-    //   virtual void resetPositions(int _team)
-    //   {
-    //     if (_team != 0 || _team != 1)
-    //     {
-    //       return;
-    //     }
-    //     for (int j = 0; j < 11; ++j)
-    //     {
-    //       Agent &agent = gameState.teams.at(_team)->members.at(j);
-    //       gameState.MoveAgent(agent, math::Vector3<double>
-    //                           (0, 0, 0.35));
-    //     }
-    //   }
 };
 
 /// \brief Test for whether beforeKickOff play mode transitions correctly
