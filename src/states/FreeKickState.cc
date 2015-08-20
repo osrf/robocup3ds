@@ -35,6 +35,7 @@ FreeKickState::FreeKickState(const std::string &_name,
 void FreeKickState::Initialize()
 {
   // Move ball in bounds
+  this->gameState->MoveBall(this->initBallPos);
   this->gameState->MoveBallInBounds();
   State::Initialize();
 }
