@@ -307,7 +307,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   if (this->UpdatePerception())
   {
     // write out perception info
-    cx += snprintf(_string + cx, _size - cx, "(See");
+    cx += snprintf(_string + cx, _size - cx, " (See");
 
     // write out landmark info
     for (const auto &kv : _agent.percept.landMarks)
@@ -347,13 +347,13 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   // write hear info
   if (_agent.percept.hear.isValid && _agent.percept.hear.self)
   {
-    cx += snprintf(_string + cx, _size - cx, "(hear %.2f self %s)",
+    cx += snprintf(_string + cx, _size - cx, " (hear %.2f self %s)",
                    _agent.percept.hear.gameTime,
                    _agent.percept.hear.msg.c_str());
   }
   else if (_agent.percept.hear.isValid)
   {
-    cx += snprintf(_string + cx, _size - cx, "(hear %.2f %.2f %s)",
+    cx += snprintf(_string + cx, _size - cx, " (hear %.2f %.2f %s)",
                    _agent.percept.hear.gameTime,
                    _agent.percept.hear.yaw,
                    _agent.percept.hear.msg.c_str());
@@ -368,12 +368,13 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
 
   // write out gyro info
   cx += snprintf(_string + cx, _size - cx,
-                 "(GYR (n torso) (rt %.2f %.2f %.2f))",
+                 " (GYR (n torso) (rt %.2f %.2f %.2f))",
                  _agent.percept.gyroRate.X(), _agent.percept.gyroRate.Y(),
                  _agent.percept.gyroRate.Z());
 
   // write out acceleration info
-  cx += snprintf(_string + cx, _size - cx, "(ACC (n torso) (a %.2f %.2f %.2f))",
+  cx += snprintf(_string + cx, _size - cx,
+                 " (ACC (n torso) (a %.2f %.2f %.2f))",
                  _agent.percept.accel.X(), _agent.percept.accel.Y(),
                  _agent.percept.accel.Z());
 

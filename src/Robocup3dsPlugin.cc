@@ -295,9 +295,10 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
 {
-  this->world->SetPaused(true);
+  // todo: pausing world when parsing effector messages in sync mode causes
+  // client to stop sending messages after beam, need to find out why
+  // this->world->SetPaused(true);
   this->UpdateEffector();
-  this->UpdateMonitorEffector();
   for (const auto &team : this->gameState->teams)
   {
     for (const auto &agent : team->members)
@@ -308,9 +309,8 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
       }
     }
   }
-  // gzmsg << "synced!, moving on: " << this->gameState->GetGameTime() <<
-  //   std::endl;
-  this->world->SetPaused(false);
+
+  // this->world->SetPaused(false);
   for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
@@ -319,6 +319,7 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
     }
   }
 
+  this->UpdateMonitorEffector();
   this->UpdateStoppedAgents();
   this->UpdateContactManager();
   this->UpdateGameState();
@@ -715,15 +716,18 @@ void Robocup3dsPlugin::UpdatePerceptor()
   {
     for (const auto &agent : team->members)
     {
-      if (!agent.inSimWorld)
-      {
-        continue;
-      }
+      // todo: this breaks sync mode, find out why and how to fix
+      // if (!agent.inSimWorld)
+      // {
+      //   continue;
+      // }
 
       int cx = perceptor->Serialize(agent, &(this->buffer[4]),
                                     Robocup3dsPlugin::kBufferSize - 4);
       unsigned int _cx = htonl(static_cast<unsigned int>(cx));
       memcpy(this->buffer, &_cx, 4);
+      // gzerr << this->gameState->GetGameTime() << " "
+      //       << &this->buffer[4] << std::endl;
       this->clientServer->Send(agent.socketID, this->buffer, cx + 4);
     }
   }
