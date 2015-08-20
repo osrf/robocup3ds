@@ -33,14 +33,16 @@ using namespace ignition;
 /// \brief This test fixture sets up a gameState object and perceptor object
 class PerceptorTest : public ::testing::Test
 {
-  protected: virtual void SetUp()
+  protected:
+    virtual void SetUp()
     {
-    GameState::useCounterForGameTime = true;
-    this->gameState = std::make_shared<GameState>();
-    this->perceptor = std::make_shared<Perceptor>(this->gameState.get());
+      GameState::useCounterForGameTime = true;
+      this->gameState = std::make_shared<GameState>();
+      this->perceptor = std::make_shared<Perceptor>(this->gameState.get());
     }
 
-  protected: virtual bool UpdateLine_Test(Agent &_agent,
+  protected:
+    virtual bool UpdateLine_Test(Agent &_agent,
                                  const math::Line3<double> &_line,
                                  math::Line3<double> &_testLine)
     {
@@ -57,7 +59,8 @@ class PerceptorTest : public ::testing::Test
       return true;
     }
 
-  protected: virtual bool UpdateLandmark_Test(Agent &_agent,
+  protected:
+    virtual bool UpdateLandmark_Test(Agent &_agent,
                                      const math::Vector3<double> &_landmark,
                                      math::Vector3<double> &_testLandmark)
     {
@@ -72,9 +75,12 @@ class PerceptorTest : public ::testing::Test
       return true;
     }
 
-  protected: virtual void TearDown() {}
-  protected: std::shared_ptr<GameState> gameState;
-  protected: std::shared_ptr<Perceptor> perceptor;
+  protected:
+    virtual void TearDown() {}
+  protected:
+    std::shared_ptr<GameState> gameState;
+  protected:
+    std::shared_ptr<Perceptor> perceptor;
 };
 
 /// \brief Test whether Perceptor constructor and destructor works
@@ -90,7 +96,7 @@ TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
   GameState::HFov = 0;
   GameState::VFov = 90;
   perceptor->SetViewFrustum();
-  std::vector <ignition::math::Plane<double> > &viewFrustum =
+  const std::vector <ignition::math::Plane<double> > &viewFrustum =
     perceptor->GetViewFrustum();
 
   EXPECT_EQ(viewFrustum.at(0).Normal(),
@@ -140,7 +146,6 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
 {
   math::Line3<double> origLine, gdLine, testLine;
   GameState::restrictVision = false;
-  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -148,7 +153,16 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
   agent.cameraPos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, M_PI / 2);
 
+  // with noise, we dont expect them to be equal
+  Perceptor::useNoise = true;
   // we have line on positive y-axis in global coordinates
+  origLine.Set(0, 1, 0, 0, 2, 0);
+  UpdateLine_Test(agent, origLine, testLine);
+  gdLine.Set(1, 0, 0, 2, 0, 0);
+  EXPECT_NE(testLine, gdLine);
+
+  // without noies, they are now equal
+  Perceptor::useNoise = false;
   origLine.Set(0, 1, 0, 0, 2, 0);
   UpdateLine_Test(agent, origLine, testLine);
   gdLine.Set(1, 0, 0, 2, 0, 0);
@@ -459,7 +473,9 @@ TEST_F(PerceptorTest, Percepter_Serialize)
       gameState->AddAgent(j + 1, teamNames[i]);
       auto &agent = gameState->teams.at(i)->members.at(j);
       if (i == 0 && j == 0)
-      { continue; }
+      {
+        continue;
+      }
       gameState->MoveAgent(agent, math::Vector3<double>(5.0, 1.0,
                            0.35));
       agent.selfBodyMap["BODY"] = agent.pos;
@@ -467,6 +483,7 @@ TEST_F(PerceptorTest, Percepter_Serialize)
                                   math::Vector3<double>(0, 0, 1);
     }
   }
+  GameState::groundTruthInfo = true;
   GameState::restrictVision = true;
   gameState->SetCycleCounter(1);
   const auto &team = gameState->teams.at(1);
@@ -491,7 +508,9 @@ TEST_F(PerceptorTest, Percepter_Serialize)
 
   // currently takes around 1.2 milliseconds to finish for all 22 agents
   for (int i = 0; i < 1000; ++i)
-  { cx = perceptor->Serialize(redAgent, testString, sizeof(testString)); }
+  {
+    cx = perceptor->Serialize(redAgent, testString, sizeof(testString));
+  }
   std::cout << testString << std::endl;
 
   // check that certain names are there in string
@@ -500,32 +519,53 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   EXPECT_TRUE(strstr(testString, "HEAD"));
   EXPECT_TRUE(strstr(testString, "BODY"));
   EXPECT_TRUE(strstr(testString, "hear"));
+  EXPECT_TRUE(strstr(testString, "myorien"));
+  EXPECT_TRUE(strstr(testString, "ballpos"));
+  EXPECT_TRUE(strstr(testString, "mypos"));
 
   // check that parenthesis are balanced
   int paren = 0;
   for (size_t i = 0; i < sizeof(testString); ++i)
   {
     if (testString[i] == '\0')
-    { break; }
+    {
+      break;
+    }
     if (testString[i] == '(')
-    { paren++; }
+    {
+      paren++;
+    }
     else if (testString[i] == ')')
-    { paren--; }
+    {
+      paren--;
+    }
   }
   EXPECT_EQ(0, paren);
 
   // make sure returned length is correct
   EXPECT_EQ(static_cast<int>(strlen(testString)), cx);
 
+  // same test for other team
+  auto &blueAgent = gameState->teams.at(1)->members.at(0);
+  blueAgent.percept.hingeJoints["joint1"] = 0.5;
+  blueAgent.percept.hingeJoints["joint2"] = 0.2;
+  cx = perceptor->Serialize(blueAgent, testString, sizeof(testString));
+
+  // check that certain names are there in string
+  EXPECT_TRUE(strstr(testString, "joint1"));
+  EXPECT_TRUE(strstr(testString, "joint2"));
+  EXPECT_TRUE(strstr(testString, "HEAD"));
+  EXPECT_TRUE(strstr(testString, "BODY"));
+  EXPECT_TRUE(strstr(testString, "hear"));
+  EXPECT_TRUE(strstr(testString, "self"));
+  EXPECT_TRUE(strstr(testString, "myorien"));
+  EXPECT_TRUE(strstr(testString, "ballpos"));
+  EXPECT_TRUE(strstr(testString, "mypos"));
+
   // ensure that encoding is correct
   char b[400];
   unsigned int _cx = htonl(static_cast<unsigned int>(cx));
   memcpy(b, &_cx, 4);
-  // b[0] =  _cx        & 0xff;
-  // b[1] = (_cx >>  8) & 0xff;
-  // b[2] = (_cx >> 16) & 0xff;
-  // b[3] = (_cx >> 24) & 0xff;
-  // unsigned int _cx2 = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | (b[0]);
   unsigned int _cx2;
   memcpy(&_cx2, b, 4);
   int cx2 = static_cast<int>(ntohl(_cx2));

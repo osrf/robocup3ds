@@ -122,10 +122,6 @@ class Perceptor
   /// (every x gamestate cycles)
   public: static int updateVisualFreq;
 
-  /// \brief Frequency at which we update the hearing
-  /// (every x gamestate cycles)
-  public: static int updateHearFreq;
-
   /// \brief Flag whether to add noise to observations or not
   public: static bool useNoise;
 
@@ -134,6 +130,10 @@ class Perceptor
 
   /// \brief Multiplier for the distance noise
   public: static const double kDistNoiseScale;
+
+  /// \brief Frequency at which we update the hearing for each side
+  /// (every 2 gamestate cycles)
+  public: static const int kUpdateHearFreq;
 
   /// \brief A constant noise that is added to all observations
   private: static const ignition::math::Vector3<double> kFixedNoise;
