@@ -118,17 +118,17 @@ GameState::GameState():
   {"NaoOfficialBT", std::make_shared<NaoOfficialBT>()
   }
 }),
-  defaultBodyType(agentBodyTypeMap.at("NaoOfficialBT")),
-  hasCurrentStateChanged(false),
-  touchBallKickoff(nullptr),
-  updateBallPose(false),
-  gameTime(0.0),
-  prevCycleGameTime(0.0),
-  lastCycleTimeLength(0.0),
-  startGameTime(0.0),
-  currentState(nullptr),
-  half(Half::FIRST_HALF),
-  cycleCounter(0)
+defaultBodyType(agentBodyTypeMap.at("NaoOfficialBT")),
+hasCurrentStateChanged(false),
+touchBallKickoff(nullptr),
+updateBallPose(false),
+gameTime(0.0),
+prevCycleGameTime(0.0),
+lastCycleTimeLength(0.0),
+startGameTime(0.0),
+currentState(nullptr),
+half(Half::FIRST_HALF),
+cycleCounter(0)
 {
   this->playModeNameMap[beforeKickOffState->name] = beforeKickOffState;
   this->playModeNameMap[kickOffLeftState->name] = kickOffLeftState;
@@ -870,7 +870,7 @@ void GameState::MoveAgent(Agent &_agent, const double _x, const double _y,
 
 /////////////////////////////////////////////////
 void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
-                               const double _yaw) const
+                               const double _yaw, const bool _beamOnce) const
 {
   double offsetX = (static_cast<double>(random()) / (RAND_MAX)) *
                    (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
@@ -878,6 +878,18 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                    (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
   double offsetYaw = (static_cast<double>(random()) / (RAND_MAX)) *
                      (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
+  double newX = _x + offsetX;
+  double newY = _y + offsetY;
+  double newYaw = _yaw + offsetYaw;
+
+  if (_beamOnce
+      && abs(_agent.pos.X() - newX) <= GameState::kBeamNoise
+      && abs(_agent.pos.Y() - newY) <= GameState::kBeamNoise
+      && abs(_agent.rot.Euler().Z() - newYaw) < GameState::kBeamNoise)
+  {
+    return;
+  }
+
   _agent.pos.Set(_x + offsetX, _y + offsetY,
                  _agent.bodyType->TorsoHeight() +
                  GameState::beamHeightOffset);

@@ -193,7 +193,8 @@ class GameState
   /// \param[in] _y New Y position of agent in meters
   /// \param[in] _yaw New yaw of agent in radians
   public: void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
-                              const double _yaw) const;
+                              const double _yaw,
+                              const bool _beamOnce = true) const;
 
   /// \brief Set the agent's position and orientation
   /// \param[out] _agent Reference to agent object
