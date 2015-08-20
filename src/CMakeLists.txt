@@ -26,8 +26,8 @@ set (gtest_sources
   Effector_TEST.cc
   GameState_TEST.cc
   Geometry_TEST.cc
-  Perceptors_TEST.cc
   Robocup3dsPlugin_TEST.cc
+  Perceptors_TEST.cc
   Server_TEST.cc
   Util_TEST.cc
 )
@@ -45,7 +45,11 @@ link_directories(
 robocup3ds_add_library(${PROJECT_NAME_LOWER}Plugin ${sources} ${PARSER_SOURCE})
 
 target_link_libraries(${PROJECT_NAME_LOWER}Plugin
+  gazebo_common
+  gazebo_physics
+  gazebo_sensors
   ${GAZEBO_LIBRARIES}
+  ${IGNITION-MATH_LIBRARIES}
 )
 
 robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
