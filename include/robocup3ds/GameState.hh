@@ -234,7 +234,7 @@ class GameState
 
   /// \brief Get the ball position in the field.
   /// \return The position of the ball.
-  public: const ignition::math::Vector3<double> GetBall();
+  public: ignition::math::Vector3<double> GetBall() const;
 
   /// \brief Move the ball to the center of field.
   public: void MoveBallToCenter();
