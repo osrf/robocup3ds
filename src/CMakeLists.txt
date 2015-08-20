@@ -2,6 +2,7 @@ set(PARSER_SOURCE ../lib/sexpLibrary/parser.c ../lib/sexpLibrary/sexp.c ../lib/s
 Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/sexpLibrary/faststack.h ../lib/sexpLibrary/sexp_errors.h ../lib/sexpLibrary/sexp_ops.h ../lib/sexp_memory.h)
 
 set (sources
+  Effector.cc
   GameState.cc
   Geometry.cc
   Perceptors.cc
@@ -22,6 +23,7 @@ set (sources
 
 set (gtest_sources
   Agent_TEST.cc
+  Effector_TEST.cc
   GameState_TEST.cc
   Geometry_TEST.cc
   Perceptors_TEST.cc
