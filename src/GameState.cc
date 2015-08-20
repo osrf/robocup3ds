@@ -253,7 +253,6 @@ void GameState::LoadConfiguration(
 /////////////////////////////////////////////////
 void GameState::ClearBallContactHistory()
 {
-  // gzmsg << "ball contact history cleared!" << std::endl;
   this->ballContactHistory.clear();
 }
 
