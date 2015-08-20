@@ -29,7 +29,9 @@ namespace states
   /// \brief State that handles the gameover.
   class GameOverState : public State
   {
-    // Documentation inherited
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
     public: GameOverState(const std::string &_name,
                           GameState *const _gameState);
 

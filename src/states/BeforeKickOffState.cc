@@ -49,10 +49,14 @@ void BeforeKickOffState::Update()
   for (const auto &team : this->gameState->teams)
   {
     if (team->members.size() > 0u)
-    { agentOnField = true; }
+    {
+      agentOnField = true;
+    }
   }
   if (!agentOnField)
-  { this->initTime = this->gameState->GetGameTime(); }
+  {
+    this->initTime = this->gameState->GetGameTime();
+  }
 
   // resets getElapsedGameTime() back to zero
   this->gameState->SetStartGameTime(this->gameState->GetGameTime());
@@ -67,8 +71,12 @@ void BeforeKickOffState::Update()
   if (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff)
   {
     if (this->gameState->GetHalf() == GameState::Half::FIRST_HALF)
-    { this->gameState->SetCurrent(this->gameState->kickOffLeftState); }
+    {
+      this->gameState->SetCurrent(this->gameState->kickOffLeftState);
+    }
     else
-    { this->gameState->SetCurrent(this->gameState->kickOffRightState); }
+    {
+      this->gameState->SetCurrent(this->gameState->kickOffRightState);
+    }
   }
 }

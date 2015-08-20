@@ -29,9 +29,10 @@ namespace states
   /// \brief State that handles the corner kick state.
   class CornerKickState : public State
   {
-    /// \brief Constructor.
-    /// \param[in] _name Name of this state.
-    /// \param[in] _gameState GameState to be used inside the state.
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
+    /// \param[in] _side Side of state
     public: CornerKickState(const std::string &_name,
                             GameState *const _gameState,
                             const Team::Side _side);
