@@ -120,6 +120,7 @@ bool Effector::Parse(int _socket)
 //////////////////////////////////////////////////
 void Effector::ParseMessage(const std::string &_msg)
 {
+  // gzmsg << this->gameState->GetGameTime() << " " << _msg << std::endl;
   sexp_t *exp;
 
   // Create a s-expression message using the received pile of s-expressions

@@ -308,7 +308,8 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
       }
     }
   }
-
+  // gzmsg << "synced!, moving on: " << this->gameState->GetGameTime() <<
+  //   std::endl;
   this->world->SetPaused(false);
   for (const auto &team : this->gameState->teams)
   {
