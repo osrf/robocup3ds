@@ -275,7 +275,6 @@ void Robocup3dsPlugin::UpdateGUIPlaymode(ConstGzStringPtr &_msg)
 {
   const std::string playModeStr = _msg->data();
   this->gameState->SetCurrent(this->gameState->playModeNameMap[playModeStr]);
-  // gzmsg << "GUI changed playmode!" << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -435,9 +434,9 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
   for (const auto &agentName : this->monitorEffector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
-    gzmsg << "(" << this->world->GetSimTime().Double() <<
-          ") agent removed from game world by monitor: " <<
-          agentName << std::endl;
+      gzmsg << "(" << this->world->GetSimTime().Double() <<
+            ") agent removed from game world by monitor: " <<
+            agentName << std::endl;
   }
 }
 
@@ -445,14 +444,6 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
 void Robocup3dsPlugin::UpdateContactManager()
 {
   const auto &contactMgr = this->world->GetPhysicsEngine()->GetContactManager();
-  // gzmsg << "num contacts: " << contactMgr->GetContactCount() << std::endl;
-  // gzmsg << "ball position: " << this->world->GetModel(SoccerField::ballName)
-  //       ->GetWorldPose().pos << std::endl;
-  // const auto &model = this->world->GetModel("1_red");
-  // if (model)
-  // {
-  //   gzmsg << "player position: " << model->GetWorldPose().pos << std::endl;
-  // }
   for (unsigned int i = 0; i < contactMgr->GetContactCount(); ++i)
   {
     this->contacts.push_back(*contactMgr->GetContact(i));
