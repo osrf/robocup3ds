@@ -20,12 +20,12 @@
 #include <chrono>
 #include <gazebo/physics/World.hh>
 #include <gazebo/test/ServerFixture.hh>
-#include <ignition/math.hh>
 #include <memory>
 #include <string>
 #include <thread>
+#include <ignition/math.hh>
 
-#include "ClientAgent.hh"
+#include "robocup3ds/ClientAgent.hh"
 
 using namespace ignition;
 using namespace std;
@@ -70,7 +70,7 @@ class IntegrationTest : public gazebo::ServerFixture
 
   public:
     const string testPath =
-      "/home/jliang/Desktop/OSRF/robocup3ds/test/integration/";
+      "../test/integration/";
 
   public:
     shared_ptr<ClientAgent> agent;

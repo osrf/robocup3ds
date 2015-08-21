@@ -315,6 +315,8 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
     }
   }
 
+  // todo: pausing world when parsing effector messages in sync mode causes
+  // client to stop sending messages after beam, need to find out why
   // this->world->SetPaused(false);
   for (const auto &team : this->gameState->teams)
   {

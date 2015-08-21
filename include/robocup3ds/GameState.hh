@@ -192,6 +192,8 @@ class GameState
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
   /// \param[in] _yaw New yaw of agent in radians
+  /// \param[in] _beamOnce If agent is within 0.15 meters of new location
+  //  do not beam the agent
   public: void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                               const double _yaw,
                               const bool _beamOnce = true) const;
