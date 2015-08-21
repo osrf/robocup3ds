@@ -45,14 +45,13 @@ const math::Vector3<double> Perceptor::kNoiseSigma(0.0965, 0.1225, 0.1480);
 Perceptor::Perceptor(GameState *const _gameState):
   gameState(_gameState)
 {
-  this->SetViewFrustum();
 }
 
 /////////////////////////////////////////////////
-void Perceptor::SetViewFrustum()
+void Perceptor::SetViewFrustum(const double _hfov, const double _vfov)
 {
-  double HFov = IGN_DTOR(std::min(180.0, std::max(0.0, GameState::HFov)));
-  double VFov = IGN_DTOR(std::min(180.0, std::max(0.0, GameState::VFov)));
+  double HFov = IGN_DTOR(std::min(180.0, std::max(0.0, _hfov)));
+  double VFov = IGN_DTOR(std::min(180.0, std::max(0.0, _vfov)));
 
   math::Vector3<double> origin = math::Vector3<double>::Zero;
   math::Vector3<double> upperRight(1.0, -tan(HFov / 2), tan(VFov / 2));

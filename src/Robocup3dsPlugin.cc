@@ -202,6 +202,7 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
 
   gzmsg << "************loading config**************" << std::endl;
   this->gameState->LoadConfiguration(config);
+  this->perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   this->LoadConfiguration(config);
   gzmsg << "************finished loading************" << std::endl;
 

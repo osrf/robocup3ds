@@ -89,7 +89,7 @@ TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
   GameState::restrictVision = true;
   GameState::HFov = 0;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   const std::vector <ignition::math::Plane<double> > &viewFrustum =
     perceptor->GetViewFrustum();
 
@@ -102,7 +102,7 @@ TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
 
   GameState::HFov = 90;
   GameState::VFov = 0;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   EXPECT_EQ(viewFrustum.at(0).Normal(),
             math::Vector3<double>(1, 0, 0));
   EXPECT_EQ(viewFrustum.at(2).Normal(),
@@ -112,7 +112,7 @@ TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
 
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   EXPECT_EQ(viewFrustum.at(0).Normal(),
             math::Vector3<double>(1, 0, 0));
 
@@ -195,7 +195,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Restrictvis)
   GameState::restrictVision = true;
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
@@ -283,7 +283,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
   GameState::restrictVision = true;
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
@@ -320,7 +320,7 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
 {
   GameState::HFov = 89;
   GameState::VFov = 89;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   gameState->AddAgent(1, "red");
@@ -489,7 +489,7 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   Perceptor::updateVisualFreq = 1;
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
 
   auto &redAgent = gameState->teams.at(0)->members.at(0);
   redAgent.percept.hingeJoints["joint1"] = 0.5;
