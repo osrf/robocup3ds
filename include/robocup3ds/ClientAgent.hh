@@ -71,6 +71,9 @@ class ClientAgent
   /// \param[in] _serverAddr Address of server
   /// \param[in] _port Port of that server is running on
   /// \param[in] _monitorPort Port that server is listening for monitors
+  /// \param[in] _uNum Uniform number of agent
+  /// \param[in] _teamName Team of agent
+  /// \param[in] _side Side of agent
   public: ClientAgent(const std::string &_serverAddr,
     const int _port, const int _monitorPort,
     const int _uNum, const std::string &_teamName,
@@ -86,16 +89,15 @@ class ClientAgent
   public: void Update();
 
   /// \brief Connects agent to server
+  /// \param[in] _port Port to connect to
+  /// \param[out] _socketID Socket id of connection
+  /// \return True if connection is successful
   private: bool Connect(const int &_port, int &_socketID);
-
-  /// \brief Disconnects the agent from server
-  public: void Disconnect(const int &_port, int &_socketID);
 
   /// \brief Adds a init and beam message to actionResponses
   /// \param[in] _x X position in meters
   /// \param[in] _y Y position in meters
   /// \param[in] _yaw Yaw in degrees
-  /// \return True if action is successful or not
   public: void InitAndBeam(const double _x,
     const double _y, const double _yaw);
 
@@ -134,6 +136,7 @@ class ClientAgent
 
   /// \brief Gets the message from the socket
   /// \param[out] _msg String to write message to
+  /// \return True if getting message is successful
   private: bool GetMessage(std::string &_msg);
 
   /// \brief Tells us if socket is ready for reading

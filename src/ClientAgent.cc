@@ -19,11 +19,12 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <ignition/math.hh>
 #include <mutex>
 #include <string>
 #include <utility>
-#include "ClientAgent.hh"
+#include <ignition/math.hh>
+
+#include "robocup3ds/ClientAgent.hh"
 
 using namespace ignition;
 
@@ -485,15 +486,6 @@ bool ClientAgent::GetMessage(std::string &_msg)
 
   _msg = std::string(buffer + sizeof(unsigned int));
   bzero(buffer, sizeof(buffer));
-  // static std::string lastMsg = "";
-  // if (msg.compare(lastMsg) == 0)
-  // {
-  //   cerr << "Duplicate message received from server"
-  //        "-- has the server killed us?\n";
-  //   Done();
-  //   exit(1);
-  // }
-  // lastMsg = msg;
 
   return true;
 }
