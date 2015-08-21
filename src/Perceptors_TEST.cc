@@ -16,10 +16,10 @@
 */
 #include <netinet/in.h>
 #include <cmath>
-#include <ignition/math.hh>
 #include <memory>
 #include <string>
 #include <vector>
+#include <ignition/math.hh>
 
 #include "gtest/gtest.h"
 #include "robocup3ds/Agent.hh"

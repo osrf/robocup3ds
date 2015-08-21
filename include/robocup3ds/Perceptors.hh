@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_PERCEPTORS_HH_
-#define _GAZEBO_PERCEPTORS_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_PERCEPTORS_HH_
+#define _GAZEBO_ROBOCUP3DS_PERCEPTORS_HH_
 
 #include <string>
 #include <vector>

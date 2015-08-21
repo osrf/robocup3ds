@@ -317,8 +317,6 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
     // write out other agent body parts
     for (const auto &kv : _agent.percept.otherAgentBodyMap)
     {
-      // agentNum = kv.first.first;
-      // agentTeam = kv.first.second;
       cx += snprintf(_string + cx, _size - cx, " (P (team %s) (id %d)",
                      kv.first.second.c_str(), kv.first.first);
       for (const auto &kv2 : kv.second)
