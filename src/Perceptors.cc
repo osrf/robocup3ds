@@ -30,10 +30,10 @@
 using namespace ignition;
 
 int          Perceptor::updateVisualFreq  = 3;
-int          Perceptor::updateHearFreq    = 2;
 bool         Perceptor::useNoise          = true;
 const double Perceptor::kDistNoiseScale   = 0.01;
 const double Perceptor::kHearDist         = 50.0;
+const int    Perceptor::kUpdateHearFreq   = 2;
 
 const math::Vector3<double> Perceptor::kFixedNoise(
   math::Rand::DblUniform(-0.005, 0.005),
@@ -79,6 +79,7 @@ void Perceptor::SetViewFrustum()
 }
 
 /////////////////////////////////////////////////
+const
 std::vector <ignition::math::Plane<double> > &Perceptor::GetViewFrustum()
 {
   return this->viewFrustum;
@@ -94,18 +95,15 @@ bool Perceptor::UpdatePerception() const
 Team::Side Perceptor::SideToSpeak() const
 {
   if (this->gameState->GetCycleCounter()
-      % Perceptor::updateHearFreq == 0)
+      % Perceptor::kUpdateHearFreq == 0)
   {
     return Team::Side::LEFT;
   }
-  else if (this->gameState->GetCycleCounter()
-           % Perceptor::updateHearFreq == 1)
-  {
-    return Team::Side::RIGHT;
-  }
   else
   {
-    return Team::Side::NEITHER;
+    // case where the following condition below is true
+    // this->gameState->GetCycleCounter() % Perceptor::updateHearFreq == 1
+    return Team::Side::RIGHT;
   }
 }
 
@@ -412,11 +410,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
     }
     else
     {
-      double rot = IGN_RTOD(_agent.rot.Euler().Z()) + 180.0;
-      if (rot >= 360.0)
-      {
-        rot -= 360.0;
-      }
+      double rot = fmod(IGN_RTOD(_agent.rot.Euler().Z()) + 180.0, 360.0);
       cx += snprintf(_string + cx, _size - cx,
                      " (mypos %.2f %.2f %.2f) (myorien %.2f)"
                      " (ballpos %.2f %.2f %.2f)",
@@ -471,12 +465,6 @@ ignition::math::Vector3<double> Perceptor::addNoise(
     math::Rand::DblNormal(0, Perceptor::kNoiseSigma.Y()),
     _pt.Z() + Perceptor::kFixedNoise.Z() +
     math::Rand::DblNormal(0, Perceptor::kNoiseSigma.Z()));
-
-  // truncation should be done when serializing the messages?
-  // newPt.Set(round(newPt.X() * 100.0) / 100.0,
-  //           round(newPt.Y() * 100.0) / 100.0,
-  //           round(newPt.Z() * 100.0) / 100.0));
-
   return newPt;
 }
 

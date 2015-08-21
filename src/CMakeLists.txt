@@ -27,6 +27,7 @@ set (gtest_sources
   Effector_TEST.cc
   GameState_TEST.cc
   Geometry_TEST.cc
+  Perceptors_TEST.cc
   Robocup3dsPlugin_TEST.cc
   Perceptors_TEST.cc
   Server_TEST.cc
