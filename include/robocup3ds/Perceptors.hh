@@ -39,8 +39,10 @@ class Perceptor
   /// \brief Destructor for Perceptor object
   public: ~Perceptor() = default;
 
-  /// \brief Method used to set view frustum based on HFov, VFov
-  public: void SetViewFrustum();
+  /// \brief Method used to set view frustum
+  /// \param[in] _hfov Horizontal field of view in degrees
+  /// \param[in] _vfov Vertical field of view in degrees
+  public: void SetViewFrustum(const double _hfov, const double _vfov);
 
   /// \brief Method used to get view frustum
   /// \return A vector of planes of the view frustum
