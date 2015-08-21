@@ -38,7 +38,7 @@ GoalKickState::GoalKickState(const std::string &_name,
 void GoalKickState::Initialize()
 {
   // Move the ball.
-  this->gameState->MoveBall(initBallPos);
+  this->gameState->MoveBall(this->initBallPos);
   this->gameState->MoveBallForGoalKick();
   State::Initialize();
 }

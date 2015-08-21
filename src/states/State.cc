@@ -95,9 +95,3 @@ double State::GetElapsedTime() const
 {
   return this->gameState->GetGameTime() - this->initTime;
 }
-
-/////////////////////////////////////////////////
-std::string State::GetName() const
-{
-  return this->name;
-}

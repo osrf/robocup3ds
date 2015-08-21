@@ -35,7 +35,7 @@ CornerKickState::CornerKickState(const std::string &_name,
 /////////////////////////////////////////////////
 void CornerKickState::Initialize()
 {
-  this->gameState->MoveBall(initBallPos);
+  this->gameState->MoveBall(this->initBallPos);
   this->gameState->MoveBallToCorner();
   State::Initialize();
 }
