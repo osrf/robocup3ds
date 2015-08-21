@@ -39,7 +39,7 @@ class IntegrationTest : public gazebo::ServerFixture
     }
 
   public:
-    void LoadWorld(const string &_path)
+    void LoadWorld(const std::string &_path)
     {
       this->Load(_path);
       this->world = gazebo::physics::get_world("default");
@@ -49,7 +49,7 @@ class IntegrationTest : public gazebo::ServerFixture
   public:
     virtual void SetUp()
     {
-      cerr << "Setting Up Test" << endl;
+      std::cerr << "Setting Up Test" << endl;
       this->agent = make_shared<ClientAgent>(
                       "0.0.0.0", 3100, 3200, 1, "red", "left");
       this->oppAgent = make_shared<ClientAgent>(
@@ -60,7 +60,7 @@ class IntegrationTest : public gazebo::ServerFixture
   public:
     virtual void TearDown()
     {
-      cerr << "Tearing Down Test" << endl;
+      std::cerr << "Tearing Down Test" << endl;
       this->agent.reset();
       this->oppAgent.reset();
       this->world.reset();
@@ -69,7 +69,7 @@ class IntegrationTest : public gazebo::ServerFixture
     }
 
   public:
-    const string testPath =
+    const std::string testPath =
       "../test/integration/";
 
   public:
@@ -111,12 +111,12 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
 
   EXPECT_GT(this->agent->allMsgs.size(), 0u);
   auto lastMsg = this->agent->allMsgs.back();
-  cerr << lastMsg << endl;
-  EXPECT_NE(lastMsg.find("GS"), string::npos);
-  EXPECT_NE(lastMsg.find("BeforeKickOff"), string::npos);
-  EXPECT_NE(lastMsg.find("myorien"), string::npos);
-  EXPECT_NE(lastMsg.find("mypos"), string::npos);
-  EXPECT_NE(lastMsg.find("ballpos"), string::npos);
+  std::cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("GS"), std::string::npos);
+  EXPECT_NE(lastMsg.find("BeforeKickOff"), std::string::npos);
+  EXPECT_NE(lastMsg.find("myorien"), std::string::npos);
+  EXPECT_NE(lastMsg.find("mypos"), std::string::npos);
+  EXPECT_NE(lastMsg.find("ballpos"), std::string::npos);
 
   bool see = false;
   for (const auto &msg : this->agent->allMsgs)
@@ -133,12 +133,12 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
 
   EXPECT_GT(this->oppAgent->allMsgs.size(), 0u);
   lastMsg = this->oppAgent->allMsgs.back();
-  cerr << lastMsg << endl;
-  EXPECT_NE(lastMsg.find("GS"), string::npos);
-  EXPECT_NE(lastMsg.find("BeforeKickOff"), string::npos);
-  EXPECT_NE(lastMsg.find("myorien"), string::npos);
-  EXPECT_NE(lastMsg.find("mypos"), string::npos);
-  EXPECT_NE(lastMsg.find("ballpos"), string::npos);
+  std::cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("GS"), std::string::npos);
+  EXPECT_NE(lastMsg.find("BeforeKickOff"), std::string::npos);
+  EXPECT_NE(lastMsg.find("myorien"), std::string::npos);
+  EXPECT_NE(lastMsg.find("mypos"), std::string::npos);
+  EXPECT_NE(lastMsg.find("ballpos"), std::string::npos);
 
   see = false;
   for (const auto &msg : this->oppAgent->allMsgs)
@@ -167,15 +167,15 @@ TEST_F(IntegrationTest, TestMonitor)
   }
 
   const auto &lastMsg = this->agent->allMsgs.back();
-  cerr << lastMsg << endl;
-  EXPECT_NE(lastMsg.find("PlayOn"), string::npos);
+  std::cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("PlayOn"), std::string::npos);
 
   // test that MoveBall and MoveAgent works
   this->agent->MoveBall(math::Vector3d(1.35, 5.69, 0.042));
   this->agent->MoveAgent(math::Vector3d(-7.35, -11.69, 0.35));
   this->Wait();
   // const auto &lastMsg2 = this->agent->allMsgs.back();
-  // cerr << lastMsg2 << endl;
+  // std::cerr << lastMsg2 << endl;
 
   bool gd = false;
   for (const auto &msg : this->agent->allMsgs)
@@ -201,8 +201,8 @@ TEST_F(IntegrationTest, TestMonitor)
     currMsgCount = this->agent->allMsgs.size();
   }
   EXPECT_LE(currMsgCount - numMessages, 3u);
-  cerr << "num msgs before kill: " << numMessages
-       << " num msgs after kill: " << currMsgCount << endl;
+  std::cerr << "num msgs before kill: " << numMessages
+            << " num msgs after kill: " << currMsgCount << endl;
 }
 
 /// \brief This tests whether we can transition from playOn to kickin
@@ -219,8 +219,8 @@ TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
   this->Wait(2500);
 
   const auto &lastMsg = this->agent->allMsgs.back();
-  // std::cerr << lastMsg << std::endl;
-  EXPECT_NE(lastMsg.find("KickInRight"), string::npos);
+  // std::std::cerr << lastMsg << std::endl;
+  EXPECT_NE(lastMsg.find("KickInRight"), std::string::npos);
 }
 
 /// \brief This tests whether we can transition from kickOff to playOn and then
