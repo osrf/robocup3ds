@@ -56,6 +56,16 @@
     <!--<plugin name="hydra" filename="libHydraPlugin.so"></plugin>-->
 
     <plugin name="robocup3dplugin" filename="librobocup3dsPlugin.so">
+      <robocup3dsplugin_syncmode>false</robocup3dsplugin_syncmode>
+<!--  <gamestate_immobilitytimelimit>7</gamestate_immobilitytimelimit>
+      <gamestate_fallentimelimit>5</gamestate_fallentimelimit>
+      <gamestate_secondskickoff>5</gamestate_secondskickoff>
+      <gamestate_secondseachhalf>20</gamestate_secondseachhalf>
+      <percept_groundtruthinfo>true</percept_groundtruthinfo> -->
     </plugin>
+    <gui fullscreen='0'>
+      <plugin name="robocup3dGUIplugin" filename="librobocup3dsGUIPlugin.so">
+      </plugin>
+    </gui>
   </world>
 </sdf>
