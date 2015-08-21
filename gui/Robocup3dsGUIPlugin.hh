@@ -37,24 +37,24 @@ namespace gazebo
     /// \brief Destructor
     public: virtual ~Robocup3dsGUIPlugin() = default;
 
-    /// \brief A signal used to set the sim time line edit.
+    /// \brief A signal used to set the sim time
     /// \param[in] _string String representation of sim time.
     signals: void SetSimTime(QString _string);
 
-    /// \brief A signal used to set the game state line edit.
-    /// \param[in] _string String representation of game state.
+    /// \brief A signal used to set the game state
+    /// \param[in] _string String representation of game time.
     signals: void SetGameTime(QString _string);
 
-    /// \brief A signal used to set the game state line edit.
-    /// \param[in] _string String representation of game state.
+    /// \brief A signal used to set the left team
+    /// \param[in] _string String representation of left team.
     signals: void SetTeam(QString _string);
 
-    /// \brief A signal used to set the game state line edit.
-    /// \param[in] _string String representation of game state.
+    /// \brief A signal used to set the right team
+    /// \param[in] _string String representation of right team.
     signals: void SetTeam2(QString _string);
 
-    /// \brief A signal used to set the game state line edit.
-    /// \param[in] _string String representation of game state.
+    /// \brief A signal used to set the play mode
+    /// \param[in] _string String representation of play mode.
     signals: void SetPlaymode(QString _string);
 
     /// \brief Callback that received world statistics messages.
