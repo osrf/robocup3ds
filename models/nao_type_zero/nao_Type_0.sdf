@@ -630,9 +630,9 @@
       </physics>
     </joint>
     <link name='LBicep'>
-      <pose>0 0.098 0.075 0 -0 0</pose>
+      <pose>0.02 0.098 0.075 0 -0 0</pose>
       <inertial>
-        <pose>0.02455 0.00563 0.0033 0 -0 0</pose>
+        <pose>0.00455 0.00563 0.0033 0 -0 0</pose>
         <mass>0.15</mass>
         <inertia>
           <ixx>0.00010625</ixx>
@@ -664,7 +664,7 @@
         </surface>
       </collision>
       <visual name='LBicep_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>-0.02 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
@@ -1293,9 +1293,9 @@
       </physics>
     </joint>
     <link name='RBicep'>
-      <pose>0 -0.098 0.075 0 -0 0</pose>
+      <pose>0.02 -0.098 0.075 0 -0 0</pose>
       <inertial>
-        <pose>0.02455 -0.00563 0.0033 0 -0 0</pose>
+        <pose>0.00455 -0.00563 0.0033 0 -0 0</pose>
         <mass>0.15</mass>
         <inertia>
           <ixx>0.00010625</ixx>
@@ -1327,7 +1327,7 @@
         </surface>
       </collision>
       <visual name='RBicep_visual'>
-        <pose>0 0 0 0 -0 0</pose>
+        <pose>-0.02 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>

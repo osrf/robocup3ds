@@ -264,7 +264,8 @@ void Robocup3dsPlugin::UpdateEffector()
         {
           // Increase the actuators damping to 1
           model->GetJoint(jointName.second)->SetDamping(0, 1);
-
+          
+          // Set the joints position to their inititail Position  
           if (jointName.second == "LShoulderPitch" || jointName.second == "RShoulderPitch")
             model->GetJoint(jointName.second)->SetAngle(0, -1.5);
           else if (jointName.second == "LShoulderRoll")
@@ -273,27 +274,6 @@ void Robocup3dsPlugin::UpdateEffector()
             model->GetJoint(jointName.second)->SetAngle(0, -0.15);
           else
             model->GetJoint(jointName.second)->SetAngle(0, 0);
-
-          /*
-          // Initial the Joint Controller;
-          physics::JointControllerPtr jointController(
-                            new physics::JointController(model));
-          jointController -> Reset();
-
-
-          jointController -> AddJoint(model->GetJoint(jointName.second));
-
-          // Set the Position PID Values
-          jointController->SetPositionPID(
-               model->GetJoint(jointName.second)->GetScopedName(),
-               common::PID(800, 10, 0.0));
-
-          // Set the joint angle to it origin
-          jointController->SetPositionTarget(
-                       model->GetJoint(jointName.second)-> GetScopedName(), 0);
-
-          jointController->Update();
-          */
         }
         continue;
       }
