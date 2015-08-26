@@ -628,7 +628,21 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
       model->GetJointController()->Reset();
       for (const auto &joint : model->GetJoints())
       {
-        joint->Reset();
+        //joint->Reset();
+        // Increase the actuators damping to 1
+        joint->SetDamping(0, 1);
+        joint->SetAngle(0, 0);
+
+        // Set the joints position to their inititail Position
+        if (joint-> GetName() == "LShoulderPitch" || joint-> GetName() == "RShoulderPitch")
+            joint->SetAngle(0, -1.5);
+        else if (joint-> GetName() == "LShoulderRoll")
+            joint->SetAngle(0, 0.15);
+        else if (joint-> GetName() == "RShoulderRoll")
+            joint->SetAngle(0, -0.15);
+        else
+            joint->SetAngle(0, 0);
+
       }
       model->ResetPhysicsStates();
       this->gameState->MoveAgent(agent, agent.pos.X(), agent.pos.Y(),
