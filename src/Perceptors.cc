@@ -33,6 +33,7 @@ int          Perceptor::updateVisualFreq  = 3;
 bool         Perceptor::useNoise          = true;
 const double Perceptor::kDistNoiseScale   = 0.01;
 const double Perceptor::kHearDist         = 50.0;
+const int    Perceptor::kUpdateHearFreq   = 2;
 
 const math::Vector3<double> Perceptor::kFixedNoise(
   math::Rand::DblUniform(-0.005, 0.005),
@@ -44,14 +45,13 @@ const math::Vector3<double> Perceptor::kNoiseSigma(0.0965, 0.1225, 0.1480);
 Perceptor::Perceptor(GameState *const _gameState):
   gameState(_gameState)
 {
-  this->SetViewFrustum();
 }
 
 /////////////////////////////////////////////////
-void Perceptor::SetViewFrustum()
+void Perceptor::SetViewFrustum(const double _hfov, const double _vfov)
 {
-  double HFov = RAD(std::min(180.0, std::max(0.0, GameState::HFov)));
-  double VFov = RAD(std::min(180.0, std::max(0.0, GameState::VFov)));
+  double HFov = IGN_DTOR(std::min(180.0, std::max(0.0, _hfov)));
+  double VFov = IGN_DTOR(std::min(180.0, std::max(0.0, _vfov)));
 
   math::Vector3<double> origin = math::Vector3<double>::Zero;
   math::Vector3<double> upperRight(1.0, -tan(HFov / 2), tan(VFov / 2));
@@ -78,6 +78,7 @@ void Perceptor::SetViewFrustum()
 }
 
 /////////////////////////////////////////////////
+const
 std::vector <ignition::math::Plane<double> > &Perceptor::GetViewFrustum()
 {
   return this->viewFrustum;
@@ -87,6 +88,22 @@ std::vector <ignition::math::Plane<double> > &Perceptor::GetViewFrustum()
 bool Perceptor::UpdatePerception() const
 {
   return this->gameState->GetCycleCounter() % Perceptor::updateVisualFreq == 0;
+}
+
+/////////////////////////////////////////////////
+Team::Side Perceptor::SideToSpeak() const
+{
+  if (this->gameState->GetCycleCounter()
+      % Perceptor::kUpdateHearFreq == 0)
+  {
+    return Team::Side::LEFT;
+  }
+  else
+  {
+    // case where the following condition below is true
+    // this->gameState->GetCycleCounter() % Perceptor::updateHearFreq == 1
+    return Team::Side::RIGHT;
+  }
 }
 
 /////////////////////////////////////////////////
@@ -101,14 +118,14 @@ void Perceptor::Update()
       {
         // update line info
         agent.percept.fieldLines.clear();
-        for (auto &fieldLine : SoccerField::FieldLines)
+        for (auto &fieldLine : SoccerField::kFieldLines)
         {
           this->UpdateLine(agent, fieldLine);
         }
 
         // update landmark info
         agent.percept.landMarks.clear();
-        for (auto &kv : SoccerField::LandMarks)
+        for (auto &kv : SoccerField::kLandMarks)
         {
           this->UpdateLandmark(agent, kv.first, kv.second);
         }
@@ -124,18 +141,25 @@ void Perceptor::Update()
           {
             if (otherAgent.uNum != agent.uNum ||
                 otherAgent.team->name != agent.team->name)
-            { this->UpdateOtherAgent(agent, otherAgent); }
+            {
+              this->UpdateOtherAgent(agent, otherAgent);
+            }
           }
         }
       }
-
       // update agent hear
       this->UpdateAgentHear(agent);
     }
   }
 
-  // after processing say, set it to false
-  this->gameState->say.isValid = false;
+  // after calling UpdateAgentHear() for all agents, set team say to false
+  for (const auto &team : this->gameState->teams)
+  {
+    if (this->SideToSpeak() == team->side)
+    {
+      team->say.isValid = false;
+    }
+  }
 }
 
 /////////////////////////////////////////////////
@@ -154,12 +178,14 @@ void Perceptor::UpdateLine(Agent &_agent,
       //           this->viewFrustum.at(i).Normal() << " // " << validLine
       //           << std::endl;
       if (!Geometry::ClipPlaneLine(agentLine, viewPlane))
-      { return; }
+      {
+        return;
+      }
     }
   }
 
-  agentLine.Set(addNoise(Geometry::CartToPolar(agentLine[0])),
-                addNoise(Geometry::CartToPolar(agentLine[1])));
+  agentLine.Set(addNoise(Geometry::CartToSphere(agentLine[0])),
+                addNoise(Geometry::CartToSphere(agentLine[1])));
   _agent.percept.fieldLines.push_back(agentLine);
 }
 
@@ -177,12 +203,14 @@ void Perceptor::UpdateLandmark(Agent &_agent,
     for (auto &viewPlane : this->viewFrustum)
     {
       if (!Geometry::PointAbovePlane(_agentLandMark, viewPlane))
-      { return; }
+      {
+        return;
+      }
     }
   }
 
   _agent.percept.landMarks[_landmarkname] =
-    addNoise(Geometry::CartToPolar(_agentLandMark));
+    addNoise(Geometry::CartToSphere(_agentLandMark));
 }
 
 /////////////////////////////////////////////////
@@ -199,29 +227,38 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
       for (auto &viewPlane : this->viewFrustum)
       {
         if (!Geometry::PointAbovePlane(_otherAgentPart, viewPlane))
-        { return; }
+        {
+          return;
+        }
       }
     }
 
     AgentId otherAgentId(_otherAgent.uNum,
                          _otherAgent.team->name);
     _agent.percept.otherAgentBodyMap[otherAgentId][kv.first] =
-      addNoise(Geometry::CartToPolar(_otherAgentPart));
+      addNoise(Geometry::CartToSphere(_otherAgentPart));
   }
 }
 
 /////////////////////////////////////////////////
 void Perceptor::UpdateAgentHear(Agent &_agent) const
 {
-  const AgentSay &say = this->gameState->say;
-  AgentHear &hear = _agent.percept.hear;
+  const AgentSay *say = NULL;
+  for (const auto &team : this->gameState->teams)
+  {
+    if (this->SideToSpeak() == team->side)
+    {
+      say = &team->say;
+    }
+  }
 
+  AgentHear &hear = _agent.percept.hear;
   hear.isValid = false;
-  if (!say.isValid)
+  if (!say || !say->isValid)
   {
     return;
   }
-  math::Vector3<double> relPos = this->G2LMat.TransformAffine(say.pos);
+  const math::Vector3<double> relPos = this->G2LMat.TransformAffine(say->pos);
   if (relPos.Length() > Perceptor::kHearDist)
   {
     return;
@@ -230,9 +267,8 @@ void Perceptor::UpdateAgentHear(Agent &_agent) const
   hear.isValid = true;
   hear.gameTime = gameState->GetElapsedGameTime();
   hear.yaw = atan2(relPos.Y(), relPos.X());
-  AgentId agentId(_agent.uNum, _agent.team->name);
-  hear.self = say.agentId == agentId;
-  hear.msg = say.msg;
+  hear.self = (say->agentId == AgentId(_agent.uNum, _agent.team->name));
+  hear.msg = say->msg;
 }
 
 /////////////////////////////////////////////////
@@ -247,9 +283,13 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   for (const auto &team : this->gameState->teams)
   {
     if (team->side == Team::Side::LEFT)
-    { sl = team->score; }
+    {
+      sl = team->score;
+    }
     if (team->side == Team::Side::RIGHT)
-    { sr = team->score; }
+    {
+      sr = team->score;
+    }
   }
   cx += snprintf(_string + cx, _size - cx,
                  "(time (now %.2f)) (GS (unum %d) (team %s) "
@@ -264,7 +304,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   if (this->UpdatePerception())
   {
     // write out perception info
-    cx += snprintf(_string + cx, _size - cx, "(See");
+    cx += snprintf(_string + cx, _size - cx, " (See");
 
     // write out landmark info
     for (const auto &kv : _agent.percept.landMarks)
@@ -276,8 +316,6 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
     // write out other agent body parts
     for (const auto &kv : _agent.percept.otherAgentBodyMap)
     {
-      // agentNum = kv.first.first;
-      // agentTeam = kv.first.second;
       cx += snprintf(_string + cx, _size - cx, " (P (team %s) (id %d)",
                      kv.first.second.c_str(), kv.first.first);
       for (const auto &kv2 : kv.second)
@@ -304,13 +342,13 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   // write hear info
   if (_agent.percept.hear.isValid && _agent.percept.hear.self)
   {
-    cx += snprintf(_string + cx, _size - cx, "(hear %.2f self %s)",
+    cx += snprintf(_string + cx, _size - cx, " (hear %.2f self %s)",
                    _agent.percept.hear.gameTime,
                    _agent.percept.hear.msg.c_str());
   }
   else if (_agent.percept.hear.isValid)
   {
-    cx += snprintf(_string + cx, _size - cx, "(hear %.2f %.2f %s)",
+    cx += snprintf(_string + cx, _size - cx, " (hear %.2f %.2f %s)",
                    _agent.percept.hear.gameTime,
                    _agent.percept.hear.yaw,
                    _agent.percept.hear.msg.c_str());
@@ -325,12 +363,13 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
 
   // write out gyro info
   cx += snprintf(_string + cx, _size - cx,
-                 "(GYR (n torso) (rt %.2f %.2f %.2f))",
+                 " (GYR (n torso) (rt %.2f %.2f %.2f))",
                  _agent.percept.gyroRate.X(), _agent.percept.gyroRate.Y(),
                  _agent.percept.gyroRate.Z());
 
   // write out acceleration info
-  cx += snprintf(_string + cx, _size - cx, "(ACC (n torso) (a %.2f %.2f %.2f))",
+  cx += snprintf(_string + cx, _size - cx,
+                 " (ACC (n torso) (a %.2f %.2f %.2f))",
                  _agent.percept.accel.X(), _agent.percept.accel.Y(),
                  _agent.percept.accel.Z());
 
@@ -357,12 +396,24 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
   if (GameState::groundTruthInfo)
   {
     const auto &ballPos = this->gameState->GetBall();
-    cx += snprintf(_string + cx, _size - cx,
-                   " (mypos %.2f %.2f %.2f) (myorien %.2f)"
-                   " (ballpos %.2f %.2f %.2f)",
-                   _agent.pos.X(), _agent.pos.Y(), _agent.pos.Z(),
-                   DEG(_agent.rot.Euler().Z()),
-                   ballPos.X(), ballPos.Y(), ballPos.Z());
+    if (_agent.team->side == Team::Side::LEFT)
+    {
+      cx += snprintf(_string + cx, _size - cx,
+                     " (mypos %.2f %.2f %.2f) (myorien %.2f)"
+                     " (ballpos %.2f %.2f %.2f)",
+                     _agent.pos.X(), _agent.pos.Y(), _agent.pos.Z(),
+                     IGN_RTOD(_agent.rot.Euler().Z()),
+                     ballPos.X(), ballPos.Y(), ballPos.Z());
+    }
+    else
+    {
+      double rot = fmod(IGN_RTOD(_agent.rot.Euler().Z()) + 180.0, 360.0);
+      cx += snprintf(_string + cx, _size - cx,
+                     " (mypos %.2f %.2f %.2f) (myorien %.2f)"
+                     " (ballpos %.2f %.2f %.2f)",
+                     -_agent.pos.X(), -_agent.pos.Y(), _agent.pos.Z(),
+                     rot, -ballPos.X(), -ballPos.Y(), ballPos.Z());
+    }
   }
 
   return cx;
@@ -411,12 +462,6 @@ ignition::math::Vector3<double> Perceptor::addNoise(
     math::Rand::DblNormal(0, Perceptor::kNoiseSigma.Y()),
     _pt.Z() + Perceptor::kFixedNoise.Z() +
     math::Rand::DblNormal(0, Perceptor::kNoiseSigma.Z()));
-
-  // truncation should be done when serializing the messages?
-  // newPt.Set(round(newPt.X() * 100.0) / 100.0,
-  //           round(newPt.Y() * 100.0) / 100.0,
-  //           round(newPt.Z() * 100.0) / 100.0));
-
   return newPt;
 }
 

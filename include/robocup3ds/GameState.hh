@@ -18,12 +18,12 @@
 #ifndef _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
 #define _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
 
-#include <ignition/math.hh>
 #include <map>
 #include <memory>
 #include <vector>
 #include <string>
 #include <utility>
+#include <ignition/math.hh>
 
 #include "robocup3ds/Geometry.hh"
 #include "robocup3ds/Agent.hh"
@@ -50,10 +50,18 @@ namespace states
 /// 1) Use the simulation world model to update the pose of all
 /// the players and ball. Also, check for collisions in simulation world model
 /// and update ballContactHistory member variable if necessary
-/// 2) Call the Effector object's Update() method
-/// 3) Call the Update() method, which updates the playmode and check/deal
-/// with rule violations
-/// 4) Call the Perceptor object's Update() method
+/// 2) Call the Update() method, which turn calls the current state's Update()
+/// method. The state's update method calls the following functions:
+/// CheckTiming()
+/// CheckDoubleTouch()
+/// CheckCanScore()
+/// CheckIllegalDefense()
+/// CheckCrowding()
+/// CheckImmobility()
+/// These functions check for rule violations and check whether the necessary
+/// conditions for a play mode transition is satisfied.
+/// 3) Call the Perceptor object's Update() method
+/// 4) Call the Effector object's Update() method
 /// 5) If the GameState object modifies the pose of any of the players and or
 /// ball (by checking the updatePose flag), update the simulation world model
 /// to match poses stored in the GameState object
@@ -68,72 +76,24 @@ class GameState
     SECOND_HALF
   };
 
-  /// \brief Internal Logger for GameState
-  private: class Logger
-  {
-    /// \brief Constructor for the logger class
-    /// \param[in] _gameState Pointer to GameState object
-    /// \param[in] _normalLevel Normal message logging level
-    /// \param[in] _errorLevel Error messages above this level will be printed
-    public: Logger(const GameState *const _gameState,
-      const int _normalLevel, const int _errorLevel):
-      gameState(_gameState),
-      normalLevel(_normalLevel),
-      errorLevel(_errorLevel)
-    {
-    }
-
-    /// \brief Print normal messages plus some game information
-    /// \param[in] _message Normal message string
-    /// \param[in] _level Normal messages above this level will be printed
-    public: void Log(const std::string &_message, const int _level) const
-    {
-      if (_level >= this->normalLevel)
-      {
-        std::cout << "[" << this->gameState->GetCycleCounter() << "]["
-                  << this->gameState->GetGameTime() << "][lvl:" <<
-                  _level << "]\t" << _message.c_str();
-      }
-    }
-
-    /// \brief Print error messages plus some game information
-    /// \param[in] _message Error message string
-    /// \param[in] _level Error messages above this level will be printed
-    public: void LogErr(const std::string &_message, const int _level) const
-    {
-      if (_level >= this->errorLevel)
-      {
-        std::cout << "\033[31m[" << this->gameState->GetCycleCounter() << "]["
-                  << this->gameState->GetGameTime() << "][lvl:" <<
-                  _level << "]\t" << _message.c_str();
-      }
-    }
-
-    /// \brief Pointer to parent gamestate object
-    private: const GameState *const gameState;
-
-    /// \brief Level for logging normal messages
-    public: const int normalLevel;
-
-    /// \brief Level for logging error messages
-    public: const int errorLevel;
-  };
-
   /// \brief Stores ball contact information for GameState
   public: class BallContact
   {
     /// \brief Constructor for Ball Contact object
-    /// \param[in] _uNum agent unique id
+    /// \param[in] _uNum agent uniform id
     /// \param[in] _side side which touched ball
     /// \param[in] _contactTime time when ball was touched
     /// \param[in] _contactPos position where ball was touched
+    /// \param[in] _playMode The playmode where ball was touched
     public: BallContact(const int _uNum, const Team::Side _side,
                         const double _contactTime,
-                        const ignition::math::Vector3<double> &_contactPos):
+                        const ignition::math::Vector3<double> &_contactPos,
+                        const std::string &_playMode = ""):
       uNum(_uNum),
       side(_side),
       contactTime(_contactTime),
-      contactPos(_contactPos)
+      contactPos(_contactPos),
+      playMode(_playMode)
     {
     }
 
@@ -144,14 +104,17 @@ class GameState
     public: Team::Side side;
 
     /// \brief Time when agent stopped contacting the ball
-    /// (if contact is longer than an instant)
+    /// (if contact is longer than an iteration)
     public: double contactTime;
 
     /// \brief Position where agent contacted ball
     public: ignition::math::Vector3<double> contactPos;
 
-    /// \brief Pointer to team of agent who touched ball
+    /// \brief Name to team of agent who touched ball
     public: std::string teamName;
+
+    /// \brief Name of playMode when ball contact occurred
+    public: std::string playMode;
   };
 
   /// \brief Constructor.
@@ -163,7 +126,7 @@ class GameState
     const std::map<std::string, std::string> &_config) const;
 
   /// \brief Destructor.
-  public: virtual ~GameState();
+  public: virtual ~GameState() = default;
 
   /// \brief Clears the history of ball contacts
   public: void ClearBallContactHistory();
@@ -182,7 +145,8 @@ class GameState
   public: void StopPlayers();
 
   /// \brief Set the current game state. If the new state is the same than
-  /// the current one, the operation does not have any effect.
+  /// the current one, the operation does not have any effect unless
+  /// reset flag is set to true
   /// \param[in] _newState New state to replace current state
   /// \param[in] _resetState When new state is the same as current state,
   /// setting this flag to true will reset the state
@@ -219,7 +183,7 @@ class GameState
   /// \param[out] _agent Reference to agent object
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
-  /// \param[in] yaw New yaw of agent
+  /// \param[in] yaw New yaw of agent in radians
   public: void MoveAgent(Agent &_agent, const double _x, const double _y,
                          const double yaw) const;
 
@@ -227,14 +191,17 @@ class GameState
   /// \param[out] _agent Reference to agent object
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
-  /// \param[in] _yaw New yaw of agent
+  /// \param[in] _yaw New yaw of agent in radians
+  /// \param[in] _beamOnce If agent is within 0.15 meters of new location
+  //  do not beam the agent
   public: void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
-                              const double _yaw) const;
+                              const double _yaw,
+                              const bool _beamOnce = true) const;
 
   /// \brief Set the agent's position and orientation
   /// \param[out] _agent Reference to agent object
   /// \param[in] _pos New position of agent in meters
-  /// \param[in] _rot New orientation of agent in meters
+  /// \param[in] _rot New orientation of agent in radians
   public: void MoveAgent(Agent &_agent,
                          const ignition::math::Vector3<double> &_pos,
                          const ignition::math::Quaternion<double> &_rot) const;
@@ -243,7 +210,7 @@ class GameState
   /// \param[out] _agent Reference to agent object
   public: void MoveAgentToSide(Agent &_agent) const;
 
-  /// \brief Move agent back to their own side if they are offsides during kick
+  /// \brief Move agent back to their own side if there are offsides during kick
   /// offs
   /// \param[out] _agent Reference to agent object
   public: void MoveOffSideAgent(Agent &_agent) const;
@@ -270,7 +237,7 @@ class GameState
 
   /// \brief Get the ball position in the field.
   /// \return The position of the ball.
-  public: ignition::math::Vector3<double> GetBall();
+  public: ignition::math::Vector3<double> GetBall() const;
 
   /// \brief Move the ball to the center of field.
   public: void MoveBallToCenter();
@@ -308,9 +275,11 @@ class GameState
   /// \brief Add agent to game state
   /// \param[out] _uNum Agent number assigned
   /// \param[in] _teamName Agent name
+  /// \param[in] _bodyType Body type used for agent
   /// \param[in] _socketID SocketID associated with agent
   /// \return Pointer to the agent object created
   public: Agent* AddAgent(const int _uNum, const std::string &_teamName,
+    const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoSimsparkBT>(),
     const int _socketID = -1);
 
   /// \brief Remove agent from game state
@@ -382,6 +351,11 @@ class GameState
   /// \brief Get the last ball contact
   /// \return Pointer to the last ball contact
   public: std::shared_ptr<GameState::BallContact> GetLastBallContact() const;
+
+  /// \brief Checks whether ball is in goal box or has intersected its front
+  /// \param[in] _side Side of field to check on
+  /// \return True if ball is in goal box or intersected its front
+  public: bool IsBallInGoal(Team::Side _side);
 
   /// \brief Method executed each time the game state changes.
   private: void Initialize();
@@ -510,7 +484,7 @@ class GameState
   public: static double dropBallRadius;
 
   /// \brief Every cycle counts as [counterCycleTime] of
-  /// game time (for `fake simulations)
+  /// game time (for fake simulations)
   public: static bool useCounterForGameTime;
 
   /// \brief Max players per team
@@ -520,7 +494,7 @@ class GameState
   public: static int penaltyBoxLimit;
 
   /// \brief Beam height
-  public: static double beamHeight;
+  public: static double beamHeightOffset;
 
   /// \brief Distance when to enable crowding rules
   public: static double crowdingEnableRadius;
@@ -550,18 +524,28 @@ class GameState
   public: static bool groundTruthInfo;
 
   /// \brief How long in game time is each cycle
-  public: static const double counterCycleTime;
+  public: static const double kCounterCycleTime;
 
   /// \brief Safety margin when beaming players during dropball
-  public: static const double dropBallRadiusMargin;
+  public: static const double kDropBallRadiusMargin;
 
   /// \brief Noise added to beams
-  public: static const double beamNoise;
+  public: static const double kBeamNoise;
+
+  /// \brief Default name used for teams when plugin starts
+  public: static const std::string kDefaultTeamName;
 
   /// \brief If less than ballContactInterval time has passed since the last
   /// ball contact by the same agent, then it will not count as a new ball
   /// contact (the time of the last ball contact is update instead)
-  public: static const double ballContactInterval;
+  public: static const double kBallContactInterval;
+
+  /// \brief Map of agent body type names and associated body types
+  public: const std::map<std::string,
+  std::shared_ptr<NaoBT>> agentBodyTypeMap;
+
+  /// \brief The default body type to use when creating agent
+  public: const std::shared_ptr<NaoBT> defaultBodyType;
 
   /// \brief Whether currentState has changed in the current update cycle or not
   public: bool hasCurrentStateChanged;
@@ -579,10 +563,6 @@ class GameState
   /// \brief Flag whether to update ball position in world to match game state.
   public: bool updateBallPose;
 
-  /// \brief Message that will be broadcast to all players within
-  /// certain range
-  public: AgentSay say;
-
   /// \brief Position of soccer ball
   private: ignition::math::Vector3<double> ballPos;
 
@@ -597,6 +577,9 @@ class GameState
 
   /// \brief Game time during previous cycle.
   private: double prevCycleGameTime;
+
+  /// \brief Time of last cycle
+  private: double lastCycleTimeLength;
 
   /// \brief Time when half starts (elapsed game time is essentially
   /// gameTime - startGameTime)

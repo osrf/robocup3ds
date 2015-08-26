@@ -18,6 +18,7 @@
 #include <netdb.h>
 #include <chrono>
 #include <condition_variable>
+#include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -30,6 +31,7 @@ const std::string content = "hello";
 const int kPort = 6234;
 std::mutex mutex;
 std::condition_variable cv;
+bool readMessage = false;
 bool clientReady = false;
 bool serverReady = false;
 bool newConnectionDetected = false;
@@ -42,6 +44,7 @@ void reset()
   serverReady = false;
   newConnectionDetected = false;
   newDisconnectionDetected = false;
+  readMessage = false;
 }
 
 //////////////////////////////////////////////////
@@ -69,6 +72,7 @@ class TrivialSocketParser : public SocketParser
       if (result < 1)
       {
         std::cerr << "TrivialSocketParser::Parse() Unable to read" << std::endl;
+        readMessage = false;
         return false;
       }
 
@@ -76,6 +80,7 @@ class TrivialSocketParser : public SocketParser
     }
 
     EXPECT_EQ(std::string(buffer), content);
+    readMessage = true;
     return true;
   }
 
@@ -94,6 +99,11 @@ class TrivialSocketParser : public SocketParser
   {
     size_t sent = write(this->socket, content.c_str(), content.size() + 1);
     EXPECT_EQ(sent, content.size() + 1u);
+  }
+
+  public: int GetSocket() const
+  {
+    return socket;
   }
 
   /// \brief Maximum size of each message received.
@@ -163,6 +173,37 @@ void senderClient(const int _port)
   }
 
   close(socket);
+}
+
+//////////////////////////////////////////////////
+/// \brief Create a client that sends some data to the server but client does
+/// not shutdown
+/// \param[in] _port Port where the server accepts connections.
+void senderClientNoDisconnect(const int _port)
+{
+  int socket;
+  if (!createClient(_port, socket))
+    return;
+
+  // Send some data.
+  auto sent = write(socket, content.c_str(), content.size() + 1);
+  EXPECT_EQ(static_cast<size_t>(sent), content.size() + 1);
+
+  clientReady = true;
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  cv.notify_one();
+
+  // Wait some time until the server checks results.
+  {
+    std::unique_lock<std::mutex> lk(mutex);
+    auto now = std::chrono::system_clock::now();
+    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
+          [](){return serverReady;}))
+    {
+      FAIL();
+    }
+  }
 }
 
 //////////////////////////////////////////////////
@@ -240,17 +281,61 @@ TEST(RCPServer, NewClient)
     clientThread.join();
 }
 
-////////////////////////////////////////////////
-TEST(RCPServer, Send)
+//////////////////////////////////////////////////
+TEST(RCPServer, NewClientNoDisconnect)
 {
   reset();
+
+  EXPECT_FALSE(newConnectionDetected);
 
   auto parser = std::make_shared<TrivialSocketParser>();
   RCPServer server(kPort + 1, parser);
 
   server.Start();
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  std::thread clientThread(&receiverClient, kPort + 1);
+  std::thread clientThread(&senderClientNoDisconnect, kPort + 1);
+
+  // Wait some time until the client sends the request.
+  {
+    std::unique_lock<std::mutex> lk(mutex);
+    auto now = std::chrono::system_clock::now();
+    if (!cv.wait_until(lk, now + std::chrono::milliseconds(500),
+          [](){return clientReady;}))
+    {
+      FAIL();
+      return;
+    }
+  }
+
+  // Check that the callback for detecting new connections was executed.
+  EXPECT_TRUE(newConnectionDetected);
+
+  serverReady = true;
+  cv.notify_one();
+
+  EXPECT_TRUE(server.DisconnectClient(parser->GetSocket()));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  // Check that the callback for detecting new disconnections was executed.
+  EXPECT_TRUE(newDisconnectionDetected);
+
+  if (clientThread.joinable())
+    clientThread.join();
+
+  // expect to return false on nonexistent socket id
+  EXPECT_FALSE(server.DisconnectClient(-1337));
+}
+
+////////////////////////////////////////////////
+TEST(RCPServer, Send)
+{
+  reset();
+
+  auto parser = std::make_shared<TrivialSocketParser>();
+  RCPServer server(kPort + 2, parser);
+
+  server.Start();
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  std::thread clientThread(&receiverClient, kPort + 2);
 
   // Wait some time until the client sends the request.
   {

@@ -31,6 +31,7 @@
 #include "robocup3ds/Agent.hh"
 
 class GameState;
+class NaoBT;
 
 /// \brief This is a Effector class. It implemented Parse() method
 /// inherited from SocketParser class. Parse() method has been used
@@ -92,14 +93,17 @@ class Effector: public SocketParser
   /// \param[in] _exp Pointer to a S-expression.
   protected: void ParseHingeJoint(sexp_t *_exp);
 
-  /// \brief List of agent names to add to gazebo world this update cycle.
-  public: std::vector<std::string> agentsToAdd;
+  /// \brief List of agents to add to gazebo world this update cycle.
+  public: std::vector<Agent*> agentsToAdd;
 
   /// \brief List of agent names to remove from gazebo world this update cycle.
   public: std::vector<std::string> agentsToRemove;
 
-  /// \brief List of sockets that is received the Scene message.
-  public: std::vector<int> sceneMessagesSocketIDs;
+  /// \brief List of sockets to disconnect this update cycle
+  public: std::vector<int> socketsToDisconnect;
+
+  /// \brief Map of socket ids and agent body types strings
+  public: std::map<int, std::shared_ptr<NaoBT>> socketIDbodyTypeMap;
 
   /// \brief Maximum size of each message received.
   protected: static const int kBufferSize;

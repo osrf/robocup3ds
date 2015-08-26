@@ -15,11 +15,11 @@
  *
 */
 
-#include <ignition/math.hh>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <ignition/math.hh>
 
 #include "gtest/gtest.h"
 #include "robocup3ds/Agent.hh"
@@ -100,17 +100,97 @@ TEST_F(GameStateTest_basic, GameState_LoadConfiguration)
 
   config["gamestate_playerlimit"] = "50";
   gameState.LoadConfiguration(config);
-  EXPECT_EQ(GameState::playerLimit, 50);
+  EXPECT_DOUBLE_EQ(GameState::playerLimit, 50);
   config["gamestate_playerlimit"] = "50.5";
   gameState.LoadConfiguration(config);
-  EXPECT_EQ(GameState::playerLimit, 50);
+  EXPECT_DOUBLE_EQ(GameState::playerLimit, 50);
 
-  config.clear();
-  config["gamestate_playerlimit"] = "11";
-  config["gamestate_usecounterforgametime"] = "true";
-  config["gamestate_secondsgoalpause"] = "3";
-  config["gamestate_secondsfullgame"] = "600";
+  config["gamestate_secondskickinpause"] = "5";
   gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::SecondsKickInPause, 5);
+
+  config["gamestate_secondskickin"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::SecondsKickIn, 5);
+
+  config["gamestate_secondsbeforekickoff"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::SecondsBeforeKickOff, 5);
+
+  config["gamestate_secondskickoff"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::SecondsKickOff, 5);
+
+  config["gamestate_dropballradius"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::dropBallRadius, 5);
+
+  config["gamestate_penaltyboxlimit"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::penaltyBoxLimit, 5);
+
+  config["gamestate_beamheightoffset"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::beamHeightOffset, 5);
+
+  config["gamestate_crowdingenableradius"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::crowdingEnableRadius, 5);
+
+  config["gamestate_innercrowdingradius"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::innerCrowdingRadius, 5);
+
+  config["gamestate_outercrowdingradius"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::outerCrowdingRadius, 5);
+
+  config["gamestate_immobilitytimelimit"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::immobilityTimeLimit, 5);
+
+  config["gamestate_fallentimelimit"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::fallenTimeLimit, 5);
+
+  config["percept_hfov"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::HFov, 5);
+
+  config["percept_vfov"] = "5";
+  gameState.LoadConfiguration(config);
+  EXPECT_DOUBLE_EQ(GameState::VFov, 5);
+
+
+  config["percept_restrictvision"] = "true";
+  gameState.LoadConfiguration(config);
+  EXPECT_TRUE(GameState::restrictVision);
+
+  config["percept_groundtruthinfo"] = "true";
+  gameState.LoadConfiguration(config);
+  EXPECT_TRUE(GameState::groundTruthInfo);
+
+  GameState::SecondsFullGame = 600;
+  GameState::SecondsEachHalf = GameState::SecondsFullGame * 0.5;
+  GameState::SecondsGoalPause = 3;
+  GameState::SecondsKickInPause = 1;
+  GameState::SecondsKickIn = 15;
+  GameState::SecondsBeforeKickOff = 5;
+  GameState::SecondsKickOff = 15;
+  GameState::useCounterForGameTime = true;
+  GameState::playerLimit = 11;
+  GameState::penaltyBoxLimit = 3;
+  GameState::beamHeightOffset = 0.05;
+  GameState::crowdingEnableRadius = 0.8;
+  GameState::innerCrowdingRadius = 0.4;
+  GameState::outerCrowdingRadius = 1.0;
+  GameState::immobilityTimeLimit = 15;
+  GameState::fallenTimeLimit = 30;
+  GameState::dropBallRadius = 2;
+  GameState::HFov = 120;
+  GameState::VFov = 120;
+  GameState::restrictVision = true;
+  GameState::groundTruthInfo = false;
 }
 
 /// \brief Test for adding teams and agents
@@ -209,6 +289,30 @@ TEST_F(GameStateTest_basic, GameState_remove_agents)
   }
 }
 
+/// \brief Test miscellaneous getter and setter functions
+TEST_F(GameStateTest_basic, GameState_misc)
+{
+  EXPECT_DOUBLE_EQ(gameState.GetElapsedGameTime(true), 0);
+  gameState.SetHalf(GameState::Half::SECOND_HALF);
+  EXPECT_DOUBLE_EQ(gameState.GetElapsedGameTime(true),
+                   GameState::SecondsEachHalf);
+
+  gameState.SetGameTime(55);
+  EXPECT_DOUBLE_EQ(55, gameState.GetGameTime());
+
+  gameState.SetStartGameTime(33);
+  EXPECT_DOUBLE_EQ(33, gameState.GetStartGameTime());
+
+  gameState.SetCycleCounter(5);
+  EXPECT_EQ(5, gameState.GetCycleCounter());
+
+  gameState.SetBallVel(math::Vector3<double>(1, 2, 3));
+  EXPECT_EQ(gameState.GetBallVel(), math::Vector3<double>(1, 2, 3));
+
+  gameState.SetBallAngVel(math::Vector3<double>(6, 5, 4));
+  EXPECT_EQ(gameState.GetBallAngVel(), math::Vector3<double>(6, 5, 4));
+}
+
 /// \brief Test for add agent with uNum 0, which assigns it the next free uNum
 TEST_F(GameStateTest_basic, GameState_add_agent_0)
 {
@@ -244,49 +348,51 @@ TEST_F(GameStateTest_basic, GameState_add_agent_0)
 /// \brief Test for whether the move ball functions are working as intended
 TEST_F(GameStateTest_basic, GameState_move_ball)
 {
-  math::Vector3<double> pos(15, 10, SoccerField::BallRadius);
+  math::Vector3<double> pos(15, 10, SoccerField::kBallRadius);
   gameState.MoveBall(pos);
   EXPECT_EQ(pos, gameState.GetBall());
 
   gameState.MoveBallToCenter();
-  EXPECT_EQ(SoccerField::BallCenterPosition, gameState.GetBall());
+  EXPECT_EQ(SoccerField::kBallCenterPosition, gameState.GetBall());
 
-  pos.Set(-10, 5, SoccerField::BallRadius);
+  pos.Set(-10, 5, SoccerField::kBallRadius);
   gameState.MoveBall(pos);
   gameState.MoveBallForGoalKick();
-  EXPECT_EQ(math::Vector3<double>(-SoccerField::HalfFieldWidth + 1, 0,
-                                  SoccerField::BallRadius),
+  EXPECT_EQ(math::Vector3<double>(-SoccerField::kHalfFieldWidth + 1, 0,
+                                  SoccerField::kBallRadius),
             gameState.GetBall());
 
-  pos.Set(10, -5, SoccerField::BallRadius);
+  pos.Set(10, -5, SoccerField::kBallRadius);
   gameState.MoveBall(pos);
   gameState.MoveBallForGoalKick();
-  EXPECT_EQ(math::Vector3<double>(SoccerField::HalfFieldWidth - 1, 0,
-                                  SoccerField::BallRadius),
+  EXPECT_EQ(math::Vector3<double>(SoccerField::kHalfFieldWidth - 1, 0,
+                                  SoccerField::kBallRadius),
             gameState.GetBall());
 
 
   std::vector<math::Vector3<double>> nearFourCorners;
   nearFourCorners.push_back(math::Vector3<double>(-1, -1,
-                            SoccerField::BallRadius));
+                            SoccerField::kBallRadius));
   nearFourCorners.push_back(math::Vector3<double>(-1, 1,
-                            SoccerField::BallRadius));
+                            SoccerField::kBallRadius));
   nearFourCorners.push_back(math::Vector3<double>(1, -1,
-                            SoccerField::BallRadius));
+                            SoccerField::kBallRadius));
   nearFourCorners.push_back(math::Vector3<double>(1, 1,
-                            SoccerField::BallRadius));
+                            SoccerField::kBallRadius));
 
   std::vector<math::Vector3<double>> fourCorners;
-  fourCorners.push_back(math::Vector3<double>(-SoccerField::HalfFieldWidth,
-                        -SoccerField::HalfFieldHeight,
-                        SoccerField::BallRadius));
-  fourCorners.push_back(math::Vector3<double>(-SoccerField::HalfFieldWidth,
-                        SoccerField::HalfFieldHeight, SoccerField::BallRadius));
-  fourCorners.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth,
-                        -SoccerField::HalfFieldHeight,
-                        SoccerField::BallRadius));
-  fourCorners.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth,
-                        SoccerField::HalfFieldHeight, SoccerField::BallRadius));
+  fourCorners.push_back(math::Vector3<double>(-SoccerField::kHalfFieldWidth,
+                        -SoccerField::kHalfFieldHeight,
+                        SoccerField::kBallRadius));
+  fourCorners.push_back(math::Vector3<double>(-SoccerField::kHalfFieldWidth,
+                        SoccerField::kHalfFieldHeight,
+                        SoccerField::kBallRadius));
+  fourCorners.push_back(math::Vector3<double>(SoccerField::kHalfFieldWidth,
+                        -SoccerField::kHalfFieldHeight,
+                        SoccerField::kBallRadius));
+  fourCorners.push_back(math::Vector3<double>(SoccerField::kHalfFieldWidth,
+                        SoccerField::kHalfFieldHeight,
+                        SoccerField::kBallRadius));
 
   for (size_t i = 0; i < nearFourCorners.size(); ++i)
   {
@@ -302,14 +408,14 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
   outOfBounds.push_back(math::Vector3<double>(-11, 12, -5));
 
   std::vector<math::Vector3<double>> inBounds;
-  inBounds.push_back(math::Vector3<double>(-SoccerField::HalfFieldWidth,
-                     -SoccerField::HalfFieldHeight, SoccerField::BallRadius));
-  inBounds.push_back(math::Vector3<double>(SoccerField::HalfFieldWidth,
-                     SoccerField::HalfFieldHeight, SoccerField::BallRadius));
-  inBounds.push_back(math::Vector3<double>(11, -SoccerField::HalfFieldHeight,
-                     SoccerField::BallRadius));
-  inBounds.push_back(math::Vector3<double>(-11, SoccerField::HalfFieldHeight,
-                     SoccerField::BallRadius));
+  inBounds.push_back(math::Vector3<double>(-SoccerField::kHalfFieldWidth,
+                     -SoccerField::kHalfFieldHeight, SoccerField::kBallRadius));
+  inBounds.push_back(math::Vector3<double>(SoccerField::kHalfFieldWidth,
+                     SoccerField::kHalfFieldHeight, SoccerField::kBallRadius));
+  inBounds.push_back(math::Vector3<double>(11, -SoccerField::kHalfFieldHeight,
+                     SoccerField::kBallRadius));
+  inBounds.push_back(math::Vector3<double>(-11, SoccerField::kHalfFieldHeight,
+                     SoccerField::kBallRadius));
 
   for (size_t i = 0; i < outOfBounds.size(); ++i)
   {
@@ -324,12 +430,12 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
 {
   gameState.AddAgent(1, "blue");
   Agent &agent = gameState.teams.at(0)->members.at(0);
-  math::Vector3<double> pos(15, 10, GameState::beamHeight);
+  math::Vector3<double> pos(15, 10, 0.35);
   gameState.MoveAgent(agent, pos);
   EXPECT_EQ(pos, agent.pos);
   EXPECT_EQ(pos, gameState.teams.at(0)->members.at(0).pos);
 
-  pos.Set(5, 6, GameState::beamHeight);
+  pos.Set(5, 6, 0.35);
   math::Quaternion<double>rot(0, 0, 1.0);
   gameState.MoveAgent(agent, 5, 6, 1.0);
   EXPECT_EQ(agent.pos, pos);
@@ -340,16 +446,16 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
   pos.Set(0, 9, 0);
   gameState.MoveAgent(agent, pos);
   gameState.MoveAgentToSide(agent);
-  pos.Set(0, -SoccerField::HalfFieldHeight, GameState::beamHeight);
+  pos.Set(0, -SoccerField::kHalfFieldHeight, 0.35);
   EXPECT_EQ(pos, agent.pos);
 
   pos.Set(0, -9, 0);
   gameState.MoveAgent(agent, pos);
   gameState.MoveAgentToSide(agent);
-  pos.Set(0, SoccerField::HalfFieldHeight, GameState::beamHeight);
+  pos.Set(0, SoccerField::kHalfFieldHeight, 0.35);
   EXPECT_EQ(pos, agent.pos);
 
-  pos.Set(-5, -6, GameState::beamHeight);
+  pos.Set(-5, -6, 0.35);
   rot.Euler(1.0, 0.5, 0.7);
   gameState.MoveAgent(agent, pos, rot);
   EXPECT_EQ(agent.pos, pos);
@@ -357,8 +463,8 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
   EXPECT_EQ(pos, gameState.teams.at(0)->members.at(0).pos);
   EXPECT_EQ(rot, gameState.teams.at(0)->members.at(0).rot);
 
-  pos.Set(7, 8, GameState::beamHeight);
-  rot.Euler(0, 0, RAD(50));
+  pos.Set(7, 8, 0.35);
+  rot.Euler(0, 0, IGN_DTOR(50));
   for (int i = 0; i < 100; ++i)
   {
     bool result = gameState.BeamAgent(1, "blue", 7, 8, 50);
@@ -366,8 +472,21 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
     EXPECT_LE(agent.pos.Distance(pos), 0.15);
     EXPECT_LE(fabs(agent.rot.Euler().Z() - rot.Euler().Z()), 0.1);
   }
+
+  gameState.AddAgent(1, "red");
+  Agent &agent2 = gameState.teams.at(1)->members.at(0);
+  pos.Set(-7, -8, 0.35);
+  rot.Euler(0, 0, IGN_DTOR(230));
+  for (int i = 0; i < 100; ++i)
+  {
+    bool result = gameState.BeamAgent(1, "red", 7, 8, 410);
+    EXPECT_TRUE(result);
+    EXPECT_LE(agent2.pos.Distance(pos), 0.15);
+    EXPECT_LE(fabs(agent2.rot.Euler().Z() - rot.Euler().Z()), 0.1);
+  }
+
   EXPECT_FALSE(gameState.BeamAgent(2, "blue", 7, 8, 1.25));
-  EXPECT_FALSE(gameState.BeamAgent(1, "red", 7, 8, 1.25));
+  EXPECT_FALSE(gameState.BeamAgent(2, "red", 7, 8, 1.25));
   gameState.SetCurrent(gameState.playOnState);
   EXPECT_FALSE(gameState.BeamAgent(1, "blue", 7, 8, 1.25));
 }
@@ -399,7 +518,7 @@ class GameStateTest_fullTeams : public GameStateTest_basic
         {
           Agent &agent = gameState.teams.at(i)->members.at(j);
           gameState.MoveAgent(agent, math::Vector3<double>
-                              (0, 0, GameState::beamHeight));
+                              (0, 0, 0.35));
         }
       }
     }
@@ -415,31 +534,16 @@ class GameStateTest_fullTeams : public GameStateTest_basic
           if (gameState.teams.at(i)->side == Team::Side::LEFT)
           {
             gameState.MoveAgent(agent, math::Vector3<double>
-                                (-5, 0, GameState::beamHeight));
+                                (-5, 0, 0.35));
           }
           else
           {
             gameState.MoveAgent(agent, math::Vector3<double>
-                                (5, 0, GameState::beamHeight));
+                                (5, 0, 0.35));
           }
         }
       }
     }
-
-    // protected:
-    //   virtual void resetPositions(int _team)
-    //   {
-    //     if (_team != 0 || _team != 1)
-    //     {
-    //       return;
-    //     }
-    //     for (int j = 0; j < 11; ++j)
-    //     {
-    //       Agent &agent = gameState.teams.at(_team)->members.at(j);
-    //       gameState.MoveAgent(agent, math::Vector3<double>
-    //                           (0, 0, GameState::beamHeight));
-    //     }
-    //   }
 };
 
 /// \brief Test for whether beforeKickOff play mode transitions correctly
@@ -452,7 +556,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff)
     gameState.Update();
     if (gameState.GetGameTime() < GameState::SecondsBeforeKickOff)
     {
-      EXPECT_EQ(gameState.GetBall(), SoccerField::BallCenterPosition);
+      EXPECT_EQ(gameState.GetBall(), SoccerField::kBallCenterPosition);
       EXPECT_EQ(gameState.GetCurrentState()->name, "BeforeKickOff");
     }
     else
@@ -471,7 +575,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff)
     gameState.Update();
     if (gameState.GetGameTime() < GameState::SecondsBeforeKickOff)
     {
-      EXPECT_EQ(gameState.GetBall(), SoccerField::BallCenterPosition);
+      EXPECT_EQ(gameState.GetBall(), SoccerField::kBallCenterPosition);
       EXPECT_EQ(gameState.GetCurrentState()->name, "BeforeKickOff");
     }
     else
@@ -506,7 +610,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
       // getElapsedTime() << endl;
       if (gameState.GetGameTime() < GameState::SecondsKickOff)
       {
-        EXPECT_EQ(gameState.GetCurrentState()->name, state->GetName());
+        EXPECT_EQ(gameState.GetCurrentState()->name, state->name);
       }
       else
       {
@@ -596,9 +700,9 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_kickIn)
   std::shared_ptr<GameState::BallContact> ballContact;
   std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(0, -15,
-                          SoccerField::BallRadius));
+                          SoccerField::kBallRadius));
   ballPositions.push_back(math::Vector3<double>(0, 15,
-                          SoccerField::BallRadius));
+                          SoccerField::kBallRadius));
 
   EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
   EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
@@ -635,11 +739,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_cornerKick)
   std::shared_ptr<GameState::BallContact> ballContact;
   std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(
-                            -(SoccerField::HalfFieldWidth + 1),
-                            5, SoccerField::BallRadius));
+                            -(SoccerField::kHalfFieldWidth + 1),
+                            5, SoccerField::kBallRadius));
   ballPositions.push_back(math::Vector3<double>(
-                            SoccerField::HalfFieldWidth + 1,
-                            -5, SoccerField::BallRadius));
+                            SoccerField::kHalfFieldWidth + 1,
+                            -5, SoccerField::kBallRadius));
 
   EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
   EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
@@ -674,11 +778,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
   std::shared_ptr<GameState::BallContact> ballContact;
   std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(
-                            -(SoccerField::HalfFieldWidth + 0.5),
-                            1, SoccerField::BallRadius));
+                            -(SoccerField::kHalfFieldWidth + 0.5),
+                            1, SoccerField::kBallRadius));
   ballPositions.push_back(math::Vector3<double>(
-                            SoccerField::HalfFieldWidth + 0.5,
-                            -1, SoccerField::BallRadius));
+                            SoccerField::kHalfFieldWidth + 0.5,
+                            -1, SoccerField::kBallRadius));
 
   EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
   EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
@@ -693,6 +797,33 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
     gameState.Update();
     EXPECT_EQ(states.at((i + 1) % 2)->name, gameState.GetCurrentState()->name);
   }
+
+  ballPositions.clear();
+  ballPositions.push_back(math::Vector3<double>(
+                            -(SoccerField::kHalfFieldWidth + 2.0),
+                            1, SoccerField::kBallRadius));
+  ballPositions.push_back(math::Vector3<double>(
+                            SoccerField::kHalfFieldWidth + 2.0,
+                            -1, SoccerField::kBallRadius));
+  std::vector<math::Vector3<double>> ballVelocities;
+  ballVelocities.push_back(math::Vector3<double>(-1000, 0, 0));
+  ballVelocities.push_back(math::Vector3<double>(1000, 0, 0));
+
+  for (size_t i = 0; i < states.size(); ++i)
+  {
+    gameState.MoveBall(math::Vector3<double>::Zero);
+    gameState.SetCurrent(gameState.playOnState);
+    gameState.Update();
+    EXPECT_EQ("PlayOn", gameState.GetCurrentState()->name);
+
+    gameState.MoveBall(ballPositions.at(i));
+    gameState.SetBallVel(ballVelocities.at(i));
+
+    gameState.Update();
+    // std::cout << gameState.IsBallInGoal(gameState.teams.at(i)->side)
+    //           << std::endl;
+    EXPECT_EQ(states.at((i + 1) % 2)->name, gameState.GetCurrentState()->name);
+  }
 }
 
 /// \brief Test for whether PlayOn play mode transitions to goalKick correctly
@@ -704,11 +835,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goalKick)
   std::shared_ptr<GameState::BallContact> ballContact;
   std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(
-                            -(SoccerField::HalfFieldWidth + 1),
-                            5, SoccerField::BallRadius));
+                            -(SoccerField::kHalfFieldWidth + 1),
+                            5, SoccerField::kBallRadius));
   ballPositions.push_back(math::Vector3<double>(
-                            SoccerField::HalfFieldWidth + 1,
-                            -5, SoccerField::BallRadius));
+                            SoccerField::kHalfFieldWidth + 1,
+                            -5, SoccerField::kBallRadius));
 
   EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
   EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
@@ -898,9 +1029,9 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_goalKick_playOn)
   std::shared_ptr<GameState::BallContact> ballContact;
   std::vector<math::Vector3<double>> ballPositions;
   ballPositions.push_back(math::Vector3<double>(-16, 5,
-                          SoccerField::BallRadius));
+                          SoccerField::kBallRadius));
   ballPositions.push_back(math::Vector3<double>(16, -5,
-                          SoccerField::BallRadius));
+                          SoccerField::kBallRadius));
 
   EXPECT_EQ(Team::Side::LEFT, gameState.teams.at(0)->side);
   EXPECT_EQ(Team::Side::RIGHT, gameState.teams.at(1)->side);
@@ -942,9 +1073,12 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
                          GameState::SecondsBeforeKickOff;
   double firstHalfKickOffTime = GameState::SecondsBeforeKickOff +
                                 GameState::SecondsKickOff;
-  double secondHalfTime = GameState::SecondsBeforeKickOff +
+  double secondHalfTime = 2 * GameState::SecondsBeforeKickOff +
                           GameState::SecondsFullGame;
-  double secondHalfKickOffTime = GameState::SecondsKickOff + firstHalfTime;
+  double secondHalfBeforeKickOffTime = GameState::SecondsBeforeKickOff +
+                                       firstHalfTime;
+  double secondHalfKickOffTime = secondHalfBeforeKickOffTime +
+                                 GameState::SecondsKickOff;
 
   while (gameState.GetGameTime() < firstHalfTime)
   {
@@ -967,7 +1101,6 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
     }
     gameState.Update();
   }
-  EXPECT_EQ("KickOffRight", gameState.GetCurrentState()->name);
   while (gameState.GetGameTime() < secondHalfTime)
   {
     EXPECT_TRUE(gameState.GetHalf() == GameState::Half::SECOND_HALF);
@@ -975,7 +1108,11 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
                 && gameState.teams.at(1)->side ==
                 Team::Side::LEFT);
     EXPECT_TRUE(gameState.GetElapsedGameTime() < GameState::SecondsEachHalf);
-    if (gameState.GetGameTime() < secondHalfKickOffTime)
+    if (gameState.GetGameTime() < secondHalfBeforeKickOffTime)
+    {
+      EXPECT_EQ("BeforeKickOff", gameState.GetCurrentState()->name);
+    }
+    else if (gameState.GetGameTime() < secondHalfKickOffTime)
     {
       EXPECT_EQ("KickOffRight", gameState.GetCurrentState()->name);
     }
@@ -1016,7 +1153,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCanScore)
                       gameState.GetBall()));
     gameState.ballContactHistory.push_back(ballContact);
     gameState.Update();
-    pos.Set(5, 5, SoccerField::BallRadius);
+    pos.Set(5, 5, SoccerField::kBallRadius);
     ballContact = std::shared_ptr<GameState::BallContact>(new
                   GameState::BallContact(2, gameState.teams.at(i)->side,
                                          gameState.GetGameTime(), pos));
@@ -1100,13 +1237,13 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
     math::Vector3<double> goalCenter;
     if (i == 0)
     {
-      penaltyBox = SoccerField::PenaltyBoxLeft;
-      goalCenter = SoccerField::GoalCenterLeft;
+      penaltyBox = SoccerField::kPenaltyBoxLeft;
+      goalCenter = SoccerField::kGoalCenterLeft;
     }
     else
     {
-      penaltyBox = SoccerField::PenaltyBoxRight;
-      goalCenter = SoccerField::GoalCenterRight;
+      penaltyBox = SoccerField::kPenaltyBoxRight;
+      goalCenter = SoccerField::kGoalCenterRight;
     }
     math::Vector3<double> penaltyPos = penaltyBox.Center();
     gameState.SetCurrent(gameState.playOnState);
@@ -1191,20 +1328,20 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckIllegalDefense)
 /// in gameState is working as intended
 TEST_F(GameStateTest_fullTeams, GameState_CheckCrowding)
 {
-  math::Vector3<double> testBallPos(5, 0, SoccerField::BallRadius);
+  math::Vector3<double> testBallPos(5, 0, SoccerField::kBallRadius);
   math::Vector3<double> crowdingEnablePos(5 + 0.5 *
                                           GameState::crowdingEnableRadius, 0,
-                                          SoccerField::BallRadius);
+                                          SoccerField::kBallRadius);
   math::Vector3<double> innerRadius(5 + 0.5 * GameState::innerCrowdingRadius,
-                                    0, SoccerField::BallRadius);
+                                    0, SoccerField::kBallRadius);
   math::Vector3<double> innerRadius2(5 + 0.75 *
                                      GameState::innerCrowdingRadius, 0,
-                                     SoccerField::BallRadius);
+                                     SoccerField::kBallRadius);
   math::Vector3<double> outerRadius(5 + 0.5 * GameState::outerCrowdingRadius,
-                                    0, SoccerField::BallRadius);
+                                    0, SoccerField::kBallRadius);
   math::Vector3<double> outerRadius2(5 + 0.75 *
                                      GameState::outerCrowdingRadius, 0,
-                                     SoccerField::BallRadius);
+                                     SoccerField::kBallRadius);
 
   gameState.SetCurrent(gameState.playOnState);
   gameState.MoveBall(testBallPos);
@@ -1249,7 +1386,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCrowding)
 /// working as intended
 TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
 {
-  math::Vector3<double> pos(0, 0, GameState::beamHeight);
+  math::Vector3<double> pos(0, 0, 0.35);
   std::vector<math::Vector3<double>> fallenPos;
   fallenPos.push_back(math::Vector3<double>(0.0, 0.0, 0.1));
   fallenPos.push_back(math::Vector3<double>(0.1, 0.1, 0.1));
@@ -1336,15 +1473,15 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckGoalKickIllegalDefense)
 
   std::vector<math::Vector3<double>> inPenaltyBox;
   inPenaltyBox.push_back(math::Vector3<double>(
-                           -SoccerField::HalfFieldWidth + 1, 0,
-                           GameState::beamHeight));
+                           -SoccerField::kHalfFieldWidth + 1, 0,
+                           0.35));
   inPenaltyBox.push_back(math::Vector3<double>(
-                           SoccerField::HalfFieldWidth - 1, 0,
-                           GameState::beamHeight));
+                           SoccerField::kHalfFieldWidth - 1, 0,
+                           0.35));
 
   std::vector<math::Box> penaltyBox;
-  penaltyBox.push_back(SoccerField::PenaltyBoxLeft);
-  penaltyBox.push_back(SoccerField::PenaltyBoxRight);
+  penaltyBox.push_back(SoccerField::kPenaltyBoxLeft);
+  penaltyBox.push_back(SoccerField::kPenaltyBoxRight);
 
   for (size_t i = 0; i < states.size(); ++i)
   {
@@ -1391,25 +1528,29 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
         if (k == 0)
         {
           EXPECT_EQ(agent.pos, math::Vector3<double>(-5, 0,
-                    GameState::beamHeight));
+                    0.35));
         }
         else
         {
           EXPECT_EQ(agent.pos, math::Vector3<double>(5, 0,
-                    GameState::beamHeight));
+                    0.35));
         }
       }
     }
 
     // Ensure that we can move our agent into circle and nothing happens
-    math::Vector3<double> pos(0, 0, GameState::beamHeight);
+    math::Vector3<double> pos(0, 0, 0.35);
     gameState.MoveAgent(ourAgent, pos);
     gameState.Update();
     EXPECT_EQ(ourAgent.pos, pos);
     if (i == 0)
-    { pos.Set(1, 0, GameState::beamHeight); }
+    {
+      pos.Set(1, 0, 0.35);
+    }
     else
-    { pos.Set(-1, 0, GameState::beamHeight); }
+    {
+      pos.Set(-1, 0, 0.35);
+    }
     gameState.MoveAgent(ourAgent, pos);
     gameState.Update();
     EXPECT_EQ(ourAgent.pos, pos);
@@ -1417,44 +1558,64 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     // Ensure that our agent is beamed back to its own side
     // if it violate sides and is not in circle
     if (i == 0)
-    { pos.Set(1, 4, GameState::beamHeight); }
+    {
+      pos.Set(1, 4, 0.35);
+    }
     else
-    { pos.Set(-1, 4, GameState::beamHeight); }
+    {
+      pos.Set(-1, 4, 0.35);
+    }
     gameState.MoveAgent(ourAgent, pos);
     gameState.Update();
     if (i == 0)
-    { EXPECT_LT(ourAgent.pos.X(), 0); }
+    {
+      EXPECT_LT(ourAgent.pos.X(), 0);
+    }
     else
-    { EXPECT_GT(ourAgent.pos.X(), 0); }
+    {
+      EXPECT_GT(ourAgent.pos.X(), 0);
+    }
 
     // Ensure that enemy agent in circle is moved back to its own side
-    pos.Set(0, 0, GameState::beamHeight);
+    pos.Set(0, 0, 0.35);
     gameState.MoveAgent(theirAgent, pos);
     gameState.Update();
     EXPECT_NE(theirAgent.pos, pos);
-    EXPECT_GE(theirAgent.pos.Distance(pos), SoccerField::CenterCircleRadius);
+    EXPECT_GE(theirAgent.pos.Distance(pos), SoccerField::kCenterCircleRadius);
     if (i == 0)
-    { pos.Set(1, 0, GameState::beamHeight); }
+    {
+      pos.Set(1, 0, 0.35);
+    }
     else
-    { pos.Set(-1, 0, GameState::beamHeight); }
+    {
+      pos.Set(-1, 0, 0.35);
+    }
     gameState.MoveAgent(theirAgent, pos);
     gameState.Update();
     EXPECT_NE(theirAgent.pos, pos);
-    pos.Set(0, 0, GameState::beamHeight);
-    EXPECT_GE(theirAgent.pos.Distance(pos), SoccerField::CenterCircleRadius);
+    pos.Set(0, 0, 0.35);
+    EXPECT_GE(theirAgent.pos.Distance(pos), SoccerField::kCenterCircleRadius);
 
     // Ensure that enemy agent is beamed back to its own side
     // if it violate sides
     if (i == 0)
-    { pos.Set(-1, 4, GameState::beamHeight); }
+    {
+      pos.Set(-1, 4, 0.35);
+    }
     else
-    { pos.Set(1, 4, GameState::beamHeight); }
+    {
+      pos.Set(1, 4, 0.35);
+    }
     gameState.MoveAgent(theirAgent, pos);
     gameState.Update();
     if (i == 0)
-    { EXPECT_GT(theirAgent.pos.X(), 0); }
+    {
+      EXPECT_GT(theirAgent.pos.X(), 0);
+    }
     else
-    { EXPECT_LT(theirAgent.pos.X(), 0); }
+    {
+      EXPECT_LT(theirAgent.pos.X(), 0);
+    }
   }
 }
 

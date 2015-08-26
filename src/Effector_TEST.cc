@@ -162,7 +162,7 @@ TEST(RCPServer, Effector)
   }
 
   // Extracts effector information and updates Agent's state
-  effector -> Update();
+  effector->Update();
 
   // Check the extracted effector information
   for (const auto &team : gameState->teams)
@@ -185,7 +185,7 @@ TEST(RCPServer, Effector)
   }
 
   // Update the agent state by the information extracted from second message
-  effector -> Update();
+  effector->Update();
 
   // Check the joint effector values and say message
   for (const auto &team : gameState->teams)
@@ -193,8 +193,8 @@ TEST(RCPServer, Effector)
     for (auto &agent : team->members)
     {
       // check if the agent recived the say message or not
-      EXPECT_TRUE(gameState->say.isValid);
-      std::cout << "Agent said: " << gameState->say.msg << std::endl;
+      EXPECT_TRUE(team->say.isValid);
+      std::cout << "Agent said: " << team->say.msg << std::endl;
 
       // check if the joints effector values
       EXPECT_DOUBLE_EQ(

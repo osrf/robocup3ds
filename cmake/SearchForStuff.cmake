@@ -22,9 +22,3 @@ find_package(Boost 1.54.0 COMPONENTS system filesystem thread REQUIRED)
 
 # for haptix GUI plugin
 find_package(Qt4)
-
-# # Find the Ignition-Math library
-# find_package(ignition-math QUIET REQUIRED)
-# set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${IGNITION-MATH_CXX_FLAGS}")
-# include_directories(${IGNITION-MATH_INCLUDE_DIRS})
-# link_directories(${IGNITION-MATH_LIBRARY_DIRS})

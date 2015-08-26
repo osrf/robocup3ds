@@ -79,6 +79,11 @@ class RCPServer
   /// \brief Destructor
   public: virtual ~RCPServer();
 
+  /// \brief Disconnects a client on a particular socket
+  /// \param[in] _socket Client ID
+  /// \return True if disconnection is successful
+  public: bool DisconnectClient(const int _socket);
+
   /// \brief Push some data to be sent by the server.
   /// \param[in] _socket Client ID.
   /// \param[in] _data Data to send.

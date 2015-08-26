@@ -16,10 +16,10 @@
 */
 #include <netinet/in.h>
 #include <cmath>
-#include <ignition/math.hh>
 #include <memory>
 #include <string>
 #include <vector>
+#include <ignition/math.hh>
 
 #include "gtest/gtest.h"
 #include "robocup3ds/Agent.hh"
@@ -52,8 +52,8 @@ class PerceptorTest : public ::testing::Test
         return false;
       }
       _testLine.Set(
-        Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[0]),
-        Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[1]));
+        Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[0]),
+        Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[1]));
       return true;
     }
 
@@ -68,7 +68,7 @@ class PerceptorTest : public ::testing::Test
       {
         return false;
       }
-      _testLandmark = Geometry::PolarToCart(_agent.percept.landMarks["test"]);
+      _testLandmark = Geometry::SphereToCart(_agent.percept.landMarks["test"]);
       return true;
     }
 
@@ -89,8 +89,8 @@ TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
   GameState::restrictVision = true;
   GameState::HFov = 0;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
-  std::vector <ignition::math::Plane<double> > &viewFrustum =
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
+  const std::vector <ignition::math::Plane<double> > &viewFrustum =
     perceptor->GetViewFrustum();
 
   EXPECT_EQ(viewFrustum.at(0).Normal(),
@@ -102,7 +102,7 @@ TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
 
   GameState::HFov = 90;
   GameState::VFov = 0;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   EXPECT_EQ(viewFrustum.at(0).Normal(),
             math::Vector3<double>(1, 0, 0));
   EXPECT_EQ(viewFrustum.at(2).Normal(),
@@ -112,7 +112,7 @@ TEST_F(PerceptorTest, Perceptor_SetViewFrustum)
 
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   EXPECT_EQ(viewFrustum.at(0).Normal(),
             math::Vector3<double>(1, 0, 0));
 
@@ -140,7 +140,6 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
 {
   math::Line3<double> origLine, gdLine, testLine;
   GameState::restrictVision = false;
-  perceptor->useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -148,7 +147,16 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Norestrictvis)
   agent.cameraPos.Set(0, 0, 0);
   agent.cameraRot.Euler(0, 0, M_PI / 2);
 
+  // with noise, we dont expect them to be equal
+  Perceptor::useNoise = true;
   // we have line on positive y-axis in global coordinates
+  origLine.Set(0, 1, 0, 0, 2, 0);
+  UpdateLine_Test(agent, origLine, testLine);
+  gdLine.Set(1, 0, 0, 2, 0, 0);
+  EXPECT_NE(testLine, gdLine);
+
+  // without noies, they are now equal
+  Perceptor::useNoise = false;
   origLine.Set(0, 1, 0, 0, 2, 0);
   UpdateLine_Test(agent, origLine, testLine);
   gdLine.Set(1, 0, 0, 2, 0, 0);
@@ -187,8 +195,8 @@ TEST_F(PerceptorTest, Perceptor_UpdateLine_Restrictvis)
   GameState::restrictVision = true;
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
-  perceptor->useNoise = false;
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -237,7 +245,7 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Norestrictvis)
 {
   math::Vector3<double> origLandmark, gdLandmark, testLandmark;
   GameState::restrictVision = false;
-  perceptor->useNoise = false;
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -275,8 +283,8 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
   GameState::restrictVision = true;
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
-  perceptor->useNoise = false;
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   Agent &agent = gameState->teams.at(0)->members.at(0);
 
@@ -310,10 +318,10 @@ TEST_F(PerceptorTest, Perceptor_UpdateLandmark_Restrictvis)
 /// intended
 TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
 {
-  GameState::HFov = 90;
-  GameState::VFov = 90;
-  perceptor->SetViewFrustum();
-  perceptor->useNoise = false;
+  GameState::HFov = 89;
+  GameState::VFov = 89;
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
+  Perceptor::useNoise = false;
   gameState->AddAgent(1, "blue");
   gameState->AddAgent(1, "red");
   Agent &agent1 = gameState->teams.at(0)->members.at(0);
@@ -337,10 +345,10 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
   EXPECT_NE(agent1.percept.otherAgentBodyMap[agent2Id].find("BODY"),
             agent1.percept.otherAgentBodyMap[agent2Id].end());
   EXPECT_EQ(
-    Geometry::PolarToCart(agent1.percept.otherAgentBodyMap[agent2Id]["HEAD"]),
+    Geometry::SphereToCart(agent1.percept.otherAgentBodyMap[agent2Id]["HEAD"]),
     math::Vector3<double>(1, -1, 1));
   EXPECT_EQ(
-    Geometry::PolarToCart(agent1.percept.otherAgentBodyMap[agent2Id]["BODY"]),
+    Geometry::SphereToCart(agent1.percept.otherAgentBodyMap[agent2Id]["BODY"]),
     math::Vector3<double>(1, -1, 0));
 
   // with restricted vision, other agent's body parts should not be visible
@@ -357,40 +365,41 @@ TEST_F(PerceptorTest, Percepter_UpdateAgentHear)
 {
   gameState->AddAgent(1, "red");
   gameState->AddAgent(2, "red");
-  auto team = gameState->teams.at(0);
+  gameState->SetCycleCounter(0);
+  const auto &team = gameState->teams.at(0);
   Agent &agent1 = team->members.at(0);
   Agent &agent2 = team->members.at(1);
   agent1.cameraPos.Set(5, 0, 0);
   agent1.cameraRot.Euler(0, 0, M_PI / 2);
   agent2.cameraPos.Set(0, 100, 0);
-  gameState->say.agentId = std::make_pair(5, "red");
-  gameState->say.pos.Set(0, 0, 0);
-  gameState->say.msg = "hello";
-  gameState->say.isValid = true;
+  team->say.agentId = std::make_pair(5, "red");
+  team->say.pos.Set(0, 0, 0);
+  team->say.msg = "hello";
+  team->say.isValid = true;
 
   perceptor->SetG2LMat(agent1);
   perceptor->UpdateAgentHear(agent1);
   EXPECT_TRUE(agent1.percept.hear.isValid);
   EXPECT_DOUBLE_EQ(agent1.percept.hear.gameTime,
                    gameState->GetElapsedGameTime());
-  EXPECT_DOUBLE_EQ(agent1.percept.hear.yaw, RAD(90.0));
+  EXPECT_DOUBLE_EQ(agent1.percept.hear.yaw, IGN_DTOR(90.0));
   EXPECT_FALSE(agent1.percept.hear.self);
   EXPECT_EQ(agent1.percept.hear.msg, "hello");
 
-  gameState->say.agentId = std::make_pair(1, "red");
+  team->say.agentId = std::make_pair(1, "red");
   perceptor->UpdateAgentHear(agent1);
   EXPECT_TRUE(agent1.percept.hear.self);
 
-  gameState->say.isValid = false;
+  team->say.isValid = false;
   perceptor->UpdateAgentHear(agent1);
   EXPECT_FALSE(agent1.percept.hear.isValid);
 
   perceptor->SetG2LMat(agent2);
-  gameState->say.isValid = true;
+  team->say.isValid = true;
   perceptor->UpdateAgentHear(agent2);
   EXPECT_FALSE(agent2.percept.hear.isValid);
 
-  gameState->say.isValid = false;
+  team->say.isValid = false;
   perceptor->UpdateAgentHear(agent2);
   EXPECT_FALSE(agent2.percept.hear.isValid);
 }
@@ -408,13 +417,15 @@ TEST_F(PerceptorTest, Percepter_Update)
       agent.selfBodyMap["BODY"] = agent.pos;
     }
   }
-  gameState->say.agentId = std::make_pair(1, "blue");
-  gameState->say.pos.Set(0, 0, 0);
-  gameState->say.msg = "hello";
-  gameState->say.isValid = true;
+  gameState->SetCycleCounter(0);
+  const auto &team = gameState->teams.at(0);
+  team->say.agentId = std::make_pair(1, "blue");
+  team->say.pos.Set(0, 0, 0);
+  team->say.msg = "hello";
+  team->say.isValid = true;
 
   GameState::restrictVision = false;
-  perceptor->useNoise = false;
+  Perceptor::useNoise = false;
   perceptor->Update();
   for (int i = 0; i < 2; ++i)
   {
@@ -422,9 +433,9 @@ TEST_F(PerceptorTest, Percepter_Update)
     {
       auto &agent = gameState->teams.at(i)->members.at(j);
       EXPECT_EQ(agent.percept.fieldLines.size(),
-                SoccerField::FieldLines.size());
+                SoccerField::kFieldLines.size());
       EXPECT_EQ(agent.percept.landMarks.size(),
-                SoccerField::LandMarks.size() + 1u);
+                SoccerField::kLandMarks.size() + 1u);
       EXPECT_NE(agent.percept.landMarks.find("B"),
                 agent.percept.landMarks.end());
       EXPECT_EQ(agent.percept.otherAgentBodyMap.size(), 21u);
@@ -456,23 +467,29 @@ TEST_F(PerceptorTest, Percepter_Serialize)
       gameState->AddAgent(j + 1, teamNames[i]);
       auto &agent = gameState->teams.at(i)->members.at(j);
       if (i == 0 && j == 0)
-      { continue; }
+      {
+        continue;
+      }
       gameState->MoveAgent(agent, math::Vector3<double>(5.0, 1.0,
-                           GameState::beamHeight));
+                           0.35));
       agent.selfBodyMap["BODY"] = agent.pos;
       agent.selfBodyMap["HEAD"] = agent.pos +
                                   math::Vector3<double>(0, 0, 1);
     }
   }
+  GameState::groundTruthInfo = true;
   GameState::restrictVision = true;
-  gameState->say.agentId = std::make_pair(1, "blue");
-  gameState->say.pos.Set(5.0, 1.0, GameState::beamHeight);
-  gameState->say.msg = "hello";
-  gameState->say.isValid = true;
-  perceptor->useNoise = false;
+  gameState->SetCycleCounter(1);
+  const auto &team = gameState->teams.at(1);
+  team->say.agentId = std::make_pair(1, "blue");
+  team->say.pos.Set(5.0, 1.0, 0.35);
+  team->say.msg = "hello";
+  team->say.isValid = true;
+  Perceptor::useNoise = false;
+  Perceptor::updateVisualFreq = 1;
   GameState::HFov = 90;
   GameState::VFov = 90;
-  perceptor->SetViewFrustum();
+  perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
 
   auto &redAgent = gameState->teams.at(0)->members.at(0);
   redAgent.percept.hingeJoints["joint1"] = 0.5;
@@ -485,7 +502,9 @@ TEST_F(PerceptorTest, Percepter_Serialize)
 
   // currently takes around 1.2 milliseconds to finish for all 22 agents
   for (int i = 0; i < 1000; ++i)
-  { cx = perceptor->Serialize(redAgent, testString, sizeof(testString)); }
+  {
+    cx = perceptor->Serialize(redAgent, testString, sizeof(testString));
+  }
   std::cout << testString << std::endl;
 
   // check that certain names are there in string
@@ -494,31 +513,55 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   EXPECT_TRUE(strstr(testString, "HEAD"));
   EXPECT_TRUE(strstr(testString, "BODY"));
   EXPECT_TRUE(strstr(testString, "hear"));
+  EXPECT_TRUE(strstr(testString, "myorien"));
+  EXPECT_TRUE(strstr(testString, "ballpos"));
+  EXPECT_TRUE(strstr(testString, "mypos"));
 
   // check that parenthesis are balanced
   int paren = 0;
   for (size_t i = 0; i < sizeof(testString); ++i)
   {
     if (testString[i] == '\0')
-    { break; }
+    {
+      break;
+    }
     if (testString[i] == '(')
-    { paren++; }
+    {
+      paren++;
+    }
     else if (testString[i] == ')')
-    { paren--; }
+    {
+      paren--;
+    }
   }
   EXPECT_EQ(0, paren);
 
   // make sure returned length is correct
   EXPECT_EQ(static_cast<int>(strlen(testString)), cx);
 
+  // same test for other team
+  auto &blueAgent = gameState->teams.at(1)->members.at(0);
+  blueAgent.percept.hingeJoints["joint1"] = 0.5;
+  blueAgent.percept.hingeJoints["joint2"] = 0.2;
+  cx = perceptor->Serialize(blueAgent, testString, sizeof(testString));
+
+  // check that certain names are there in string
+  EXPECT_TRUE(strstr(testString, "joint1"));
+  EXPECT_TRUE(strstr(testString, "joint2"));
+  EXPECT_TRUE(strstr(testString, "HEAD"));
+  EXPECT_TRUE(strstr(testString, "BODY"));
+  EXPECT_TRUE(strstr(testString, "hear"));
+  EXPECT_TRUE(strstr(testString, "self"));
+  EXPECT_TRUE(strstr(testString, "myorien"));
+  EXPECT_TRUE(strstr(testString, "ballpos"));
+  EXPECT_TRUE(strstr(testString, "mypos"));
+
   // ensure that encoding is correct
-  char b[4];
+  char b[400];
   unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-  b[0] =  _cx        & 0xff;
-  b[1] = (_cx >>  8) & 0xff;
-  b[2] = (_cx >> 16) & 0xff;
-  b[3] = (_cx >> 24) & 0xff;
-  unsigned int _cx2 = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | (b[0]);
+  memcpy(b, &_cx, 4);
+  unsigned int _cx2;
+  memcpy(&_cx2, b, 4);
   int cx2 = static_cast<int>(ntohl(_cx2));
   EXPECT_EQ(cx, cx2);
 }

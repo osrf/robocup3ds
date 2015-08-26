@@ -20,12 +20,12 @@
 #include <chrono>
 #include <gazebo/physics/World.hh>
 #include <gazebo/test/ServerFixture.hh>
-#include <ignition/math.hh>
 #include <memory>
 #include <string>
 #include <thread>
+#include <ignition/math.hh>
 
-#include "ClientAgent.hh"
+#include "robocup3ds/ClientAgent.hh"
 
 using namespace ignition;
 using namespace std;
@@ -39,7 +39,7 @@ class IntegrationTest : public gazebo::ServerFixture
     }
 
   public:
-    void LoadWorld(const string &_path)
+    void LoadWorld(const std::string &_path)
     {
       this->Load(_path);
       this->world = gazebo::physics::get_world("default");
@@ -49,27 +49,34 @@ class IntegrationTest : public gazebo::ServerFixture
   public:
     virtual void SetUp()
     {
-      cerr << "Setting Up Test" << endl;
+      std::cerr << "Setting Up Test" << endl;
       this->agent = make_shared<ClientAgent>(
                       "0.0.0.0", 3100, 3200, 1, "red", "left");
+      this->oppAgent = make_shared<ClientAgent>(
+                         "0.0.0.0", 3100, 3200, 1, "blue", "right");
       this->Wait();
     }
 
   public:
     virtual void TearDown()
     {
-      cerr << "Tearing Down Test" << endl;
+      std::cerr << "Tearing Down Test" << endl;
       this->agent.reset();
+      this->oppAgent.reset();
+      this->world.reset();
       gazebo::ServerFixture::TearDown();
       this->Wait();
     }
 
   public:
-    const string testPath =
-      "/home/jliang/Desktop/OSRF/robocup3ds/test/integration/";
+    const std::string testPath =
+      "../test/integration/";
 
   public:
     shared_ptr<ClientAgent> agent;
+
+  public:
+    shared_ptr<ClientAgent> oppAgent;
 
   public:
     gazebo::physics::WorldPtr world;
@@ -83,34 +90,63 @@ TEST_F(IntegrationTest, TestLoadWorldPlugin)
   SUCCEED();
 }
 
-/// \brief This tests whether agent can successfully connect, init, and beam
+/// \brief This tests whether two agents can successfully connect,
+/// init, and beam
 TEST_F(IntegrationTest, TestLoadConnectAgent)
 {
   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
   this->Wait();
   this->agent->InitAndBeam(1, 1, 90);
   this->agent->Start();
+  this->oppAgent->InitAndBeam(-1, -1, 45);
+  this->oppAgent->Start();
 
   while (this->agent->allMsgs.size() == 0u)
-  { this->Wait(); }
+  {
+    this->Wait();
+  }
 
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
 
   EXPECT_GT(this->agent->allMsgs.size(), 0u);
-  const auto &lastMsg = this->agent->allMsgs.back();
-  cerr << lastMsg << endl;
-  EXPECT_NE(lastMsg.find("GS"), string::npos);
-  EXPECT_NE(lastMsg.find("BeforeKickOff"), string::npos);
-  EXPECT_NE(lastMsg.find("myorien"), string::npos);
-  EXPECT_NE(lastMsg.find("mypos"), string::npos);
-  EXPECT_NE(lastMsg.find("ballpos"), string::npos);
+  auto lastMsg = this->agent->allMsgs.back();
+  std::cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("GS"), std::string::npos);
+  EXPECT_NE(lastMsg.find("BeforeKickOff"), std::string::npos);
+  EXPECT_NE(lastMsg.find("myorien"), std::string::npos);
+  EXPECT_NE(lastMsg.find("mypos"), std::string::npos);
+  EXPECT_NE(lastMsg.find("ballpos"), std::string::npos);
 
   bool see = false;
   for (const auto &msg : this->agent->allMsgs)
   {
     if (msg.find("See"))
-    { see = true; }
+    {
+      see = true;
+    }
+  }
+  EXPECT_TRUE(see);
+
+  EXPECT_TRUE(this->oppAgent->running);
+  EXPECT_TRUE(this->oppAgent->connected);
+
+  EXPECT_GT(this->oppAgent->allMsgs.size(), 0u);
+  lastMsg = this->oppAgent->allMsgs.back();
+  std::cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("GS"), std::string::npos);
+  EXPECT_NE(lastMsg.find("BeforeKickOff"), std::string::npos);
+  EXPECT_NE(lastMsg.find("myorien"), std::string::npos);
+  EXPECT_NE(lastMsg.find("mypos"), std::string::npos);
+  EXPECT_NE(lastMsg.find("ballpos"), std::string::npos);
+
+  see = false;
+  for (const auto &msg : this->oppAgent->allMsgs)
+  {
+    if (msg.find("See"))
+    {
+      see = true;
+    }
   }
   EXPECT_TRUE(see);
 }
@@ -126,24 +162,28 @@ TEST_F(IntegrationTest, TestMonitor)
 
   // test game mode has successfully changed
   while (this->agent->allMsgs.size() == 0u)
-  { this->Wait(); }
+  {
+    this->Wait();
+  }
 
   const auto &lastMsg = this->agent->allMsgs.back();
-  cerr << lastMsg << endl;
-  EXPECT_NE(lastMsg.find("PlayOn"), string::npos);
+  std::cerr << lastMsg << endl;
+  EXPECT_NE(lastMsg.find("PlayOn"), std::string::npos);
 
   // test that MoveBall and MoveAgent works
   this->agent->MoveBall(math::Vector3d(1.35, 5.69, 0.042));
   this->agent->MoveAgent(math::Vector3d(-7.35, -11.69, 0.35));
   this->Wait();
   // const auto &lastMsg2 = this->agent->allMsgs.back();
-  // cerr << lastMsg2 << endl;
+  // std::cerr << lastMsg2 << endl;
 
   bool gd = false;
   for (const auto &msg : this->agent->allMsgs)
   {
     if (msg.find("1.35 5.69 0.04") && msg.find("-7.35 -11.69 0.35"))
-    { gd = true; }
+    {
+      gd = true;
+    }
   }
   EXPECT_TRUE(gd);
 
@@ -160,28 +200,59 @@ TEST_F(IntegrationTest, TestMonitor)
     this->Wait();
     currMsgCount = this->agent->allMsgs.size();
   }
-  SUCCEED();
-  // EXPECT_LE(currMsgCount - numMessages, 3u);
-  cerr << "num msgs before kill: " << numMessages
-       << " num msgs after kill: " << currMsgCount << endl;
+  EXPECT_LE(currMsgCount - numMessages, 3u);
+  std::cerr << "num msgs before kill: " << numMessages
+            << " num msgs after kill: " << currMsgCount << endl;
 }
 
-/// \brief This tests whether agent walk works
-// TEST_F(IntegrationTest, TestWalk)
-// {
-//   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
+/// \brief This tests whether we can transition from playOn to kickin
+TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
+{
+  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
 
-//   this->Wait();
-//   this->agent->InitAndBeam(0, 0, 0);
-//   this->agent->ChangePlayMode("PlayOn");
-//   this->agent->Walk(math::Vector3d(-5, -5, 0.35),
-//                     math::Vector3d(5, 5, 0.35), 100);
-//   this->agent->Start();
-//   this->Wait(2500);
+  this->Wait();
+  this->agent->InitAndBeam(0, 0, 0);
+  this->agent->ChangePlayMode("PlayOn");
+  this->agent->Dribble(math::Vector3d(3, -5, 0.35),
+                       math::Vector3d(5, -12, 0.35), 20);
+  this->agent->Start();
+  this->Wait(2500);
 
-//   const auto &lastMsg = this->agent->allMsgs.back();
-//   std::cerr << lastMsg << std::endl;
-// }
+  const auto &lastMsg = this->agent->allMsgs.back();
+  // std::std::cerr << lastMsg << std::endl;
+  EXPECT_NE(lastMsg.find("KickInRight"), std::string::npos);
+}
+
+/// \brief This tests whether we can transition from kickOff to playOn and then
+/// back to kick off due to double touch violation
+TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
+{
+  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
+
+  this->Wait();
+  this->agent->InitAndBeam(0, 0, 0);
+  this->agent->ChangePlayMode("KickOffLeft");
+  this->agent->Dribble(math::Vector3d(0, 0, 0.35),
+                       math::Vector3d(0, 1, 0.35), 10);
+  this->agent->Start();
+  this->Wait(1000);
+
+  bool playOn = false;
+  bool kickOffRight = false;
+  for (const auto &msg : this->agent->allMsgs)
+  {
+    if (msg.find("PlayOn"))
+    {
+      playOn = true;
+    }
+    if (playOn && msg.find("KickOffRight"))
+    {
+      kickOffRight = true;
+    }
+  }
+  EXPECT_TRUE(playOn);
+  EXPECT_TRUE(kickOffRight);
+}
 
 int main(int argc, char **argv)
 {

@@ -36,7 +36,7 @@ KickInState::KickInState(const std::string &_name,
 void KickInState::Initialize()
 {
   // Move the ball to the sideline.
-  this->gameState->MoveBall(initBallPos);
+  this->gameState->MoveBall(this->initBallPos);
   this->gameState->MoveBallInBounds();
   State::Initialize();
 }
