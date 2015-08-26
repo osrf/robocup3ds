@@ -345,12 +345,12 @@ void Robocup3dsPlugin::UpdateEffector()
   for (const auto &agentPtr : this->effector->agentsToAdd)
   {
     std::string path = agentPtr->bodyType->BlueModelPath();
-		/*
+
     if (this->gameState->teams.at(1) == agentPtr->team)
     {
       path = agentPtr->bodyType->RedModelPath();
     }
-		*/
+
     const sdf::SDFPtr modelSDF(new sdf::SDF());
     sdf::init(modelSDF);
     std::string filePath = ModelDatabase::Instance()->GetModelFile(path);
@@ -626,24 +626,31 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
       const auto &model = this->world->GetModel(agent.GetName());
 
       model->GetJointController()->Reset();
+
       for (const auto &joint : model->GetJoints())
       {
-        //joint->Reset();
-        // Increase the actuators damping to 1
-        joint->SetDamping(0, 1);
-        joint->SetAngle(0, 0);
+        if( agent.bodyType->DefaultModelName()== "naoType0"){
 
-        // Set the joints position to their inititail Position
-        if (joint-> GetName() == "LShoulderPitch" || joint-> GetName() == "RShoulderPitch")
-            joint->SetAngle(0, -1.5);
-        else if (joint-> GetName() == "LShoulderRoll")
-            joint->SetAngle(0, 0.15);
-        else if (joint-> GetName() == "RShoulderRoll")
-            joint->SetAngle(0, -0.15);
+          // Increase the actuators damping to 1
+          joint->SetDamping(0, 1);
+
+          // Set the joints position to their initial Position
+          if (joint-> GetName() == "LShoulderPitch" ||
+                 joint-> GetName() == "RShoulderPitch")
+              joint->SetAngle(0, -1.5);
+          else if (joint-> GetName() == "LShoulderRoll")
+              joint->SetAngle(0, 0.15);
+          else if (joint-> GetName() == "RShoulderRoll")
+              joint->SetAngle(0, -0.15);
+          else
+              joint->SetAngle(0, 0);
+        }
         else
-            joint->SetAngle(0, 0);
-
+        {
+          joint->Reset();
+        }
       }
+
       model->ResetPhysicsStates();
       this->gameState->MoveAgent(agent, agent.pos.X(), agent.pos.Y(),
                                  agent.rot.Euler().Z());
