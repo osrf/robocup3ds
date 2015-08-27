@@ -2,8 +2,19 @@ set(PARSER_SOURCE ../lib/sexpLibrary/parser.c ../lib/sexpLibrary/sexp.c ../lib/s
 Set(PARSER_HEADER ../lib/sexpLibrary/sexp.h ../lib/sexpLibrary/cstring.h ../lib/sexpLibrary/faststack.h ../lib/sexpLibrary/sexp_errors.h ../lib/sexpLibrary/sexp_ops.h ../lib/sexp_memory.h)
 
 set (sources
+  GameState.cc
   Geometry.cc
   Robocup3dsPlugin.cc
+  states/BeforeKickOffState.cc
+  states/CornerKickState.cc
+  states/FreeKickState.cc
+  states/GameOverState.cc
+  states/GoalKickState.cc
+  states/GoalState.cc
+  states/KickInState.cc
+  states/KickOffState.cc
+  states/PlayOnState.cc
+  states/State.cc
   Server.cc
   Util.cc
 )
