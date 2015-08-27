@@ -644,12 +644,11 @@
         </inertia>
       </inertial>
       <collision name='LBicep_collision'>
-        <pose>0.045 0 0 1.57 -0 1.8</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
-          <cylinder>
-            <length>0.09</length>
-            <radius>0.02</radius>
-          </cylinder>
+          <box>
+            <size>0.08 0.07 0.06</size>
+          </box>
         </geometry>
         <surface>
           <contact>
@@ -1307,12 +1306,11 @@
         </inertia>
       </inertial>
       <collision name='RBicep_collision'>
-        <pose>0.045 0 0 1.57 0 -1.8</pose>
+        <pose>0 0 0 0 0 0</pose>
         <geometry>
-          <cylinder>
-            <length>0.09</length>
-            <radius>0.02</radius>
-          </cylinder>
+          <box>
+            <size>0.08 0.07 0.06</size>
+          </box>
         </geometry>
         <surface>
           <contact>
@@ -1467,10 +1465,10 @@
       <child>RForeArm</child>
       <parent>RElbow</parent>
       <axis>
-        <xyz>0 0 1</xyz>
+        <xyz>0 0 -1</xyz>
         <limit>
-          <lower>-0.017453</lower>
-          <upper>1.570796</upper>
+          <lower>-1.570796</lower>
+          <upper>0.017453</upper>
           <effort>40.25</effort>
           <velocity>6.1395</velocity>
         </limit>
