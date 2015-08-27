@@ -27,7 +27,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.11 0.11</scale>
-            <uri>model://nao/meshes/meshes/V40/Torso.dae</uri>
+            <uri>model://nao_blue/meshes/V40/Torso.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -54,7 +54,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.2</scale>
-            <uri>model://nao/meshes/meshes/V40/HeadYaw.dae</uri>
+            <uri>model://nao_blue/meshes/V40/HeadYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -130,7 +130,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.13</scale>
-            <uri>model://nao/meshes/meshes/V40/HeadPitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/HeadPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -188,7 +188,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LHipYawPitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LHipYawPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -245,7 +245,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LHipRoll.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LHipRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -321,7 +321,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.13</scale>
-            <uri>model://nao/meshes/meshes/V40/LHipPitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LHipPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -397,7 +397,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.11</scale>
-            <uri>model://nao/meshes/meshes/V40/LKneePitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LKneePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -454,7 +454,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LAnklePitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LAnklePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -534,7 +534,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LAnkleRoll.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LAnkleRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -591,7 +591,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.11</scale>
-            <uri>model://nao/meshes/meshes/V40/LShoulderPitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LShoulderPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -667,7 +667,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LShoulderRoll.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LShoulderRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -791,7 +791,7 @@
         <geometry>
           <mesh>
             <scale>0.15 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/LWristYaw.dae</uri>
+            <uri>model://nao_blue/meshes/V40/LWristYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -850,7 +850,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RHipYawPitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RHipYawPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -907,7 +907,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RHipRoll.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RHipRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -983,7 +983,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.13</scale>
-            <uri>model://nao/meshes/meshes/V40/RHipPitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RHipPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1059,7 +1059,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.11</scale>
-            <uri>model://nao/meshes/meshes/V40/RKneePitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RKneePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1116,7 +1116,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RAnklePitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RAnklePitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1196,7 +1196,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RAnkleRoll.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RAnkleRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1253,7 +1253,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.11</scale>
-            <uri>model://nao/meshes/meshes/V40/RShoulderPitch.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RShoulderPitch.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1329,7 +1329,7 @@
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RShoulderRoll.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RShoulderRoll.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1453,7 +1453,7 @@
         <geometry>
           <mesh>
             <scale>0.15 0.1 0.1</scale>
-            <uri>model://nao/meshes/meshes/V40/RWristYaw.dae</uri>
+            <uri>model://nao_blue/meshes/V40/RWristYaw.dae</uri>
           </mesh>
         </geometry>
       </visual>
