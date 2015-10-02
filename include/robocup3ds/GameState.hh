@@ -18,12 +18,12 @@
 #ifndef _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
 #define _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
 
-#include <ignition/math.hh>
 #include <map>
 #include <memory>
 #include <vector>
 #include <string>
 #include <utility>
+#include <ignition/math.hh>
 
 #include "robocup3ds/Geometry.hh"
 #include "robocup3ds/Agent.hh"
@@ -50,10 +50,18 @@ namespace states
 /// 1) Use the simulation world model to update the pose of all
 /// the players and ball. Also, check for collisions in simulation world model
 /// and update ballContactHistory member variable if necessary
-/// 2) Call the Effector object's Update() method
-/// 3) Call the Update() method, which updates the playmode and check/deal
-/// with rule violations
-/// 4) Call the Perceptor object's Update() method
+/// 2) Call the Update() method, which turn calls the current state's Update()
+/// method. The state's update method calls the following functions:
+/// CheckTiming()
+/// CheckDoubleTouch()
+/// CheckCanScore()
+/// CheckIllegalDefense()
+/// CheckCrowding()
+/// CheckImmobility()
+/// These functions check for rule violations and check whether the necessary
+/// conditions for a play mode transition is satisfied.
+/// 3) Call the Perceptor object's Update() method
+/// 4) Call the Effector object's Update() method
 /// 5) If the GameState object modifies the pose of any of the players and or
 /// ball (by checking the updatePose flag), update the simulation world model
 /// to match poses stored in the GameState object
@@ -68,65 +76,15 @@ class GameState
     SECOND_HALF
   };
 
-  /// \brief Internal Logger for GameState
-  private: class Logger
-  {
-    /// \brief Constructor for the logger class
-    /// \param[in] _gameState Pointer to GameState object
-    /// \param[in] _normalLevel Normal message logging level
-    /// \param[in] _errorLevel Error messages above this level will be printed
-    public: Logger(const GameState *const _gameState,
-      const int _normalLevel, const int _errorLevel):
-      gameState(_gameState),
-      normalLevel(_normalLevel),
-      errorLevel(_errorLevel)
-    {
-    }
-
-    /// \brief Print normal messages plus some game information
-    /// \param[in] _message Normal message string
-    /// \param[in] _level Normal messages above this level will be printed
-    public: void Log(const std::string &_message, const int _level) const
-    {
-      if (_level >= this->normalLevel)
-      {
-        std::cout << "[" << this->gameState->GetCycleCounter() << "]["
-                  << this->gameState->GetGameTime() << "][lvl:" <<
-                  _level << "]\t" << _message.c_str() << std::endl;
-      }
-    }
-
-    /// \brief Print error messages plus some game information
-    /// \param[in] _message Error message string
-    /// \param[in] _level Error messages above this level will be printed
-    public: void LogErr(const std::string &_message, const int _level) const
-    {
-      if (_level >= this->errorLevel)
-      {
-        std::cout << "\033[31m[" << this->gameState->GetCycleCounter() << "]["
-                  << this->gameState->GetGameTime() << "][lvl:" <<
-                  _level << "]\t" << _message.c_str() << std::endl;
-      }
-    }
-
-    /// \brief Pointer to parent gamestate object
-    private: const GameState *const gameState;
-
-    /// \brief Level for logging normal messages
-    public: const int normalLevel;
-
-    /// \brief Level for logging error messages
-    public: const int errorLevel;
-  };
-
   /// \brief Stores ball contact information for GameState
   public: class BallContact
   {
     /// \brief Constructor for Ball Contact object
-    /// \param[in] _uNum agent unique id
+    /// \param[in] _uNum agent uniform id
     /// \param[in] _side side which touched ball
     /// \param[in] _contactTime time when ball was touched
     /// \param[in] _contactPos position where ball was touched
+    /// \param[in] _playMode The playmode where ball was touched
     public: BallContact(const int _uNum, const Team::Side _side,
                         const double _contactTime,
                         const ignition::math::Vector3<double> &_contactPos,
@@ -146,7 +104,7 @@ class GameState
     public: Team::Side side;
 
     /// \brief Time when agent stopped contacting the ball
-    /// (if contact is longer than an instant)
+    /// (if contact is longer than an iteration)
     public: double contactTime;
 
     /// \brief Position where agent contacted ball
@@ -165,47 +123,35 @@ class GameState
   /// \brief Function for loading gameState configuration variables
   /// \param[in] _config Map of configuration variables
   public: void LoadConfiguration(
-    const std::map<std::string, std::string> &/*_config*/) const
-  {
-  };
+    const std::map<std::string, std::string> &_config) const;
 
   /// \brief Destructor.
   public: virtual ~GameState() = default;
 
   /// \brief Clears the history of ball contacts
-  public: void ClearBallContactHistory()
-  {
-  };
+  public: void ClearBallContactHistory();
 
   /// \brief Update the robocup simulation state.
-  public: void Update()
-  {
-  };
+  public: void Update();
 
   /// \brief During some of the states of the game the players are not allowed
   /// to move (for example during kickoff). This method releases the players
   /// when it's time to move the robots (for example in play mode).
-  public: void ReleasePlayers()
-  {
-  };
+  public: void ReleasePlayers();
 
   /// \brief During some of the states of the game the players are not allowed
   /// to move (for example during kickoff). This method stops the players by
   /// creating a joint to the world for each player.
-  public: void StopPlayers()
-  {
-  };
+  public: void StopPlayers();
 
   /// \brief Set the current game state. If the new state is the same than
-  /// the current one, the operation does not have any effect.
+  /// the current one, the operation does not have any effect unless
+  /// reset flag is set to true
   /// \param[in] _newState New state to replace current state
   /// \param[in] _resetState When new state is the same as current state,
   /// setting this flag to true will reset the state
-  public: void SetCurrent(const std::shared_ptr<states::State> &/*_newState*/,
-    const bool _resetState = false)
-  {
-    _resetState;
-  };
+  public: void SetCurrent(const std::shared_ptr<states::State> &_newState,
+    const bool _resetState = false);
 
   /// \brief Drops the ball at its current position and move all players away
   /// by the free kick radius. If the ball is off the field, it is brought
@@ -214,192 +160,130 @@ class GameState
   /// close to the ball. Team::RIGHT if the right team is allowed or any other
   /// number if none of the teams are allowed to be within the free kick
   /// radius.
-  public: void DropBallImpl(const Team::Side /*_teamAllowed*/)
-  {
-  };
+  public: void DropBallImpl(const Team::Side _teamAllowed);
 
   /// \brief Checks whether the double touching rules are violated
-  public: void CheckDoubleTouch()
-  {
-  };
+  public: void CheckDoubleTouch();
 
   /// \brief Check whether scoring conditions are met (another agent on
   /// same side that is not the kick off agent has touched the ball).
-  public: void CheckCanScore()
-  {
-  };
+  public: void CheckCanScore();
 
   /// \brief Check that agents stay on their own side during kick offs
   /// \param[in] _kickingSide The kicking side during the kickoff
-  public: void CheckOffSidesOnKickOff(const Team::Side /*_kickingSide*/)
-  {
-  };
+  public: void CheckOffSidesOnKickOff(const Team::Side _kickingSide);
 
   /// \brief Set the agent's position only
   /// \param[out] _agent Reference to agent object
   /// \param[in] _pos New position of agent in meters
-  public: void MoveAgent(Agent &/*_agent*/,
-                         const ignition::math::Vector3<double> &/*_pos*/) const
-  {
-  };
+  public: void MoveAgent(Agent &_agent,
+                         const ignition::math::Vector3<double> &_pos) const;
 
   /// \brief Set the agent's position and yaw (beaming the agent)
   /// \param[out] _agent Reference to agent object
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
-  /// \param[in] _yaw New yaw of agent
-  public: void MoveAgent(Agent &/*_agent*/, const double /*_x*/,
-                         const double /*_y*/,
-                         const double /*_yaw*/) const
-  {
-  };
-
+  /// \param[in] yaw New yaw of agent in radians
+  public: void MoveAgent(Agent &_agent, const double _x, const double _y,
+                         const double yaw) const;
 
   /// \brief Set the agent's position and yaw with some additional noise
   /// \param[out] _agent Reference to agent object
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
-  /// \param[in] _yaw New yaw of agent
-  public: void MoveAgentNoisy(Agent &/*_agent*/, const double /*_x*/,
-                              const double /*_y*/,
-                              const double /*_yaw*/) const
-  {
-  };
+  /// \param[in] _yaw New yaw of agent in radians
+  public: void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
+                              const double _yaw) const;
 
   /// \brief Set the agent's position and orientation
   /// \param[out] _agent Reference to agent object
   /// \param[in] _pos New position of agent in meters
-  /// \param[in] _rot New orientation of agent in meters
-  public: void MoveAgent(Agent &/*_agent*/,
-                         const ignition::math::Vector3<double> &/*_pos*/,
-                         const ignition::math::Quaternion<double> &/*_rot*/)
-                        const
-  {
-  };
+  /// \param[in] _rot New orientation of agent in radians
+  public: void MoveAgent(Agent &_agent,
+                         const ignition::math::Vector3<double> &_pos,
+                         const ignition::math::Quaternion<double> &_rot) const;
 
   /// \brief Move agent to side of field, the side depends on the agent's side
   /// \param[out] _agent Reference to agent object
-  public: void MoveAgentToSide(Agent &/*_agent*/) const;
+  public: void MoveAgentToSide(Agent &_agent) const;
 
-  /// \brief Move agent back to their own side if they are offsides during kick
+  /// \brief Move agent back to their own side if there are offsides during kick
   /// offs
   /// \param[out] _agent Reference to agent object
-  public: void MoveOffSideAgent(Agent &/*_agent*/) const
-  {
-  };
+  public: void MoveOffSideAgent(Agent &_agent) const;
 
   /// \brief Check if the first half or the game ends, also update elapsed time.
-  public: void CheckTiming()
-  {
-  };
+  public: void CheckTiming();
 
   /// \brief Check the ball's position looking for goals or out of bounds.
-  public: void CheckBall()
-  {
-  };
+  public: void CheckBall();
 
   /// \brief Checks that during goal kick, no members of opposing team
   /// are inside penalty area
   /// \param[in] _teamAllowed Side of the team that is allowed in penalty area
-  public: void CheckGoalKickIllegalDefense(const Team::Side /*_teamAllowed*/)
-  {
-  };
+  public: void CheckGoalKickIllegalDefense(const Team::Side _teamAllowed);
 
   /// \brief Check that no more than 3 players are in penalty area.
-  public: void CheckIllegalDefense()
-  {
-  };
+  public: void CheckIllegalDefense();
 
   /// \brief Check that no player has fallen or remain still for too long.
-  public: void CheckImmobility()
-  {
-  };
+  public: void CheckImmobility();
 
   /// \brief Check crowding rules.
-  public: void CheckCrowding()
-  {
-  };
+  public: void CheckCrowding();
 
   /// \brief Get the ball position in the field.
   /// \return The position of the ball.
-  public: ignition::math::Vector3<double> GetBall()
-  {
-    return ignition::math::Vector3d();
-  };
+  public: ignition::math::Vector3<double> GetBall() const;
 
   /// \brief Move the ball to the center of field.
-  public: void MoveBallToCenter()
-  {
-  };
+  public: void MoveBallToCenter();
 
   /// \brief Move ball to goal kick position.
-  public: void MoveBallForGoalKick()
-  {
-  };
+  public: void MoveBallForGoalKick();
 
   /// \brief Move the ball to the corner of the field.
-  public: void MoveBallToCorner()
-  {
-  };
+  public: void MoveBallToCorner();
 
   /// \brief Move the ball in bounds if it is out of bounds.
-  public: void MoveBallInBounds()
-  {
-  };
+  public: void MoveBallInBounds();
 
   /// \brief Move the ball to a given position.
   /// \param[in] _ballPos Target position in meters
-  public: void MoveBall(const ignition::math::Vector3<double> &/*_ballPos*/)
-  {
-  };
+  public: void MoveBall(const ignition::math::Vector3<double> &_ballPos);
 
   /// \brief Set the linear velocity of the ball
   /// \param[in] _ballVel Target linear velocity in m/s
-  public: void SetBallVel(const ignition::math::Vector3<double> &/*_ballVel*/)
-  {
-  };
+  public: void SetBallVel(const ignition::math::Vector3<double> &_ballVel);
 
   /// \brief Set the angular velocity of the ball
   /// \param[in] _ballAngVel Target angular velocity in m/s
   public: void SetBallAngVel(const ignition::math::Vector3<double>
-                             &/*_ballAngVel*/)
-  {
-  };
+                             &_ballAngVel);
 
   /// \brief Get the linear velocity of the ball
   /// \return Ball linear velocity
-  public: ignition::math::Vector3<double> GetBallVel() const
-  {
-    return ignition::math::Vector3d();
-  };
+  public: ignition::math::Vector3<double> GetBallVel() const;
 
   /// \brief Get the angular velocity of the ball
   /// \return Ball angular velocity
-  public: ignition::math::Vector3<double> GetBallAngVel() const
-  {
-    return ignition::math::Vector3d();
-  };
+  public: ignition::math::Vector3<double> GetBallAngVel() const;
 
   /// \brief Add agent to game state
   /// \param[out] _uNum Agent number assigned
   /// \param[in] _teamName Agent name
+  /// \param[in] _bodyType Body type used for agent
   /// \param[in] _socketID SocketID associated with agent
   /// \return Pointer to the agent object created
-  public: Agent* AddAgent(const int /*_uNum*/, const std::string &/*_teamName*/,
-    const int /*_socketID = -1*/)
-  {
-    return nullptr;
-  };
+  public: Agent *AddAgent(const int _uNum, const std::string &_teamName,
+    const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoOfficialBT>(),
+    const int _socketID = -1);
 
   /// \brief Remove agent from game state
   /// \param[in] _uNum Agent number
   /// \param[in] _teamName Agent name
   /// \return True when removing agent is successful
-  public: bool RemoveAgent(const int /*_uNum*/,
-    const std::string &/*_teamName*/)
-  {
-    return false;
-  };
+  public: bool RemoveAgent(const int _uNum, const std::string &_teamName);
 
   /// \brief Beam the agent if the play mode allows it
   /// \param[in] _uNum Agent number
@@ -408,109 +292,67 @@ class GameState
   /// \param[in] _y Y position of agent
   /// \param[in] _rot Yaw of agent
   /// \return Flag whether beaming agent is successful
-  public: bool BeamAgent(const int /*_uNum*/, const std::string &/*_teamName*/,
-                         const double /*_x*/, const double /*_y*/,
-                          const double /*_rot*/)
-  {
-    return false;
-  };
+  public: bool BeamAgent(const int _uNum, const std::string &_teamName,
+                         const double _x, const double _y, const double _rot);
 
   /// \brief Get the game's half.
   /// \return if the game is in the first half or if is in the second.
-  public: Half GetHalf() const
-  {
-    return Half::FIRST_HALF;
-  };
+  public: Half GetHalf() const;
 
   /// \brief Set the game half.
   /// \param[in] _newHalf Set the current half
-  public: void SetHalf(const Half /*_newHalf*/)
-  {
-  };
+  public: void SetHalf(const Half _newHalf);
 
   /// \brief Get the elapsed time in seconds since beginning of half.
   /// \param[in] _beginning If true, will return elapsed time always since
   /// first half
   /// \return The elapsed game time
-  public: double GetElapsedGameTime(const bool /*_beginning = false*/) const
-  {
-    return 0;
-  };
+  public: double GetElapsedGameTime(const bool _beginning = false) const;
 
   /// \brief Get the elapsed time in seconds since last cycle.
   /// \return The elapsed game time since last cycle
-  public: double GetElapsedCycleGameTime() const
-  {
-    return 0;
-  };
+  public: double GetElapsedCycleGameTime() const;
 
   /// \brief Set the game time.
   /// \param[in] _gameTime New game time
-  public: void SetGameTime(const double /*_gameTime*/)
-  {
-  };
+  public: void SetGameTime(const double _gameTime);
 
   /// \brief Get the game time.
   /// \return Current game time
-  public: double GetGameTime() const
-  {
-    return 0;
-  };
+  public: double GetGameTime() const;
 
   /// \brief Get the game time when play starts
   /// \return Time when game started
-  public: double GetStartGameTime() const
-  {
-    return 0;
-  };
+  public: double GetStartGameTime() const;
 
   /// \brief Set the game time when play starts
   /// \param[in] _startGameTime New start game time
-  public: void SetStartGameTime(const double /*_startGameTime*/)
-  {
-  };
+  public: void SetStartGameTime(const double _startGameTime);
 
   /// \brief Set the cycle counter
   /// \param[in] _cycleCounter New cycle counter
-  public: void SetCycleCounter(const int /*_cycleCounter*/)
-  {
-  };
+  public: void SetCycleCounter(const int _cycleCounter);
 
   /// \brief Get the cycle counter
   /// \return Current cycle count
-  public: int GetCycleCounter() const
-  {
-    return 0;
-  };
+  public: int GetCycleCounter() const;
 
   /// \brief Get the current state
   /// \return Shared_ptr to current state
-  public: std::shared_ptr<states::State> GetCurrentState() const
-  {
-    return nullptr;
-  };
+  public: std::shared_ptr<states::State> GetCurrentState() const;
 
   /// \brief Get the side of the team who last touched the ball.
   /// \return Pointer to the side of the team
-  public: Team::Side GetLastSideTouchedBall() const
-  {
-    return Team::Side::LEFT;
-  };
+  public: Team::Side GetLastSideTouchedBall() const;
 
   /// \brief Get the last ball contact
   /// \return Pointer to the last ball contact
-  public: std::shared_ptr<GameState::BallContact> GetLastBallContact() const
-  {
-    return nullptr;
-  };
+  public: std::shared_ptr<GameState::BallContact> GetLastBallContact() const;
 
   /// \brief Checks whether ball is in goal box or has intersected its front
   /// \param[in] _side Side of field to check on
   /// \return True if ball is in goal box or intersected its front
-  public: bool IsBallInGoal(Team::Side /*_side*/)
-  {
-    return false;
-  };
+  public: bool IsBallInGoal(Team::Side _side);
 
   /// \brief Method executed each time the game state changes.
   private: void Initialize();
@@ -677,6 +519,10 @@ class GameState
 
   /// \brief Flag whether to output groundtruth information during perception
   public: static bool groundTruthInfo;
+
+  /// \brief If agent is within this distance of the ball, for gameplay purposes
+  /// it counts as if the player is exactly on top of the ball
+  public: static const double kOnBallDist;
 
   /// \brief How long in game time is each cycle
   public: static const double kCounterCycleTime;

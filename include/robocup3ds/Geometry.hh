@@ -24,6 +24,9 @@
 /// \brief Squaring function
 #define G_SQUARE(a) ((a) * (a))
 
+/// \brief Calculates normal of plane given three points
+#define CALC_NORMAL(P_A, P_B, P_C) ((P_C - P_A).Cross(P_B - P_A)).Normalize()
+
 namespace Geometry
 {
   /// \brief Calculates the intersection between a line and a plane
