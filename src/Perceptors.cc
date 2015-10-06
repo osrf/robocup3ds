@@ -80,7 +80,7 @@ void Perceptor::SetViewFrustum(const double _hfov, const double _vfov)
 
 /////////////////////////////////////////////////
 const
-std::vector <ignition::math::Plane<double> > &Perceptor::GetViewFrustum()
+std::vector <ignition::math::Plane<double>> &Perceptor::GetViewFrustum() const
 {
   return this->viewFrustum;
 }
