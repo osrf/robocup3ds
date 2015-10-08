@@ -623,7 +623,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
       // getElapsedTime() << endl;
       if (gameState.GetGameTime() < GameState::SecondsKickOff)
       {
-        EXPECT_EQ(gameState.GetCurrentState()->name, state->GetName());
+        EXPECT_EQ(gameState.GetCurrentState()->name, state->name);
       }
       else
       {

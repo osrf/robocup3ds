@@ -292,6 +292,8 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
       sr = team->score;
     }
   }
+
+  //write out basic gamestate information
   cx += snprintf(_string + cx, _size - cx,
                  "(time (now %.2f)) (GS (unum %d) (team %s) "
                  "(t %.2f) (pm %s) (sl %d) (sr %d))",
@@ -301,44 +303,6 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
                  this->gameState->GetElapsedGameTime(true),
                  this->gameState->GetCurrentState()->name.c_str(),
                  sl, sr);
-
-  if (this->UpdatePerception())
-  {
-    // write out perception info
-    cx += snprintf(_string + cx, _size - cx, "(See");
-
-    // write out landmark info
-    for (const auto &kv : _agent.percept.landMarks)
-    {
-      cx += SerializePoint(kv.first.c_str(), kv.second,
-                           _string + cx, _size - cx);
-    }
-
-    // write out other agent body parts
-    for (const auto &kv : _agent.percept.otherAgentBodyMap)
-    {
-      cx += snprintf(_string + cx, _size - cx, " (P (team %s) (id %d)",
-                     kv.first.second.c_str(), kv.first.first);
-      for (const auto &kv2 : kv.second)
-      {
-        cx += SerializePoint(kv2.first.c_str(),
-                             kv2.second, _string + cx, _size - cx);
-      }
-      cx += snprintf(_string + cx, _size - cx, ")");
-    }
-
-    // write out fieldlines
-    for (const auto &fieldLine : _agent.percept.fieldLines)
-    {
-      cx += snprintf(_string + cx, _size - cx,
-                     " (L (pol %.2f %.2f %.2f) (pol %.2f %.2f %.2f))",
-                     fieldLine[0].X(), fieldLine[0].Y(), fieldLine[0].Z(),
-                     fieldLine[1].X(), fieldLine[1].Y(), fieldLine[1].Z());
-    }
-
-    // finish writing out perception info
-    cx += snprintf(_string + cx, _size - cx, ")");
-  }
 
   // write hear info
   if (_agent.percept.hear.isValid && _agent.percept.hear.self)
@@ -392,6 +356,44 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
                  _agent.percept.rightFootFR.second.Y(),
                  _agent.percept.rightFootFR.second.Z());
 
+  if (this->UpdatePerception())
+  {
+    // write out perception info
+    cx += snprintf(_string + cx, _size - cx, "(See");
+
+    // write out landmark info
+    for (const auto &kv : _agent.percept.landMarks)
+    {
+      cx += SerializePoint(kv.first.c_str(), kv.second,
+                           _string + cx, _size - cx);
+    }
+
+    // write out other agent body parts
+    for (const auto &kv : _agent.percept.otherAgentBodyMap)
+    {
+      cx += snprintf(_string + cx, _size - cx, " (P (team %s) (id %d)",
+                     kv.first.second.c_str(), kv.first.first);
+      for (const auto &kv2 : kv.second)
+      {
+        cx += SerializePoint(kv2.first.c_str(),
+                             kv2.second, _string + cx, _size - cx);
+      }
+      cx += snprintf(_string + cx, _size - cx, ")");
+    }
+
+    // write out fieldlines
+    for (const auto &fieldLine : _agent.percept.fieldLines)
+    {
+      cx += snprintf(_string + cx, _size - cx,
+                     " (L (pol %.2f %.2f %.2f) (pol %.2f %.2f %.2f))",
+                     fieldLine[0].X(), fieldLine[0].Y(), fieldLine[0].Z(),
+                     fieldLine[1].X(), fieldLine[1].Y(), fieldLine[1].Z());
+    }
+
+    // finish writing out perception info
+    cx += snprintf(_string + cx, _size - cx, ")");
+  }
+
   // write out ground truth information
   if (GameState::groundTruthInfo)
   {
@@ -426,24 +428,6 @@ int Perceptor::SerializePoint(const char *_label,
   return snprintf(_string, _size, " (%s (pol %.2f %.2f %.2f))",
                   _label, _pt.X(), _pt.Y(), _pt.Z());
 }
-
-// void Perceptor::SendToServer() const
-// {
-//   for (auto &team : this->gameState->teams)
-//   {
-//     for (auto &agent : team->members)
-//     {
-//       int cx = this->Serialize(agent, &(this->buffer.get())[4],
-//                                Perceptor::bufferSize - 4);
-//       unsigned int _cx = htonl(static_cast<unsigned int>(cx));
-//       this->buffer.get()[0] = _cx         & 0xff;
-//       this->buffer.get()[1] = (_cx >> 8)  & 0xff;
-//       this->buffer.get()[2] = (_cx >> 16) & 0xff;
-//       this->buffer.get()[3] = (_cx >> 24) & 0xff;
-//       this->server->Send(agent.socketID, this->buffer.get(), cx + 4);
-//     }
-//   }
-// }
 
 /////////////////////////////////////////////////
 ignition::math::Vector3<double> Perceptor::addNoise(
