@@ -45,6 +45,9 @@ void BeforeKickOffState::Update()
     this->Initialize();
   }
 
+  // This checks whether an agent is on the field, before starting the play mode
+  // timer. Doing so prevents the BeforeKickOff from transitioning to PlayOn
+  // without any players on the field
   bool agentOnField = false;
   for (const auto &team : this->gameState->teams)
   {
@@ -67,7 +70,7 @@ void BeforeKickOffState::Update()
     this->gameState->MoveBallToCenter();
   }
 
-  // After some time, go to play mode.
+  // After some time, go to kick off play mode
   if (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff)
   {
     if (this->gameState->GetHalf() == GameState::Half::FIRST_HALF)
