@@ -38,7 +38,7 @@ using namespace Util;
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
   gameState(_gameState),
-  currAgent(NULL),
+  currAgent(nullptr),
   currSocketId(-1)
 {
 }
