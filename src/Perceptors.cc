@@ -293,7 +293,7 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
     }
   }
 
-  //write out basic gamestate information
+  // write out basic gamestate information
   cx += snprintf(_string + cx, _size - cx,
                  "(time (now %.2f)) (GS (unum %d) (team %s) "
                  "(t %.2f) (pm %s) (sl %d) (sr %d))",
