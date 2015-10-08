@@ -53,10 +53,6 @@ namespace states
     /// \brief Update the state.
     public: virtual void Update();
 
-    /// \brief Returns the name of the state
-    /// \return Name of state
-    public: std::string GetName() const;
-
     /// \brief Checks whether agent contacts ball since Initialize() is called
     /// \return True if agent has contacted ball
     public: bool HasBallContactOccurred() const;
