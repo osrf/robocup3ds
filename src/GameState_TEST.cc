@@ -547,7 +547,20 @@ class GameStateTest_fullTeams : public GameStateTest_basic
 };
 
 /// \brief Test for whether beforeKickOff play mode transitions correctly
-TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff)
+/// without any players
+TEST_F(GameStateTest_basic, GameState_transition_beforeKickOff_kickOff_empty)
+{
+  EXPECT_EQ(gameState.GetHalf(), GameState::Half::FIRST_HALF);
+  while (gameState.GetGameTime() < 2*GameState::SecondsBeforeKickOff)
+  {
+    gameState.Update();
+    EXPECT_EQ(gameState.GetCurrentState()->name, "BeforeKickOff");
+  }
+}
+
+/// \brief Test for whether beforeKickOff play mode transitions correctly
+/// with full teams
+TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff_full)
 {
   // try first half
   EXPECT_EQ(gameState.GetHalf(), GameState::Half::FIRST_HALF);
@@ -610,7 +623,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
       // getElapsedTime() << endl;
       if (gameState.GetGameTime() < GameState::SecondsKickOff)
       {
-        EXPECT_EQ(gameState.GetCurrentState()->name, state->GetName());
+        EXPECT_EQ(gameState.GetCurrentState()->name, state->name);
       }
       else
       {
