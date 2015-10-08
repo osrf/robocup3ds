@@ -62,7 +62,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Function for loading robocupPlugin configuration variables
   /// \param[in] _config Map of configuration variables
   private: void LoadConfiguration(
-    const std::map<std::string, std::string> &_config) const;
+    const std::map<std::string, std::string> &_config);
 
   /// \brief Helper function to load custom gains and limits for PID controllers
   /// of each body type and joint
@@ -74,7 +74,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
                               const std::string &_bodyType,
                               const std::string &_jointName,
                               const std::map<std::string,
-                              std::string> &_config) const;
+                                             std::string> &_config) const;
 
   /// \brief Copies contact objects from the world contact manager to contacts
   private: void UpdateContactManager();
@@ -87,7 +87,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \param[in] _agent Agent object
   /// \param[in] _model Pointer to agent's model
   private: void InitJointController(const Agent &_agent,
-    const gazebo::physics::ModelPtr &_model);
+                                    const gazebo::physics::ModelPtr &_model);
 
   /// \brief Update the monitor effector
   private: void UpdateMonitorEffector();
@@ -110,14 +110,17 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: void UpdateGUIPlaymode(ConstGzStringPtr &_msg);
 
   /// \brief Port used for connecting client agents
-  public: static int clientPort;
+  public: int clientPort = 3100;
 
   /// \brief Port used for connecting monitors
-  public: static int monitorPort;
+  public: int monitorPort = 3200;
 
   /// \brief Flag whether to enable sync mode, with this enable, the plugin
   /// trys to update as fast as possible
-  public: static bool syncMode;
+  public: bool syncMode = false;
+
+  /// \brief Size of buffer in bytes
+  private: static const int kBufferSize = 16384;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
@@ -147,13 +150,10 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: std::shared_ptr<RCPServer> monitorServer;
 
   /// \brief Pointer to buffer for sending messages to server;
-  private: char* buffer;
+  private: char buffer[kBufferSize] = {0};
 
   /// \brief Gazebo simulation time when last update occurred
   private: double lastUpdateTime;
-
-  /// \brief Size of buffer in bytes
-  private: static const int kBufferSize;
 
   /// \brief Vector of all contacts received from contact manager
   private: std::vector<gazebo::physics::Contact> contacts;

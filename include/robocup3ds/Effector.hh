@@ -122,10 +122,10 @@ class Effector: public SocketParser
   protected: std::map<int, std::string> socketIDMessageMap;
 
   /// \brief Buffer for reading from socket
-  protected: char buffer[Effector::kBufferSize];
+  protected: char buffer[Effector::kBufferSize] = {0};
 
   /// \brief Buffer for reading from socket
-  protected: char sexpBuffer[Effector::kBufferSize];
+  protected: char sexpBuffer[Effector::kBufferSize]= {0};
 
   /// \brief Pointer to current agent whose message is being parsed
   protected: Agent* currAgent;
