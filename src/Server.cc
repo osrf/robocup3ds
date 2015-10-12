@@ -192,6 +192,7 @@ void RCPServer::RunReceptionTask()
     // (from anyone including ourselves).
     int pollReturnCode =
       poll(&this->pollSockets[0], this->pollSockets.size(), 500);
+
     if (pollReturnCode == -1)
     {
       std::cerr << "RCPServer::RunReceptionTask(): Polling error!" << std::endl;
@@ -246,7 +247,7 @@ void RCPServer::DispatchRequestOnMasterSocket()
   // Add the new socket to the list of sockets to poll.
   this->pollSockets.push_back(newSocketPollItem);
 
-  // Call connectCb().
+  // Call OnConnection().
   this->parser->OnConnection(newSocketFd);
 }
 
@@ -264,7 +265,7 @@ void RCPServer::DispatchRequestOnClientSocket()
       {
         int socket = this->pollSockets.at(i).fd;
 
-        // Call disconnectCb().
+        // Call OnDisconnection().
         this->parser->OnDisconnection(this->pollSockets.at(i).fd);
 
         // Remove the client from the list used by poll.
@@ -287,4 +288,16 @@ void RCPServer::DispatchRequestOnClientSocket()
       continue;
     }
   }
+}
+
+//////////////////////////////////////////////////
+int RCPServer::GetPort() const
+{
+  return this->port;
+}
+
+//////////////////////////////////////////////////
+void RCPServer::SetPort(const int _port)
+{
+  this->port = _port;
 }

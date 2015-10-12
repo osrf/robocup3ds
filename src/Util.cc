@@ -87,7 +87,7 @@ bool Util::LoadConfigParameter(
   else
   {
     gzerr << "LoadConfigParameter() failed to read the following key: "
-          << _key << "!" << std::endl;
+          << _key << ", using default values!" << std::endl;
   }
   return rValue;
 }
@@ -125,7 +125,7 @@ bool Util::LoadConfigParameterBool(
   else
   {
     gzerr << "LoadConfigParameterBool() failed to read the following key: "
-          << _key << "!" << std::endl;
+          << _key << ", using default values!" << std::endl;
   }
   return rValue;
 }
