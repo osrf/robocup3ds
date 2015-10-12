@@ -192,10 +192,10 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
     _sdf = _sdf->GetNextElement();
   }
 
-  gzmsg << "************loading config**************" << std::endl;
+  gzmsg << "************Loading config**************" << std::endl;
   this->gameState->LoadConfiguration(config);
   this->LoadConfiguration(config);
-  gzmsg << "************finished loading************" << std::endl;
+  gzmsg << "************Finished loading************" << std::endl;
 
   gzmsg << "Client port: " << Robocup3dsPlugin::clientPort << std::endl;
   gzmsg << "Monitor port: " << Robocup3dsPlugin::monitorPort << std::endl;
@@ -354,9 +354,10 @@ void Robocup3dsPlugin::UpdateEffector()
   for (const auto &agentName : this->effector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
-    gzmsg << "(" << this->world->GetSimTime().Double()
-          << ") agent removed from game world by client: "
-          << agentName << std::endl;
+    // Debug output:
+    // gzmsg << "(" << this->world->GetSimTime().Double()
+    //       << ") agent removed from game world by client: "
+    //       << agentName << std::endl;
   }
 
   // disconnect sockets for failed clients
@@ -426,9 +427,10 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
   for (const auto &agentName : this->monitorEffector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
-      gzmsg << "(" << this->world->GetSimTime().Double()
-            << ") agent removed from game world by monitor: "
-            << agentName << std::endl;
+    // Debug output:
+    // gzmsg << "(" << this->world->GetSimTime().Double()
+    //       << ") agent removed from game world by monitor: "
+    //       << agentName << std::endl;
   }
 }
 
@@ -509,6 +511,7 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
                                    gameState->GetCurrentState()->name));
       gameState->ballContactHistory.push_back(ballContact);
       break;
+      // Debug output:
       // gzmsg << "new ball contact: " << playerModel->GetName() <<
       //       " " << gameState->GetGameTime() << std::endl;
       // gzmsg << "total number of contacts: " <<
@@ -521,8 +524,6 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateGameState()
 {
-  // gzmsg << "UpdateGameState()" << std::endl;
-
   // sync gameState time and gaezbo world time
   this->gameState->SetGameTime(this->world->GetSimTime().Double());
 
@@ -536,9 +537,10 @@ void Robocup3dsPlugin::UpdateGameState()
       {
         agent.inSimWorld = true;
         this->InitJointController(agent, model);
-        gzmsg << "(" << this->world->GetSimTime().Double() <<
-              ") agent added to game world: " <<
-              model->GetName() << std::endl;
+        // Debug output:
+        // gzmsg << "(" << this->world->GetSimTime().Double()
+        //       << ") agent added to game world: "
+        //       << model->GetName() << std::endl;
       }
 
       // set agent pose in gameState
