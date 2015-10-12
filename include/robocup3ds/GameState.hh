@@ -520,6 +520,10 @@ class GameState
   /// \brief Flag whether to output groundtruth information during perception
   public: static bool groundTruthInfo;
 
+  /// \brief If agent is within this distance of the ball, for gameplay purposes
+  /// it counts as if the player is exactly on top of the ball
+  public: static const double kOnBallDist;
+
   /// \brief How long in game time is each cycle
   public: static const double kCounterCycleTime;
 

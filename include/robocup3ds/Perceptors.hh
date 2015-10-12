@@ -15,12 +15,12 @@
  *
 */
 
-#ifndef _GAZEBO_PERCEPTORS_HH_
-#define _GAZEBO_PERCEPTORS_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_PERCEPTORS_HH_
+#define _GAZEBO_ROBOCUP3DS_PERCEPTORS_HH_
 
-#include <ignition/math.hh>
 #include <string>
 #include <vector>
+#include <ignition/math.hh>
 
 #include "robocup3ds/Geometry.hh"
 
@@ -39,12 +39,15 @@ class Perceptor
   /// \brief Destructor for Perceptor object
   public: ~Perceptor() = default;
 
-  /// \brief Method used to set view frustum based on HFov, VFov
-  public: void SetViewFrustum();
+  /// \brief Method used to set view frustum
+  /// \param[in] _hfov Horizontal field of view in degrees
+  /// \param[in] _vfov Vertical field of view in degrees
+  public: void SetViewFrustum(const double _hfov, const double _vfov);
 
   /// \brief Method used to get view frustum
   /// \return A vector of planes of the view frustum
-  public: std::vector <ignition::math::Plane<double>> &GetViewFrustum();
+  public: const std::vector <ignition::math::Plane<double>>
+                &GetViewFrustum() const;
 
   /// \brief Set the transformation matrix from global to local
   /// coordinates for an agent
@@ -78,16 +81,14 @@ class Perceptor
   /// \param[out] _agent Agent whose perception we are updating
   public: void UpdateAgentHear(Agent &_agent) const;
 
-  /// \brief Function to send messages to server
-  // public: void SendToServer() const;
-
   /// \brief Function to convert perception information to s-expressions
   /// and write it to a string
   /// \param[in] _agent Agent whose perception we are updating
-  /// \param[in] _string Buffer we are writing to
+  /// \param[out] _string Buffer we are writing to
+  /// \param[in] _size Size of the buffer
   /// \return True if buffer is large enough
   public: int Serialize(const Agent &_agent, char *_string,
-                          const int _size) const;
+                        const int _size) const;
 
   /// \brief Converts points to a string
   /// \param[in] _label Label for point
@@ -124,10 +125,6 @@ class Perceptor
   /// (every x gamestate cycles)
   public: static int updateVisualFreq;
 
-  /// \brief Frequency at which we update the hearing
-  /// (every x gamestate cycles)
-  public: static int updateHearFreq;
-
   /// \brief Flag whether to add noise to observations or not
   public: static bool useNoise;
 
@@ -136,6 +133,10 @@ class Perceptor
 
   /// \brief Multiplier for the distance noise
   public: static const double kDistNoiseScale;
+
+  /// \brief Frequency at which we update the hearing for each side
+  /// (every 2 gamestate cycles)
+  public: static const int kUpdateHearFreq;
 
   /// \brief A constant noise that is added to all observations
   private: static const ignition::math::Vector3<double> kFixedNoise;
@@ -151,7 +152,7 @@ class Perceptor
 
   /// \brief View frustum
   /// We model view frustum as a vector of four planes
-  private: std::vector <ignition::math::Plane<double> > viewFrustum;
+  private: std::vector <ignition::math::Plane<double>> viewFrustum;
 };
 
 #endif
