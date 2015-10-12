@@ -46,7 +46,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
 
   this->AddSimTimeWidget(frameLayout);
   this->AddGameStateWidget(frameLayout);
-  this->AddComboBox(frameLayout);
+  this->AddPlaymodeWidget(frameLayout);
   this->AddTeamWidget(frameLayout);
 
   // Add frameLayout to the frame
@@ -63,7 +63,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
 
   // Position and resize this widget
   this->move(12, 12);
-  this->resize(1300, 30);
+  this->resize(1500, 30);
 
   // Create a node for transportation
   this->node = transport::NodePtr(new transport::Node());
@@ -111,6 +111,7 @@ void Robocup3dsGUIPlugin::AddGameStateWidget(QHBoxLayout *_frameLayout)
 
   QLabel *label2 = new QLabel(tr("Playmode:"));
   QLabel *playmodeLabel = new QLabel();
+  playmodeLabel->setMinimumWidth(200);
   _frameLayout->addWidget(label2);
   _frameLayout->addWidget(playmodeLabel);
   connect(this, SIGNAL(SetPlaymode(QString)),
@@ -123,24 +124,22 @@ void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
   _frameLayout->addSpacerItem(new QSpacerItem(0, 1, QSizePolicy::Expanding));
 
   QLabel *teamLabel = new QLabel();
-  teamLabel->setStyleSheet(
-    "QLabel { color : #99FFFF; }");
+  teamLabel->setStyleSheet("QLabel {color : #99FFFF;}");
   _frameLayout->addWidget(teamLabel);
-  connect(this, SIGNAL(SetTeam(QString)),
+  connect(this, SIGNAL(SetLeftTeam(QString)),
           teamLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
   _frameLayout->addSpacerItem(new QSpacerItem(30, 1, QSizePolicy::Fixed));
 
   QLabel *teamLabel2 = new QLabel();
-  teamLabel2->setStyleSheet(
-    "QLabel { color : #FFCCFF; }");
+  teamLabel2->setStyleSheet("QLabel {color : #FFCCFF;}");
   _frameLayout->addWidget(teamLabel2);
-  connect(this, SIGNAL(SetTeam2(QString)),
+  connect(this, SIGNAL(SetRightTeam(QString)),
           teamLabel2, SLOT(setText(QString)), Qt::QueuedConnection);
 }
 
 /////////////////////////////////////////////////
-void Robocup3dsGUIPlugin::AddComboBox(QHBoxLayout *_frameLayout)
+void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
 {
   QLabel *label = new QLabel(tr("Select: "));
   QComboBox *comboBox = new QComboBox(this);
@@ -193,8 +192,8 @@ void Robocup3dsGUIPlugin::OnGameState(ConstGzStringPtr &_msg)
   this->SetGameTime(QString::fromStdString(stream.str()));
 
   i = rawString.find("$");
-  this->SetTeam(QString::fromStdString(rawString.substr(0, i)));
-  this->SetTeam2(QString::fromStdString(rawString.substr(i + 1)));
+  this->SetLeftTeam(QString::fromStdString(rawString.substr(0, i)));
+  this->SetRightTeam(QString::fromStdString(rawString.substr(i + 1)));
 }
 
 /////////////////////////////////////////////////
