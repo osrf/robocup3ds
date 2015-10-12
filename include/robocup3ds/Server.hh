@@ -94,7 +94,8 @@ class RCPServer
   /// \brief Enable the server.
   public: void Start();
 
-  /// \brief Get the port the server is using
+  /// \brief Get the port the server is using.
+  /// \return The port number.
   public: int GetPort() const;
 
   /// \brief Set the port the server is using
