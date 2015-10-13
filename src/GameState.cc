@@ -10,7 +10,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES or CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions &&
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
 */
@@ -78,6 +78,7 @@ double GameState::HFov = 120;
 double GameState::VFov = 120;
 bool   GameState::restrictVision = true;
 bool   GameState::groundTruthInfo = false;
+const double GameState::kOnBallDist = 0.001;
 const double GameState::kCounterCycleTime = 0.02;
 const double GameState::kDropBallRadiusMargin = 0.5;
 const double GameState::kBeamNoise = 0.1;
@@ -342,11 +343,13 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
         // Move the player if it's close enough to the ball.
         if (agent.pos.Distance(this->ballPos) < GameState::dropBallRadius)
         {
-          if (fabs(agent.pos.X() - this->ballPos.X()) < 0.001 &&
-              fabs(agent.pos.Y() - this->ballPos.Y()) < 0.001)
+          if (fabs(agent.pos.X() - this->ballPos.X()) < GameState::kOnBallDist
+              && fabs(agent.pos.Y() - this->ballPos.Y()) <
+              GameState::kOnBallDist)
           {
-            agent.pos.Set(agent.pos.X() + 0.002,
-                          agent.pos.Y() + 0.002, agent.pos.Z());
+            agent.pos.Set(agent.pos.X() + 2*GameState::kOnBallDist,
+                          agent.pos.Y() + 2*GameState::kOnBallDist,
+                          agent.pos.Z());
           }
           math::Line3<double> line(agent.pos, this->ballPos);
           math::Vector3<double> newPos;
@@ -371,7 +374,6 @@ void GameState::DropBallImpl(const Team::Side _teamAllowed)
     }
   }
 }
-
 
 /////////////////////////////////////////////////
 void GameState::CheckTiming()
@@ -433,7 +435,7 @@ bool GameState::IsBallInGoal(Team::Side _side)
   if (intersect && t > 0 && t < 1 && fabs(pt.Y()) < SoccerField::kHalfGoalWidth
       && pt.Z() > 0 && pt.Z() < SoccerField::kGoalHeight)
   {
-    return true;
+    return intersect;
   }
 
   return false;
@@ -646,9 +648,9 @@ bool GameState::SortDist(const AgentDist &_i, const AgentDist &_j)
 void GameState::CheckCrowding()
 {
   bool enableCrowding = false;
-  for (auto &team : this->teams)
+  for (auto const &team : this->teams)
   {
-    for (auto &agent : team->members)
+    for (auto const &agent : team->members)
     {
       if (agent.pos.Distance(ballPos) < GameState::crowdingEnableRadius)
       {
