@@ -945,10 +945,10 @@ void GameState::MoveBallToCenter()
 }
 
 /////////////////////////////////////////////////
-void GameState::MoveBallForGoalKick()
+void GameState::MoveBallForGoalKick(const Team::Side _side)
 {
   double newX = SoccerField::kHalfFieldWidth - 1.0;
-  if (ballPos.X() < 0)
+  if (_side == Team::Side::LEFT)
   {
     newX = -newX;
   }
