@@ -134,6 +134,10 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
   try
   {
     const auto &keyName = "pid_" + _bodyType + "_" + _jointName;
+
+    if (_config.find(keyName) == _config.end())
+      return;
+
     ss << _config.at(keyName);
     double i;
     while (ss >> i)

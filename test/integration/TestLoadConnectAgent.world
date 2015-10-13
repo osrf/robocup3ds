@@ -44,9 +44,7 @@
       <uri>model://robocup_3Dsim_ball</uri>
     </include>
 
-    <!-- Load the plugin for Razer Hydra -->
-    <!--<plugin name="hydra" filename="libHydraPlugin.so"></plugin>-->
-
+    <!-- Load the RoboCup 3D plugin -->
     <plugin name="robocup3dplugin" filename="librobocup3dsPlugin.so">
       <robocup3dsplugin_syncmode>false</robocup3dsplugin_syncmode>
       <gamestate_immobilitytimelimit>7</gamestate_immobilitytimelimit>

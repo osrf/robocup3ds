@@ -15,83 +15,69 @@
  *
 */
 
-
 #include <gtest/gtest.h>
 #include <chrono>
-#include <gazebo/physics/World.hh>
-#include <gazebo/test/ServerFixture.hh>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
+#include <gazebo/physics/World.hh>
+#include <gazebo/test/ServerFixture.hh>
 #include <ignition/math.hh>
-
 #include "robocup3ds/ClientAgent.hh"
 
 using namespace ignition;
-using namespace std;
 
 class IntegrationTest : public gazebo::ServerFixture
 {
-  public:
-    void Wait(const int _msec = 500)
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(_msec));
-    }
+  public: void Wait(const int _msec = 500)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(_msec));
+  }
 
-  public:
-    void LoadWorld(const std::string &_path)
-    {
-      this->Load(_path);
-      this->world = gazebo::physics::get_world("default");
-      EXPECT_TRUE(this->world != NULL);
-    }
+  public: void LoadWorld(const std::string &_path)
+  {
+    this->Load(_path);
+    this->world = gazebo::physics::get_world("default");
+    EXPECT_TRUE(this->world != NULL);
+  }
 
-  public:
-    virtual void SetUp()
-    {
-      std::cerr << "Setting Up Test" << endl;
-      this->agent = make_shared<ClientAgent>(
-                      "0.0.0.0", 3100, 3200, 1, "red", "left");
-      this->oppAgent = make_shared<ClientAgent>(
-                         "0.0.0.0", 3100, 3200, 1, "blue", "right");
-      this->Wait();
-    }
+  public: virtual void SetUp()
+  {
+    this->agent = std::make_shared<ClientAgent>(
+                    "0.0.0.0", 3100, 3200, 1, "red", "left");
+    this->oppAgent = std::make_shared<ClientAgent>(
+                       "0.0.0.0", 3100, 3200, 1, "blue", "right");
+    this->Wait();
+  }
 
-  public:
-    virtual void TearDown()
-    {
-      std::cerr << "Tearing Down Test" << endl;
-      this->agent.reset();
-      this->oppAgent.reset();
-      this->world.reset();
-      gazebo::ServerFixture::TearDown();
-      this->Wait();
-    }
+  public: virtual void TearDown()
+  {
+    this->agent.reset();
+    this->oppAgent.reset();
+    this->world.reset();
+    gazebo::ServerFixture::TearDown();
+    this->Wait();
+  }
 
-  public:
-    const std::string testPath =
-      "../test/integration/";
+  public: const std::string testPath = "../test/integration/";
 
-  public:
-    shared_ptr<ClientAgent> agent;
+  public: std::shared_ptr<ClientAgent> agent;
 
-  public:
-    shared_ptr<ClientAgent> oppAgent;
+  public: std::shared_ptr<ClientAgent> oppAgent;
 
-  public:
-    gazebo::physics::WorldPtr world;
+  public: gazebo::physics::WorldPtr world;
 };
 
 
-/// \brief This tests whether loading the world plugin is successful or not
+/// \brief This tests whether loading the world plugin is successful or not.
 TEST_F(IntegrationTest, TestLoadWorldPlugin)
 {
   this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
   SUCCEED();
 }
 
-/// \brief This tests whether two agents can successfully connect,
-/// init, and beam
+/// \brief This tests whether two agents can successfully connect, init, beam.
 TEST_F(IntegrationTest, TestLoadConnectAgent)
 {
   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
@@ -111,7 +97,6 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
 
   EXPECT_GT(this->agent->allMsgs.size(), 0u);
   auto lastMsg = this->agent->allMsgs.back();
-  std::cerr << lastMsg << endl;
   EXPECT_NE(lastMsg.find("GS"), std::string::npos);
   EXPECT_NE(lastMsg.find("BeforeKickOff"), std::string::npos);
   EXPECT_NE(lastMsg.find("myorien"), std::string::npos);
@@ -133,7 +118,6 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
 
   EXPECT_GT(this->oppAgent->allMsgs.size(), 0u);
   lastMsg = this->oppAgent->allMsgs.back();
-  std::cerr << lastMsg << endl;
   EXPECT_NE(lastMsg.find("GS"), std::string::npos);
   EXPECT_NE(lastMsg.find("BeforeKickOff"), std::string::npos);
   EXPECT_NE(lastMsg.find("myorien"), std::string::npos);
@@ -151,7 +135,7 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
   EXPECT_TRUE(see);
 }
 
-/// \brief This tests whether monitor messages work
+/// \brief This tests whether monitor messages work.
 TEST_F(IntegrationTest, TestMonitor)
 {
   this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
@@ -167,15 +151,12 @@ TEST_F(IntegrationTest, TestMonitor)
   }
 
   const auto &lastMsg = this->agent->allMsgs.back();
-  std::cerr << lastMsg << endl;
   EXPECT_NE(lastMsg.find("PlayOn"), std::string::npos);
 
-  // test that MoveBall and MoveAgent works
+  // test that MoveBall and MoveAgent work.
   this->agent->MoveBall(math::Vector3d(1.35, 5.69, 0.042));
   this->agent->MoveAgent(math::Vector3d(-7.35, -11.69, 0.35));
   this->Wait();
-  // const auto &lastMsg2 = this->agent->allMsgs.back();
-  // std::cerr << lastMsg2 << endl;
 
   bool gd = false;
   for (const auto &msg : this->agent->allMsgs)
@@ -201,8 +182,6 @@ TEST_F(IntegrationTest, TestMonitor)
     currMsgCount = this->agent->allMsgs.size();
   }
   EXPECT_LE(currMsgCount - numMessages, 3u);
-  std::cerr << "num msgs before kill: " << numMessages
-            << " num msgs after kill: " << currMsgCount << endl;
 }
 
 /// \brief This tests whether we can transition from playOn to kickin
@@ -219,12 +198,11 @@ TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
   this->Wait(2500);
 
   const auto &lastMsg = this->agent->allMsgs.back();
-  // std::std::cerr << lastMsg << std::endl;
   EXPECT_NE(lastMsg.find("KickInRight"), std::string::npos);
 }
 
-/// \brief This tests whether we can transition from kickOff to playOn and then
-/// back to kick off due to double touch violation
+/// \brief Test whether we can transition from kickOff to playOn and then
+/// back to kick off due to double touch violation.
 TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
 {
   this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
@@ -254,6 +232,7 @@ TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
   EXPECT_TRUE(kickOffRight);
 }
 
+//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   // Set a specific seed to avoid occasional test failures due to
