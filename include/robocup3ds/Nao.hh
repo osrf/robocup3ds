@@ -274,4 +274,183 @@ class NaoOfficialBT : public NaoBT
   };
 };
 
+/// \brief The Nao type Zero from Simspark
+class NaoSimsparkBT : public NaoBT
+{
+  // Documentation inherited
+  public: virtual double Height() const
+  {
+    return 0.6;
+  }
+
+  // Documentation inherited
+  public: virtual double TorsoHeight() const
+  {
+    return 0.39;
+  }
+
+  // Documentation inherited
+  public: virtual const std::map<std::string, std::string>& BodyPartMap() const
+  {
+    return this->kBodyPartMap;
+  }
+
+  // Documentation inherited
+  public: virtual
+  const std::map<std::string, std::string>& HingeJointEffectorMap() const
+  {
+    return this->hingeJointEffectorMap;
+  }
+
+  // Documentation inherited
+  public: virtual const std::map<std::string, std::string>&
+  HingeJointPerceptorMap() const
+  {
+    return this->hingeJointPerceptorMap;
+  }
+
+  // Documentation inherited
+  public: virtual std::map<std::string, gazebo::common::PID>&
+  HingeJointPIDMap()
+  {
+    return this->hingeJointPIDMap;
+  }
+
+  // Documentation inherited
+  public: virtual std::string CameraLinkName() const
+  {
+    return "Head";
+  }
+
+  // Documentation inherited
+  public: virtual std::string TorsoLinkName() const
+  {
+    return "base_link";
+  }
+
+  // Documentation inherited
+  public: virtual std::string LeftFootLinkName() const
+  {
+    return "l_sole";
+  }
+
+  // Documentation inherited
+  public: virtual std::string RightFootLinkName() const
+  {
+    return "r_sole";
+  }
+
+  // Documentation inherited
+  public: virtual std::string DefaultModelName() const
+  {
+    return "naoType0";
+  }
+
+  // Documentation inherited
+  public: virtual std::string BlueModelPath() const
+  {
+    return "model://nao_type_zero";
+  }
+
+  // Documentation inherited
+  public: virtual std::string RedModelPath() const
+  {
+    return "model://nao_type_zero";
+  }
+
+  // Documentation inherited
+  protected: const std::map<std::string, std::string> kBodyPartMap =
+  {
+    {"head", "Head"},
+    {"llowerarm", "LForeArm"},
+    {"rlowerarm", "RForeArm"},
+    {"lfoot", "l_sole"},
+    {"rfoot", "r_sole"}
+  };
+
+  // Documentation inherited
+  protected: const
+  std::map<std::string, std::string> hingeJointEffectorMap =
+  {
+    {"he1", "HeadYaw"},
+    {"he2", "HeadPitch"},
+    {"lae1", "LShoulderPitch"},
+    {"lae2", "LShoulderRoll"},
+    {"lae3", "LElbowYaw"},
+    {"lae4", "LElbowRoll"},
+    {"lle1", "LHipYawPitch"},
+    {"lle2", "LHipRoll"},
+    {"lle3", "LHipPitch"},
+    {"lle4", "LKneePitch"},
+    {"lle5", "LAnklePitch"},
+    {"lle6", "LAnkleRoll"},
+    {"rle1", "RHipYawPitch"},
+    {"rle2", "RHipRoll"},
+    {"rle3", "RHipPitch"},
+    {"rle4", "RKneePitch"},
+    {"rle5", "RAnklePitch"},
+    {"rle6", "RAnkleRoll"},
+    {"rae1", "RShoulderPitch"},
+    {"rae2", "RShoulderRoll"},
+    {"rae3", "RElbowYaw"},
+    {"rae4", "RElbowRoll"}
+  };
+
+  // Documentation inherited
+  protected: const std::map<std::string, std::string>
+  hingeJointPerceptorMap =
+  {
+    {"hj1", "HeadYaw"},
+    {"hj2", "HeadPitch"},
+    {"laj1", "LShoulderPitch"},
+    {"laj2", "LShoulderRoll"},
+    {"laj3", "LElbowYaw"},
+    {"laj4", "LElbowRoll"},
+    {"llj1", "LHipYawPitch"},
+    {"llj2", "LHipRoll"},
+    {"llj3", "LHipPitch"},
+    {"llj4", "LKneePitch"},
+    {"llj5", "LAnklePitch"},
+    {"llj6", "LAnkleRoll"},
+    {"rlj1", "RHipYawPitch"},
+    {"rlj2", "RHipRoll"},
+    {"rlj3", "RHipPitch"},
+    {"rlj4", "RKneePitch"},
+    {"rlj5", "RAnklePitch"},
+    {"rlj6", "RAnkleRoll"},
+    {"raj1", "RShoulderPitch"},
+    {"raj2", "RShoulderRoll"},
+    {"raj3", "RElbowYaw"},
+    {"raj4", "RElbowRoll"}
+  };
+
+  // documentation inherited
+  protected: std::map<std::string, gazebo::common::PID>
+  hingeJointPIDMap =
+  {
+      {"HeadYaw", gazebo::common::PID(160, 160, 0)},
+      {"HeadPitch", gazebo::common::PID(160, 160, 0)},
+      {"LShoulderPitch", gazebo::common::PID(160, 160, 0)},
+      {"LShoulderRoll", gazebo::common::PID(160, 160, 0)},
+      {"LElbowYaw", gazebo::common::PID(160, 160, 0)},
+      {"LElbowRoll", gazebo::common::PID(160, 160, 0)},
+      {"LHipYawPitch", gazebo::common::PID(160, 160, 0)},
+      {"LHipRoll", gazebo::common::PID(160, 160, 0)},
+      {"LHipPitch", gazebo::common::PID(400, 400, 0)},
+      {"LKneePitch", gazebo::common::PID(400, 400, 0)},
+      {"LAnklePitch", gazebo::common::PID(400, 400, 0)},
+      {"LAnkleRoll", gazebo::common::PID(160, 160, 0)},
+      {"RHipYawPitch", gazebo::common::PID(160, 160, 0)},
+      {"RHipRoll", gazebo::common::PID(160, 160, 0)},
+      {"RHipPitch", gazebo::common::PID(400, 400, 0)},
+      {"RKneePitch", gazebo::common::PID(400, 400, 0)},
+      {"RAnklePitch", gazebo::common::PID(400, 400, 0)},
+      {"RAnkleRoll", gazebo::common::PID(160, 160, 0)},
+      {"RShoulderPitch", gazebo::common::PID(160, 160, 0)},
+      {"RShoulderRoll", gazebo::common::PID(160, 160, 0)},
+      {"RElbowYaw", gazebo::common::PID(160, 160, 0)},
+      {"RElbowRoll", gazebo::common::PID(160, 160, 0)}
+  };
+};
+
 #endif
