@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Open Source Robotics Foundation
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,17 +41,17 @@ namespace gazebo
     /// \param[in] _string String representation of sim time.
     signals: void SetSimTime(QString _string);
 
-    /// \brief A signal used to set the game state
+    /// \brief A signal used to set the game time
     /// \param[in] _string String representation of game time.
     signals: void SetGameTime(QString _string);
 
     /// \brief A signal used to set the left team
     /// \param[in] _string String representation of left team.
-    signals: void SetTeam(QString _string);
+    signals: void SetLeftTeam(QString _string);
 
     /// \brief A signal used to set the right team
     /// \param[in] _string String representation of right team.
-    signals: void SetTeam2(QString _string);
+    signals: void SetRightTeam(QString _string);
 
     /// \brief A signal used to set the play mode
     /// \param[in] _string String representation of play mode.
@@ -79,7 +79,7 @@ namespace gazebo
 
     /// \brief Helper method to add a playmode combo box widget
     /// \param[in] _frameLayout Pointer to frame layout object
-    protected: void AddComboBox(QHBoxLayout *_frameLayout);
+    protected: void AddPlaymodeWidget(QHBoxLayout *_frameLayout);
 
     /// \brief Helper function callback for playmode combobox
     /// \param[in] _text Text of current selection

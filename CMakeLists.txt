@@ -251,12 +251,12 @@ else (build_errors)
   if (BUILD_ROBOCUP3DS)
     set(TEST_TYPE "UNIT")
     add_subdirectory(deps)
+    add_subdirectory(gui)
     add_subdirectory(include)
     add_subdirectory(src)
     add_subdirectory(test)
     add_subdirectory(worlds)
     add_subdirectory(models)
-    add_subdirectory(gui)
   endif (BUILD_ROBOCUP3DS)
 
   ########################################
