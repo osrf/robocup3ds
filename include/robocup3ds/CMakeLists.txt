@@ -2,6 +2,8 @@ include (${project_cmake_dir}/Utils.cmake)
 
 set (headers
   Agent.hh
+  Effector.hh
+  GameState.hh
   Geometry.hh
   Nao.hh
   Robocup3dsPlugin.hh

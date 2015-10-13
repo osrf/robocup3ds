@@ -35,24 +35,17 @@
 using namespace ignition;
 using namespace Util;
 
-const int Effector::kBufferSize = 16384;
-
 //////////////////////////////////////////////////
 Effector::Effector(GameState *const _gameState):
   gameState(_gameState),
-  currAgent(NULL),
+  currAgent(nullptr),
   currSocketId(-1)
 {
-  // Initialize global variables
-  this->buffer = new char[Effector::kBufferSize];
-  this->sexpBuffer = new char[Effector::kBufferSize];
 }
 
 //////////////////////////////////////////////////
 Effector::~Effector()
 {
-  delete[] this->buffer;
-  delete[] this->sexpBuffer;
 }
 
 //////////////////////////////////////////////////
@@ -112,8 +105,7 @@ bool Effector::Parse(int _socket)
     this->socketIDMessageMap[_socket]
       = this->socketIDMessageMap[_socket] + msg;
   }
-  // std::cerr << "socket id and msg: " << _socket << std::endl;
-  // std::cerr << this->socketIDMessageMap[_socket] << std::endl;
+
   return true;
 }
 
@@ -123,8 +115,7 @@ void Effector::ParseMessage(const std::string &_msg)
   sexp_t *exp;
 
   // Create a s-expression message using the received pile of s-expressions
-  snprintf(this->sexpBuffer, Effector::kBufferSize, "(msg %s)",
-           _msg.c_str());
+  snprintf(this->sexpBuffer, Effector::kBufferSize, "(msg %s)", _msg.c_str());
 
   // use parse_sexp() from s-expression library
   exp = parse_sexp(this->sexpBuffer, _msg.length() + 6);
@@ -329,7 +320,6 @@ void Effector::ParseSay(sexp_t *_exp)
     this->currAgent->team->say.pos = this->currAgent->pos;
   }
 }
-
 
 //////////////////////////////////////////////////
 void Effector::ParseInit(sexp_t *_exp)

@@ -23,21 +23,21 @@
 #include <cstdlib>
 #include <map>
 #include <memory>
+#include <string>
+#include <vector>
 #include <gazebo/gazebo.hh>
-#include <gazebo/physics/Collision.hh>
 #include <gazebo/msgs/msgs.hh>
+#include <gazebo/physics/Collision.hh>
 #include <gazebo/physics/Contact.hh>
 #include <gazebo/physics/ContactManager.hh>
 #include <gazebo/physics/JointController.hh>
-#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
+#include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/physics/World.hh>
 #include <gazebo/transport/TransportTypes.hh>
 #include <ignition/math.hh>
-#include <string>
 #include <sdf/sdf.hh>
-#include <vector>
 
 #include "robocup3ds/Effector.hh"
 #include "robocup3ds/GameState.hh"
@@ -54,10 +54,8 @@ using namespace gazebo;
 using namespace common;
 using namespace Util;
 
-int Robocup3dsPlugin::clientPort        = 3100;
-int Robocup3dsPlugin::monitorPort       = 3200;
-bool Robocup3dsPlugin::syncMode         = false;
-const int Robocup3dsPlugin::kBufferSize = 16384;
+const double Robocup3dsPlugin::kPID_I_LIMIT = 1.0;
+const double Robocup3dsPlugin::kPID_CMD_LIMIT = 1000.0;
 
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
@@ -75,8 +73,6 @@ Robocup3dsPlugin::Robocup3dsPlugin():
                   this->monitorEffector)),
   lastUpdateTime(-GameState::kCounterCycleTime)
 {
-  this->buffer = new char[Robocup3dsPlugin::kBufferSize];
-
   // initialize transport and publisher
   this->gzNode = transport::NodePtr(new transport::Node());
   this->gzNode->Init();
@@ -85,32 +81,31 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   this->playmodeSub = this->gzNode->Subscribe(
                         "~/robocup3dsGUI/playmode",
                         &Robocup3dsPlugin::UpdateGUIPlaymode, this);
-  gzmsg << "Robocup Plugin for Gazebo Started" << std::endl;
+  gzmsg << "Robocup 3D plugin started" << std::endl;
 }
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::~Robocup3dsPlugin()
 {
-  delete[] this->buffer;
 }
 
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::LoadConfiguration(
-  const std::map<std::string, std::string> &_config) const
+  const std::map<std::string, std::string> &_config)
 {
   double value;
   bool boolValue;
   if (LoadConfigParameter(_config, "robocup3dsplugin_monitorport", value))
   {
-    Robocup3dsPlugin::monitorPort = static_cast<int>(value);
+    this->monitorPort = static_cast<int>(value);
   }
   if (LoadConfigParameter(_config, "robocup3dsplugin_clientport", value))
   {
-    Robocup3dsPlugin::clientPort = static_cast<int>(value);
+    this->clientPort = static_cast<int>(value);
   }
   if (LoadConfigParameterBool(_config, "robocup3dsplugin_syncmode", boolValue))
   {
-    Robocup3dsPlugin::syncMode = boolValue;
+    this->syncMode = boolValue;
   }
 
   for (const auto &kv : this->gameState->agentBodyTypeMap)
@@ -132,7 +127,7 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
                                      const std::string &_bodyType,
                                      const std::string &_jointName,
                                      const std::map<std::string,
-                                     std::string> &_config) const
+                                                    std::string> &_config) const
 {
   std::stringstream ss;
   std::vector<double> params;
@@ -158,7 +153,7 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
     return;
   }
 
-  if (params.size() != 5u)
+  if (params.size() != 3u)
   {
     gzerr << "LoadPIDParams() cannot parse PID params for "
           + _jointName + " in " + _bodyType
@@ -173,10 +168,10 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
   _pid.SetPGain(params[0]);
   _pid.SetIGain(params[1]);
   _pid.SetDGain(params[2]);
-  _pid.SetIMax(params[3]);
-  _pid.SetIMin(-params[3]);
-  _pid.SetCmdMax(params[4]);
-  _pid.SetCmdMin(-params[4]);
+  _pid.SetIMax(Robocup3dsPlugin::kPID_I_LIMIT);
+  _pid.SetIMin(-Robocup3dsPlugin::kPID_I_LIMIT);
+  _pid.SetCmdMax(Robocup3dsPlugin::kPID_CMD_LIMIT);
+  _pid.SetCmdMin(-Robocup3dsPlugin::kPID_CMD_LIMIT);
 }
 
 /////////////////////////////////////////////////
@@ -200,15 +195,14 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
     _sdf = _sdf->GetNextElement();
   }
 
-  gzmsg << "************loading config**************" << std::endl;
+  gzmsg << "************Loading config**************" << std::endl;
   this->gameState->LoadConfiguration(config);
-  this->perceptor->SetViewFrustum(GameState::HFov, GameState::VFov);
   this->LoadConfiguration(config);
-  gzmsg << "************finished loading************" << std::endl;
+  gzmsg << "************Finished loading************" << std::endl;
 
-  gzmsg << "client port: " << Robocup3dsPlugin::clientPort << std::endl;
-  gzmsg << "monitor port: " << Robocup3dsPlugin::monitorPort << std::endl;
-  gzmsg << "sync mode status: " << Robocup3dsPlugin::syncMode << std::endl;
+  gzmsg << "Client port: " << this->clientPort << std::endl;
+  gzmsg << "Monitor port: " << this->monitorPort << std::endl;
+  gzmsg << "Sync mode status: " << this->syncMode << std::endl;
 
   // connect to the update event.
   if (!Robocup3dsPlugin::syncMode)
@@ -260,8 +254,8 @@ void Robocup3dsPlugin::PublishGameInfo()
     " " + this->gameState->GetCurrentState()->name;
   for (const auto &team : this->gameState->teams)
   {
-    _stateMsg += "$" + team->name + " (" + Team::GetSideAsString(
-                   team->side) + ") (Score: " + std::to_string(team->score)
+    _stateMsg += "$" + team->name + " (" + Team::GetSideAsString(team->side)
+                 + ") (Score: " + std::to_string(team->score)
                  + ") (# of Players: " +
                  std::to_string(team->members.size()) + ")";
   }
@@ -345,7 +339,6 @@ void Robocup3dsPlugin::UpdateEffector()
   for (const auto &agentPtr : this->effector->agentsToAdd)
   {
     std::string path = agentPtr->bodyType->BlueModelPath();
-
     if (this->gameState->teams.at(1) == agentPtr->team)
     {
       path = agentPtr->bodyType->RedModelPath();
@@ -440,9 +433,6 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
   for (const auto &agentName : this->monitorEffector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
-    gzmsg << "(" << this->world->GetSimTime().Double() <<
-          ") agent removed from game world by monitor: " <<
-          agentName << std::endl;
   }
 }
 
@@ -510,9 +500,6 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
     {
       lastBallContact->contactTime = gameState->GetGameTime();
       break;
-      // gzmsg << "last ball contact updated: " << playerModel->GetName() <<
-      //       " " << gameState->GetGameTime() << " " <<
-      //       lastBallContact->contactTime << std::endl;
     }
     else
     {
@@ -523,10 +510,6 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
                                    gameState->GetCurrentState()->name));
       gameState->ballContactHistory.push_back(ballContact);
       break;
-      // gzmsg << "new ball contact: " << playerModel->GetName() <<
-      //       " " << gameState->GetGameTime() << std::endl;
-      // gzmsg << "total number of contacts: " <<
-      //       this->gameState->ballContactHistory.size() << std::endl;
     }
   }
   this->contacts.clear();
@@ -535,8 +518,6 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateGameState()
 {
-  // gzmsg << "UpdateGameState()" << std::endl;
-
   // sync gameState time and gaezbo world time
   this->gameState->SetGameTime(this->world->GetSimTime().Double());
 
@@ -626,7 +607,6 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
       const auto &model = this->world->GetModel(agent.GetName());
 
       model->GetJointController()->Reset();
-
       for (const auto &joint : model->GetJoints())
       {
         if( agent.bodyType->DefaultModelName()== "naoType0"){
@@ -650,7 +630,6 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
           joint->Reset();
         }
       }
-
       model->ResetPhysicsStates();
       this->gameState->MoveAgent(agent, agent.pos.X(), agent.pos.Y(),
                                  agent.rot.Euler().Z());

@@ -46,7 +46,8 @@ class Perceptor
 
   /// \brief Method used to get view frustum
   /// \return A vector of planes of the view frustum
-  public: const std::vector <ignition::math::Plane<double>> &GetViewFrustum();
+  public: const std::vector <ignition::math::Plane<double>>
+                &GetViewFrustum() const;
 
   /// \brief Set the transformation matrix from global to local
   /// coordinates for an agent
@@ -87,7 +88,7 @@ class Perceptor
   /// \param[in] _size Size of the buffer
   /// \return True if buffer is large enough
   public: int Serialize(const Agent &_agent, char *_string,
-                          const int _size) const;
+                        const int _size) const;
 
   /// \brief Converts points to a string
   /// \param[in] _label Label for point
@@ -151,7 +152,7 @@ class Perceptor
 
   /// \brief View frustum
   /// We model view frustum as a vector of four planes
-  private: std::vector <ignition::math::Plane<double> > viewFrustum;
+  private: std::vector <ignition::math::Plane<double>> viewFrustum;
 };
 
 #endif

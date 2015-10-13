@@ -233,6 +233,7 @@ else (build_errors)
     ${PROJECT_BINARY_DIR}/include/robocup3ds/config.hh)
 
   include_directories(
+    ${PROJECT_SOURCE_DIR}/deps
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_BINARY_DIR}/include
   )
@@ -249,8 +250,9 @@ else (build_errors)
 
   if (BUILD_ROBOCUP3DS)
     set(TEST_TYPE "UNIT")
-    add_subdirectory(src)
+    add_subdirectory(deps)
     add_subdirectory(include)
+    add_subdirectory(src)
     add_subdirectory(test)
     add_subdirectory(worlds)
     add_subdirectory(models)

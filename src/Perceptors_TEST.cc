@@ -34,43 +34,43 @@ using namespace ignition;
 class PerceptorTest : public ::testing::Test
 {
   protected: virtual void SetUp()
-    {
+  {
     GameState::useCounterForGameTime = true;
     this->gameState = std::make_shared<GameState>();
     this->perceptor = std::make_shared<Perceptor>(this->gameState.get());
-    }
+  }
 
   protected: virtual bool UpdateLine_Test(Agent &_agent,
-                                 const math::Line3<double> &_line,
-                                 math::Line3<double> &_testLine)
+                                          const math::Line3<double> &_line,
+                                          math::Line3<double> &_testLine)
+  {
+    this->perceptor->SetG2LMat(_agent);
+    _agent.percept.fieldLines.clear();
+    this->perceptor->UpdateLine(_agent, _line);
+    if (_agent.percept.fieldLines.size() == 0)
     {
-      this->perceptor->SetG2LMat(_agent);
-      _agent.percept.fieldLines.clear();
-      this->perceptor->UpdateLine(_agent, _line);
-      if (_agent.percept.fieldLines.size() == 0)
-      {
-        return false;
-      }
-      _testLine.Set(
-        Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[0]),
-        Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[1]));
-      return true;
+      return false;
     }
+    _testLine.Set(
+      Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[0]),
+      Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[1]));
+    return true;
+  }
 
   protected: virtual bool UpdateLandmark_Test(Agent &_agent,
-                                     const math::Vector3<double> &_landmark,
-                                     math::Vector3<double> &_testLandmark)
+                                         const math::Vector3<double> &_landmark,
+                                         math::Vector3<double> &_testLandmark)
+  {
+    this->perceptor->SetG2LMat(_agent);
+    _agent.percept.landMarks.clear();
+    this->perceptor->UpdateLandmark(_agent, "test", _landmark);
+    if (_agent.percept.landMarks.empty())
     {
-      this->perceptor->SetG2LMat(_agent);
-      _agent.percept.landMarks.clear();
-      this->perceptor->UpdateLandmark(_agent, "test", _landmark);
-      if (_agent.percept.landMarks.empty())
-      {
-        return false;
-      }
-      _testLandmark = Geometry::SphereToCart(_agent.percept.landMarks["test"]);
-      return true;
+      return false;
     }
+    _testLandmark = Geometry::SphereToCart(_agent.percept.landMarks["test"]);
+    return true;
+  }
 
   protected: virtual void TearDown() {}
   protected: std::shared_ptr<GameState> gameState;
