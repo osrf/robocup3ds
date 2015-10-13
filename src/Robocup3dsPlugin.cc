@@ -164,7 +164,7 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
   gzmsg << "LoadPIDParams() set PID params for joint "
         + _jointName + " in " + _bodyType
         + " bodytype: " << params[0] << " " << params[1] << " " << params[2]
-        << " " << params[3] << " " << params[4] << std::endl;
+        << std::endl;
   _pid.SetPGain(params[0]);
   _pid.SetIGain(params[1]);
   _pid.SetDGain(params[2]);
