@@ -32,9 +32,8 @@ const int ClientAgent::kThreadSleepTime = 20000;
 
 //////////////////////////////////////////////////
 ClientAgent::ClientAgent(const std::string &_serverAddr, const int _port,
-                         const int _monitorPort,
-                         const int _uNum, const std::string &_teamName,
-                         const std::string &_side):
+    const int _monitorPort, const int _uNum, const std::string &_teamName,
+    const std::string &_side):
   running(false),
   connected(false),
   cycleCounter(0),
@@ -63,7 +62,6 @@ ClientAgent::~ClientAgent()
     this->running = false;
     this->thread.join();
   }
-  std::cout << "client shutting down!" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -85,7 +83,6 @@ void ClientAgent::Start()
 
   // Start the thread that receives information.
   this->thread = std::thread(&ClientAgent::Update, this);
-  std::cout << "client running!" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -112,17 +109,12 @@ void ClientAgent::Update()
     return;
   }
 
-  std::cout << "client has connected!" << std::endl;
-
   size_t currActionIndex = 0;
   size_t currMsgIndex = 0;
-  // std::chrono::microseconds ms(20000);
   std::string receivedMsg;
   while (this->running)
   {
     this->Wait();
-    // std::chrono::high_resolution_clock::time_point start =
-    //   std::chrono::high_resolution_clock::now();
 
     if (this->verbose)
     {
@@ -160,12 +152,8 @@ void ClientAgent::Update()
     bool succ1 = this->PutMessage(ar.msgToSend[currMsgIndex] + " (syn)");
     bool succ2 = this->PutMonMessage(ar.monitorMsgToSend[currMsgIndex] +
                                      " (syn)");
-    // std::cerr << currMsgIndex << " " << succ1 << " " << succ2 << std::endl;
     if (succ1 && succ2)
     {
-      std::cerr << "[" << this->cycleCounter <<
-                "] client has sent the following action: " +
-                ar.actionName << std::endl;
       if (verbose)
       {
         std::cerr << "sent client msg: " << ar.msgToSend[currMsgIndex]
@@ -190,13 +178,8 @@ void ClientAgent::Update()
       currActionIndex++;
       currMsgIndex = 0;
       ar.status = ActionResponse::Status::FINISHED;
-      // std::cerr << currActionIndex << " " <<
-      //           this->actionResponses.size() << std::endl;
     }
     this->cycleCounter++;
-    // ms = std::chrono::duration_cast<std::chrono::microseconds>
-    //      (std::chrono::high_resolution_clock::now() - start);
-    // std::cerr << ms.count() << std::endl;
   }
 }
 
@@ -205,7 +188,6 @@ bool ClientAgent::Connect(const int &_port, int &_socketID)
 {
   struct sockaddr_in servaddr;
   _socketID = socket(AF_INET, SOCK_STREAM, 0);
-  // fcntl(_socketID, F_SETFL, O_NONBLOCK);
 
   bzero(&servaddr, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
@@ -426,15 +408,6 @@ bool ClientAgent::GetMessage(std::string &_msg)
     {
       return false;
     }
-    // if (readResult == 0)
-    // {
-    //   // [patmac] Kill ourselves if we disconnect from the server
-    //   // for instance when the server is killed.  This helps to
-    //   // prevent runaway agents.
-    //   cerr << "Lost connection to server" << endl;
-    //   Done();
-    //   exit(1);
-    // }
     bytesRead += readResult;
   }
 
@@ -447,7 +420,6 @@ bool ClientAgent::GetMessage(std::string &_msg)
   int_char_t size;
   size.c = buffer;
   unsigned int msgLen = ntohl(*(size.i));
-  // cerr << "GM 6 / " << msgLen << " (bytesRead " << bytesRead << ")\n";
   if (sizeof(unsigned int) + msgLen > sizeof(buffer))
   {
     std::cerr << "too long message; aborting" << std::endl;

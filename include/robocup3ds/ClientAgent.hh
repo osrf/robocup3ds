@@ -19,13 +19,12 @@
 #define _GAZEBO_INTEGRATION_TESTAGENT_HH_
 
 #include <atomic>
-#include <ignition/math.hh>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <utility>
 #include <vector>
-
+#include <ignition/math.hh>
 
 /// \brief Class for storing agent actions and responses from server
 class ActionResponse
@@ -75,9 +74,11 @@ class ClientAgent
   /// \param[in] _teamName Team of agent
   /// \param[in] _side Side of agent
   public: ClientAgent(const std::string &_serverAddr,
-    const int _port, const int _monitorPort,
-    const int _uNum, const std::string &_teamName,
-    const std::string &_side);
+                      const int _port,
+                      const int _monitorPort,
+                      const int _uNum,
+                      const std::string &_teamName,
+                      const std::string &_side);
 
   /// \brief ClientAgent destructor
   public: ~ClientAgent();
@@ -92,14 +93,16 @@ class ClientAgent
   /// \param[in] _port Port to connect to
   /// \param[out] _socketID Socket id of connection
   /// \return True if connection is successful
-  private: bool Connect(const int &_port, int &_socketID);
+  private: bool Connect(const int &_port,
+                        int &_socketID);
 
   /// \brief Adds a init and beam message to actionResponses
   /// \param[in] _x X position in meters
   /// \param[in] _y Y position in meters
   /// \param[in] _yaw Yaw in degrees
   public: void InitAndBeam(const double _x,
-    const double _y, const double _yaw);
+                           const double _y,
+                           const double _yaw);
 
   /// \brief Simulates the agent and ball moving together
   /// from one location to another
@@ -107,7 +110,8 @@ class ClientAgent
   /// \param[in] _end Ending position
   /// \param[in] _nSteps Number of time steps to walk
   public: void Dribble(const ignition::math::Vector3<double> &_start,
-    const ignition::math::Vector3<double> &_end, const int _nSteps);
+                       const ignition::math::Vector3<double> &_end,
+                       const int _nSteps);
 
   /// \brief Sends a change playmode monitor message
   /// \param[in] _playMode New playmode to change to

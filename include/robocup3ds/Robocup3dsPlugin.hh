@@ -43,7 +43,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   // Documentation inherited.
   public: virtual void Load(gazebo::physics::WorldPtr _world,
-      sdf::ElementPtr _sdf);
+                            sdf::ElementPtr _sdf);
 
   // Documentation inherited.
   public: virtual void Init();

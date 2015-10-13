@@ -617,13 +617,13 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
           // Set the joints position to their initial Position
           if (joint-> GetName() == "LShoulderPitch" ||
               joint-> GetName() == "RShoulderPitch")
-            joint->SetAngle(0, -1.5);
+            joint->SetPosition(0, -1.5);
           else if (joint-> GetName() == "LShoulderRoll")
-            joint->SetAngle(0, 0.15);
+            joint->SetPosition(0, 0.15);
           else if (joint-> GetName() == "RShoulderRoll")
-            joint->SetAngle(0, -0.15);
+            joint->SetPosition(0, -0.15);
           else
-            joint->SetAngle(0, 0);
+            joint->SetPosition(0, 0);
         }
         else
         {
