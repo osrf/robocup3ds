@@ -430,12 +430,12 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
 {
   gameState.AddAgent(1, "blue");
   Agent &agent = gameState.teams.at(0)->members.at(0);
-  math::Vector3<double> pos(15, 10, 0.35);
+  math::Vector3<double> pos(15, 10, 0.44);
   gameState.MoveAgent(agent, pos);
   EXPECT_EQ(pos, agent.pos);
   EXPECT_EQ(pos, gameState.teams.at(0)->members.at(0).pos);
 
-  pos.Set(5, 6, 0.35);
+  pos.Set(5, 6, 0.44);
   math::Quaternion<double>rot(0, 0, 1.0);
   gameState.MoveAgent(agent, 5, 6, 1.0);
   EXPECT_EQ(agent.pos, pos);
@@ -446,16 +446,16 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
   pos.Set(0, 9, 0);
   gameState.MoveAgent(agent, pos);
   gameState.MoveAgentToSide(agent);
-  pos.Set(0, -SoccerField::kHalfFieldHeight, 0.35);
+  pos.Set(0, -SoccerField::kHalfFieldHeight, 0.44);
   EXPECT_EQ(pos, agent.pos);
 
   pos.Set(0, -9, 0);
   gameState.MoveAgent(agent, pos);
   gameState.MoveAgentToSide(agent);
-  pos.Set(0, SoccerField::kHalfFieldHeight, 0.35);
+  pos.Set(0, SoccerField::kHalfFieldHeight, 0.44);
   EXPECT_EQ(pos, agent.pos);
 
-  pos.Set(-5, -6, 0.35);
+  pos.Set(-5, -6, 0.44);
   rot.Euler(1.0, 0.5, 0.7);
   gameState.MoveAgent(agent, pos, rot);
   EXPECT_EQ(agent.pos, pos);
@@ -463,7 +463,7 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
   EXPECT_EQ(pos, gameState.teams.at(0)->members.at(0).pos);
   EXPECT_EQ(rot, gameState.teams.at(0)->members.at(0).rot);
 
-  pos.Set(7, 8, 0.35);
+  pos.Set(7, 8, 0.44);
   rot.Euler(0, 0, IGN_DTOR(50));
   for (int i = 0; i < 100; ++i)
   {
@@ -475,7 +475,7 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
 
   gameState.AddAgent(1, "red");
   Agent &agent2 = gameState.teams.at(1)->members.at(0);
-  pos.Set(-7, -8, 0.35);
+  pos.Set(-7, -8, 0.44);
   rot.Euler(0, 0, IGN_DTOR(230));
   for (int i = 0; i < 100; ++i)
   {
@@ -518,7 +518,7 @@ class GameStateTest_fullTeams : public GameStateTest_basic
         {
           Agent &agent = gameState.teams.at(i)->members.at(j);
           gameState.MoveAgent(agent, math::Vector3<double>
-                              (0, 0, 0.35));
+                              (0, 0, 0.44));
         }
       }
     }
@@ -534,12 +534,12 @@ class GameStateTest_fullTeams : public GameStateTest_basic
           if (gameState.teams.at(i)->side == Team::Side::LEFT)
           {
             gameState.MoveAgent(agent, math::Vector3<double>
-                                (-5, 0, 0.35));
+                                (-5, 0, 0.44));
           }
           else
           {
             gameState.MoveAgent(agent, math::Vector3<double>
-                                (5, 0, 0.35));
+                                (5, 0, 0.44));
           }
         }
       }
@@ -1386,7 +1386,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckCrowding)
 /// working as intended
 TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
 {
-  math::Vector3<double> pos(0, 0, 0.35);
+  math::Vector3<double> pos(0, 0, 0.44);
   std::vector<math::Vector3<double>> fallenPos;
   fallenPos.push_back(math::Vector3<double>(0.0, 0.0, 0.1));
   fallenPos.push_back(math::Vector3<double>(0.1, 0.1, 0.1));
@@ -1474,10 +1474,10 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckGoalKickIllegalDefense)
   std::vector<math::Vector3<double>> inPenaltyBox;
   inPenaltyBox.push_back(math::Vector3<double>(
                            -SoccerField::kHalfFieldWidth + 1, 0,
-                           0.35));
+                           0.44));
   inPenaltyBox.push_back(math::Vector3<double>(
                            SoccerField::kHalfFieldWidth - 1, 0,
-                           0.35));
+                           0.44));
 
   std::vector<math::Box> penaltyBox;
   penaltyBox.push_back(SoccerField::kPenaltyBoxLeft);
@@ -1528,28 +1528,28 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
         if (k == 0)
         {
           EXPECT_EQ(agent.pos, math::Vector3<double>(-5, 0,
-                    0.35));
+                    0.44));
         }
         else
         {
           EXPECT_EQ(agent.pos, math::Vector3<double>(5, 0,
-                    0.35));
+                    0.44));
         }
       }
     }
 
     // Ensure that we can move our agent into circle and nothing happens
-    math::Vector3<double> pos(0, 0, 0.35);
+    math::Vector3<double> pos(0, 0, 0.44);
     gameState.MoveAgent(ourAgent, pos);
     gameState.Update();
     EXPECT_EQ(ourAgent.pos, pos);
     if (i == 0)
     {
-      pos.Set(1, 0, 0.35);
+      pos.Set(1, 0, 0.44);
     }
     else
     {
-      pos.Set(-1, 0, 0.35);
+      pos.Set(-1, 0, 0.44);
     }
     gameState.MoveAgent(ourAgent, pos);
     gameState.Update();
@@ -1559,11 +1559,11 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     // if it violate sides and is not in circle
     if (i == 0)
     {
-      pos.Set(1, 4, 0.35);
+      pos.Set(1, 4, 0.44);
     }
     else
     {
-      pos.Set(-1, 4, 0.35);
+      pos.Set(-1, 4, 0.44);
     }
     gameState.MoveAgent(ourAgent, pos);
     gameState.Update();
@@ -1577,34 +1577,34 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
     }
 
     // Ensure that enemy agent in circle is moved back to its own side
-    pos.Set(0, 0, 0.35);
+    pos.Set(0, 0, 0.44);
     gameState.MoveAgent(theirAgent, pos);
     gameState.Update();
     EXPECT_NE(theirAgent.pos, pos);
     EXPECT_GE(theirAgent.pos.Distance(pos), SoccerField::kCenterCircleRadius);
     if (i == 0)
     {
-      pos.Set(1, 0, 0.35);
+      pos.Set(1, 0, 0.44);
     }
     else
     {
-      pos.Set(-1, 0, 0.35);
+      pos.Set(-1, 0, 0.44);
     }
     gameState.MoveAgent(theirAgent, pos);
     gameState.Update();
     EXPECT_NE(theirAgent.pos, pos);
-    pos.Set(0, 0, 0.35);
+    pos.Set(0, 0, 0.44);
     EXPECT_GE(theirAgent.pos.Distance(pos), SoccerField::kCenterCircleRadius);
 
     // Ensure that enemy agent is beamed back to its own side
     // if it violate sides
     if (i == 0)
     {
-      pos.Set(-1, 4, 0.35);
+      pos.Set(-1, 4, 0.44);
     }
     else
     {
-      pos.Set(1, 4, 0.35);
+      pos.Set(1, 4, 0.44);
     }
     gameState.MoveAgent(theirAgent, pos);
     gameState.Update();
