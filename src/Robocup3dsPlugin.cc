@@ -127,7 +127,7 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
                                      const std::string &_bodyType,
                                      const std::string &_jointName,
                                      const std::map<std::string,
-                                                    std::string> &_config) const
+                                     std::string> &_config) const
 {
   std::stringstream ss;
   std::vector<double> params;
@@ -609,21 +609,21 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
       model->GetJointController()->Reset();
       for (const auto &joint : model->GetJoints())
       {
-        if( agent.bodyType->DefaultModelName()== "naoType0"){
-
+        if (agent.bodyType->DefaultModelName() == "naoType0")
+        {
           // Increase the actuators damping to 1
           joint->SetDamping(0, 1);
 
           // Set the joints position to their initial Position
           if (joint-> GetName() == "LShoulderPitch" ||
-                 joint-> GetName() == "RShoulderPitch")
-              joint->SetAngle(0, -1.5);
+              joint-> GetName() == "RShoulderPitch")
+            joint->SetAngle(0, -1.5);
           else if (joint-> GetName() == "LShoulderRoll")
-              joint->SetAngle(0, 0.15);
+            joint->SetAngle(0, 0.15);
           else if (joint-> GetName() == "RShoulderRoll")
-              joint->SetAngle(0, -0.15);
+            joint->SetAngle(0, -0.15);
           else
-              joint->SetAngle(0, 0);
+            joint->SetAngle(0, 0);
         }
         else
         {
