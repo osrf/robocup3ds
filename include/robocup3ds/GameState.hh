@@ -280,7 +280,7 @@ class GameState
   /// \param[in] _socketID SocketID associated with agent
   /// \return Pointer to the agent object created
   public: Agent* AddAgent(const int _uNum, const std::string &_teamName,
-    const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoSimsparkBT>(),
+    const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoOfficialBT>(),
     const int _socketID = -1);
 
   /// \brief Remove agent from game state

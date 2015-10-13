@@ -116,10 +116,10 @@ GameState::GameState():
                      Team::Side::RIGHT)),
   agentBodyTypeMap(
 {
-  {"NaoSimsparkBT", std::make_shared<NaoSimsparkBT>()
-  }
+  {"NaoOfficialBT", std::make_shared<NaoOfficialBT>()},
+  {"NaoSimsparkBT", std::make_shared<NaoSimsparkBT>()}
 }),
-defaultBodyType(agentBodyTypeMap.at("NaoSimsparkBT")),
+defaultBodyType(agentBodyTypeMap.at("NaoOfficialBT")),
 hasCurrentStateChanged(false),
 touchBallKickoff(nullptr),
 updateBallPose(false),
