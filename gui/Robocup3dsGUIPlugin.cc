@@ -14,6 +14,8 @@
  * limitations under the License.
  *
 */
+
+#include <gazebo/common/Time.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <sstream>
@@ -31,6 +33,8 @@ GZ_REGISTER_GUI_PLUGIN(Robocup3dsGUIPlugin)
 Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
   : GUIPlugin()
 {
+  this->time = common::Time();
+
   // Set the frame background and foreground colors
   this->setStyleSheet(
     "QFrame { background-color : rgba(100, 100, 100, 255); color : white; }");
@@ -86,7 +90,7 @@ void Robocup3dsGUIPlugin::AddSimTimeWidget(QHBoxLayout *_frameLayout)
   QLabel *timeLabel = new QLabel();
   QFont myFont;
   QFontMetrics fm(myFont);
-  QString str("0000.00");
+  QString str("00:00:000");
   timeLabel->setFixedWidth(fm.width(str));
 
   _frameLayout->addWidget(label);
@@ -102,7 +106,7 @@ void Robocup3dsGUIPlugin::AddGameStateWidget(QHBoxLayout *_frameLayout)
   QLabel *gameTimeLabel = new QLabel();
   QFont myFont;
   QFontMetrics fm(myFont);
-  QString str("0000.00");
+  QString str("00:00:000");
   gameTimeLabel->setFixedWidth(fm.width(str));
   _frameLayout->addWidget(label);
   _frameLayout->addWidget(gameTimeLabel);
@@ -185,11 +189,9 @@ void Robocup3dsGUIPlugin::OnGameState(ConstGzStringPtr &_msg)
   double _gameTime = std::stod(gameState.substr(0, j));
   this->SetPlaymode(QString::fromStdString(gameState.substr(j + 1)));
 
-  int sec = static_cast<double>(_gameTime);
-  int msec = rint((_gameTime - sec) * 1e2);
-  stream << std::setw(4) << std::setfill('0') << sec << ".";
-  stream << std::setw(2) << std::setfill('0') << msec;
-  this->SetGameTime(QString::fromStdString(stream.str()));
+  this->time.Set(_gameTime);
+  this->SetGameTime(QString::fromStdString(this->time.FormattedString(
+                      common::Time::MINUTES)));
 
   i = rawString.find("$");
   this->SetLeftTeam(QString::fromStdString(rawString.substr(0, i)));
@@ -202,10 +204,9 @@ void Robocup3dsGUIPlugin::OnStats(ConstWorldStatisticsPtr &_msg)
   std::ostringstream stream;
   stream.str("");
   const msgs::Time msg = _msg->sim_time();
-  const auto msec = rint(msg.nsec() * 1e-7);
-  stream << std::setw(4) << std::setfill('0') << msg.sec() << ".";
-  stream << std::setw(2) << std::setfill('0') << msec;
-  this->SetSimTime(QString::fromStdString(stream.str()));
+  this->time.Set(msg.sec(), msg.nsec());
+  this->SetSimTime(QString::fromStdString(this->time.FormattedString(
+      common::Time::MINUTES)));
 }
 
 /////////////////////////////////////////////////

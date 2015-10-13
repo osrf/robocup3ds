@@ -19,6 +19,7 @@
 
 #include <string>
 #include <gazebo/common/Plugin.hh>
+#include <gazebo/common/Time.hh>
 #include <gazebo/gui/GuiPlugin.hh>
 #ifndef Q_MOC_RUN  // See: https://bugreports.qt-project.org/browse/QTBUG-22829
 # include <gazebo/transport/transport.hh>
@@ -96,6 +97,9 @@ namespace gazebo
 
     /// \brief Game state publisher.
     private: gazebo::transport::PublisherPtr playmodePub;
+
+    /// \brief Time object used for formatting
+    private: gazebo::common::Time time;
   };
 }
 

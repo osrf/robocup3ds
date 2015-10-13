@@ -355,19 +355,15 @@ TEST_F(GameStateTest_basic, GameState_move_ball)
   gameState.MoveBallToCenter();
   EXPECT_EQ(SoccerField::kBallCenterPosition, gameState.GetBall());
 
-  pos.Set(-10, 5, SoccerField::kBallRadius);
-  gameState.MoveBall(pos);
-  gameState.MoveBallForGoalKick();
+  gameState.MoveBallForGoalKick(Team::Side::LEFT);
   EXPECT_EQ(math::Vector3<double>(-SoccerField::kHalfFieldWidth + 1, 0,
                                   SoccerField::kBallRadius),
-            gameState.GetBall());
+                                  gameState.GetBall());
 
-  pos.Set(10, -5, SoccerField::kBallRadius);
-  gameState.MoveBall(pos);
-  gameState.MoveBallForGoalKick();
+  gameState.MoveBallForGoalKick(Team::Side::RIGHT);
   EXPECT_EQ(math::Vector3<double>(SoccerField::kHalfFieldWidth - 1, 0,
                                   SoccerField::kBallRadius),
-            gameState.GetBall());
+                                  gameState.GetBall());
 
 
   std::vector<math::Vector3<double>> nearFourCorners;
