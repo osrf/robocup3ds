@@ -243,7 +243,8 @@ class GameState
   public: void MoveBallToCenter();
 
   /// \brief Move ball to goal kick position.
-  public: void MoveBallForGoalKick();
+  /// \param[in] _side Side to move ball to
+  public: void MoveBallForGoalKick(const Team::Side _side);
 
   /// \brief Move the ball to the corner of the field.
   public: void MoveBallToCorner();
