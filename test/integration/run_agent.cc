@@ -96,8 +96,6 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
     this->Wait();
   }
 
-  std::cout << 1 << std::endl;
-
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
 
@@ -117,8 +115,6 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
       see = true;
     }
   }
-
-  std::cout << 2 << std::endl;
 
   EXPECT_TRUE(see);
 
