@@ -25,6 +25,7 @@
 #include <gazebo/test/ServerFixture.hh>
 #include <ignition/math.hh>
 #include "robocup3ds/ClientAgent.hh"
+#include "test/test_config.h"
 
 using namespace ignition;
 
@@ -44,6 +45,11 @@ class IntegrationTest : public gazebo::ServerFixture
 
   public: virtual void SetUp()
   {
+    gazebo::common::SystemPaths::Instance()->AddPluginPaths(
+      ROBOCUP3DS_TEST_INTEGRATION_PATH);
+    gazebo::common::SystemPaths::Instance()->AddGazeboPaths(
+      ROBOCUP3DS_TEST_WORLD_PATH);
+
     this->agent = std::make_shared<ClientAgent>(
                     "0.0.0.0", 3100, 3200, 1, "red", "left");
     this->oppAgent = std::make_shared<ClientAgent>(
@@ -60,8 +66,6 @@ class IntegrationTest : public gazebo::ServerFixture
     this->Wait();
   }
 
-  public: const std::string testPath = "../test/integration/";
-
   public: std::shared_ptr<ClientAgent> agent;
 
   public: std::shared_ptr<ClientAgent> oppAgent;
@@ -73,14 +77,14 @@ class IntegrationTest : public gazebo::ServerFixture
 /// \brief This tests whether loading the world plugin is successful or not.
 TEST_F(IntegrationTest, TestLoadWorldPlugin)
 {
-  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
+  this->LoadWorld("TestLoadWorldPlugin.world");
   SUCCEED();
 }
 
 /// \brief This tests whether two agents can successfully connect, init, beam.
 TEST_F(IntegrationTest, TestLoadConnectAgent)
 {
-  this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
+  this->LoadWorld("TestLoadConnectAgent.world");
   this->Wait();
   this->agent->InitAndBeam(1, 1, 90);
   this->agent->Start();
@@ -91,6 +95,8 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
   {
     this->Wait();
   }
+
+  std::cout << 1 << std::endl;
 
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
@@ -111,6 +117,9 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
       see = true;
     }
   }
+
+  std::cout << 2 << std::endl;
+
   EXPECT_TRUE(see);
 
   EXPECT_TRUE(this->oppAgent->running);
@@ -138,7 +147,7 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
 /// \brief This tests whether monitor messages work.
 TEST_F(IntegrationTest, TestMonitor)
 {
-  this->LoadWorld(this->testPath + "TestLoadConnectAgent.world");
+  this->LoadWorld("TestLoadConnectAgent.world");
   this->Wait();
   this->agent->InitAndBeam(1, 1, 90);
   this->agent->ChangePlayMode("PlayOn");
@@ -187,7 +196,7 @@ TEST_F(IntegrationTest, TestMonitor)
 /// \brief This tests whether we can transition from playOn to kickin
 TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
 {
-  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
+  this->LoadWorld("TestLoadWorldPlugin.world");
 
   this->Wait();
   this->agent->InitAndBeam(0, 0, 0);
@@ -205,7 +214,7 @@ TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
 /// back to kick off due to double touch violation.
 TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
 {
-  this->LoadWorld(this->testPath + "TestLoadWorldPlugin.world");
+  this->LoadWorld("TestLoadWorldPlugin.world");
 
   this->Wait();
   this->agent->InitAndBeam(0, 0, 0);
