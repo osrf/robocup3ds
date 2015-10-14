@@ -264,7 +264,7 @@ else (build_errors)
     ${CMAKE_SOURCE_DIR}/cmake/pkgconfig/robocup3ds.in
     ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc @ONLY)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc
     DESTINATION ${LIB_INSTALL_DIR}/pkgconfig
     COMPONENT pkgconfig)
 
