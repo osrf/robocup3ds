@@ -1,18 +1,12 @@
 # This file setup gazebo and gazebo plugin environment variables needed by
-# gazebo for haptix_gazebo_plugins
+# gazebo for robocup3ds
 
-# source gazebo's setup.sh (one less step for users)
-# Skip Gazebo setup if the HAPTIX_SKIP_ROS_GAZEBO_SETUP environment variable
-# is set (to anything).
-if [ -z "$HAPTIX_SKIP_ROS_GAZEBO_SETUP" ]; then
-  # Step 4: get Gazebo configuration.
-  if [ -f @GAZEBO_PREFIX@/share/gazebo/setup.sh ]; then
-    . @GAZEBO_PREFIX@/share/gazebo/setup.sh 
-  elif [ -f /usr/share/gazebo/setup.sh ]; then
-    . /usr/share/gazebo/setup.sh  
-  else
-    echo "Warning: failed to find Gazebo's setup.sh.  You will need to source it manually.  Afterwards, source share/haptix_gazebo_plugins/setup.sh again."
-  fi
+if [ -f @GAZEBO_PREFIX@/share/gazebo/setup.sh ]; then
+  . @GAZEBO_PREFIX@/share/gazebo/setup.sh
+elif [ -f /usr/share/gazebo/setup.sh ]; then
+  . /usr/share/gazebo/setup.sh
+else
+  echo "Warning: failed to find Gazebo's setup.sh.  You will need to source it manually. Afterwards, source share/robocup3ds/setup.sh again."
 fi
 
 # Add our top-level directory to GAZEBO_RESOURCE_PATH so that its
@@ -22,5 +16,5 @@ export GAZEBO_RESOURCE_PATH=@CMAKE_INSTALL_PREFIX@/share/@PROJECT_NAME@:$GAZEBO_
 # Add the directories containing our Gazebo plugins to GAZEBO_PLUGIN_PATH.
 export GAZEBO_PLUGIN_PATH=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@/@PROJECT_NAME@:$GAZEBO_PLUGIN_PATH
 
-# apl_description is installed in ${CMAKE_INSTALL_PREFIX}/share/apl_description
-export GAZEBO_MODEL_PATH=@CMAKE_INSTALL_PREFIX@/share/gazebo_models:$GAZEBO_MODEL_PATH
+# Models are installed in ${CMAKE_INSTALL_PREFIX}/share/robocup3ds/models
+export GAZEBO_MODEL_PATH=@CMAKE_INSTALL_PREFIX@/share/@PROJECT_NAME@/models:$GAZEBO_MODEL_PATH

@@ -53,6 +53,7 @@ target_link_libraries(${PROJECT_NAME_LOWER}Plugin
   ${IGNITION-MATH_LIBRARIES}
 )
 
-robocup3ds_install_library(${PROJECT_NAME_LOWER}Plugin)
+set_target_properties(${PROJECT_NAME_LOWER}Plugin PROPERTIES SOVERSION ${PROJECT_MAJOR_VERSION} VERSION ${PROJECT_VERSION_FULL})
+install (TARGETS ${PROJECT_NAME_LOWER}Plugin DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/ COMPONENT shlib)
 
 robocup3ds_build_tests(${gtest_sources})
