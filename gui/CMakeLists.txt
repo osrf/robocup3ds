@@ -4,11 +4,11 @@ include (${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 
 set (GUIplugins
-  Robocup3dsGUIPlugin.cc 
+  Robocup3dsGUIPlugin.cc
 )
 
 set (GUIpluginHeaders
-  Robocup3dsGUIPlugin.hh 
+  Robocup3dsGUIPlugin.hh
 )
 
 set (GUIpluginMOC
@@ -28,9 +28,10 @@ link_directories(
 QT4_WRAP_CPP(${GUIpluginMOC} ${GUIpluginHeaders})
 robocup3ds_add_library(${PROJECT_NAME_LOWER}GUIPlugin ${GUIplugins} ${GUIpluginMOC} ${GUIpluginHeaders})
 
-robocup3ds_install_library(${PROJECT_NAME_LOWER}GUIPlugin)
+set_target_properties(${PROJECT_NAME_LOWER}GUIPlugin PROPERTIES SOVERSION ${PROJECT_MAJOR_VERSION} VERSION ${PROJECT_VERSION_FULL})
+install (TARGETS ${PROJECT_NAME_LOWER}GUIPlugin DESTINATION ${LIB_INSTALL_DIR}/${PROJECT_NAME}/ COMPONENT shlib)
 
 target_link_libraries(${PROJECT_NAME_LOWER}GUIPlugin
-  ${GAZEBO_LIBRARIES} 
+  ${GAZEBO_LIBRARIES}
   ${QT_LIBRARIES}
 )

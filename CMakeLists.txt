@@ -231,6 +231,17 @@ else (build_errors)
   robocup3ds_install_includes(${PROJECT_NAME}
     ${PROJECT_BINARY_DIR}/include/robocup3ds/config.hh)
 
+  ########################################
+  # Write the setup.sh file
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.sh.in ${PROJECT_BINARY_DIR}/setup.sh @ONLY)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/)
+
+  ########################################
+  # Write the gazebo-robocup3ds file
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/gazebo-robocup3ds.in ${PROJECT_BINARY_DIR}/bin/gazebo-robocup3ds @ONLY)
+  install (PROGRAMS ${PROJECT_BINARY_DIR}/bin/gazebo-robocup3ds DESTINATION ${BIN_INSTALL_DIR})
+
+
   include_directories(
     ${PROJECT_SOURCE_DIR}/deps
     ${PROJECT_SOURCE_DIR}/include
