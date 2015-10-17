@@ -366,7 +366,7 @@ void Robocup3dsPlugin::UpdateEffector()
   {
     this->world->RemoveModel(agentName);
     gzmsg << "(" << this->world->GetSimTime().Double() <<
-          ") agent removed from game world by client: " <<
+          ") agent removed from game world: " <<
           agentName << std::endl;
   }
 
