@@ -52,9 +52,6 @@
       <uri>model://robocup_3Dsim_ball</uri>
     </include>
 
-    <!-- Load the plugin for Razer Hydra -->
-    <!--<plugin name="hydra" filename="libHydraPlugin.so"></plugin>-->
-
     <plugin name="robocup3dplugin" filename="librobocup3dsPlugin.so">
     </plugin>
     <gui fullscreen='0'>
