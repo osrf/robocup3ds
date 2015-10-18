@@ -49,6 +49,8 @@ class IntegrationTest : public gazebo::ServerFixture
       ROBOCUP3DS_TEST_INTEGRATION_PATH);
     gazebo::common::SystemPaths::Instance()->AddGazeboPaths(
       ROBOCUP3DS_TEST_WORLD_PATH);
+    gazebo::common::SystemPaths::Instance()->AddModelPaths(
+      ROBOCUP3DS_TEST_MODEL_PATH);
 
     this->agent = std::make_shared<ClientAgent>(
                     "0.0.0.0", 3100, 3200, 1, "red", "left");
