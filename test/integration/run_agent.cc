@@ -38,9 +38,11 @@ class IntegrationTest : public gazebo::ServerFixture
 
   public: void LoadWorld(const std::string &_path)
   {
-    this->Load(_path);
+    this->Load(_path, true);
     this->world = gazebo::physics::get_world("default");
     EXPECT_TRUE(this->world != NULL);
+    this->world->Step(1);
+    this->world->SetPaused(false);
   }
 
   public: virtual void SetUp()
