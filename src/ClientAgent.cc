@@ -371,16 +371,18 @@ bool ClientAgent::SelectInput()
     case 1:
       return true;
     case 0:
-      std::cerr << "(SelectInput) select failed "
-                << strerror(errno) << std::endl;
+      // debug
+      // std::cerr << "(SelectInput) select failed "
+      //           << strerror(errno) << std::endl;
       return false;
     default:
       if (errno == EINTR)
       {
         continue;
       }
-      std::cerr << "(SelectInput) select failed "
-                << strerror(errno) << std::endl;
+      // debug
+      // std::cerr << "(SelectInput) select failed "
+      //           << strerror(errno) << std::endl;
       return false;
     }
   }
