@@ -94,6 +94,13 @@ class RCPServer
   /// \brief Enable the server.
   public: void Start();
 
+  /// \brief Get the port the server is using.
+  /// \return The port number.
+  public: int GetPort() const;
+
+  /// \brief Set the port the server is using
+  public: void SetPort(const int _port);
+
   /// \brief Task running in a different thread in charge of dispatching the
   /// new connections.
   private: void RunReceptionTask();

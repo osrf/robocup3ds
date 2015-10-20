@@ -218,11 +218,11 @@ class AgentPerceptions
 
   /// \brief Position of left foot of Agent and force exerted on it
   public: std::pair<ignition::math::Vector3<double>,
-    ignition::math::Vector3<double>> leftFootFR;
+  ignition::math::Vector3<double>> leftFootFR;
 
   /// \brief Position of right foot of Agent and force exerted on it
   public: std::pair<ignition::math::Vector3<double>,
-    ignition::math::Vector3<double>> rightFootFR;
+  ignition::math::Vector3<double>> rightFootFR;
 };
 
 /// \brief This class serves as a container for the information sent by the

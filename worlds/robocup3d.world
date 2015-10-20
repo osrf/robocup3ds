@@ -57,5 +57,9 @@
 
     <plugin name="robocup3dplugin" filename="librobocup3dsPlugin.so">
     </plugin>
+    <gui fullscreen='0'>
+      <plugin name="robocup3dGUIplugin" filename="librobocup3dsGUIPlugin.so">
+      </plugin>
+    </gui>
   </world>
 </sdf>

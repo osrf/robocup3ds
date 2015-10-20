@@ -39,7 +39,7 @@ void GoalKickState::Initialize()
 {
   // Move the ball.
   this->gameState->MoveBall(this->initBallPos);
-  this->gameState->MoveBallForGoalKick();
+  this->gameState->MoveBallForGoalKick(this->side);
   State::Initialize();
 }
 
