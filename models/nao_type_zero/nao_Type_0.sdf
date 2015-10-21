@@ -141,6 +141,7 @@
     </link>
     <joint name='HeadPitch' type='revolute'>
       <child>Head</child>
+      <pose>0 0 -0.005 0 0 0</pose>
       <parent>Neck</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -331,6 +332,7 @@
     </link>
     <joint name='LHipPitch' type='revolute'>
       <child>LThigh</child>
+      <pose>0 0 0.04 0 -0 0</pose>
       <parent>LHip</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -407,6 +409,7 @@
     </link>
     <joint name='LKneePitch' type='revolute'>
       <child>LTibia</child>
+      <pose>0 0 0.045 0 -0 0</pose>
       <parent>LThigh</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -495,7 +498,7 @@
     <link name='l_sole'>
       <pose>0 0.055 -0.375 0 -0 0</pose>
       <inertial>
-        <pose>0.02 0 0 0 -0 0</pose>
+        <pose>0.025 0 0 0 -0 0</pose>
         <mass>0.2</mass>
         <inertia>
           <ixx>0.00011333</ixx>
@@ -507,10 +510,10 @@
         </inertia>
       </inertial>
       <collision name='l_sole_collision'>
-        <pose>0.02 0.0 0.0 0 -0 0</pose>
+        <pose>0.025 0.0 0.0 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.16 0.085 0.02</size>
+            <size>0.16 0.08 0.02</size>
           </box>
         </geometry>
         <surface>
@@ -544,6 +547,7 @@
     </link>
     <joint name='LAnkleRoll' type='revolute'>
       <child>l_sole</child>
+      <pose>0 0 0.04 0 -0 0</pose>
       <parent>l_ankle</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -630,9 +634,9 @@
       </physics>
     </joint>
     <link name='LBicep'>
-      <pose>0.02 0.098 0.075 0 -0 0</pose>
+      <pose>0.02 0.108 0.075 0 -0 0</pose>
       <inertial>
-        <pose>0.00455 0.00563 0.0033 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
         <inertia>
           <ixx>0.00010625</ixx>
@@ -663,7 +667,7 @@
         </surface>
       </collision>
       <visual name='LBicep_visual'>
-        <pose>-0.02 0 0 0 -0 0</pose>
+        <pose>-0.02 -0.015 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
@@ -677,6 +681,7 @@
     </link>
     <joint name='LShoulderRoll' type='revolute'>
       <child>LBicep</child>
+      <pose>-0.02 -0.01 0 0 -0 0</pose>
       <parent>LShoulder</parent>
       <axis>
         <xyz>0 0 1</xyz>
@@ -731,7 +736,7 @@
         <limit>
           <lower>-2.094395</lower>
           <upper>2.094395</upper>
-          <effort>0.25</effort>
+          <effort>40.25</effort>
           <velocity>6.1395</velocity>
         </limit>
         <dynamics>
@@ -756,7 +761,7 @@
     <link name='LForeArm'>
       <pose>0.14 0.098 0.084 0 -0 0</pose>
       <inertial>
-        <pose>0.02556 0.00281 0.00076 0 -0 0</pose>
+        <pose>0.0 0.0 0.0 0 -0 0</pose>
         <mass>0.2</mass>
         <inertia>
           <ixx>0.000083333</ixx>
@@ -768,7 +773,7 @@
         </inertia>
       </inertial>
       <collision name='LForeArm_collision'>
-        <pose>0.025325 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.11 0.05 0.05</size>
@@ -801,6 +806,7 @@
     </link>
     <joint name='LElbowRoll' type='revolute'>
       <child>LForeArm</child>
+      <pose>-0.05 0 0 0 -0 0</pose>
       <parent>LElbow</parent>
       <axis>
         <xyz>0 0 1</xyz>
@@ -993,6 +999,7 @@
     </link>
     <joint name='RHipPitch' type='revolute'>
       <child>RThigh</child>
+      <pose>0 0 0.04 0 -0 0</pose>
       <parent>RHip</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -1069,6 +1076,7 @@
     </link>
     <joint name='RKneePitch' type='revolute'>
       <child>RTibia</child>
+      <pose>0 0 0.045 0 -0 0</pose>
       <parent>RThigh</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -1157,7 +1165,7 @@
     <link name='r_sole'>
       <pose>0 -0.055 -0.375 0 -0 0</pose>
       <inertial>
-        <pose>0.02 0 0 0 -0 0</pose>
+        <pose>0.025 0 0 0 -0 0</pose>
         <mass>0.2</mass>
         <inertia>
           <ixx>0.00011333</ixx>
@@ -1169,10 +1177,10 @@
         </inertia>
       </inertial>
       <collision name='r_sole_collision'>
-        <pose>0.02 0.0 0.0 0 -0 0</pose>
+        <pose>0.025 0.0 0.0 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.16 0.085 0.02</size>
+            <size>0.16 0.08 0.02</size>
           </box>
         </geometry>
         <surface>
@@ -1206,6 +1214,7 @@
     </link>
     <joint name='RAnkleRoll' type='revolute'>
       <child>r_sole</child>
+      <pose>0 0 0.04 0 0 0</pose>
       <parent>r_ankle</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -1292,9 +1301,9 @@
       </physics>
     </joint>
     <link name='RBicep'>
-      <pose>0.02 -0.098 0.075 0 -0 0</pose>
+      <pose>0.02 -0.108 0.075 0 -0 0</pose>
       <inertial>
-        <pose>0.00455 -0.00563 0.0033 0 -0 0</pose>
+        <pose>0 -0 0 0 -0 0</pose>
         <mass>0.15</mass>
         <inertia>
           <ixx>0.00010625</ixx>
@@ -1325,7 +1334,7 @@
         </surface>
       </collision>
       <visual name='RBicep_visual'>
-        <pose>-0.02 0 0 0 -0 0</pose>
+        <pose>-0.02 0.015 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>0.1 0.1 0.1</scale>
@@ -1339,6 +1348,7 @@
     </link>
     <joint name='RShoulderRoll' type='revolute'>
       <child>RBicep</child>
+	  <pose>-0.02 0.01 0 0 0 0</pose>
       <parent>RShoulder</parent>
       <axis>
         <xyz>0 0 1</xyz>
@@ -1368,7 +1378,7 @@
       </physics>
     </joint>
     <link name='RElbow'>
-      <pose>0.095 -0.098 0.084 0 -0 0</pose>
+      <pose>0.09 -0.098 0.084 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.035</mass>
@@ -1393,7 +1403,7 @@
         <limit>
           <lower>-2.094395</lower>
           <upper>2.094395</upper>
-          <effort>0.25</effort>
+          <effort>40.25</effort>
           <velocity>6.1395</velocity>
         </limit>
         <dynamics>
@@ -1418,7 +1428,7 @@
     <link name='RForeArm'>
       <pose>0.14 -0.098 0.084 0 -0 0</pose>
       <inertial>
-        <pose>0.02556 -0.00281 0.00076 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <mass>0.2</mass>
         <inertia>
           <ixx>0.000083333</ixx>
@@ -1430,7 +1440,7 @@
         </inertia>
       </inertial>
       <collision name='RForeArm_collision'>
-        <pose>0.025325 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.11 0.05 0.05</size>
@@ -1463,12 +1473,13 @@
     </link>
     <joint name='RElbowRoll' type='revolute'>
       <child>RForeArm</child>
+      <pose>-0.05 0 0 0 -0 0</pose>
       <parent>RElbow</parent>
       <axis>
-        <xyz>0 0 -1</xyz>
+        <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.570796</lower>
-          <upper>0.017453</upper>
+          <lower>-0.017453</lower>
+          <upper>1.570796</upper>
           <effort>0.25</effort>
           <velocity>6.1395</velocity>
         </limit>
