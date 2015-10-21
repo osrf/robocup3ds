@@ -4,30 +4,22 @@
 
     <physics type="ode">
       <max_step_size>0.001</max_step_size>
-      <real_time_update_rate>1000</real_time_update_rate>
     </physics>
 
     <!-- Remove the grid -->
     <scene>
       <grid>false</grid>
-      <origin_visual>false</origin_visual>
-      <sky></sky>
     </scene>
 
     <!-- A global light source -->
-    <light type="directional" name="sun">
-      <cast_shadows>true</cast_shadows>
-      <pose>0 0 1000 0 0 0</pose>
-      <diffuse>0.8 0.8 0.8 1</diffuse>
-      <specular>0.2 0.2 0.2 1</specular>
-      <attenuation>
-        <range>1000</range>
-        <constant>0.9</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <direction>-0.5 0.1 -0.9</direction>
-    </light>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- A ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
 
     <!-- RoboCup 3D simulator field -->
     <include>
@@ -52,11 +44,8 @@
       <uri>model://robocup_3Dsim_ball</uri>
     </include>
 
+    <!-- Load the RoboCup 3D plugin -->
     <plugin name="robocup3dplugin" filename="librobocup3dsPlugin.so">
     </plugin>
-    <gui fullscreen='0'>
-      <plugin name="robocup3dGUIplugin" filename="librobocup3dsGUIPlugin.so">
-      </plugin>
-    </gui>
   </world>
 </sdf>

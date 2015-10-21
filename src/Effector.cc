@@ -93,7 +93,7 @@ bool Effector::Parse(int _socket)
     bytesRead += result;
   }
 
-  std::string msg(buffer);
+  std::string msg(this->buffer);
 
   std::lock_guard<std::mutex> lock(this->mutex);
   if (this->socketIDMessageMap[_socket] == "__empty__")

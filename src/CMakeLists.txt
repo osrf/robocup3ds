@@ -16,6 +16,7 @@ set (sources
   states/State.cc
   Server.cc
   Util.cc
+  ClientAgent.cc
 )
 
 set (gtest_sources
@@ -23,8 +24,8 @@ set (gtest_sources
   Effector_TEST.cc
   GameState_TEST.cc
   Geometry_TEST.cc
-  Robocup3dsPlugin_TEST.cc
   Perceptors_TEST.cc
+  Robocup3dsPlugin_TEST.cc
   Server_TEST.cc
   Util_TEST.cc
 )

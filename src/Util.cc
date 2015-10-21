@@ -66,11 +66,15 @@ bool Util::LoadConfigParameter(
   const std::string &_key,
   double &_value)
 {
+  if (_config.find(_key) == _config.end())
+    return false;
+
   bool rValue = true;
   try
   {
     size_t offset;
     _value = std::stod(_config.at(_key), &offset);
+
     if (offset != _config.at(_key).size())
     {
       rValue = false;
@@ -98,6 +102,9 @@ bool Util::LoadConfigParameterBool(
   const std::string &_key,
   bool &_boolValue)
 {
+  if (_config.find(_key) == _config.end())
+    return false;
+
   bool rValue = true;
   try
   {

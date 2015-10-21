@@ -54,6 +54,9 @@ using namespace gazebo;
 using namespace common;
 using namespace Util;
 
+const double Robocup3dsPlugin::kPID_I_LIMIT = 1.0;
+const double Robocup3dsPlugin::kPID_CMD_LIMIT = 1000.0;
+
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
 /////////////////////////////////////////////////
@@ -124,13 +127,17 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
                                      const std::string &_bodyType,
                                      const std::string &_jointName,
                                      const std::map<std::string,
-                                                    std::string> &_config) const
+                                     std::string> &_config) const
 {
   std::stringstream ss;
   std::vector<double> params;
   try
   {
     const auto &keyName = "pid_" + _bodyType + "_" + _jointName;
+
+    if (_config.find(keyName) == _config.end())
+      return;
+
     ss << _config.at(keyName);
     double i;
     while (ss >> i)
@@ -150,7 +157,7 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
     return;
   }
 
-  if (params.size() != 5u)
+  if (params.size() != 3u)
   {
     gzerr << "LoadPIDParams() cannot parse PID params for "
           + _jointName + " in " + _bodyType
@@ -161,14 +168,14 @@ void Robocup3dsPlugin::LoadPIDParams(common::PID &_pid,
   gzmsg << "LoadPIDParams() set PID params for joint "
         + _jointName + " in " + _bodyType
         + " bodytype: " << params[0] << " " << params[1] << " " << params[2]
-        << " " << params[3] << " " << params[4] << std::endl;
+        << std::endl;
   _pid.SetPGain(params[0]);
   _pid.SetIGain(params[1]);
   _pid.SetDGain(params[2]);
-  _pid.SetIMax(params[3]);
-  _pid.SetIMin(-params[3]);
-  _pid.SetCmdMax(params[4]);
-  _pid.SetCmdMin(-params[4]);
+  _pid.SetIMax(Robocup3dsPlugin::kPID_I_LIMIT);
+  _pid.SetIMin(-Robocup3dsPlugin::kPID_I_LIMIT);
+  _pid.SetCmdMax(Robocup3dsPlugin::kPID_CMD_LIMIT);
+  _pid.SetCmdMin(-Robocup3dsPlugin::kPID_CMD_LIMIT);
 }
 
 /////////////////////////////////////////////////
@@ -197,9 +204,9 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   this->LoadConfiguration(config);
   gzmsg << "************Finished loading************" << std::endl;
 
-  gzmsg << "Client port: " << Robocup3dsPlugin::clientPort << std::endl;
-  gzmsg << "Monitor port: " << Robocup3dsPlugin::monitorPort << std::endl;
-  gzmsg << "Sync mode status: " << Robocup3dsPlugin::syncMode << std::endl;
+  gzmsg << "Client port: " << this->clientPort << std::endl;
+  gzmsg << "Monitor port: " << this->monitorPort << std::endl;
+  gzmsg << "Sync mode status: " << this->syncMode << std::endl;
 
   // connect to the update event.
   if (!Robocup3dsPlugin::syncMode)
@@ -292,9 +299,10 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
 {
-  this->world->SetPaused(true);
+  // todo: pausing world when parsing effector messages in sync mode causes
+  // client to stop sending messages after beam, need to find out why
+  // this->world->SetPaused(true);
   this->UpdateEffector();
-  this->UpdateMonitorEffector();
   for (const auto &team : this->gameState->teams)
   {
     for (const auto &agent : team->members)
@@ -306,7 +314,9 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
     }
   }
 
-  this->world->SetPaused(false);
+  // todo: pausing world when parsing effector messages in sync mode causes
+  // client to stop sending messages after beam, need to find out why
+  // this->world->SetPaused(false);
   for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
@@ -315,6 +325,7 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
     }
   }
 
+  this->UpdateMonitorEffector();
   this->UpdateStoppedAgents();
   this->UpdateContactManager();
   this->UpdateGameState();
@@ -354,10 +365,9 @@ void Robocup3dsPlugin::UpdateEffector()
   for (const auto &agentName : this->effector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
-    // Debug output:
-    // gzmsg << "(" << this->world->GetSimTime().Double()
-    //       << ") agent removed from game world by client: "
-    //       << agentName << std::endl;
+    gzmsg << "(" << this->world->GetSimTime().Double() <<
+          ") agent removed from game world: " <<
+          agentName << std::endl;
   }
 
   // disconnect sockets for failed clients
@@ -427,10 +437,6 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
   for (const auto &agentName : this->monitorEffector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
-    // Debug output:
-    // gzmsg << "(" << this->world->GetSimTime().Double()
-    //       << ") agent removed from game world by monitor: "
-    //       << agentName << std::endl;
   }
 }
 
@@ -498,9 +504,6 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
     {
       lastBallContact->contactTime = gameState->GetGameTime();
       break;
-      // gzmsg << "last ball contact updated: " << playerModel->GetName() <<
-      //       " " << gameState->GetGameTime() << " " <<
-      //       lastBallContact->contactTime << std::endl;
     }
     else
     {
@@ -511,11 +514,6 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
                                    gameState->GetCurrentState()->name));
       gameState->ballContactHistory.push_back(ballContact);
       break;
-      // Debug output:
-      // gzmsg << "new ball contact: " << playerModel->GetName() <<
-      //       " " << gameState->GetGameTime() << std::endl;
-      // gzmsg << "total number of contacts: " <<
-      //       this->gameState->ballContactHistory.size() << std::endl;
     }
   }
   this->contacts.clear();
@@ -537,10 +535,9 @@ void Robocup3dsPlugin::UpdateGameState()
       {
         agent.inSimWorld = true;
         this->InitJointController(agent, model);
-        // Debug output:
-        // gzmsg << "(" << this->world->GetSimTime().Double()
-        //       << ") agent added to game world: "
-        //       << model->GetName() << std::endl;
+        gzmsg << "(" << this->world->GetSimTime().Double() <<
+              ") agent added to game world: " <<
+              model->GetName() << std::endl;
       }
 
       // set agent pose in gameState
@@ -616,7 +613,26 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
       model->GetJointController()->Reset();
       for (const auto &joint : model->GetJoints())
       {
-        joint->Reset();
+        if (agent.bodyType->DefaultModelName() == "naoType0")
+        {
+          // Increase the actuators damping to 1
+          joint->SetDamping(0, 1);
+
+          // Set the joints position to their initial Position
+          if (joint-> GetName() == "LShoulderPitch" ||
+              joint-> GetName() == "RShoulderPitch")
+            joint->SetPosition(0, -1.5);
+          else if (joint-> GetName() == "LShoulderRoll")
+            joint->SetPosition(0, 0.15);
+          else if (joint-> GetName() == "RShoulderRoll")
+            joint->SetPosition(0, -0.15);
+          else
+            joint->SetPosition(0, 0);
+        }
+        else
+        {
+          joint->Reset();
+        }
       }
       model->ResetPhysicsStates();
       this->gameState->MoveAgent(agent, agent.pos.X(), agent.pos.Y(),
@@ -705,10 +721,11 @@ void Robocup3dsPlugin::UpdatePerceptor()
   {
     for (const auto &agent : team->members)
     {
-      if (!agent.inSimWorld)
-      {
-        continue;
-      }
+      // todo: this breaks sync mode, find out why and how to fix
+      // if (!agent.inSimWorld)
+      // {
+      //   continue;
+      // }
 
       int cx = perceptor->Serialize(agent, &(this->buffer[4]),
                                     Robocup3dsPlugin::kBufferSize - 4);

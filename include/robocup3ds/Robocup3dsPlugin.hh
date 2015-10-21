@@ -43,7 +43,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   // Documentation inherited.
   public: virtual void Load(gazebo::physics::WorldPtr _world,
-      sdf::ElementPtr _sdf);
+                            sdf::ElementPtr _sdf);
 
   // Documentation inherited.
   public: virtual void Init();
@@ -121,6 +121,12 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Size of buffer in bytes
   private: static const int kBufferSize = 16384;
+
+  /// \brief Integral limit used for all joint controllers
+  private: static const double kPID_I_LIMIT;
+
+  /// \brief Output limit used for all joint controllers
+  private: static const double kPID_CMD_LIMIT;
 
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;

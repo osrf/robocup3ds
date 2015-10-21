@@ -89,7 +89,9 @@ class RCPServer
   /// \param[in] _data Data to send.
   /// \param[in] _len Data length in bytes.
   /// \return True when data was succesfully send or false otherwise.
-  public: bool Send(const int _socket, const char *_data, const size_t _len);
+  public: bool Send(const int _socket,
+                    const char *_data,
+                    const size_t _len);
 
   /// \brief Enable the server.
   public: void Start();
