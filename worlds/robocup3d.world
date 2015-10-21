@@ -3,7 +3,8 @@
   <world name="default">
 
     <physics type="ode">
-      <max_step_size>0.0005</max_step_size>
+      <max_step_size>0.001</max_step_size>
+	  <real_time_update_rate>1000</real_time_update_rate>
     </physics>
 
     <!-- Remove the grid -->

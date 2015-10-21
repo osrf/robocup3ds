@@ -280,13 +280,13 @@ class NaoSimsparkBT : public NaoBT
   // Documentation inherited
   public: virtual double Height() const
   {
-    return 0.6;
+    return 0.57;
   }
 
   // Documentation inherited
   public: virtual double TorsoHeight() const
   {
-    return 0.39;
+    return 0.36;
   }
 
   // Documentation inherited

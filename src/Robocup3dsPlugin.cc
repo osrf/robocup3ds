@@ -639,9 +639,9 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
                  joint-> GetName() == "RShoulderPitch")
               joint->SetAngle(0, -1.5);
           else if (joint-> GetName() == "LShoulderRoll")
-              joint->SetAngle(0, 0.15);
+              joint->SetAngle(0, 0.25);
           else if (joint-> GetName() == "RShoulderRoll")
-              joint->SetAngle(0, -0.15);
+              joint->SetAngle(0, -0.25);
           else
               joint->SetAngle(0, 0);
         }
