@@ -1,10 +1,23 @@
 # Gazebo support for the RoboCup 3D simulator league #
 
-### Install Gazebo
+## Install Gazebo
 
 The RoboCup 3d plugin requires Gazebo 6 or higher. Follow the [Gazebo installation tutorial](http://gazebosim.org/tutorials?tut=install_ubuntu&cat=install) for installing Gazebo on your machine.
 
-### Build And Install RoboCup 3D Gazebo simulation
+### Install RoboCup 3D Gazebo simulation
+
+To install the robocup 3D gazebo package in Ubuntu please use:
+
+```
+#!sh
+curl -ssL https://bitbucket.org/osrf/release-tools/raw/default/one-line-installations/robocup3ds.sh | sh
+```
+An alternative step by step installation method is detailed below.
+
+### Alternative: build gazebo from source
+
+If robocup 3D gazebo simulator was installed using the one-liner this instructions
+are not required.
 
 1. Clone the repository into a directory in your home folder:
 
@@ -24,22 +37,22 @@ The RoboCup 3d plugin requires Gazebo 6 or higher. Follow the [Gazebo installati
     > a. Release mode: This will generate optimized code, but will not have
     debug symbols. Use this mode if you don't need to use GDB.
 
-    >        cmake ../
+    >        cmake ..
 
 
     >> Note: You can use a custom install path to make it easier to switch
     between source and debian installs:
 
-    >>        cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/local ../
+    >>        cmake -DCMAKE_INSTALL_PREFIX=/home/$USER/local ..
 
     > b. Debug mode: This will generate code with debug symbols. RoboCup3dS will
     run slower, but you'll be able to use GDB.
 
-    >        cmake -DCMAKE_BUILD_TYPE=Debug ../
+    >        cmake -DCMAKE_BUILD_TYPE=Debug ..
 
-1. The output from `cmake ../` may generate a number of errors and warnings
+1. The output from `cmake ..` may generate a number of errors and warnings
 about missing packages. You must install the missing packages that have errors
-and re-run `cmake ../`. Make sure all the build errors are resolved before
+and re-run `cmake ..`. Make sure all the build errors are resolved before
 continuing (they should be there from the earlier step in which you installed
 prerequisites). Warnings alert of optional packages that are missing.
 
@@ -55,33 +68,14 @@ prerequisites). Warnings alert of optional packages that are missing.
 
         sudo make install
 
-### Running an example world
 
-Run an simple robocup world to check your installation.
+#### Running tests
 
-1. First move to the robocup3ds directory:
+You can run the tests for the plugins from the same build directory by running:
 
-        cd ~/robocup3ds
+        make test
 
-1. Then run the world in verbose mode:
-
-        gazebo --verbose worlds/robocup3d.world
-
-A world with a soccer field should appear and there should be no errors printed in the terminal, so we know the plugins are running.
-
-### Running tests
-
-You can run the tests for the plugins as follows:
-
-1. First move to the robocup3ds directory:
-
-        cd ~/robocup3ds
-
-1. Then run a unit test, like:
-
-        ./build/src/UNIT_Robocup3dsPlugin_TEST
-
-### Code checking
+#### Code checking
 
 Code checking is done with cppchecker. Make sure you have it installed:
 
@@ -96,3 +90,14 @@ Then to run the check:
 1. Then run the checker:
 
         . tools/code_check.sh
+
+### Running the simulator
+
+Run the simulator to check your installation. A world with a soccer field
+should appear and there should be no errors printed in the terminal, so we know
+the plugins are running.
+
+```
+#!/bin/bash
+gazebo-robocup3ds --verbose
+```
