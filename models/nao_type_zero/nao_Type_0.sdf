@@ -199,6 +199,7 @@
     </link>
     <joint name='LHipYawPitch' type='revolute'>
       <child>LHip1</child>
+	  <pose>-0.01 0 0 0 0 0</pose>		
       <parent>base_link</parent>
       <axis>
         <xyz>0 0.7071 -0.7071</xyz>
@@ -256,6 +257,7 @@
     </link>
     <joint name='LHipRoll' type='revolute'>
       <child>LHip</child>
+	  <pose>-0.01 0 0 0 0 0</pose>				
       <parent>LHip1</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -332,7 +334,7 @@
     </link>
     <joint name='LHipPitch' type='revolute'>
       <child>LThigh</child>
-      <pose>0 0 0.04 0 -0 0</pose>
+      <pose>-0.01 0 0.04 0 -0 0</pose>
       <parent>LHip</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -362,13 +364,13 @@
       </physics>
     </joint>
     <link name='LTibia'>
-      <pose>0 0.055 -0.280 0 -0 0</pose>
+      <pose>0.005 0.055 -0.280 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.225 </mass>
         <inertia>
-          <ixx>0.0003187</ixx>
-          <iyy>0.0003468</iyy>
+          <ixx>0.0003468</ixx>
+          <iyy>0.0003187</iyy>
           <izz>0.0002118</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
@@ -379,7 +381,7 @@
         <pose>0 0 0.0 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.080 0.070 0.11</size>
+            <size>0.070 0.080 0.11</size>
           </box>
         </geometry>
         <surface>
@@ -467,6 +469,7 @@
     </link>
     <joint name='LAnklePitch' type='revolute'>
       <child>l_ankle</child>
+      <pose>-0.005 0 0 0 0 0</pose>
       <parent>LTibia</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -547,7 +550,7 @@
     </link>
     <joint name='LAnkleRoll' type='revolute'>
       <child>l_sole</child>
-      <pose>0 0 0.04 0 -0 0</pose>
+      <pose>-0.005 0 0.04 0 -0 0</pose>
       <parent>l_ankle</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -866,6 +869,7 @@
     </link>
     <joint name='RHipYawPitch' type='revolute'>
       <child>RHip1</child>
+      <pose>-0.01 0 0 0 0 0</pose>		
       <parent>base_link</parent>
       <axis>
         <xyz>0 0.7071 0.7071</xyz>
@@ -923,6 +927,7 @@
     </link>
     <joint name='RHipRoll' type='revolute'>
       <child>RHip</child>
+	  <pose>-0.01 0 0 0 0 0</pose>		
       <parent>RHip1</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -999,7 +1004,7 @@
     </link>
     <joint name='RHipPitch' type='revolute'>
       <child>RThigh</child>
-      <pose>0 0 0.04 0 -0 0</pose>
+      <pose>-0.01 0 0.04 0 -0 0</pose>
       <parent>RHip</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -1029,13 +1034,13 @@
       </physics>
     </joint>
     <link name='RTibia'>
-      <pose>0 -0.055 -0.280 0 -0 0</pose>
+      <pose>0.005 -0.055 -0.280 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.225 </mass>
         <inertia>
-          <ixx>0.0003187</ixx>
-          <iyy>0.0003468</iyy>
+          <ixx>0.0003468</ixx>
+          <iyy>0.0003187</iyy>
           <izz>0.0002118</izz>
           <ixy>0</ixy>
           <ixz>0</ixz>
@@ -1046,7 +1051,7 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.080 0.070 0.11</size>
+            <size>0.070 0.080 0.11</size>
           </box>
         </geometry>
         <surface>
@@ -1134,6 +1139,7 @@
     </link>
     <joint name='RAnklePitch' type='revolute'>
       <child>r_ankle</child>
+	  <pose>-0.005 0 0 0 0 0</pose>	
       <parent>RTibia</parent>
       <axis>
         <xyz>0 -1 0</xyz>
@@ -1214,7 +1220,7 @@
     </link>
     <joint name='RAnkleRoll' type='revolute'>
       <child>r_sole</child>
-      <pose>0 0 0.04 0 0 0</pose>
+      <pose>-0.005 0 0.04 0 0 0</pose>
       <parent>r_ankle</parent>
       <axis>
         <xyz>1 0 0</xyz>
