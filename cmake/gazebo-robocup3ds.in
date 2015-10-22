@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # Copyright (C) 2015 Open Source Robotics Foundation
 #
@@ -14,8 +15,6 @@
 # limitations under the License.
 #
 #
-
-#!/bin/bash
 
 # gazebo-robocup3ds: A shell script to execute gazebo with the environment
 # for the RoboCup 3D simulation league.
