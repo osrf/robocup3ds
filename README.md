@@ -98,6 +98,5 @@ should appear and there should be no errors printed in the terminal, so we know
 the plugins are running.
 
 ```
-#!/bin/bash
 gazebo-robocup3ds --verbose
 ```
