@@ -86,7 +86,7 @@ TEST(AgentTest, BodyTypeTest)
   Agent a1(1, t1);
 
   EXPECT_DOUBLE_EQ(a1.bodyType->Height(), 0.6);
-  EXPECT_DOUBLE_EQ(a1.bodyType->TorsoHeight(), 0.6 * 0.5);
+  EXPECT_DOUBLE_EQ(a1.bodyType->TorsoHeight(), 0.3);
   EXPECT_EQ(a1.bodyType->HingeJointEffectorMap().at("lae3"), "LElbowYaw");
   EXPECT_EQ(a1.bodyType->DefaultModelName(), "naoH25V40");
 }

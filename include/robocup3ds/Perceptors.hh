@@ -42,7 +42,8 @@ class Perceptor
   /// \brief Method used to set view frustum
   /// \param[in] _hfov Horizontal field of view in degrees
   /// \param[in] _vfov Vertical field of view in degrees
-  public: void SetViewFrustum(const double _hfov, const double _vfov);
+  public: void SetViewFrustum(const double _hfov,
+                              const double _vfov);
 
   /// \brief Method used to get view frustum
   /// \return A vector of planes of the view frustum
@@ -87,7 +88,8 @@ class Perceptor
   /// \param[out] _string Buffer we are writing to
   /// \param[in] _size Size of the buffer
   /// \return True if buffer is large enough
-  public: int Serialize(const Agent &_agent, char *_string,
+  public: int Serialize(const Agent &_agent,
+                        char *_string,
                         const int _size) const;
 
   /// \brief Converts points to a string
@@ -97,8 +99,9 @@ class Perceptor
   /// \param[in] _size Size of string buffer
   /// \return Number of characters written
   private: inline int SerializePoint(const char *_label,
-                              const ignition::math::Vector3<double> &_pt,
-                              char *_string, const int _size) const;
+                                     const ignition::math::Vector3<double> &_pt,
+                                     char *_string,
+                                     const int _size) const;
 
   /// \brief Function to add noise to all observations
   /// \param[in] _pt Point object

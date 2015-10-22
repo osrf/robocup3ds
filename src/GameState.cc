@@ -116,8 +116,8 @@ GameState::GameState():
                      Team::Side::RIGHT)),
   agentBodyTypeMap(
 {
-  {"NaoOfficialBT", std::make_shared<NaoOfficialBT>()
-  }
+  {"NaoOfficialBT", std::make_shared<NaoOfficialBT>()},
+  {"NaoSimsparkBT", std::make_shared<NaoSimsparkBT>()}
 }),
 defaultBodyType(agentBodyTypeMap.at("NaoOfficialBT")),
 hasCurrentStateChanged(false),
@@ -872,7 +872,7 @@ void GameState::MoveAgent(Agent &_agent, const double _x, const double _y,
 
 /////////////////////////////////////////////////
 void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
-                               const double _yaw) const
+                               const double _yaw, const bool _beamOnce) const
 {
   double offsetX = (static_cast<double>(random()) / (RAND_MAX)) *
                    (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
@@ -880,6 +880,18 @@ void GameState::MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                    (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
   double offsetYaw = (static_cast<double>(random()) / (RAND_MAX)) *
                      (2 * GameState::kBeamNoise) - GameState::kBeamNoise;
+  double newX = _x + offsetX;
+  double newY = _y + offsetY;
+  double newYaw = _yaw + offsetYaw;
+
+  if (_beamOnce
+      && abs(_agent.pos.X() - newX) <= GameState::kBeamNoise
+      && abs(_agent.pos.Y() - newY) <= GameState::kBeamNoise
+      && abs(_agent.rot.Euler().Z() - newYaw) < GameState::kBeamNoise)
+  {
+    return;
+  }
+
   _agent.pos.Set(_x + offsetX, _y + offsetY,
                  _agent.bodyType->TorsoHeight() +
                  GameState::beamHeightOffset);

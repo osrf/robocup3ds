@@ -85,7 +85,8 @@ class GameState
     /// \param[in] _contactTime time when ball was touched
     /// \param[in] _contactPos position where ball was touched
     /// \param[in] _playMode The playmode where ball was touched
-    public: BallContact(const int _uNum, const Team::Side _side,
+    public: BallContact(const int _uNum,
+                        const Team::Side _side,
                         const double _contactTime,
                         const ignition::math::Vector3<double> &_contactPos,
                         const std::string &_playMode = ""):
@@ -151,7 +152,7 @@ class GameState
   /// \param[in] _resetState When new state is the same as current state,
   /// setting this flag to true will reset the state
   public: void SetCurrent(const std::shared_ptr<states::State> &_newState,
-    const bool _resetState = false);
+                          const bool _resetState = false);
 
   /// \brief Drops the ball at its current position and move all players away
   /// by the free kick radius. If the ball is off the field, it is brought
@@ -184,7 +185,9 @@ class GameState
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
   /// \param[in] yaw New yaw of agent in radians
-  public: void MoveAgent(Agent &_agent, const double _x, const double _y,
+  public: void MoveAgent(Agent &_agent,
+                         const double _x,
+                         const double _y,
                          const double yaw) const;
 
   /// \brief Set the agent's position and yaw with some additional noise
@@ -192,8 +195,13 @@ class GameState
   /// \param[in] _x New X position of agent in meters
   /// \param[in] _y New Y position of agent in meters
   /// \param[in] _yaw New yaw of agent in radians
-  public: void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
-                              const double _yaw) const;
+  /// \param[in] _beamOnce If agent is within 0.15 meters of new location
+  //  do not beam the agent
+  public: void MoveAgentNoisy(Agent &_agent,
+                              const double _x,
+                              const double _y,
+                              const double _yaw,
+                              const bool _beamOnce = true) const;
 
   /// \brief Set the agent's position and orientation
   /// \param[out] _agent Reference to agent object
@@ -276,7 +284,9 @@ class GameState
   /// \param[in] _bodyType Body type used for agent
   /// \param[in] _socketID SocketID associated with agent
   /// \return Pointer to the agent object created
-  public: Agent *AddAgent(const int _uNum, const std::string &_teamName,
+  public: Agent* AddAgent(
+    const int _uNum,
+    const std::string &_teamName,
     const std::shared_ptr<NaoBT> &_bodyType = std::make_shared<NaoOfficialBT>(),
     const int _socketID = -1);
 
@@ -284,7 +294,8 @@ class GameState
   /// \param[in] _uNum Agent number
   /// \param[in] _teamName Agent name
   /// \return True when removing agent is successful
-  public: bool RemoveAgent(const int _uNum, const std::string &_teamName);
+  public: bool RemoveAgent(const int _uNum,
+                           const std::string &_teamName);
 
   /// \brief Beam the agent if the play mode allows it
   /// \param[in] _uNum Agent number
@@ -293,8 +304,11 @@ class GameState
   /// \param[in] _y Y position of agent
   /// \param[in] _rot Yaw of agent
   /// \return Flag whether beaming agent is successful
-  public: bool BeamAgent(const int _uNum, const std::string &_teamName,
-                         const double _x, const double _y, const double _rot);
+  public: bool BeamAgent(const int _uNum,
+                         const std::string &_teamName,
+                         const double _x,
+                         const double _y,
+                         const double _rot);
 
   /// \brief Get the game's half.
   /// \return if the game is in the first half or if is in the second.
@@ -362,7 +376,8 @@ class GameState
   /// \param[in] _i First comparison AgentDist object
   /// \param[in] _j Second comparison AgentDist object
   /// \return True when _i is smaller than _j
-  private: static bool SortDist(const AgentDist &_i, const AgentDist &_j);
+  private: static bool SortDist(const AgentDist &_i,
+                                const AgentDist &_j);
 
   /// \brief beforeKickOffState playmode
   public: std::shared_ptr<states::BeforeKickOffState> beforeKickOffState;
@@ -543,8 +558,7 @@ class GameState
   public: static const double kBallContactInterval;
 
   /// \brief Map of agent body type names and associated body types
-  public: const std::map<std::string,
-  std::shared_ptr<NaoBT>> agentBodyTypeMap;
+  public: const std::map<std::string, std::shared_ptr<NaoBT>> agentBodyTypeMap;
 
   /// \brief The default body type to use when creating agent
   public: const std::shared_ptr<NaoBT> defaultBodyType;
