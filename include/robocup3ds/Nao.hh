@@ -280,13 +280,13 @@ class NaoSimsparkBT : public NaoBT
   // Documentation inherited
   public: virtual double Height() const
   {
-    return 0.6;
+    return 0.57;
   }
 
   // Documentation inherited
   public: virtual double TorsoHeight() const
   {
-    return 0.39;
+    return 0.36;
   }
 
   // Documentation inherited
@@ -428,28 +428,28 @@ class NaoSimsparkBT : public NaoBT
   protected: std::map<std::string, gazebo::common::PID>
   hingeJointPIDMap =
   {
-      {"HeadYaw", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"HeadPitch", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"LShoulderPitch", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"LShoulderRoll", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"LElbowYaw", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"LElbowRoll", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"LHipYawPitch", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"LHipRoll", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"LHipPitch", gazebo::common::PID(400, 400, 0, 1, -1, 1000, -1000)},
-      {"LKneePitch", gazebo::common::PID(400, 400, 0, 1, -1, 1000, -1000)},
-      {"LAnklePitch", gazebo::common::PID(400, 400, 0, 1, -1, 1000, -1000)},
-      {"LAnkleRoll", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"RHipYawPitch", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"RHipRoll", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"RHipPitch", gazebo::common::PID(400, 400, 0, 1, -1, 1000, -1000)},
-      {"RKneePitch", gazebo::common::PID(400, 400, 0, 1, -1, 1000, -1000)},
-      {"RAnklePitch", gazebo::common::PID(400, 400, 0, 1, -1, 1000, -1000)},
-      {"RAnkleRoll", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"RShoulderPitch", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"RShoulderRoll", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"RElbowYaw", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)},
-      {"RElbowRoll", gazebo::common::PID(160, 160, 0, 1, -1, 1000, -1000)}
+      {"HeadYaw", gazebo::common::PID(160, 160, 0)},
+      {"HeadPitch", gazebo::common::PID(160, 160, 0)},
+      {"LShoulderPitch", gazebo::common::PID(160, 160, 0)},
+      {"LShoulderRoll", gazebo::common::PID(160, 160, 0)},
+      {"LElbowYaw", gazebo::common::PID(160, 160, 0)},
+      {"LElbowRoll", gazebo::common::PID(1, 1, 0)},
+      {"LHipYawPitch", gazebo::common::PID(160, 160, 0)},
+      {"LHipRoll", gazebo::common::PID(160, 160, 0)},
+      {"LHipPitch", gazebo::common::PID(400, 400, 0)},
+      {"LKneePitch", gazebo::common::PID(400, 400, 0)},
+      {"LAnklePitch", gazebo::common::PID(400, 400, 0)},
+      {"LAnkleRoll", gazebo::common::PID(160, 160, 0)},
+      {"RHipYawPitch", gazebo::common::PID(160, 160, 0)},
+      {"RHipRoll", gazebo::common::PID(160, 160, 0)},
+      {"RHipPitch", gazebo::common::PID(400, 400, 0)},
+      {"RKneePitch", gazebo::common::PID(400, 400, 0)},
+      {"RAnklePitch", gazebo::common::PID(400, 400, 0)},
+      {"RAnkleRoll", gazebo::common::PID(160, 160, 0)},
+      {"RShoulderPitch", gazebo::common::PID(160, 160, 0)},
+      {"RShoulderRoll", gazebo::common::PID(160, 160, 0)},
+      {"RElbowYaw", gazebo::common::PID(160, 160, 0)},
+      {"RElbowRoll", gazebo::common::PID(1, 1, 0)}
   };
 };
 

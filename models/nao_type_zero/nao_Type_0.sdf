@@ -816,7 +816,7 @@
         <limit>
           <lower>-1.570796</lower>
           <upper>0.017453</upper>
-          <effort>0.25</effort>
+          <effort>40.25</effort>
           <velocity>6.1395</velocity>
         </limit>
         <dynamics>
@@ -1486,7 +1486,7 @@
         <limit>
           <lower>-0.017453</lower>
           <upper>1.570796</upper>
-          <effort>0.25</effort>
+          <effort>40.25</effort>
           <velocity>6.1395</velocity>
         </limit>
         <dynamics>

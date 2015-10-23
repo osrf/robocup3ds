@@ -55,7 +55,7 @@ using namespace common;
 using namespace Util;
 
 const double Robocup3dsPlugin::kPID_I_LIMIT = 1.0;
-const double Robocup3dsPlugin::kPID_CMD_LIMIT = 1000.0;
+const double Robocup3dsPlugin::kPID_CMD_LIMIT = 2500.0;
 
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
