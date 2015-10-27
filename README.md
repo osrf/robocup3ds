@@ -45,7 +45,7 @@ are not required.
 
     >        cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug ..
 
-1. The output from `cmake ..` may generate a number of errors and warnings
+1. The output from `cmake` may generate a number of errors and warnings
 about missing packages. You must install the missing packages that have errors
 and re-run `cmake`. Make sure all the build errors are resolved before
 continuing (they should be there from the earlier step in which you installed
