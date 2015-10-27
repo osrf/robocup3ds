@@ -95,3 +95,7 @@ the plugins are running.
 ```
 gazebo-robocup3ds --verbose
 ```
+
+### Code contributions
+
+New features and bug fixes are more than welcome. Please, review the [Gazebo guide for code contributions](https://bitbucket.org/osrf/gazebo_tutorials/src/default/contrib_code/tutorial.md?fileviewer=file-view-default). We follow the same rules here.
