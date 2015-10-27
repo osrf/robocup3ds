@@ -1,6 +1,7 @@
 set (folders
   nao_blue
   nao_red
+  nao_type_zero
 )
 
 foreach (folder ${folders})
