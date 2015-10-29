@@ -58,11 +58,16 @@ fi
 
 SUPPRESS=/tmp/cpp_check.suppress
 
+# C++11 char buffers initialization are false positive
+# in cppcheck on trusty
+echo "*:src/Effector.cc:39" > $SUPPRESS
+echo "*:src/Robocup3dsPlugin.cc:63" >> $SUPPRESS
+
 # The follow suppression is useful when checking for missing includes.
 # It's disable for now because checking for missing includes is very
 # time consuming. See CPPCHECK_CMD3.
 #echo "missingIncludeSystem" >> $SUPPRESS
-echo "*:include/ignition/transport/TransportTypes.hh:63" > $SUPPRESS
+echo "*:include/ignition/transport/TransportTypes.hh:63" >> $SUPPRESS
 
 #cppcheck
 CPPCHECK_BASE="cppcheck -q --suppressions-list=$SUPPRESS"
