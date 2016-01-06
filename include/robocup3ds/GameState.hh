@@ -20,6 +20,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <string>
 #include <utility>
@@ -609,6 +610,8 @@ class GameState
 
   /// \brief Number of cycles of updates elapsed
   private: int cycleCounter;
+
+  public: std::mutex mutex;
 };
 
 #endif

@@ -114,7 +114,7 @@ class Effector: public SocketParser
   protected: GameState *const gameState;
 
   /// \brief Protect concurrent access.
-  protected: mutable std::mutex mutex;
+  public: mutable std::mutex mutex;
 
   /// \brief Data Structure used to store Message received by sockets.
   /// Here, the key of the map is the Socket IDs which is assigned in

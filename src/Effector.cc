@@ -408,7 +408,7 @@ void Effector::Update()
   this->agentsToRemove.clear();
   this->socketsToDisconnect.clear();
 
-  std::map <int, Agent *> socketIdAgentMap;
+  std::map<int, Agent *> socketIdAgentMap;
 
   for (const auto &team : this->gameState->teams)
   {
@@ -433,10 +433,14 @@ void Effector::Update()
 
     if (kv->second == "__del__")
     {
+      //std::cout << "Processing _del_" << std::endl;
+      std::string agentName = this->currAgent->GetName();
       if (this->currAgent && this->gameState->RemoveAgent(this->currAgent->uNum,
           this->currAgent->team->name))
       {
-        this->agentsToRemove.push_back(this->currAgent->GetName());
+        std::cout << "Effector::Update() About to remove " << std::endl;
+        std::cout << this->currAgent->GetName() << std::endl;
+        this->agentsToRemove.push_back(agentName);
       }
       this->socketIDMessageMap.erase(kv++);
     }

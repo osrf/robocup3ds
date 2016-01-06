@@ -1044,6 +1044,9 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
                            const std::shared_ptr<NaoBT> &_bodyType,
                            const int _socketID)
 {
+  std::cout << "GameState::AddAgent()" << std::endl;
+  std::lock_guard<std::mutex> lock(this->mutex);
+
   if (this->currentState->name != "BeforeKickOff")
   {
     return nullptr;
@@ -1110,6 +1113,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
     return nullptr;
   }
   teamToAdd->members.push_back(Agent(uNum, teamToAdd, _bodyType, _socketID));
+  std::cout << "Agent added" << std::endl;
   return &teamToAdd->members.back();
 }
 
@@ -1117,7 +1121,11 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
 ///////////////////////////////////////////////
 bool GameState::RemoveAgent(const int _uNum, const std::string &_teamName)
 {
-  for (const auto &team : this->teams)
+  std::cout << "Removing agent " << _uNum << "," << _teamName << std::endl;
+
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  for (auto &team : this->teams)
   {
     if (team->name == _teamName)
     {
@@ -1125,9 +1133,11 @@ bool GameState::RemoveAgent(const int _uNum, const std::string &_teamName)
       {
         if (agent.uNum == _uNum)
         {
+          std::cout << "RemoveAgent() About to remove" << std::endl;
           team->members.erase(std::remove(team->members.begin(),
                                           team->members.end(), agent),
                               team->members.end());
+          std::cout << "Removed" << std::endl;
           return true;
         }
       }

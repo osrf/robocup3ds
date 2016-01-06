@@ -270,6 +270,8 @@ void RCPServer::DispatchRequestOnClientSocket()
       {
         int socket = this->pollSockets.at(i).fd;
 
+        std::cout << "Client disconnected" << std::endl;
+
         // Call OnDisconnection().
         this->parser->OnDisconnection(this->pollSockets.at(i).fd);
 

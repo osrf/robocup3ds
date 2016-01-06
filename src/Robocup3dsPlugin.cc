@@ -338,9 +338,12 @@ void Robocup3dsPlugin::UpdateEffector()
   // update effector
   this->effector->Update();
 
+  std::lock_guard<std::mutex> lock(this->effector->mutex);
+
   // insert models into world that need to be inserted
   for (const auto &agentPtr : this->effector->agentsToAdd)
   {
+    std::cout << "Inserting agent" << std::endl;
     std::string path = agentPtr->bodyType->BlueModelPath();
     if (this->gameState->teams.at(1) == agentPtr->team)
     {
@@ -363,6 +366,7 @@ void Robocup3dsPlugin::UpdateEffector()
   // remove models that need to be removed from world
   for (const auto &agentName : this->effector->agentsToRemove)
   {
+    std::cout << "Removing agent" << std::endl;
     this->world->RemoveModel(agentName);
     gzmsg << "(" << this->world->GetSimTime().Double() <<
           ") agent removed from game world: " <<
@@ -372,6 +376,7 @@ void Robocup3dsPlugin::UpdateEffector()
   // disconnect sockets for failed clients
   for (const auto &socketId : this->effector->socketsToDisconnect)
   {
+    std::cout << "Disconnect client" << std::endl;
     this->clientServer->DisconnectClient(socketId);
   }
 
@@ -386,6 +391,9 @@ void Robocup3dsPlugin::UpdateEffector()
       }
 
       const auto &model = this->world->GetModel(agent.GetName());
+      if (!model)
+        continue;
+
       const auto &jointController = model->GetJointController();
 
       for (auto &kv : agent.action.jointEffectors)
@@ -545,6 +553,10 @@ void Robocup3dsPlugin::UpdateGameState()
       {
         continue;
       }
+
+      if (!model)
+        continue;
+
       const auto &modelPose = model->GetWorldPose();
       agent.pos = G2I(modelPose.pos);
       agent.rot = G2I(modelPose.rot);
@@ -553,6 +565,9 @@ void Robocup3dsPlugin::UpdateGameState()
 
   // find ball in gazebo world and use it to update gameState
   const auto &ball = this->world->GetModel(SoccerField::kBallName);
+  if (!ball)
+    return;
+
   auto &ballPose = ball->GetWorldPose();
   if (!this->gameState->updateBallPose)
   {
@@ -599,6 +614,8 @@ void Robocup3dsPlugin::UpdateGameState()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateStoppedAgents()
 {
+  std::lock_guard<std::mutex> lock(this->gameState->mutex);
+
   for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
@@ -608,6 +625,9 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
         continue;
       }
       const auto &model = this->world->GetModel(agent.GetName());
+
+      if (!model)
+        continue;
 
       model->GetJointController()->Reset();
       for (const auto &joint : model->GetJoints())
@@ -658,6 +678,8 @@ void Robocup3dsPlugin::UpdatePerceptor()
     this->clientServer->Send(socketId, this->buffer, len + 4);
   }
 
+  std::lock_guard<std::mutex> lock(this->gameState->mutex);
+
   // update perception related info using gazebo world model
   for (const auto &team : this->gameState->teams)
   {
@@ -668,7 +690,12 @@ void Robocup3dsPlugin::UpdatePerceptor()
         continue;
       }
 
+      std::cout << "UpdatePerceptor for " << agent.GetName() << std::endl;
+
       const auto &model = this->world->GetModel(agent.GetName());
+
+      if (!model)
+        continue;
 
       // update agent's camera pose
       auto &cameraPose = model->GetLink(agent.bodyType->CameraLinkName())->
