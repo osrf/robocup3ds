@@ -87,7 +87,7 @@ bool RCPServer::Send(const int _socket, const char *_data, const size_t _len)
 {
   if (!this->enabled)
   {
-    std::cerr << "RCPServer::Send() error: Service not enabled yet"
+    std::cerr << "RCPServer::Send() error: Service not enabled yet."
               << std::endl;
     return false;
   }
@@ -106,15 +106,15 @@ bool RCPServer::Send(const int _socket, const char *_data, const size_t _len)
 
   if (!found)
   {
-    std::cerr << "Socket not found" << std::endl;
+    std::cerr << "RCPServer::Send() Socket not found." << std::endl;
     return false;
   }
 
-  // Send data using the soket.
+  // Send data using the socket.
   auto bytes_written = write(_socket, _data, _len);
   if (bytes_written < 0)
   {
-    std::cerr << "ERROR writing to socket" << std::endl;
+    std::cerr << "RCPServer::Send() Error writing to socket." << std::endl;
     return false;
   }
 
@@ -126,6 +126,11 @@ bool RCPServer::InitializeSockets()
 {
   // Create the master socket.
   this->masterSocket = socket(AF_INET, SOCK_STREAM, 0);
+  if (this->masterSocket == -1)
+  {
+    std::cerr << "Error creating master socket." << std::endl;
+    return false;
+  }
 
   // Socket option: SO_REUSEADDR.
   int value = 1;
