@@ -16,11 +16,10 @@
 */
 
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
 #include <netinet/in.h>
 #include <algorithm>
 #include <cstdlib>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -212,14 +211,14 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   if (!Robocup3dsPlugin::syncMode)
   {
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-                               boost::bind(&Robocup3dsPlugin::Update,
-                                           this, _1));
+                               std::bind(&Robocup3dsPlugin::Update,
+                                           this, std::placeholders::_1));
   }
   else
   {
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-                               boost::bind(&Robocup3dsPlugin::UpdateSync,
-                                           this, _1));
+                               std::bind(&Robocup3dsPlugin::UpdateSync,
+                                           this, std::placeholders::_1));
     this->world->GetPhysicsEngine()->SetRealTimeUpdateRate(0);
   }
 

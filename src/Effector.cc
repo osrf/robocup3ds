@@ -66,8 +66,9 @@ bool Effector::Parse(int _socket)
   int bytesRead = 0;
   int totalBytes;
 
-  // Used to read the size of the message in little-endian format
-  int endianSize = recv(_socket, this->buffer, 4, 0);
+  // Used to read the size of the message in little-endian format.
+  // MSG_WAITALL guarantees that recv does not return until we read 4 bytes.
+  int endianSize = recv(_socket, this->buffer, 4, MSG_WAITALL);
 
   if (endianSize < 1)
   {
@@ -102,8 +103,7 @@ bool Effector::Parse(int _socket)
   }
   else
   {
-    this->socketIDMessageMap[_socket]
-      = this->socketIDMessageMap[_socket] + msg;
+    this->socketIDMessageMap[_socket] = this->socketIDMessageMap[_socket] + msg;
   }
 
   return true;

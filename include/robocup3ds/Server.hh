@@ -44,7 +44,7 @@
 /// |         |   ClientN socket
 ///  --------- <-----------------> ClientN data exchange
 ///
-///  The RCPServer API allows to send a message to a specific socket (client).
+/// The RCPServer API allows to send a message to a specific socket (client).
 ///
 /// When data is available for reading on a socket, it's not always possible
 /// to read it with one recv() call. Sometimes we just get a partial message
@@ -63,7 +63,7 @@
 ///
 /// This is an example of how to instantiate a RCPServer class:
 /// auto parser = std::make_shared<TrivialSocketParser>();
-//  gazebo::RCPServer server(kPort, parser);
+//  RCPServer server(kPort, parser);
 class RCPServer
 {
   /// \brief Constructor.
