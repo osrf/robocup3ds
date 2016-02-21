@@ -156,7 +156,7 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: std::shared_ptr<RCPServer> monitorServer;
 
   /// \brief Pointer to buffer for sending messages to server;
-  private: char buffer[kBufferSize] = {0};
+  private: char buffer[kBufferSize];
 
   /// \brief Gazebo simulation time when last update occurred
   private: double lastUpdateTime;

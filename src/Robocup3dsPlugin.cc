@@ -70,6 +70,7 @@ Robocup3dsPlugin::Robocup3dsPlugin():
   monitorServer(std::make_shared<RCPServer>(
                   Robocup3dsPlugin::monitorPort,
                   this->monitorEffector)),
+  buffer(),
   lastUpdateTime(-GameState::kCounterCycleTime)
 {
   // initialize transport and publisher
