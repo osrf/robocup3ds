@@ -540,6 +540,12 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateAgentModelStatus()
 {
+  // gzmsg << this->world->GetSimTime().Double() << std::endl;
+  // for (const auto &currModel : this->world->GetModels())
+  // {
+  //   gzmsg << "currModel: " << currModel->GetName() << std::endl;
+  // }
+
   for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
@@ -643,17 +649,6 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
         continue;
       }
       const auto &model = this->world->GetModel(agent.GetName());
-      if (!model)
-      {
-        gzmsg << "(" << this->world->GetSimTime().Double() << ") " <<
-              "warning world model not found for " << agent.GetName()
-              << std::endl;
-        for (const auto &currModel : this->world->GetModels())
-        {
-          gzmsg << "currModel: " << currModel->GetName() << std::endl;
-        }
-        continue;
-      }
 
       model->GetJointController()->Reset();
       for (const auto &joint : model->GetJoints())
