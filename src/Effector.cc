@@ -362,6 +362,7 @@ void Effector::ParseInit(sexp_t *_exp)
                       playerNum, teamName,
                       this->socketIDbodyTypeMap.at(this->currSocketId),
                       this->currSocketId);
+
   if (this->currAgent)
   {
     this->socketIDbodyTypeMap.erase(this->currSocketId);
