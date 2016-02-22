@@ -372,7 +372,7 @@ void Effector::ParseInit(sexp_t *_exp)
   }
   else
   {
-    // not needed, we give agent a second chance at adding agent?
+    // not needed, we give client a second chance at adding agent?
     // this->socketIDbodyTypeMap.erase(this->currSocketId);
     // this->socketIDMessageMap.erase(this->currSocketId);
     // this->socketsToDisconnect.push_back(this->currSocketId);
