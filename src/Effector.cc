@@ -433,10 +433,16 @@ void Effector::Update()
 
     if (kv->second == "__del__")
     {
-      if (this->currAgent && this->gameState->RemoveAgent(this->currAgent->uNum,
-          this->currAgent->team->name))
+      if (this->currAgent)
       {
-        this->agentsToRemove.push_back(this->currAgent->GetName());
+        std::string agentName = this->currAgent->GetName();
+        if (this->gameState->RemoveAgent(this->currAgent->uNum,
+                                        this->currAgent->team->name))
+        {
+          gzmsg << "(" << this->gameState->GetGameTime() <<
+                ") agent removed from game state: " << agentName << std::endl;
+          this->agentsToRemove.push_back(agentName);
+        }
       }
       this->socketIDMessageMap.erase(kv++);
     }
