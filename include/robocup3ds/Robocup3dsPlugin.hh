@@ -95,6 +95,10 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Check if ball is colliding with any player model
   private: void UpdateBallContactHistory();
 
+
+  /// \brief Update whether model is in gazebo world or not
+  private: void UpdateAgentModelStatus();
+
   /// \brief Sync the gameState with the gazebo world
   private: void UpdateGameState();
 

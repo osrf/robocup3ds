@@ -213,13 +213,13 @@ void Robocup3dsPlugin::Load(physics::WorldPtr _world,
   {
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                std::bind(&Robocup3dsPlugin::Update,
-                                           this, std::placeholders::_1));
+                                         this, std::placeholders::_1));
   }
   else
   {
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                std::bind(&Robocup3dsPlugin::UpdateSync,
-                                           this, std::placeholders::_1));
+                                         this, std::placeholders::_1));
     this->world->GetPhysicsEngine()->SetRealTimeUpdateRate(0);
   }
 
@@ -279,6 +279,9 @@ void Robocup3dsPlugin::UpdateGUIPlaymode(ConstGzStringPtr &_msg)
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 {
+  // gzmsg << this->world->GetSimTime().Double() << std::endl;
+  // gzmsg << "calling UpdateStoppedAgents" << std::endl;
+  this->UpdateAgentModelStatus();
   this->UpdateStoppedAgents();
   this->UpdateContactManager();
   // checks if enough time has elapsed to update gameState and send out
@@ -289,6 +292,7 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
     return;
   }
 
+  // gzmsg << "calling UpdateGameState" << std::endl;
   this->UpdateGameState();
   this->UpdatePerceptor();
   this->UpdateEffector();
@@ -376,14 +380,14 @@ void Robocup3dsPlugin::UpdateEffector()
     if (this->clientServer->DisconnectClient(socketId))
     {
       gzmsg << "(" << this->world->GetSimTime().Double() <<
-      ") success disconnecting socket id: " <<
-      socketId << std::endl;
+            ") success disconnecting socket id: " <<
+            socketId << std::endl;
     }
     else
     {
       gzmsg << "(" << this->world->GetSimTime().Double() <<
-      ") error disconnecting socket id: " <<
-      socketId << std::endl;
+            ") error disconnecting socket id: " <<
+            socketId << std::endl;
     }
   }
 
@@ -448,6 +452,9 @@ void Robocup3dsPlugin::UpdateMonitorEffector()
   for (const auto &agentName : this->monitorEffector->agentsToRemove)
   {
     this->world->RemoveModel(agentName);
+    gzmsg << "(" << this->world->GetSimTime().Double() <<
+          ") agent removed from game world: " <<
+          agentName << std::endl;
   }
 }
 
@@ -531,12 +538,8 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
 }
 
 /////////////////////////////////////////////////
-void Robocup3dsPlugin::UpdateGameState()
+void Robocup3dsPlugin::UpdateAgentModelStatus()
 {
-  // sync gameState time and gaezbo world time
-  this->gameState->SetGameTime(this->world->GetSimTime().Double());
-
-  // use models in gazebo world to update agents and perception info
   for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
@@ -550,13 +553,33 @@ void Robocup3dsPlugin::UpdateGameState()
               ") agent added to game world: " <<
               model->GetName() << std::endl;
       }
+      else if (!model && agent.inSimWorld)
+      {
+        agent.inSimWorld = false;
+      }
+    }
+  }
+}
 
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateGameState()
+{
+  // sync gameState time and gaezbo world time
+  this->gameState->SetGameTime(this->world->GetSimTime().Double());
+
+  // use models in gazebo world to update agents and perception info
+  for (const auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
       // set agent pose in gameState
       if (agent.updatePose || agent.status == Agent::Status::STOPPED
           || !agent.inSimWorld)
       {
         continue;
       }
+
+      const auto &model = this->world->GetModel(agent.GetName());
       const auto &modelPose = model->GetWorldPose();
       agent.pos = G2I(modelPose.pos);
       agent.rot = G2I(modelPose.rot);
@@ -620,6 +643,17 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
         continue;
       }
       const auto &model = this->world->GetModel(agent.GetName());
+      if (!model)
+      {
+        gzmsg << "(" << this->world->GetSimTime().Double() << ") " <<
+              "warning world model not found for " << agent.GetName()
+              << std::endl;
+        for (const auto &currModel : this->world->GetModels())
+        {
+          gzmsg << "currModel: " << currModel->GetName() << std::endl;
+        }
+        continue;
+      }
 
       model->GetJointController()->Reset();
       for (const auto &joint : model->GetJoints())
