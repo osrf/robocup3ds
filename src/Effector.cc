@@ -362,10 +362,9 @@ void Effector::ParseInit(sexp_t *_exp)
                       playerNum, teamName,
                       this->socketIDbodyTypeMap.at(this->currSocketId),
                       this->currSocketId);
-  this->socketIDbodyTypeMap.erase(this->currSocketId);
-
   if (this->currAgent)
   {
+    this->socketIDbodyTypeMap.erase(this->currSocketId);
     this->agentsToAdd.push_back(this->currAgent);
     gzmsg << "(" << this->gameState->GetGameTime() <<
           ") agent added to game state: " << this->currAgent->GetName()
@@ -373,7 +372,10 @@ void Effector::ParseInit(sexp_t *_exp)
   }
   else
   {
-    this->socketsToDisconnect.push_back(this->currSocketId);
+    // not needed, we give agent a second chance at adding agent?
+    // this->socketIDbodyTypeMap.erase(this->currSocketId);
+    // this->socketIDMessageMap.erase(this->currSocketId);
+    // this->socketsToDisconnect.push_back(this->currSocketId);
     gzmsg << "(" << this->gameState->GetGameTime() <<
           ") failed to add agent to game state: " <<
           Agent::GetName(playerNum, teamName) << std::endl;

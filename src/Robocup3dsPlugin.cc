@@ -281,9 +281,9 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 {
   // gzmsg << this->world->GetSimTime().Double() << std::endl;
   // gzmsg << "calling UpdateStoppedAgents" << std::endl;
+  this->UpdateContactManager();
   this->UpdateAgentModelStatus();
   this->UpdateStoppedAgents();
-  this->UpdateContactManager();
   // checks if enough time has elapsed to update gameState and send out
   // information
   if (this->world->GetSimTime().Double() - this->lastUpdateTime <
@@ -303,6 +303,9 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
 {
+  this->UpdateContactManager();
+  this->UpdateAgentModelStatus();
+  this->UpdateStoppedAgents();
   // todo: pausing world when parsing effector messages in sync mode causes
   // client to stop sending messages after beam, need to find out why
   // this->world->SetPaused(true);
@@ -330,8 +333,6 @@ void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
   }
 
   this->UpdateMonitorEffector();
-  this->UpdateStoppedAgents();
-  this->UpdateContactManager();
   this->UpdateGameState();
   this->UpdatePerceptor();
   this->lastUpdateTime = this->world->GetSimTime().Double();
@@ -561,7 +562,18 @@ void Robocup3dsPlugin::UpdateAgentModelStatus()
       }
       else if (!model && agent.inSimWorld)
       {
-        agent.inSimWorld = false;
+        // This is a temporary hack to fix an issue where if you re-add an agent
+        // model to the world, it disappears after 0.5 seconds. The solution for
+        // now is to remove the agent from the game state as well.
+        this->contacts.clear();
+        std::string agentName = agent.GetName();
+        if (this->gameState->RemoveAgent(agent.uNum,
+                                         agent.team->name))
+        {
+          gzmsg << "(" << this->gameState->GetGameTime() <<
+                ") UpdateAgentModelStatus() agent removed from game state: "
+                << agentName << std::endl;
+        }
       }
     }
   }
