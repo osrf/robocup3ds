@@ -1046,7 +1046,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
 {
   if (this->currentState->name != "BeforeKickOff")
   {
-    gzmsg << "GameState::AddAgent() error: Invalid playmode, " 
+    gzmsg << "GameState::AddAgent() error: Invalid playmode, "
       << this->currentState->name << std::endl;
     return nullptr;
   }
@@ -1097,7 +1097,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
     uNumArray.at(agent.uNum - 1) = false;
     if (uNum != 0 && agent.uNum == uNum)
     {
-      gzmsg << "GameState::AddAgent() error: uNum already in use, " 
+      gzmsg << "GameState::AddAgent() error: uNum already in use, "
         << uNum << std::endl;
       return nullptr;
     }
@@ -1115,7 +1115,7 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
   }
   if (uNum == 0)
   {
-    gzmsg << "GameState::AddAgent() error: No available uNum to assign" 
+    gzmsg << "GameState::AddAgent() error: No available uNum to assign"
       << std::endl;
     return nullptr;
   }
