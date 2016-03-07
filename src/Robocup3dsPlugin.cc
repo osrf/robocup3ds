@@ -373,7 +373,18 @@ void Robocup3dsPlugin::UpdateEffector()
   // disconnect sockets for failed clients
   for (const auto &socketId : this->effector->socketsToDisconnect)
   {
-    this->clientServer->DisconnectClient(socketId);
+    if (this->clientServer->DisconnectClient(socketId))
+    {
+      gzmsg << "(" << this->world->GetSimTime().Double() <<
+      ") success disconnecting socket id: " <<
+      socketId << std::endl;
+    }
+    else
+    {
+      gzmsg << "(" << this->world->GetSimTime().Double() <<
+      ") error disconnecting socket id: " <<
+      socketId << std::endl;
+    }
   }
 
   // set joint velocities of agent model
