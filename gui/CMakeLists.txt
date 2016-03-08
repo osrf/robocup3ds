@@ -28,7 +28,6 @@ link_directories(
 QT4_WRAP_CPP(${GUIpluginMOC} ${GUIpluginHeaders})
 robocup3ds_add_library(${PROJECT_NAME_LOWER}GUIPlugin ${GUIplugins} ${GUIpluginMOC} ${GUIpluginHeaders})
 
-#set_target_properties(${PROJECT_NAME_LOWER}GUIPlugin PROPERTIES SOVERSION ${PROJECT_MAJOR_VERSION} VERSION ${PROJECT_VERSION_FULL})
 install (TARGETS ${PROJECT_NAME_LOWER}GUIPlugin DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/gazebo-${GAZEBO_MAJOR_VERSION}/plugins/ COMPONENT shlib)
 
 target_link_libraries(${PROJECT_NAME_LOWER}GUIPlugin
