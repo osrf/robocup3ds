@@ -16,9 +16,7 @@
 #
 #
 
-# gazebo-robocup3ds: A shell script to execute gazebo with the environment
+# gazebo-robocup3ds: A shell script to execute gazebo with the world
 # for the RoboCup 3D simulation league.
-
-source @CMAKE_INSTALL_PREFIX@/share/@PROJECT_NAME@/setup.sh
 
 gazebo worlds/robocup3d.world "$@"
