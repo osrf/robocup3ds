@@ -6,5 +6,5 @@ set (folders
 
 foreach (folder ${folders})
   install(DIRECTORY ${folder}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/models)
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/gazebo-${GAZEBO_MAJOR_VERSION}/models)
 endforeach()
