@@ -146,34 +146,32 @@ void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
 void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
 {
   QLabel *label = new QLabel(tr("Select: "));
-  QComboBox *comboBox = new QComboBox(this);
-  comboBox->addItem("BeforeKickOff");
-  comboBox->addItem("KickOffLeft");
-  comboBox->addItem("KickOffRight");
-  comboBox->addItem("PlayOn");
-  comboBox->addItem("KickInLeft");
-  comboBox->addItem("KickInRight");
-  comboBox->addItem("CornerKickLeft");
-  comboBox->addItem("CornerKickRight");
-  comboBox->addItem("GoalKickLeft");
-  comboBox->addItem("GoalKickRight");
-  comboBox->addItem("GameOver");
-  comboBox->addItem("GoalLeft");
-  comboBox->addItem("GoalRight");
-  comboBox->addItem("FreeKickLeft");
-  comboBox->addItem("FreeKickRight");
-  comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+  this->playmodeComboBox = new QComboBox(this);
+  this->playmodeComboBox->addItem("BeforeKickOff");
+  this->playmodeComboBox->addItem("KickOffLeft");
+  this->playmodeComboBox->addItem("KickOffRight");
+  this->playmodeComboBox->addItem("PlayOn");
+  this->playmodeComboBox->addItem("KickInLeft");
+  this->playmodeComboBox->addItem("KickInRight");
+  this->playmodeComboBox->addItem("CornerKickLeft");
+  this->playmodeComboBox->addItem("CornerKickRight");
+  this->playmodeComboBox->addItem("GoalKickLeft");
+  this->playmodeComboBox->addItem("GoalKickRight");
+  this->playmodeComboBox->addItem("GameOver");
+  this->playmodeComboBox->addItem("GoalLeft");
+  this->playmodeComboBox->addItem("GoalRight");
+  this->playmodeComboBox->addItem("FreeKickLeft");
+  this->playmodeComboBox->addItem("FreeKickRight");
+  this->playmodeComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   QFont myFont;
   QFontMetrics fm(myFont);
   QString str("#################");
-  comboBox->view()->setFixedWidth(fm.width(str));
+  this->playmodeComboBox->view()->setFixedWidth(fm.width(str));
 
   _frameLayout->addWidget(label);
-  _frameLayout->addWidget(comboBox);
-  connect(comboBox, SIGNAL(currentIndexChanged(QString)),
+  _frameLayout->addWidget(this->playmodeComboBox);
+  connect(this->playmodeComboBox, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(HandleSelectionChanged(QString)));
-
-  this->playmodeComboBox = comboBox;
 }
 
 /////////////////////////////////////////////////
