@@ -196,6 +196,9 @@ TEST_F(GameStateTest_basic, GameState_LoadConfiguration)
 /// \brief Test for adding teams and agents
 TEST_F(GameStateTest_basic, GameState_add_teams_agents)
 {
+  // cannot add agent in incorrect play mode
+  gameState.SetCurrent(gameState.playOnState);
+  EXPECT_FALSE(gameState.AddAgent(0, "red"));
   gameState.SetCurrent(gameState.beforeKickOffState);
 
   // make sure that agents with bad unums or teams cannot be added
@@ -247,13 +250,6 @@ TEST_F(GameStateTest_basic, GameState_add_teams_agents)
       EXPECT_TRUE(agent.team != NULL);
     }
   }
-}
-
-/// \brief Make sure that we can add agents in play mode.
-TEST_F(GameStateTest_basic, GameState_add_teams_agents_playmode)
-{
-  gameState.SetCurrent(gameState.playOnState);
-  EXPECT_TRUE(gameState.AddAgent(0, "red"));
 }
 
 /// \brief Test for removing teams and agents

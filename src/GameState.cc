@@ -62,7 +62,7 @@ double GameState::SecondsEachHalf = GameState::SecondsFullGame * 0.5;
 double GameState::SecondsGoalPause = 3;
 double GameState::SecondsKickInPause = 1;
 double GameState::SecondsKickIn = 15;
-double GameState::SecondsBeforeKickOff = 5;
+double GameState::SecondsBeforeKickOff = -1;
 double GameState::SecondsKickOff = 15;
 bool   GameState::useCounterForGameTime = false;
 int    GameState::playerLimit = 11;
@@ -1044,6 +1044,13 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
                            const std::shared_ptr<NaoBT> &_bodyType,
                            const int _socketID)
 {
+  if (this->currentState->name != "BeforeKickOff")
+  {
+    gzmsg << "GameState::AddAgent() error: Invalid playmode, "
+      << this->currentState->name << std::endl;
+    return nullptr;
+  }
+
   int uNum = _uNum;
 
   if (uNum < 0 || uNum > GameState::playerLimit)
