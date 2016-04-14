@@ -1,5 +1,9 @@
 # Gazebo support for the RoboCup 3D simulator league #
 
+## Documentation
+
+See our [wiki](https://bitbucket.org/osrf/robocup3ds/wiki/).
+
 ## Install Gazebo
 
 The RoboCup 3d plugin requires Gazebo 6 or higher. Follow the [Gazebo installation tutorial](http://gazebosim.org/tutorials?tut=install_ubuntu&cat=install) for installing Gazebo on your machine.
