@@ -1044,13 +1044,6 @@ Agent *GameState::AddAgent(const int _uNum, const std::string &_teamName,
                            const std::shared_ptr<NaoBT> &_bodyType,
                            const int _socketID)
 {
-  if (this->currentState->name != "BeforeKickOff")
-  {
-    gzmsg << "GameState::AddAgent() error: Invalid playmode, "
-      << this->currentState->name << std::endl;
-    return nullptr;
-  }
-
   int uNum = _uNum;
 
   if (uNum < 0 || uNum > GameState::playerLimit)
