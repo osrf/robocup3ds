@@ -100,6 +100,9 @@ namespace gazebo
 
     /// \brief Time object used for formatting
     private: gazebo::common::Time time;
+
+    /// \brief ComboBox used to change the playmode.
+    private: QComboBox *playmodeComboBox;
   };
 }
 

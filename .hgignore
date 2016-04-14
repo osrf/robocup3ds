@@ -10,3 +10,4 @@ Ogre.log
 *.tags_*
 *.o
 .hgrc
+.idea

@@ -172,6 +172,8 @@ void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
   _frameLayout->addWidget(comboBox);
   connect(comboBox, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(HandleSelectionChanged(QString)));
+
+  this->playmodeComboBox = comboBox;
 }
 
 /////////////////////////////////////////////////
@@ -187,7 +189,16 @@ void Robocup3dsGUIPlugin::OnGameState(ConstGzStringPtr &_msg)
 
   size_t j = gameState.find(" ");
   double _gameTime = std::stod(gameState.substr(0, j));
-  this->SetPlaymode(QString::fromStdString(gameState.substr(j + 1)));
+  QString playmode = QString::fromStdString(gameState.substr(j + 1));
+  this->SetPlaymode(playmode);
+
+  int index = this->playmodeComboBox->findText(playmode);
+  if (index != -1)
+  {
+    this->playmodeComboBox->blockSignals(true);
+    this->playmodeComboBox->setCurrentIndex(index);
+    this->playmodeComboBox->blockSignals(false);
+  }
 
   this->time.Set(_gameTime);
   this->SetGameTime(QString::fromStdString(this->time.FormattedString(
