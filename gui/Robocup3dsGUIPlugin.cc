@@ -146,31 +146,31 @@ void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
 void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
 {
   QLabel *label = new QLabel(tr("Select: "));
-  QComboBox *comboBox = new QComboBox(this);
-  comboBox->addItem("BeforeKickOff");
-  comboBox->addItem("KickOffLeft");
-  comboBox->addItem("KickOffRight");
-  comboBox->addItem("PlayOn");
-  comboBox->addItem("KickInLeft");
-  comboBox->addItem("KickInRight");
-  comboBox->addItem("CornerKickLeft");
-  comboBox->addItem("CornerKickRight");
-  comboBox->addItem("GoalKickLeft");
-  comboBox->addItem("GoalKickRight");
-  comboBox->addItem("GameOver");
-  comboBox->addItem("GoalLeft");
-  comboBox->addItem("GoalRight");
-  comboBox->addItem("FreeKickLeft");
-  comboBox->addItem("FreeKickRight");
-  comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+  this->playmodeComboBox = new QComboBox(this);
+  this->playmodeComboBox->addItem("BeforeKickOff");
+  this->playmodeComboBox->addItem("KickOffLeft");
+  this->playmodeComboBox->addItem("KickOffRight");
+  this->playmodeComboBox->addItem("PlayOn");
+  this->playmodeComboBox->addItem("KickInLeft");
+  this->playmodeComboBox->addItem("KickInRight");
+  this->playmodeComboBox->addItem("CornerKickLeft");
+  this->playmodeComboBox->addItem("CornerKickRight");
+  this->playmodeComboBox->addItem("GoalKickLeft");
+  this->playmodeComboBox->addItem("GoalKickRight");
+  this->playmodeComboBox->addItem("GameOver");
+  this->playmodeComboBox->addItem("GoalLeft");
+  this->playmodeComboBox->addItem("GoalRight");
+  this->playmodeComboBox->addItem("FreeKickLeft");
+  this->playmodeComboBox->addItem("FreeKickRight");
+  this->playmodeComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   QFont myFont;
   QFontMetrics fm(myFont);
   QString str("#################");
-  comboBox->view()->setFixedWidth(fm.width(str));
+  this->playmodeComboBox->view()->setFixedWidth(fm.width(str));
 
   _frameLayout->addWidget(label);
-  _frameLayout->addWidget(comboBox);
-  connect(comboBox, SIGNAL(currentIndexChanged(QString)),
+  _frameLayout->addWidget(this->playmodeComboBox);
+  connect(this->playmodeComboBox, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(HandleSelectionChanged(QString)));
 }
 
@@ -187,7 +187,16 @@ void Robocup3dsGUIPlugin::OnGameState(ConstGzStringPtr &_msg)
 
   size_t j = gameState.find(" ");
   double _gameTime = std::stod(gameState.substr(0, j));
-  this->SetPlaymode(QString::fromStdString(gameState.substr(j + 1)));
+  QString playmode = QString::fromStdString(gameState.substr(j + 1));
+  this->SetPlaymode(playmode);
+
+  int index = this->playmodeComboBox->findText(playmode);
+  if (index != -1)
+  {
+    this->playmodeComboBox->blockSignals(true);
+    this->playmodeComboBox->setCurrentIndex(index);
+    this->playmodeComboBox->blockSignals(false);
+  }
 
   this->time.Set(_gameTime);
   this->SetGameTime(QString::fromStdString(this->time.FormattedString(
