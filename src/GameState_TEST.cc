@@ -554,6 +554,25 @@ TEST_F(GameStateTest_basic, GameState_transition_beforeKickOff_kickOff_empty)
   }
 }
 
+/// \brief Test that beforeKickOff does not transition to kickOff if
+/// SecondsBeforeKickOff is negative
+TEST_F(GameStateTest_basic, GameState_transition_beforeKickOff_kickOff_negative)
+{
+  // Save the current option.
+  auto originalValue = gameState.SecondsBeforeKickOff;
+  gameState.SecondsBeforeKickOff = -1;
+
+  // Try for some time and make sure that we don't move to KickOff.
+  while (gameState.GetGameTime() < 6.0)
+  {
+    gameState.Update();
+    EXPECT_EQ(gameState.GetCurrentState()->name, "BeforeKickOff");
+  }
+
+  // Restore the original value.
+  gameState.SecondsBeforeKickOff = originalValue;
+}
+
 /// \brief Test for whether beforeKickOff play mode transitions correctly
 /// with full teams
 TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff_full)

@@ -70,8 +70,12 @@ void BeforeKickOffState::Update()
     this->gameState->MoveBallToCenter();
   }
 
-  // After some time, go to kick off play mode
-  if (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff)
+
+  // After some time, go to kick off play mode.
+  // Note that if "SecondsBeforeKickOff" is -1, the timed transition will be
+  // disabled.
+  if ((GameState::SecondsBeforeKickOff >= 0) &&
+      (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff))
   {
     if (this->gameState->GetHalf() == GameState::Half::FIRST_HALF)
     {
