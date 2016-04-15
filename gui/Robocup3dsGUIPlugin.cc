@@ -48,8 +48,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
   // Create the layout that sits inside the frame
   QHBoxLayout *frameLayout = new QHBoxLayout();
 
-  this->AddSimTimeWidget(frameLayout);
-  this->AddGameStateWidget(frameLayout);
+  this->AddGameTimeWidget(frameLayout);
   this->AddPlaymodeWidget(frameLayout);
   this->AddTeamWidget(frameLayout);
 
@@ -67,13 +66,11 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
 
   // Position and resize this widget
   this->move(12, 12);
-  this->resize(1500, 30);
+  this->resize(800, 30);
 
   // Create a node for transportation
   this->node = transport::NodePtr(new transport::Node());
   this->node->Init("default");
-  this->statsSub = this->node->Subscribe("~/world_stats",
-                                         &Robocup3dsGUIPlugin::OnStats, this);
   this->gameSub = this->node->Subscribe("~/robocup3ds/state",
                                         &Robocup3dsGUIPlugin::OnGameState,
                                         this);
@@ -84,25 +81,9 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
 }
 
 /////////////////////////////////////////////////
-void Robocup3dsGUIPlugin::AddSimTimeWidget(QHBoxLayout *_frameLayout)
+void Robocup3dsGUIPlugin::AddGameTimeWidget(QHBoxLayout *_frameLayout)
 {
-  QLabel *label = new QLabel(tr("Sim Time:"));
-  QLabel *timeLabel = new QLabel();
-  QFont myFont;
-  QFontMetrics fm(myFont);
-  QString str("00:00:000");
-  timeLabel->setFixedWidth(fm.width(str));
-
-  _frameLayout->addWidget(label);
-  _frameLayout->addWidget(timeLabel);
-  connect(this, SIGNAL(SetSimTime(QString)),
-          timeLabel, SLOT(setText(QString)), Qt::QueuedConnection);
-}
-
-/////////////////////////////////////////////////
-void Robocup3dsGUIPlugin::AddGameStateWidget(QHBoxLayout *_frameLayout)
-{
-  QLabel *label = new QLabel(tr("Game Time:"));
+  QLabel *label = new QLabel(tr("Time:"));
   QLabel *gameTimeLabel = new QLabel();
   QFont myFont;
   QFontMetrics fm(myFont);
@@ -113,19 +94,13 @@ void Robocup3dsGUIPlugin::AddGameStateWidget(QHBoxLayout *_frameLayout)
   connect(this, SIGNAL(SetGameTime(QString)),
           gameTimeLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
-  QLabel *label2 = new QLabel(tr("Playmode:"));
-  QLabel *playmodeLabel = new QLabel();
-  playmodeLabel->setMinimumWidth(200);
-  _frameLayout->addWidget(label2);
-  _frameLayout->addWidget(playmodeLabel);
-  connect(this, SIGNAL(SetPlaymode(QString)),
-          playmodeLabel, SLOT(setText(QString)), Qt::QueuedConnection);
+  _frameLayout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed));
 }
 
 /////////////////////////////////////////////////
 void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
 {
-  _frameLayout->addSpacerItem(new QSpacerItem(0, 1, QSizePolicy::Expanding));
+  _frameLayout->addSpacerItem(new QSpacerItem(30, 1, QSizePolicy::Fixed));
 
   QLabel *teamLabel = new QLabel();
   teamLabel->setStyleSheet("QLabel {color : #99FFFF;}");
@@ -145,7 +120,6 @@ void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
 /////////////////////////////////////////////////
 void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
 {
-  QLabel *label = new QLabel(tr("Select: "));
   this->playmodeComboBox = new QComboBox(this);
   this->playmodeComboBox->addItem("BeforeKickOff");
   this->playmodeComboBox->addItem("KickOffLeft");
@@ -168,7 +142,6 @@ void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
   QString str("#################");
   this->playmodeComboBox->view()->setFixedWidth(fm.width(str));
 
-  _frameLayout->addWidget(label);
   _frameLayout->addWidget(this->playmodeComboBox);
   connect(this->playmodeComboBox, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(HandleSelectionChanged(QString)));
@@ -188,8 +161,6 @@ void Robocup3dsGUIPlugin::OnGameState(ConstGzStringPtr &_msg)
   size_t j = gameState.find(" ");
   double _gameTime = std::stod(gameState.substr(0, j));
   QString playmode = QString::fromStdString(gameState.substr(j + 1));
-  this->SetPlaymode(playmode);
-
   int index = this->playmodeComboBox->findText(playmode);
   if (index != -1)
   {
@@ -205,17 +176,6 @@ void Robocup3dsGUIPlugin::OnGameState(ConstGzStringPtr &_msg)
   i = rawString.find("$");
   this->SetLeftTeam(QString::fromStdString(rawString.substr(0, i)));
   this->SetRightTeam(QString::fromStdString(rawString.substr(i + 1)));
-}
-
-/////////////////////////////////////////////////
-void Robocup3dsGUIPlugin::OnStats(ConstWorldStatisticsPtr &_msg)
-{
-  std::ostringstream stream;
-  stream.str("");
-  const msgs::Time msg = _msg->sim_time();
-  this->time.Set(msg.sec(), msg.nsec());
-  this->SetSimTime(QString::fromStdString(this->time.FormattedString(
-      common::Time::MINUTES)));
 }
 
 /////////////////////////////////////////////////

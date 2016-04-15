@@ -58,21 +58,13 @@ namespace gazebo
     /// \param[in] _string String representation of play mode.
     signals: void SetPlaymode(QString _string);
 
-    /// \brief Callback that received world statistics messages.
-    /// \param[in] _msg World statistics message that is received.
-    protected: void OnStats(ConstWorldStatisticsPtr &_msg);
-
     /// \brief Callback that received game state messages.
     /// \param[in] _msg Game state message that is received.
     protected: void OnGameState(ConstGzStringPtr &_msg);
 
-    /// \brief Helper method to add a simulation time widget
-    /// \param[in] _frameLayout Pointer to frame layout object
-    protected: void AddSimTimeWidget(QHBoxLayout *_frameLayout);
-
     /// \brief Helper method to add a game state widget
     /// \param[in] _frameLayout Pointer to frame layout object
-    protected: void AddGameStateWidget(QHBoxLayout *_frameLayout);
+    protected: void AddGameTimeWidget(QHBoxLayout *_frameLayout);
 
     /// \brief Helper method to add a team info widget
     /// \param[in] _frameLayout Pointer to frame layout object
@@ -88,9 +80,6 @@ namespace gazebo
 
     /// \brief Node used to establish communication with gzserver.
     private: transport::NodePtr node;
-
-    /// \brief Subscriber to world statistics messages.
-    private: transport::SubscriberPtr statsSub;
 
     /// \brief Subscriber to game state messages.
     private: transport::SubscriberPtr gameSub;
