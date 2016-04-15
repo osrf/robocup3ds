@@ -260,8 +260,7 @@ void Robocup3dsPlugin::PublishGameInfo()
   {
     _stateMsg += "$" + team->name + " (" + Team::GetSideAsString(team->side)
                  + ") (Score: " + std::to_string(team->score)
-                 + ") (# of Players: " +
-                 std::to_string(team->members.size()) + ")";
+                 + ") (" + std::to_string(team->members.size()) + " players)";
   }
 
   msgs::GzString stateMsg;

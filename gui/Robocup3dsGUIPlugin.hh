@@ -66,13 +66,9 @@ namespace gazebo
     /// \param[in] _msg Game state message that is received.
     protected: void OnGameState(ConstGzStringPtr &_msg);
 
-    /// \brief Helper method to add a simulation time widget
-    /// \param[in] _frameLayout Pointer to frame layout object
-    protected: void AddSimTimeWidget(QHBoxLayout *_frameLayout);
-
     /// \brief Helper method to add a game state widget
     /// \param[in] _frameLayout Pointer to frame layout object
-    protected: void AddGameStateWidget(QHBoxLayout *_frameLayout);
+    protected: void AddGameTimeWidget(QHBoxLayout *_frameLayout);
 
     /// \brief Helper method to add a team info widget
     /// \param[in] _frameLayout Pointer to frame layout object
