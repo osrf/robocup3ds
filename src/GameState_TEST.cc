@@ -565,7 +565,6 @@ TEST_F(GameStateTest_basic, GameState_transition_beforeKickOff_kickOff_negative)
   // Try for some time and make sure that we don't move to KickOff.
   while (gameState.GetGameTime() < 6.0)
   {
-    std::cout << gameState.GetGameTime() << std::endl;
     gameState.Update();
     EXPECT_EQ(gameState.GetCurrentState()->name, "BeforeKickOff");
   }
