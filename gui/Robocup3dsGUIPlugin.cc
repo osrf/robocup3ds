@@ -71,8 +71,6 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
   // Create a node for transportation
   this->node = transport::NodePtr(new transport::Node());
   this->node->Init("default");
-  this->statsSub = this->node->Subscribe("~/world_stats",
-                                         &Robocup3dsGUIPlugin::OnStats, this);
   this->gameSub = this->node->Subscribe("~/robocup3ds/state",
                                         &Robocup3dsGUIPlugin::OnGameState,
                                         this);
@@ -178,17 +176,6 @@ void Robocup3dsGUIPlugin::OnGameState(ConstGzStringPtr &_msg)
   i = rawString.find("$");
   this->SetLeftTeam(QString::fromStdString(rawString.substr(0, i)));
   this->SetRightTeam(QString::fromStdString(rawString.substr(i + 1)));
-}
-
-/////////////////////////////////////////////////
-void Robocup3dsGUIPlugin::OnStats(ConstWorldStatisticsPtr &_msg)
-{
-  std::ostringstream stream;
-  stream.str("");
-  const msgs::Time msg = _msg->sim_time();
-  this->time.Set(msg.sec(), msg.nsec());
-  this->SetSimTime(QString::fromStdString(this->time.FormattedString(
-      common::Time::MINUTES)));
 }
 
 /////////////////////////////////////////////////
