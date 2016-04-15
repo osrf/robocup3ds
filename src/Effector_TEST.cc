@@ -174,7 +174,7 @@ TEST(RCPServer, Effector)
     }
   }
 
-  // The server is ready to recieve the second message
+  // The server is ready to receive the second message
   serverReady = true;
   cv.notify_one();
 
@@ -192,7 +192,7 @@ TEST(RCPServer, Effector)
   {
     for (auto &agent : team->members)
     {
-      // check if the agent recived the say message or not
+      // check if the agent received the say message or not
       EXPECT_TRUE(team->say.isValid);
       std::cout << "Agent said: " << team->say.msg << std::endl;
 
