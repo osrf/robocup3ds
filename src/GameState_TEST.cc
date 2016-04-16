@@ -589,7 +589,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff_full)
     }
     else
     {
-      EXPECT_EQ(gameState.GetCurrentState()->name, "KickOffLeft");
+      EXPECT_EQ(gameState.GetCurrentState()->name, "KickOff_Left");
     }
   }
 
@@ -608,7 +608,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_beforeKickOff_kickOff_full)
     }
     else
     {
-      EXPECT_EQ(gameState.GetCurrentState()->name, "KickOffRight");
+      EXPECT_EQ(gameState.GetCurrentState()->name, "KickOff_Right");
     }
   }
 }
@@ -1121,7 +1121,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
     }
     else if (gameState.GetGameTime() < firstHalfKickOffTime)
     {
-      EXPECT_EQ("KickOffLeft", gameState.GetCurrentState()->name);
+      EXPECT_EQ("KickOff_Left", gameState.GetCurrentState()->name);
     }
     else
     {
@@ -1142,7 +1142,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_checkTiming)
     }
     else if (gameState.GetGameTime() < secondHalfKickOffTime)
     {
-      EXPECT_EQ("KickOffRight", gameState.GetCurrentState()->name);
+      EXPECT_EQ("KickOff_Right", gameState.GetCurrentState()->name);
     }
     else
     {

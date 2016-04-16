@@ -767,8 +767,8 @@ void GameState::CheckDoubleTouch()
   std::shared_ptr<BallContact> firstContact = this->ballContactHistory.at(1);
   if (this->touchBallKickoff
       && this->currentState->prevState
-      && (this->currentState->prevState->name == "KickOffRight"
-          || this->currentState->prevState->name == "KickOffLeft")
+      && (this->currentState->prevState->name == KickOffRight
+          || this->currentState->prevState->name == KickOffLeft)
       && this->touchBallKickoff->side == firstContact->side
       && this->touchBallKickoff->uNum == firstContact->uNum)
   {
@@ -1150,9 +1150,9 @@ bool GameState::RemoveAgent(const int _uNum, const std::string &_teamName)
 bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
                           const double _x, const double _y, const double _rot)
 {
-  if (this->currentState->name != "BeforeKickOff"
-      && this->currentState->name != "GoalKickLeft"
-      && this->currentState->name != "GoalKickRight")
+  if (this->currentState->name != BeforeKickOff
+      && this->currentState->name != GoalKickLeft
+      && this->currentState->name != GoalKickRight)
   {
     return false;
   }
