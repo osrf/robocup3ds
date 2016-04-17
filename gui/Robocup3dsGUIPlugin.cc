@@ -87,14 +87,15 @@ void Robocup3dsGUIPlugin::AddGameTimeWidget(QHBoxLayout *_frameLayout)
   QLabel *gameTimeLabel = new QLabel();
   QFont myFont;
   QFontMetrics fm(myFont);
-  QString str("00:00:000");
+  QString str("00:00:000000");
   gameTimeLabel->setFixedWidth(fm.width(str));
   _frameLayout->addWidget(label);
   _frameLayout->addWidget(gameTimeLabel);
   connect(this, SIGNAL(SetGameTime(QString)),
           gameTimeLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
-  _frameLayout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed));
+  _frameLayout->addSpacerItem(new QSpacerItem(10, 1,
+    QSizePolicy::MinimumExpanding));
 }
 
 /////////////////////////////////////////////////
@@ -136,10 +137,9 @@ void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
   this->playmodeComboBox->addItem("GoalRight");
   this->playmodeComboBox->addItem("FreeKickLeft");
   this->playmodeComboBox->addItem("FreeKickRight");
-  this->playmodeComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   QFont myFont;
   QFontMetrics fm(myFont);
-  QString str("#################");
+  QString str("##########################");
   this->playmodeComboBox->view()->setFixedWidth(fm.width(str));
 
   _frameLayout->addWidget(this->playmodeComboBox);
