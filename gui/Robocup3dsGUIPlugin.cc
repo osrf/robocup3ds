@@ -66,7 +66,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
 
   // Position and resize this widget
   this->move(12, 12);
-  this->resize(800, 30);
+  this->resize(1000, 30);
 
   // Create a node for transportation
   this->node = transport::NodePtr(new transport::Node());
@@ -138,7 +138,7 @@ void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
   this->playmodeComboBox->addItem("FreeKickRight");
   QFont myFont;
   QFontMetrics fm(myFont);
-  QString str("##########################");
+  QString str("#####################");
   this->playmodeComboBox->view()->setFixedWidth(fm.width(str));
   this->playmodeComboBox->setMinimumContentsLength(16);
 
