@@ -271,8 +271,20 @@ class Agent
     this->inPenaltyBox = false;
     this->timeImmobilized = 0;
     this->timeFallen = 0;
-    this->pos.Set(0, SoccerField::kHalfFieldHeight,
-      this->bodyType->TorsoHeight() + 0.05);
+
+    if (this->team->side == Team::Side::LEFT)
+    {
+      this->pos.Set(-SoccerField::kHalfFieldWidth + 1.,
+                    SoccerField::kHalfFieldHeight - 1.,
+                    this->bodyType->TorsoHeight() + 0.05);
+    }
+    else
+    {
+      this->pos.Set(SoccerField::kHalfFieldWidth - 1.,
+                    -SoccerField::kHalfFieldHeight + 1.,
+                    this->bodyType->TorsoHeight() + 0.05);
+      this->rot.Euler(0., 0., IGN_DTOR(180));
+    }
 
     if (!this->team)
       this->name = std::to_string(this->uNum);
