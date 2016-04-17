@@ -95,14 +95,13 @@ void Robocup3dsGUIPlugin::AddGameTimeWidget(QHBoxLayout *_frameLayout)
           gameTimeLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
   _frameLayout->addSpacerItem(new QSpacerItem(10, 1,
-    QSizePolicy::MinimumExpanding));
+                              QSizePolicy::Expanding));
 }
 
 /////////////////////////////////////////////////
 void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
 {
   _frameLayout->addSpacerItem(new QSpacerItem(30, 1, QSizePolicy::Fixed));
-
   QLabel *teamLabel = new QLabel();
   teamLabel->setStyleSheet("QLabel {color : #99FFFF;}");
   _frameLayout->addWidget(teamLabel);
@@ -141,6 +140,7 @@ void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
   QFontMetrics fm(myFont);
   QString str("##########################");
   this->playmodeComboBox->view()->setFixedWidth(fm.width(str));
+  this->playmodeComboBox->setMinimumContentsLength(16);
 
   _frameLayout->addWidget(this->playmodeComboBox);
   connect(this->playmodeComboBox, SIGNAL(currentIndexChanged(QString)),
