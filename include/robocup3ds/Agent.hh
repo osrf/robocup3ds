@@ -272,18 +272,21 @@ class Agent
     this->timeImmobilized = 0;
     this->timeFallen = 0;
 
-    if (this->team->side == Team::Side::LEFT)
+    if (this->team)
     {
-      this->pos.Set(-SoccerField::kHalfFieldWidth + 1.,
-                    SoccerField::kHalfFieldHeight - 1.,
-                    this->bodyType->TorsoHeight() + 0.05);
-    }
-    else
-    {
-      this->pos.Set(SoccerField::kHalfFieldWidth - 1.,
-                    -SoccerField::kHalfFieldHeight + 1.,
-                    this->bodyType->TorsoHeight() + 0.05);
-      this->rot.Euler(0., 0., IGN_DTOR(180));
+      if (this->team->side == Team::Side::LEFT)
+      {
+        this->pos.Set(-SoccerField::kHalfFieldWidth + 1.,
+                      SoccerField::kHalfFieldHeight - 1.,
+                      this->bodyType->TorsoHeight() + 0.05);
+      }
+      else
+      {
+        this->pos.Set(SoccerField::kHalfFieldWidth - 1.,
+                      -SoccerField::kHalfFieldHeight + 1.,
+                      this->bodyType->TorsoHeight() + 0.05);
+        this->rot.Euler(0., 0., IGN_DTOR(180));
+      }
     }
 
     if (!this->team)
