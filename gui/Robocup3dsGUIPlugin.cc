@@ -138,7 +138,7 @@ void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
   this->playmodeComboBox->addItem("FreeKickRight");
   QFont myFont;
   QFontMetrics fm(myFont);
-  QString str("#####################");
+  QString str("#######################");
   this->playmodeComboBox->view()->setFixedWidth(fm.width(str));
   this->playmodeComboBox->setMinimumContentsLength(16);
 
