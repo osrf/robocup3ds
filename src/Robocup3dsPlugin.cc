@@ -545,7 +545,7 @@ void Robocup3dsPlugin::UpdateGameState()
       {
         agent.inSimWorld = true;
         this->InitJointController(agent, model);
-        ignition::math::Pose3<double> pose(agent.pos, agent.rot);
+        ignition::math::Pose3d pose(agent.pos, agent.rot);
         model->SetWorldPose(I2G(pose));
         gzmsg << "(" << this->world->GetSimTime().Double() <<
               ") agent added to game world: " <<
