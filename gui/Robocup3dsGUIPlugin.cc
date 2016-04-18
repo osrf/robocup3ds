@@ -66,7 +66,7 @@ Robocup3dsGUIPlugin::Robocup3dsGUIPlugin()
 
   // Position and resize this widget
   this->move(12, 12);
-  this->resize(800, 30);
+  this->resize(1000, 30);
 
   // Create a node for transportation
   this->node = transport::NodePtr(new transport::Node());
@@ -85,32 +85,39 @@ void Robocup3dsGUIPlugin::AddGameTimeWidget(QHBoxLayout *_frameLayout)
 {
   QLabel *label = new QLabel(tr("Time:"));
   QLabel *gameTimeLabel = new QLabel();
+
   QFont myFont;
+  myFont.setPixelSize(13);
+  gameTimeLabel->setFont(myFont);
   QFontMetrics fm(myFont);
   QString str("00:00:000");
   gameTimeLabel->setFixedWidth(fm.width(str));
+
   _frameLayout->addWidget(label);
   _frameLayout->addWidget(gameTimeLabel);
   connect(this, SIGNAL(SetGameTime(QString)),
           gameTimeLabel, SLOT(setText(QString)), Qt::QueuedConnection);
-
-  _frameLayout->addSpacerItem(new QSpacerItem(10, 1, QSizePolicy::Fixed));
+  _frameLayout->addSpacerItem(new QSpacerItem(10, 1,
+                              QSizePolicy::Expanding));
 }
 
 /////////////////////////////////////////////////
 void Robocup3dsGUIPlugin::AddTeamWidget(QHBoxLayout *_frameLayout)
 {
-  _frameLayout->addSpacerItem(new QSpacerItem(30, 1, QSizePolicy::Fixed));
+  QFont myFont;
+  myFont.setPixelSize(12);
 
+  _frameLayout->addSpacerItem(new QSpacerItem(60, 1, QSizePolicy::Fixed));
   QLabel *teamLabel = new QLabel();
+  teamLabel->setFont(myFont);
   teamLabel->setStyleSheet("QLabel {color : #99FFFF;}");
   _frameLayout->addWidget(teamLabel);
   connect(this, SIGNAL(SetLeftTeam(QString)),
           teamLabel, SLOT(setText(QString)), Qt::QueuedConnection);
 
   _frameLayout->addSpacerItem(new QSpacerItem(30, 1, QSizePolicy::Fixed));
-
   QLabel *teamLabel2 = new QLabel();
+  teamLabel2->setFont(myFont);
   teamLabel2->setStyleSheet("QLabel {color : #FFCCFF;}");
   _frameLayout->addWidget(teamLabel2);
   connect(this, SIGNAL(SetRightTeam(QString)),
@@ -136,11 +143,14 @@ void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
   this->playmodeComboBox->addItem("GoalRight");
   this->playmodeComboBox->addItem("FreeKickLeft");
   this->playmodeComboBox->addItem("FreeKickRight");
-  this->playmodeComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
   QFont myFont;
+  myFont.setPixelSize(13);
+  this->playmodeComboBox->setFont(myFont);
   QFontMetrics fm(myFont);
-  QString str("#################");
+  QString str("##################");
   this->playmodeComboBox->view()->setFixedWidth(fm.width(str));
+  this->playmodeComboBox->setMinimumContentsLength(16);
 
   _frameLayout->addWidget(this->playmodeComboBox);
   connect(this->playmodeComboBox, SIGNAL(currentIndexChanged(QString)),
