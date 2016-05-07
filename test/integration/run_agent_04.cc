@@ -91,7 +91,7 @@ TEST_F(IntegrationTest, TestTransition_PlayOn_KickIn)
   this->Wait(2500);
 
   const auto &lastMsg = this->agent->allMsgs.back();
-  EXPECT_NE(lastMsg.find("KickInRight"), std::string::npos);
+  EXPECT_NE(lastMsg.find("KickIn_Right"), std::string::npos);
 }
 
 //////////////////////////////////////////////////

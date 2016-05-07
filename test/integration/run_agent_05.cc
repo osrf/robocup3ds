@@ -85,7 +85,7 @@ TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
 
   this->Wait();
   this->agent->InitAndBeam(0, 0, 0);
-  this->agent->ChangePlayMode("KickOffLeft");
+  this->agent->ChangePlayMode("KickOff_Left");
   this->agent->Dribble(math::Vector3d(0, 0, 0.35),
                        math::Vector3d(0, 1, 0.35), 10);
   this->agent->Start();
@@ -99,7 +99,7 @@ TEST_F(IntegrationTest, TestTransition_KickOff_PlayOn)
     {
       playOn = true;
     }
-    if (playOn && msg.find("KickOffRight"))
+    if (playOn && msg.find("KickOff_Right"))
     {
       kickOffRight = true;
     }

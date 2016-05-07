@@ -42,20 +42,20 @@ using namespace states;
 using namespace Util;
 
 const std::string GameState::BeforeKickOff   = "BeforeKickOff";
-const std::string GameState::KickOffLeft     = "KickOffLeft";
-const std::string GameState::KickOffRight    = "KickOffRight";
+const std::string GameState::KickOffLeft     = "KickOff_Left";
+const std::string GameState::KickOffRight    = "KickOff_Right";
 const std::string GameState::PlayOn          = "PlayOn";
-const std::string GameState::KickInLeft      = "KickInLeft";
-const std::string GameState::KickInRight     = "KickInRight";
-const std::string GameState::CornerKickLeft  = "CornerKickLeft";
-const std::string GameState::CornerKickRight = "CornerKickRight";
-const std::string GameState::GoalKickLeft    = "GoalKickLeft";
-const std::string GameState::GoalKickRight   = "GoalKickRight";
+const std::string GameState::KickInLeft      = "KickIn_Left";
+const std::string GameState::KickInRight     = "KickIn_Right";
+const std::string GameState::CornerKickLeft  = "corner_kick_left";
+const std::string GameState::CornerKickRight = "corner_kick_right";
+const std::string GameState::GoalKickLeft    = "goal_kick_left";
+const std::string GameState::GoalKickRight   = "goal_kick_right";
 const std::string GameState::GameOver        = "GameOver";
-const std::string GameState::GoalLeft        = "GoalLeft";
-const std::string GameState::GoalRight       = "GoalRight";
-const std::string GameState::FreeKickLeft    = "FreeKickLeft";
-const std::string GameState::FreeKickRight   = "FreeKickRight";
+const std::string GameState::GoalLeft        = "Goal_Left";
+const std::string GameState::GoalRight       = "Goal_Right";
+const std::string GameState::FreeKickLeft    = "free_kick_left";
+const std::string GameState::FreeKickRight   = "free_kick_right";
 
 double GameState::SecondsFullGame = 600;
 double GameState::SecondsEachHalf = GameState::SecondsFullGame * 0.5;
@@ -767,8 +767,8 @@ void GameState::CheckDoubleTouch()
   std::shared_ptr<BallContact> firstContact = this->ballContactHistory.at(1);
   if (this->touchBallKickoff
       && this->currentState->prevState
-      && (this->currentState->prevState->name == "KickOffRight"
-          || this->currentState->prevState->name == "KickOffLeft")
+      && (this->currentState->prevState->name == KickOffRight
+          || this->currentState->prevState->name == KickOffLeft)
       && this->touchBallKickoff->side == firstContact->side
       && this->touchBallKickoff->uNum == firstContact->uNum)
   {
@@ -1150,9 +1150,9 @@ bool GameState::RemoveAgent(const int _uNum, const std::string &_teamName)
 bool GameState::BeamAgent(const int _uNum, const std::string &_teamName,
                           const double _x, const double _y, const double _rot)
 {
-  if (this->currentState->name != "BeforeKickOff"
-      && this->currentState->name != "GoalKickLeft"
-      && this->currentState->name != "GoalKickRight")
+  if (this->currentState->name != BeforeKickOff
+      && this->currentState->name != GoalKickLeft
+      && this->currentState->name != GoalKickRight)
   {
     return false;
   }

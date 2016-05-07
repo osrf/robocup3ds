@@ -129,20 +129,20 @@ void Robocup3dsGUIPlugin::AddPlaymodeWidget(QHBoxLayout *_frameLayout)
 {
   this->playmodeComboBox = new QComboBox(this);
   this->playmodeComboBox->addItem("BeforeKickOff");
-  this->playmodeComboBox->addItem("KickOffLeft");
-  this->playmodeComboBox->addItem("KickOffRight");
+  this->playmodeComboBox->addItem("KickOff_Left");
+  this->playmodeComboBox->addItem("KickOff_Right");
   this->playmodeComboBox->addItem("PlayOn");
-  this->playmodeComboBox->addItem("KickInLeft");
-  this->playmodeComboBox->addItem("KickInRight");
-  this->playmodeComboBox->addItem("CornerKickLeft");
-  this->playmodeComboBox->addItem("CornerKickRight");
-  this->playmodeComboBox->addItem("GoalKickLeft");
-  this->playmodeComboBox->addItem("GoalKickRight");
+  this->playmodeComboBox->addItem("KickIn_Left");
+  this->playmodeComboBox->addItem("KickIn_Right");
+  this->playmodeComboBox->addItem("corner_kick_left");
+  this->playmodeComboBox->addItem("corner_kick_right");
+  this->playmodeComboBox->addItem("goal_kick_left");
+  this->playmodeComboBox->addItem("goal_kick_right");
   this->playmodeComboBox->addItem("GameOver");
-  this->playmodeComboBox->addItem("GoalLeft");
-  this->playmodeComboBox->addItem("GoalRight");
-  this->playmodeComboBox->addItem("FreeKickLeft");
-  this->playmodeComboBox->addItem("FreeKickRight");
+  this->playmodeComboBox->addItem("Goal_Left");
+  this->playmodeComboBox->addItem("Goal_Right");
+  this->playmodeComboBox->addItem("free_kick_left");
+  this->playmodeComboBox->addItem("free_kick_right");
 
   QFont myFont;
   myFont.setPixelSize(13);
