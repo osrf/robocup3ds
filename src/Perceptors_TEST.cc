@@ -52,8 +52,8 @@ class PerceptorTest : public ::testing::Test
       return false;
     }
     _testLine.Set(
-      Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[0]),
-      Geometry::SphereToCart(_agent.percept.fieldLines.at(0)[1]));
+      Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[0]),
+      Geometry::PolarToCart(_agent.percept.fieldLines.at(0)[1]));
     return true;
   }
 
@@ -68,7 +68,7 @@ class PerceptorTest : public ::testing::Test
     {
       return false;
     }
-    _testLandmark = Geometry::SphereToCart(_agent.percept.landMarks["test"]);
+    _testLandmark = Geometry::PolarToCart(_agent.percept.landMarks["test"]);
     return true;
   }
 
@@ -345,10 +345,10 @@ TEST_F(PerceptorTest, Percepter_UpdateOtherAgent)
   EXPECT_NE(agent1.percept.otherAgentBodyMap[agent2Id].find("BODY"),
             agent1.percept.otherAgentBodyMap[agent2Id].end());
   EXPECT_EQ(
-    Geometry::SphereToCart(agent1.percept.otherAgentBodyMap[agent2Id]["HEAD"]),
+    Geometry::PolarToCart(agent1.percept.otherAgentBodyMap[agent2Id]["HEAD"]),
     math::Vector3<double>(1, -1, 1));
   EXPECT_EQ(
-    Geometry::SphereToCart(agent1.percept.otherAgentBodyMap[agent2Id]["BODY"]),
+    Geometry::PolarToCart(agent1.percept.otherAgentBodyMap[agent2Id]["BODY"]),
     math::Vector3<double>(1, -1, 0));
 
   // with restricted vision, other agent's body parts should not be visible

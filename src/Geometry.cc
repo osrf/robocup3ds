@@ -17,6 +17,7 @@
 #include <cfloat>
 #include <cmath>
 #include <iostream>
+#include <ignition/math.hh>
 
 #include "robocup3ds/Geometry.hh"
 
@@ -127,16 +128,18 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
 }
 
 /////////////////////////////////////////////////
-math::Vector3<double> Geometry::CartToSphere(const math::Vector3<double> &_pt)
+math::Vector3<double> Geometry::CartToPolar(const math::Vector3<double> &_pt)
 {
   double r = _pt.Length() + DBL_EPSILON;
-  return math::Vector3<double>(r, atan2(_pt.Y(), _pt.X()), acos(_pt.Z() / r));
+  return math::Vector3<double>(r, IGN_RTOD(atan2(_pt.Y(), _pt.X())), IGN_RTOD(asin(_pt.Z() / r)));
 }
 
 /////////////////////////////////////////////////
-math::Vector3<double> Geometry::SphereToCart(const math::Vector3<double> &_pt)
+math::Vector3<double> Geometry::PolarToCart(const math::Vector3<double> &_pt)
 {
-  return math::Vector3<double>(_pt.X() * sin(_pt.Z()) * cos(_pt.Y()),
-                               _pt.X() * sin(_pt.Z()) * sin(_pt.Y()),
-                               _pt.X() * cos(_pt.Z()));
+  double azimuth = IGN_DTOR(_pt.Y());
+  double elevation = IGN_DTOR(_pt.Z());
+  return math::Vector3<double>(_pt.X() * cos(elevation) * cos(azimuth),
+                               _pt.X() * cos(elevation) * sin(azimuth),
+                               _pt.X() * sin(elevation));
 }

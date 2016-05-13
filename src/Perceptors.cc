@@ -185,8 +185,8 @@ void Perceptor::UpdateLine(Agent &_agent,
     }
   }
 
-  agentLine.Set(addNoise(Geometry::CartToSphere(agentLine[0])),
-                addNoise(Geometry::CartToSphere(agentLine[1])));
+  agentLine.Set(addNoise(Geometry::CartToPolar(agentLine[0])),
+                addNoise(Geometry::CartToPolar(agentLine[1])));
   _agent.percept.fieldLines.push_back(agentLine);
 }
 
@@ -211,7 +211,7 @@ void Perceptor::UpdateLandmark(Agent &_agent,
   }
 
   _agent.percept.landMarks[_landmarkname] =
-    addNoise(Geometry::CartToSphere(_agentLandMark));
+    addNoise(Geometry::CartToPolar(_agentLandMark));
 }
 
 /////////////////////////////////////////////////
@@ -237,7 +237,7 @@ void Perceptor::UpdateOtherAgent(Agent &_agent,
     AgentId otherAgentId(_otherAgent.uNum,
                          _otherAgent.team->name);
     _agent.percept.otherAgentBodyMap[otherAgentId][kv.first] =
-      addNoise(Geometry::CartToSphere(_otherAgentPart));
+      addNoise(Geometry::CartToPolar(_otherAgentPart));
   }
 }
 
