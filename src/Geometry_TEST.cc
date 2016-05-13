@@ -163,25 +163,34 @@ TEST(Geometry_Test, ClipPlaneLine)
 TEST(Geometry_Test, CartToPolar_PolarToCart)
 {
   math::Vector3<double> pt(5, 0, 0);
-  math::Vector3<double> pt2(5, 0, IGN_DTOR(90));
-  EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
-  EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
+  math::Vector3<double> pt2(5, 0, 0);
+  EXPECT_EQ(Geometry::CartToPolar(pt), pt2);
+  EXPECT_EQ(pt, Geometry::PolarToCart(pt2));
 
   pt.Set(6, 0, 4);
-  pt2.Set(7.211102550928, 0, IGN_DTOR(56.30993247402));
-  EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
-  EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
+  pt2.Set(7.211102550927978, 0, 33.690067525979790);
+  EXPECT_EQ(Geometry::CartToPolar(pt), pt2);
+  EXPECT_EQ(pt, Geometry::PolarToCart(pt2));
 
   pt.Set(3, 4, 5);
-  pt2.Set(7.0710678118655, IGN_DTOR(53.130102354156), IGN_DTOR(45));
-  EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
-  EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
+  pt2.Set(7.071067811865476, 53.130102354155980, 45);
+  EXPECT_EQ(Geometry::CartToPolar(pt), pt2);
+  EXPECT_EQ(pt, Geometry::PolarToCart(pt2));
 
   pt.Set(-1, 3, 2);
-  pt2.Set(3.7416573867739,
-          IGN_DTOR(108.43494882292), IGN_DTOR(57.688466762576));
-  EXPECT_EQ(Geometry::CartToSphere(pt), pt2);
-  EXPECT_EQ(pt, Geometry::SphereToCart(pt2));
+  pt2.Set(3.741657386773941, 108.4349488229220, 32.311533237423850);
+  EXPECT_EQ(Geometry::CartToPolar(pt), pt2);
+  EXPECT_EQ(pt, Geometry::PolarToCart(pt2));
+
+  pt.Set(-1, -3, -2);
+  pt2.Set(3.741657386773941, -108.4349488229220, -32.311533237423850);
+  EXPECT_EQ(Geometry::CartToPolar(pt), pt2);
+  EXPECT_EQ(pt, Geometry::PolarToCart(pt2));
+
+  pt.Set(2, -12, -0.5);
+  pt2.Set(12.175795661885921, -80.537677791974390, -2.353517449860922);
+  EXPECT_EQ(Geometry::CartToPolar(pt), pt2);
+  EXPECT_EQ(pt, Geometry::PolarToCart(pt2));
 }
 
 int main(int argc, char **argv)

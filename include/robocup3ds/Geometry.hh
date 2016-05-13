@@ -76,17 +76,17 @@ namespace Geometry
                                      ignition::math::Vector3<double> &_int2);
 
 
-  /// \brief Transform from spherical to cartesian coordinates, spherical
-  /// coordinates are in the following order: radius, inclination, azimuth
-  /// \param[in] _pt Point in spherical coordinates
+  /// \brief Transform from polar to cartesian coordinates, polar
+  /// coordinates are in the following order: radius, azimuth, elevation
+  /// \param[in] _pt Point in polar coordinates
   /// \return Point in cartesian coordinates
-  ignition::math::Vector3<double> SphereToCart(
+  ignition::math::Vector3<double> PolarToCart(
     const ignition::math::Vector3<double> &_pt);
 
-  /// \brief Transform from cartesian to spherical coordinates
+  /// \brief Transform from cartesian to polar coordinates
   /// \param[in] _pt Point in cartesian coordinates
-  /// \return Point in spherical coordinates
-  ignition::math::Vector3<double> CartToSphere(
+  /// \return Point in polar coordinates
+  ignition::math::Vector3<double> CartToPolar(
     const ignition::math::Vector3<double> &_pt);
 }
 
