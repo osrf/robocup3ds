@@ -131,7 +131,9 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
 math::Vector3<double> Geometry::CartToPolar(const math::Vector3<double> &_pt)
 {
   double r = _pt.Length() + DBL_EPSILON;
-  return math::Vector3<double>(r, IGN_RTOD(atan2(_pt.Y(), _pt.X())), IGN_RTOD(asin(_pt.Z() / r)));
+  return math::Vector3<double>(r,
+                               IGN_RTOD(atan2(_pt.Y(), _pt.X())),
+                               IGN_RTOD(asin(_pt.Z() / r)));
 }
 
 /////////////////////////////////////////////////
