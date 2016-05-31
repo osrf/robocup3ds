@@ -499,7 +499,7 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
       continue;
     }
 
-    const auto &ballPose = ballModel->GetWorldPose();
+    const auto &ballPose = ballModel->GetWorldPose().Ign();
     const auto &lastBallContact = gameState->GetLastBallContact();
 
     // only update the last ball contact if contact by same agent
@@ -520,7 +520,7 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
       std::shared_ptr<GameState::BallContact> ballContact(
         new GameState::BallContact(uNum, teamSide[teamName],
                                    gameState->GetGameTime(),
-                                   G2I(ballPose.pos),
+                                   ballPose.Pos(),
                                    gameState->GetCurrentState()->name));
       gameState->ballContactHistory.push_back(ballContact);
       break;
@@ -546,7 +546,7 @@ void Robocup3dsPlugin::UpdateGameState()
         agent.inSimWorld = true;
         this->InitJointController(agent, model);
         ignition::math::Pose3d pose(agent.pos, agent.rot);
-        model->SetWorldPose(I2G(pose));
+        model->SetWorldPose(pose);
         gzmsg << "(" << this->world->GetSimTime().Double() <<
               ") agent added to game world: " <<
               model->GetName() << std::endl;
@@ -558,20 +558,20 @@ void Robocup3dsPlugin::UpdateGameState()
       {
         continue;
       }
-      const auto &modelPose = model->GetWorldPose();
-      agent.pos = G2I(modelPose.pos);
-      agent.rot = G2I(modelPose.rot);
+      const auto &modelPose = model->GetWorldPose().Ign();
+      agent.pos = modelPose.Pos();
+      agent.rot = modelPose.Rot();
     }
   }
 
   // find ball in gazebo world and use it to update gameState
   const auto &ball = this->world->GetModel(SoccerField::kBallName);
-  auto &ballPose = ball->GetWorldPose();
+  const auto &ballPose = ball->GetWorldPose().Ign();
   if (!this->gameState->updateBallPose)
   {
-    this->gameState->MoveBall(G2I(ballPose.pos));
-    this->gameState->SetBallVel(G2I(ball->GetWorldLinearVel()));
-    this->gameState->SetBallAngVel(G2I(ball->GetWorldAngularVel()));
+    this->gameState->MoveBall(ballPose.Pos());
+    this->gameState->SetBallVel(ball->GetWorldLinearVel().Ign());
+    this->gameState->SetBallAngVel(ball->GetWorldAngularVel().Ign());
   }
 
   // update ball contact history
@@ -592,7 +592,7 @@ void Robocup3dsPlugin::UpdateGameState()
       const auto &model = this->world->GetModel(agent.GetName());
 
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
-      model->SetWorldPose(I2G(pose));
+      model->SetWorldPose(pose);
       agent.updatePose = false;
     }
   }
@@ -601,10 +601,10 @@ void Robocup3dsPlugin::UpdateGameState()
   if (this->gameState->updateBallPose)
   {
     auto newBallPose =
-      math::Pose(I2G(this->gameState->GetBall()), ballPose.rot);
+      math::Pose(this->gameState->GetBall(), ballPose.Rot());
     ball->SetWorldPose(newBallPose);
-    ball->SetAngularVel(I2G(this->gameState->GetBallAngVel()));
-    ball->SetLinearVel(I2G(this->gameState->GetBallVel()));
+    ball->SetAngularVel(this->gameState->GetBallAngVel());
+    ball->SetLinearVel(this->gameState->GetBallVel());
     this->gameState->updateBallPose = false;
   }
 }
@@ -650,7 +650,7 @@ void Robocup3dsPlugin::UpdateStoppedAgents()
       this->gameState->MoveAgent(agent, agent.pos.X(), agent.pos.Y(),
                                  agent.rot.Euler().Z());
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
-      model->SetWorldPose(I2G(pose));
+      model->SetWorldPose(pose);
       agent.updatePose = false;
     }
   }
@@ -684,16 +684,16 @@ void Robocup3dsPlugin::UpdatePerceptor()
       const auto &model = this->world->GetModel(agent.GetName());
 
       // update agent's camera pose
-      auto &cameraPose = model->GetLink(agent.bodyType->CameraLinkName())->
-                         GetWorldPose();
-      agent.cameraPos = G2I(cameraPose.pos);
-      agent.cameraRot = G2I(cameraPose.rot);
+      const auto &cameraPose = model->GetLink(agent.bodyType->CameraLinkName())->
+                         GetWorldPose().Ign();
+      agent.cameraPos = cameraPose.Pos();
+      agent.cameraRot = cameraPose.Rot();
 
       // update agent's self body map
       for (auto &kv : agent.bodyType->BodyPartMap())
       {
         agent.selfBodyMap[kv.first] =
-          G2I(model->GetLink(kv.second)->GetWorldPose().pos);
+          model->GetLink(kv.second)->GetWorldPose().Ign().Pos();
       }
       // update agent's percept joints angles
       for (auto &kv : agent.bodyType->HingeJointPerceptorMap())
@@ -704,25 +704,25 @@ void Robocup3dsPlugin::UpdatePerceptor()
 
       // update agent's percept gyro rate
       const auto &torsoLink = model->GetLink(agent.bodyType->TorsoLinkName());
-      agent.percept.gyroRate = G2I(torsoLink->GetWorldAngularVel());
+      agent.percept.gyroRate = torsoLink->GetWorldAngularVel().Ign();
 
       // update agent's percept acceleration
-      agent.percept.accel = G2I(torsoLink->GetWorldLinearAccel());
+      agent.percept.accel = torsoLink->GetWorldLinearAccel().Ign();
 
       // update agent's percept left and right foot force info
       agent.percept.leftFootFR =
         std::make_pair(
-          G2I(model->GetLink(agent.bodyType->LeftFootLinkName())->
-              GetWorldPose().pos),
-          G2I(model->GetLink(agent.bodyType->LeftFootLinkName())->
-              GetWorldForce()));
+          model->GetLink(agent.bodyType->LeftFootLinkName())->
+              GetWorldPose().Ign().Pos(),
+          model->GetLink(agent.bodyType->LeftFootLinkName())->
+              GetWorldForce().Ign());
 
       agent.percept.rightFootFR =
         std::make_pair(
-          G2I(model->GetLink(agent.bodyType->RightFootLinkName())->
-              GetWorldPose().pos),
-          G2I(model->GetLink(agent.bodyType->RightFootLinkName())->
-              GetWorldForce()));
+          model->GetLink(agent.bodyType->RightFootLinkName())->
+              GetWorldPose().Ign().Pos(),
+          model->GetLink(agent.bodyType->RightFootLinkName())->
+              GetWorldForce().Ign());
     }
   }
   // call update function

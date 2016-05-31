@@ -25,40 +25,6 @@
 
 using namespace Util;
 
-/// \brief We test that the functions that convert between gazebo and ignition
-/// math objects work
-TEST(UtilTest, I2G_G2I_Test)
-{
-  auto pt1 = gazebo::math::Vector3(5, 6, 8);
-  auto pt2 = G2I(pt1);
-  EXPECT_DOUBLE_EQ(pt1[0], pt2.X());
-  EXPECT_DOUBLE_EQ(pt1[1], pt2.Y());
-  EXPECT_DOUBLE_EQ(pt1[2], pt2.Z());
-  auto pt3 = I2G(pt2);
-  EXPECT_EQ(pt1, pt3);
-
-  auto q1 = gazebo::math::Quaternion(5, 6, 8);
-  auto q2 = G2I(q1);
-  EXPECT_DOUBLE_EQ(q1.w, q2.W());
-  EXPECT_DOUBLE_EQ(q1.x, q2.X());
-  EXPECT_DOUBLE_EQ(q1.y, q2.Y());
-  EXPECT_DOUBLE_EQ(q1.z, q2.Z());
-  auto q3 = I2G(q2);
-  EXPECT_EQ(q1, q3);
-
-  auto p1 = gazebo::math::Pose(6, 7, 3, 5, 6, 8);
-  auto p2 = G2I(p1);
-  EXPECT_DOUBLE_EQ(p1.rot.w, p2.Rot().W());
-  EXPECT_DOUBLE_EQ(p1.rot.x, p2.Rot().X());
-  EXPECT_DOUBLE_EQ(p1.rot.y, p2.Rot().Y());
-  EXPECT_DOUBLE_EQ(p1.rot.z, p2.Rot().Z());
-  EXPECT_DOUBLE_EQ(p1.pos.x, p2.Pos().X());
-  EXPECT_DOUBLE_EQ(p1.pos.y, p2.Pos().Y());
-  EXPECT_DOUBLE_EQ(p1.pos.z, p2.Pos().Z());
-  auto p3 = I2G(p2);
-  EXPECT_EQ(p1, p3);
-}
-
 /// \brief We test that the functions that extract values from a map work
 TEST(UtilTest, MapValueTest)
 {
