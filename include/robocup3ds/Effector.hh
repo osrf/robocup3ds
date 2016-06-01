@@ -43,7 +43,7 @@ class Effector: public SocketParser
 {
   /// \brief Class constructor.
   /// \param[in] _gameState Pointer to GameState object
-  public: Effector(GameState *const _gamestate);
+  public: explicit Effector(GameState *const _gamestate);
 
   /// \brief Class destructor.
   public: ~Effector();
@@ -138,7 +138,7 @@ class MonitorEffector : public Effector
 {
   /// \brief Class constructor.
   /// \param[in] _gameState Pointer to GameState object
-  public: MonitorEffector(GameState *const _gamestate);
+  public: explicit MonitorEffector(GameState *const _gamestate);
 
   /// \brief Iterate through all monitor messages and parse them
   public: void Update();

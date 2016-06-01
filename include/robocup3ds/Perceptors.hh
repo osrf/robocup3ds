@@ -34,7 +34,7 @@ class Perceptor
 {
   /// \brief Constructor for Perceptor object
   /// \param[in] _gameState Pointer to GameState object
-  public: Perceptor(GameState *const _gameState);
+  public: explicit Perceptor(GameState *const _gameState);
 
   /// \brief Destructor for Perceptor object
   public: ~Perceptor() = default;
