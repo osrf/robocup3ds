@@ -25,38 +25,6 @@
 
 namespace Util
 {
-  /// \brief Converts from ignition math Vector3 to gazebo math Vector3
-  /// \param[in] _pt Ignition math Vector3
-  /// \return Gazebo math Vector3
-  gazebo::math::Vector3 I2G(const ignition::math::Vector3<double> _pt);
-
-  /// \brief Converts from gazebo math Vector3 to ignition math Vector3
-  /// \param[in] _pt Gazebo math Vector3
-  /// \return Ignition math Vector3
-  ignition::math::Vector3<double> G2I(const gazebo::math::Vector3 _pt);
-
-  /// \brief Converts from ignition math Quaternion to gazebo math Quaternion
-  /// \param[in] _pt Ignition math Quaternion
-  /// \return Gazebo math Quaternion
-  gazebo::math::Quaternion I2G(
-    const ignition::math::Quaternion<double> _q);
-
-  /// \brief Converts from gazebo math Quaternion to ignition math Quaternion
-  /// \param[in] _pt Gazebo math Quaternion
-  /// \return Ignition math Quaternion
-  ignition::math::Quaternion<double> G2I(
-    const gazebo::math::Quaternion _q);
-
-  /// \brief Converts from ignition math Pose to gazebo math Pose
-  /// \param[in] _pt Ignition math Pose
-  /// \return Gazebo math Pose
-  gazebo::math::Pose I2G(const ignition::math::Pose3<double> _p);
-
-  /// \brief Converts from gazebo math Pose to ignition math Pose
-  /// \param[in] _pt Gazebo math Pose
-  /// \return Ignition math Pose
-  ignition::math::Pose3<double> G2I(const gazebo::math::Pose _p);
-
   /// \brief Helper function for loading configuration variables
   /// \param[in] _config Map of configuration variables
   /// \param[in] _key Key to look for in map
