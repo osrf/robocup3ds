@@ -34,6 +34,8 @@
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/physics/World.hh>
+#include <gazebo/sensors/ImuSensor.hh>
+#include <gazebo/sensors/SensorsIface.hh>
 #include <gazebo/transport/TransportTypes.hh>
 #include <ignition/math.hh>
 #include <sdf/sdf.hh>
@@ -701,12 +703,18 @@ void Robocup3dsPlugin::UpdatePerceptor()
           model->GetJoint(kv.second)->GetAngle(0).Degree();
       }
 
-      // update agent's percept gyro rate
-      const auto &torsoLink = model->GetLink(agent.bodyType->TorsoLinkName());
-      agent.percept.gyroRate = G2I(torsoLink->GetWorldAngularVel());
-
-      // update agent's percept acceleration
-      agent.percept.accel = G2I(torsoLink->GetWorldLinearAccel());
+      // update agent's percept gyro and accelerometer
+      auto imuTorso = std::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(
+          gazebo::sensors::get_sensor(
+          agent.bodyType->TorsoLinkName() + "::imuTorso"));
+      if (!imuTorso)
+      {
+        gzerr << "Couldn't find [" <<  agent.bodyType->TorsoLinkName() <<
+            "::imuTorso]"<< std::endl;
+        continue;
+      }
+      agent.percept.gyroRate = imuTorso->AngularVelocity();
+      agent.percept.accel = imuTorso->LinearAcceleration();
 
       // update agent's percept left and right foot force info
       agent.percept.leftFootFR =
