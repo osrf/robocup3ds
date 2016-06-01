@@ -684,8 +684,8 @@ void Robocup3dsPlugin::UpdatePerceptor()
       const auto &model = this->world->GetModel(agent.GetName());
 
       // update agent's camera pose
-      const auto &cameraPose = model->GetLink(agent.bodyType->CameraLinkName())->
-                         GetWorldPose().Ign();
+      const auto &cameraPose = model->GetLink(
+        agent.bodyType->CameraLinkName())->GetWorldPose().Ign();
       agent.cameraPos = cameraPose.Pos();
       agent.cameraRot = cameraPose.Rot();
 
