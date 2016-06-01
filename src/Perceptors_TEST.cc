@@ -566,6 +566,16 @@ TEST_F(PerceptorTest, Percepter_Serialize)
   EXPECT_EQ(cx, cx2);
 }
 
+/// \brief Test accelerometer
+TEST_F(PerceptorTest, Perceptor_Accelerometer)
+{
+  this->gameState->AddAgent(1, "blue");
+  auto agent = gameState->teams.at(0)->members.at(0);
+
+  // Start with zero acceleration
+  EXPECT_EQ(agent.percept.accel, ignition::math::Vector3d::Zero);
+}
+
 int main(int argc, char **argv)
 {
   // Set a specific seed to avoid occasional test failures due to

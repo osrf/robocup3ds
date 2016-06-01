@@ -34,6 +34,10 @@
       <gravity>1</gravity>
       <velocity_decay/>
       <self_collide>0</self_collide>
+      <sensor name="torsoImu" type="imu">
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+      </sensor>
     </link>
     <link name='Neck'>
       <pose>0 0 0.09 0 0 0</pose>
@@ -199,7 +203,7 @@
     </link>
     <joint name='LHipYawPitch' type='revolute'>
       <child>LHip1</child>
-	  <pose>-0.01 0 0 0 0 0</pose>		
+	  <pose>-0.01 0 0 0 0 0</pose>
       <parent>base_link</parent>
       <axis>
         <xyz>0 0.7071 -0.7071</xyz>
@@ -257,7 +261,7 @@
     </link>
     <joint name='LHipRoll' type='revolute'>
       <child>LHip</child>
-	  <pose>-0.01 0 0 0 0 0</pose>				
+	  <pose>-0.01 0 0 0 0 0</pose>
       <parent>LHip1</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -869,7 +873,7 @@
     </link>
     <joint name='RHipYawPitch' type='revolute'>
       <child>RHip1</child>
-      <pose>-0.01 0 0 0 0 0</pose>		
+      <pose>-0.01 0 0 0 0 0</pose>
       <parent>base_link</parent>
       <axis>
         <xyz>0 0.7071 0.7071</xyz>
@@ -927,7 +931,7 @@
     </link>
     <joint name='RHipRoll' type='revolute'>
       <child>RHip</child>
-	  <pose>-0.01 0 0 0 0 0</pose>		
+	  <pose>-0.01 0 0 0 0 0</pose>
       <parent>RHip1</parent>
       <axis>
         <xyz>1 0 0</xyz>
@@ -1139,7 +1143,7 @@
     </link>
     <joint name='RAnklePitch' type='revolute'>
       <child>r_ankle</child>
-	  <pose>-0.005 0 0 0 0 0</pose>	
+	  <pose>-0.005 0 0 0 0 0</pose>
       <parent>RTibia</parent>
       <axis>
         <xyz>0 -1 0</xyz>
