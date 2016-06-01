@@ -419,7 +419,6 @@ void Robocup3dsPlugin::UpdateEffector()
 
         jointController->SetPositionTarget(scopedJointName, target);
       }
-      agent.action.jointEffectors.clear();
     }
   }
 }
