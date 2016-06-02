@@ -705,12 +705,12 @@ void Robocup3dsPlugin::UpdatePerceptor()
 
       // update agent's percept gyro and accelerometer
       auto imuTorso = std::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(
-          gazebo::sensors::get_sensor(
-          agent.bodyType->TorsoLinkName() + "::imuTorso"));
+          gazebo::sensors::get_sensor("default::" + agent.GetName() + "::" +
+          agent.bodyType->TorsoLinkName() + "::torsoImu"));
       if (!imuTorso)
       {
         gzerr << "Couldn't find [" <<  agent.bodyType->TorsoLinkName() <<
-            "::imuTorso]"<< std::endl;
+            "::torsoImu]"<< std::endl;
         continue;
       }
       agent.percept.gyroRate = imuTorso->AngularVelocity();

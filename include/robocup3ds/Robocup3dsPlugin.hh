@@ -50,11 +50,11 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
 
   /// \brief Update the robocup simulation state.
   /// \param[in] _info Information used in the update event.
-  public: void Update(const gazebo::common::UpdateInfo &_info);
+  public: virtual void Update(const gazebo::common::UpdateInfo &_info);
 
   /// \brief Update the robocup simulation state in sync mode
   /// \param[in] _info Information used in the update event.
-  public: void UpdateSync(const gazebo::common::UpdateInfo &_info);
+  public: virtual void UpdateSync(const gazebo::common::UpdateInfo &_info);
 
   /// \brief Publish game state information to GUI plugin
   private: void PublishGameInfo();
@@ -132,13 +132,13 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   private: gazebo::event::ConnectionPtr updateConnection;
 
   /// \brief Pointer to world
-  private: gazebo::physics::WorldPtr world;
+  protected: gazebo::physics::WorldPtr world;
 
   /// \brief Pointer to sdf
   private: sdf::ElementPtr sdf;
 
   /// \brief Pointer to GameState object
-  private: std::shared_ptr<GameState> gameState;
+  protected: std::shared_ptr<GameState> gameState;
 
   /// \brief Pointer to Effector object;
   private: std::shared_ptr<Effector> effector;
