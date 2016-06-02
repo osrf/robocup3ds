@@ -12,7 +12,6 @@ set(tests
 
 # set_source_files_properties(run_agent.cc PROPERTIES COMPILE_FLAGS -v)
 
-MESSAGE(STATUS "caguero: ${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 link_directories(${PROJECT_BINARY_DIR}/test)
 
