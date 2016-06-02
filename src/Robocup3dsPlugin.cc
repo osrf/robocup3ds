@@ -710,7 +710,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
           gazebo::sensors::get_sensor(imuName));
       if (!imuTorso)
       {
-        gzerr << "Couldn't find [" <<  imuName << std::endl;
+        gzerr << "Couldn't find [" <<  imuName << "]" << std::endl;
         continue;
       }
       agent.percept.gyroRate = imuTorso->AngularVelocity();
