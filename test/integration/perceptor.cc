@@ -87,7 +87,7 @@ TEST_F(PerceptorTest, IMU)
   // The perceptor_plugin will eventually move the agent, we need to be playing.
   this->agent->ChangePlayMode("PlayOn");
 
-  this->Wait(1000);
+  this->Wait(5000);
 }
 
 /////////////////////////////////////////////////

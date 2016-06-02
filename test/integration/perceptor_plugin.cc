@@ -44,10 +44,22 @@ void PerceptorPlugin::Update(const gazebo::common::UpdateInfo &_info)
 
   if (this->iterations == 1000)
   {
+    gzmsg << "-- Checking that robot is at rest" << std::endl;
+
+    // Aceelerometer registers gravity at rest
+    EXPECT_NEAR(agent->percept.accel.X(), 0.0, 0.4);
+    EXPECT_NEAR(agent->percept.accel.Y(), 0.0, 0.4);
     EXPECT_NEAR(agent->percept.accel.Z(), 9.8, 0.4);
+
+    // Gyro registers no velocity at rest
+    EXPECT_NEAR(agent->percept.gyroRate.X(), 0.0, 0.4);
+    EXPECT_NEAR(agent->percept.gyroRate.Y(), 0.0, 0.4);
+    EXPECT_NEAR(agent->percept.gyroRate.Z(), 0.0, 0.4);
   }
   else if (this->iterations == 2000)
   {
+    gzmsg << "-- Dropping robot" << std::endl;
+
     auto model = this->world->GetModel(agent->GetName());
     ASSERT_TRUE(model != NULL);
     // Force a free fall to generate some random angular velocity.
@@ -55,6 +67,39 @@ void PerceptorPlugin::Update(const gazebo::common::UpdateInfo &_info)
   }
   else if (this->iterations == 2500)
   {
+    gzmsg << "-- Checking that robot is at free fall" << std::endl;
+
+    // Accelerometer registers no acceleration on free-fall
+    EXPECT_NEAR(agent->percept.accel.X(), 0.0, 0.4);
+    EXPECT_NEAR(agent->percept.accel.Y(), 0.0, 0.4);
+    EXPECT_NEAR(agent->percept.accel.Z(), 0.0, 0.4);
+
+    // Check that robot is spinning due to its uneven inertia
+    EXPECT_FALSE(ignition::math::equal(agent->percept.gyroRate.X(), 0.0));
     EXPECT_FALSE(ignition::math::equal(agent->percept.gyroRate.Y(), 0.0));
+    EXPECT_FALSE(ignition::math::equal(agent->percept.gyroRate.Z(), 0.0));
+  }
+  else if (this->iterations == 3000)
+  {
+    gzmsg << "-- Laying down the robot" << std::endl;
+
+    auto model = this->world->GetModel(agent->GetName());
+    ASSERT_TRUE(model != NULL);
+    // Force the model to lie on its back
+    model->SetWorldPose(gazebo::math::Pose(0, 0, 0.4, 3.14, -1.57, 3.14));
+  }
+  else if (this->iterations == 4000)
+  {
+    gzmsg << "-- Checking robot is laid down" << std::endl;
+
+    // Accelerometer registers gravity mostly on torso's X axis
+    EXPECT_NEAR(agent->percept.accel.X(), -9.8, 3.0);
+    EXPECT_NEAR(agent->percept.accel.Y(), 0.0, 3.0);
+    EXPECT_NEAR(agent->percept.accel.Z(), 0.0, 3.0);
+
+    // Gyro registers no velocity at rest
+    EXPECT_NEAR(agent->percept.gyroRate.X(), 0.0, 0.4);
+    EXPECT_NEAR(agent->percept.gyroRate.Y(), 0.0, 0.4);
+    EXPECT_NEAR(agent->percept.gyroRate.Z(), 0.0, 0.4);
   }
 }
