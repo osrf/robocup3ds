@@ -66,7 +66,8 @@ class PerceptorTest : public gazebo::ServerFixture
 };
 
 /////////////////////////////////////////////////
-/// \brief .
+/// \brief Load a world running the perceptor_plugin that will test the IMU
+/// values sent to the agents.
 TEST_F(PerceptorTest, IMU)
 {
   this->LoadWorld("TestPerceptor.world");
