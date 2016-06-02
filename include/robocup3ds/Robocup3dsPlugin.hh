@@ -116,8 +116,14 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   public: int monitorPort = 3200;
 
   /// \brief Flag whether to enable sync mode, with this enable, the plugin
-  /// trys to update as fast as possible
+  /// tries to update as fast as possible
   public: bool syncMode = false;
+
+  /// \brief Pointer to world
+  protected: gazebo::physics::WorldPtr world;
+
+  /// \brief Pointer to GameState object
+  protected: std::shared_ptr<GameState> gameState;
 
   /// \brief Size of buffer in bytes
   private: static const int kBufferSize = 16384;
@@ -131,14 +137,8 @@ class Robocup3dsPlugin : public gazebo::WorldPlugin
   /// \brief Pointer to the update event connection.
   private: gazebo::event::ConnectionPtr updateConnection;
 
-  /// \brief Pointer to world
-  protected: gazebo::physics::WorldPtr world;
-
   /// \brief Pointer to sdf
   private: sdf::ElementPtr sdf;
-
-  /// \brief Pointer to GameState object
-  protected: std::shared_ptr<GameState> gameState;
 
   /// \brief Pointer to Effector object;
   private: std::shared_ptr<Effector> effector;
