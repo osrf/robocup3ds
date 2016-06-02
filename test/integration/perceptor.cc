@@ -54,14 +54,14 @@ class PerceptorTest : public gazebo::ServerFixture
   //////////////////////////////////////////////////
   public: virtual void TearDown()
   {
-    this->agent.reset();
-    this->world.reset();
     gazebo::ServerFixture::TearDown();
     this->Wait();
   }
 
+  /// \brief External agent to interact with the plugin.
   public: std::unique_ptr<ClientAgent> agent;
 
+  /// \brief World pointer.
   public: gazebo::physics::WorldPtr world;
 };
 
@@ -71,9 +71,7 @@ TEST_F(PerceptorTest, IMU)
 {
   this->LoadWorld("TestPerceptor.world");
 
-  this->agent.reset(new ClientAgent(
-                    "0.0.0.0", 3100, 3200, 1, "red", "left"));
-  this->Wait();
+  this->agent.reset(new ClientAgent("0.0.0.0", 3100, 3200, 1, "red", "left"));
   this->agent->InitAndBeam(1, 1, 90);
   this->agent->Start();
 
@@ -83,11 +81,9 @@ TEST_F(PerceptorTest, IMU)
   EXPECT_TRUE(this->agent->running);
   EXPECT_TRUE(this->agent->connected);
 
-  gazebo::physics::WorldPtr world = gazebo::physics::get_world("default");
-  ASSERT_TRUE(world != NULL);
-
   this->Wait(1500);
 
+  // The perceptor_plugin will eventually move the agent, we need to be playing.
   this->agent->ChangePlayMode("PlayOn");
 
   this->Wait(1000);
@@ -96,8 +92,6 @@ TEST_F(PerceptorTest, IMU)
 /////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  // Set a specific seed to avoid occasional test failures due to
-  // statistically unlikely, but possible results.
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
