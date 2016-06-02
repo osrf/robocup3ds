@@ -44,9 +44,9 @@ void PerceptorPlugin::Update(const gazebo::common::UpdateInfo &_info)
 
   if (this->iterations == 1000)
   {
-    gzmsg << "-- Checking that robot is at rest" << std::endl;
+    gzmsg << "-- Checking that robot is pinned" << std::endl;
 
-    // Aceelerometer registers gravity at rest
+    // Accelerometer registers gravity at rest
     EXPECT_NEAR(agent->percept.accel.X(), 0.0, 0.4);
     EXPECT_NEAR(agent->percept.accel.Y(), 0.0, 0.4);
     EXPECT_NEAR(agent->percept.accel.Z(), 9.8, 0.4);
@@ -78,28 +78,5 @@ void PerceptorPlugin::Update(const gazebo::common::UpdateInfo &_info)
     EXPECT_FALSE(ignition::math::equal(agent->percept.gyroRate.X(), 0.0));
     EXPECT_FALSE(ignition::math::equal(agent->percept.gyroRate.Y(), 0.0));
     EXPECT_FALSE(ignition::math::equal(agent->percept.gyroRate.Z(), 0.0));
-  }
-  else if (this->iterations == 3000)
-  {
-    gzmsg << "-- Laying down the robot" << std::endl;
-
-    auto model = this->world->GetModel(agent->GetName());
-    ASSERT_TRUE(model != NULL);
-    // Force the model to lie on its back
-    model->SetWorldPose(gazebo::math::Pose(0, 0, 0.4, 3.14, -1.57, 3.14));
-  }
-  else if (this->iterations == 4000)
-  {
-    gzmsg << "-- Checking robot is laid down" << std::endl;
-
-    // Accelerometer registers gravity mostly on torso's X axis
-    EXPECT_NEAR(agent->percept.accel.X(), -9.8, 3.0);
-    EXPECT_NEAR(agent->percept.accel.Y(), 0.0, 3.0);
-    EXPECT_NEAR(agent->percept.accel.Z(), 0.0, 3.0);
-
-    // Gyro registers no velocity at rest
-    EXPECT_NEAR(agent->percept.gyroRate.X(), 0.0, 0.4);
-    EXPECT_NEAR(agent->percept.gyroRate.Y(), 0.0, 0.4);
-    EXPECT_NEAR(agent->percept.gyroRate.Z(), 0.0, 0.4);
   }
 }

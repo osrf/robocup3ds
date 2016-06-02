@@ -87,12 +87,13 @@ TEST_F(PerceptorTest, IMU)
   // The perceptor_plugin will eventually move the agent, we need to be playing.
   this->agent->ChangePlayMode("PlayOn");
 
-  this->Wait(5000);
+  this->Wait(1500);
 }
 
 /////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
+  ignition::math::Rand::Seed(20);
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
