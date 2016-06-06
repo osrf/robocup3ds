@@ -716,7 +716,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
       agent.percept.gyroRate = imuTorso->AngularVelocity();
       agent.percept.accel = imuTorso->LinearAcceleration();
       // Flip the sign of the X axis to match SimSpark.
-      agent.percept.accel *= -1;
+      agent.percept.accel.X(-1 * agent.percept.accel.X());
 
       // update agent's percept left and right foot force info
       agent.percept.leftFootFR =
