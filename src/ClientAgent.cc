@@ -31,8 +31,11 @@ using namespace ignition;
 const int ClientAgent::kThreadSleepTime = 20000;
 
 //////////////////////////////////////////////////
-ClientAgent::ClientAgent(const std::string &_serverAddr, const int _port,
-    const int _monitorPort, const int _uNum, const std::string &_teamName,
+ClientAgent::ClientAgent(const std::string &_serverAddr,
+    const int _port,
+    const int _monitorPort,
+    const int _uNum,
+    const std::string &_teamName,
     const std::string &_side):
   running(false),
   connected(false),

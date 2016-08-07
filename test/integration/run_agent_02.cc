@@ -99,16 +99,16 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
   auto lastMsg = this->agent->allMsgs.back();
   EXPECT_NE(lastMsg.find("GS"), std::string::npos);
   EXPECT_NE(lastMsg.find("BeforeKickOff"), std::string::npos);
-  EXPECT_NE(lastMsg.find("myorien"), std::string::npos);
-  EXPECT_NE(lastMsg.find("mypos"), std::string::npos);
-  EXPECT_NE(lastMsg.find("ballpos"), std::string::npos);
 
   bool see = false;
   for (const auto &msg : this->agent->allMsgs)
   {
-    if (msg.find("See"))
+    if (msg.find("See") != std::string::npos)
     {
       see = true;
+      EXPECT_NE(msg.find("myorien"), std::string::npos);
+      EXPECT_NE(msg.find("mypos"), std::string::npos);
+      EXPECT_NE(msg.find("ballpos"), std::string::npos);
     }
   }
 
@@ -121,16 +121,16 @@ TEST_F(IntegrationTest, TestLoadConnectAgent)
   lastMsg = this->oppAgent->allMsgs.back();
   EXPECT_NE(lastMsg.find("GS"), std::string::npos);
   EXPECT_NE(lastMsg.find("BeforeKickOff"), std::string::npos);
-  EXPECT_NE(lastMsg.find("myorien"), std::string::npos);
-  EXPECT_NE(lastMsg.find("mypos"), std::string::npos);
-  EXPECT_NE(lastMsg.find("ballpos"), std::string::npos);
 
   see = false;
   for (const auto &msg : this->oppAgent->allMsgs)
   {
-    if (msg.find("See"))
+    if (msg.find("See") != std::string::npos)
     {
       see = true;
+      EXPECT_NE(msg.find("myorien"), std::string::npos);
+      EXPECT_NE(msg.find("mypos"), std::string::npos);
+      EXPECT_NE(msg.find("ballpos"), std::string::npos);
     }
   }
   EXPECT_TRUE(see);
