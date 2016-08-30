@@ -42,7 +42,7 @@ class ActionResponse
 
   /// \brief Constructor
   /// \param[in] _actionName Name of action
-  public: ActionResponse(const std::string &_actionName):
+  public: explicit ActionResponse(const std::string &_actionName):
     status(Status::NOTSTARTED),
     actionName(_actionName) {}
 

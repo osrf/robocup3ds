@@ -390,32 +390,37 @@ int Perceptor::Serialize(const Agent &_agent, char *_string,
                      fieldLine[1].X(), fieldLine[1].Y(), fieldLine[1].Z());
     }
 
+    // write out ground truth information
+    if (GameState::groundTruthInfo)
+    {
+      const auto &ballPos = this->gameState->GetBall();
+      if (_agent.team->side == Team::Side::LEFT)
+      {
+        cx += snprintf(_string + cx, _size - cx,
+                       " (mypos %.2f %.2f %.2f) (myorien %.2f)"
+                       " (ballpos %.2f %.2f %.2f)",
+                       _agent.cameraPos.X(),
+                       _agent.cameraPos.Y(),
+                       _agent.cameraPos.Z(),
+                       IGN_RTOD(_agent.cameraRot.Euler().Z()),
+                       ballPos.X(), ballPos.Y(), ballPos.Z());
+      }
+      else
+      {
+        double rot = fmod(IGN_RTOD(_agent.cameraRot.Euler().Z()) + 180.0,
+          360.0);
+        cx += snprintf(_string + cx, _size - cx,
+                       " (mypos %.2f %.2f %.2f) (myorien %.2f)"
+                       " (ballpos %.2f %.2f %.2f)",
+                       -_agent.cameraPos.X(),
+                       -_agent.cameraPos.Y(),
+                       _agent.cameraPos.Z(),
+                       rot, -ballPos.X(), -ballPos.Y(), ballPos.Z());
+      }
+    }
+
     // finish writing out perception info
     cx += snprintf(_string + cx, _size - cx, ")");
-  }
-
-  // write out ground truth information
-  if (GameState::groundTruthInfo)
-  {
-    const auto &ballPos = this->gameState->GetBall();
-    if (_agent.team->side == Team::Side::LEFT)
-    {
-      cx += snprintf(_string + cx, _size - cx,
-                     " (mypos %.2f %.2f %.2f) (myorien %.2f)"
-                     " (ballpos %.2f %.2f %.2f)",
-                     _agent.pos.X(), _agent.pos.Y(), _agent.pos.Z(),
-                     IGN_RTOD(_agent.rot.Euler().Z()),
-                     ballPos.X(), ballPos.Y(), ballPos.Z());
-    }
-    else
-    {
-      double rot = fmod(IGN_RTOD(_agent.rot.Euler().Z()) + 180.0, 360.0);
-      cx += snprintf(_string + cx, _size - cx,
-                     " (mypos %.2f %.2f %.2f) (myorien %.2f)"
-                     " (ballpos %.2f %.2f %.2f)",
-                     -_agent.pos.X(), -_agent.pos.Y(), _agent.pos.Z(),
-                     rot, -ballPos.X(), -ballPos.Y(), ballPos.Z());
-    }
   }
 
   return cx;
