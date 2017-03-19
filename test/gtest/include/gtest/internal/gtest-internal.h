@@ -1155,4 +1155,27 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
             GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>);\
 void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
 
+// Helper macro for defining simulated tests
+#define GTEST_SIMULATED_SCENARIO_(parent_class, parent_id)\
+class MySimulatedScenarioClassName : public parent_class {\
+ public:\
+  MySimulatedScenarioClassName() {} \
+ private:\
+  virtual void TestBody();\
+  static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
+  GTEST_DISALLOW_COPY_AND_ASSIGN_(\
+      MySimulatedScenarioClassName);\
+};\
+\
+::testing::TestInfo* const MySimulatedScenarioClassName\
+  ::test_info_ =\
+    ::testing::internal::MakeAndRegisterTestInfo(\
+        "my_simulated_test_case_name", "my_simulated_test_name", NULL, NULL, \
+        (parent_id), \
+        parent_class::SetUpTestCase, \
+        parent_class::TearDownTestCase, \
+        new ::testing::internal::TestFactoryImpl<\
+            MySimulatedScenarioClassName>);\
+void MySimulatedScenarioClassName::TestBody()
+
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_

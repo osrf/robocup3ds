@@ -2207,6 +2207,13 @@ bool StaticAssertTypeEq() {
   return true;
 }
 
+// Defines a Gazebo simulated testing scenario
+#define SIMULATED_SCENARIO GTEST_SIMULATED_SCENARIO
+
+#define GTEST_SIMULATED_SCENARIO \
+    GTEST_SIMULATED_SCENARIO_(::testing::Test, \
+              ::testing::internal::GetTestTypeId())
+
 // Defines a test.
 //
 // The first parameter is the name of the test case, and the second
