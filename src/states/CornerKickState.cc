@@ -35,7 +35,7 @@ CornerKickState::CornerKickState(const std::string &_name,
 /////////////////////////////////////////////////
 void CornerKickState::Initialize()
 {
-  this->gameState->MoveBall(initBallPos);
+  this->gameState->MoveBall(this->initBallPos);
   this->gameState->MoveBallToCorner();
   State::Initialize();
 }
@@ -53,6 +53,7 @@ void CornerKickState::Update()
   }
 
   this->gameState->DropBallImpl(this->side);
+  State::Update();
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsKickIn)

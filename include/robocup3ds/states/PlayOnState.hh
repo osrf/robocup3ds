@@ -29,7 +29,9 @@ namespace states
   /// \brief State that handles regular gameplay.
   class PlayOnState : public State
   {
-    // Documentation inherited
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
     public: PlayOnState(const std::string &_name,
                         GameState *const _gameState);
 
