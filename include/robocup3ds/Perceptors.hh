@@ -19,8 +19,6 @@
 #define _GAZEBO_PERCEPTORS_HH_
 
 #include <ignition/math.hh>
-#include <map>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -38,7 +36,7 @@ class Perceptor
   public: Perceptor(GameState *_gameState);
 
   /// \brief Destructor for Perceptor object
-  public: ~Perceptor();
+  public: ~Perceptor() = default;
 
   /// \brief Method used to set view frustum based on HFov, VFov
   public: void SetViewFrustum();

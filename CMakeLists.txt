@@ -7,8 +7,8 @@ string (TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 string (TOUPPER ${PROJECT_NAME} PROJECT_NAME_UPPER)
 
 set (PROJECT_MAJOR_VERSION 0)
-set (PROJECT_MINOR_VERSION 1)
-set (PROJECT_PATCH_VERSION 0)
+set (PROJECT_MINOR_VERSION 0)
+set (PROJECT_PATCH_VERSION 0~beta2)
 
 set (PROJECT_VERSION ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION})
 set (PROJECT_VERSION_FULL ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
@@ -89,7 +89,6 @@ endif()
 
 set (INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/robocup3ds")
 set (LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
-set (LIB_INSTALL_DIR_ARCH_INDEPENDENT "lib/")
 set (BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
 
 set (USE_FULL_RPATH OFF CACHE BOOL "Set to true to enable full rpath")
@@ -232,7 +231,19 @@ else (build_errors)
   robocup3ds_install_includes(${PROJECT_NAME}
     ${PROJECT_BINARY_DIR}/include/robocup3ds/config.hh)
 
+  ########################################
+  # Write the setup.sh file
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/setup.sh.in ${PROJECT_BINARY_DIR}/setup.sh @ONLY)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/)
+
+  ########################################
+  # Write the gazebo-robocup3ds file
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/gazebo-robocup3ds.in ${PROJECT_BINARY_DIR}/bin/gazebo-robocup3ds @ONLY)
+  install (PROGRAMS ${PROJECT_BINARY_DIR}/bin/gazebo-robocup3ds DESTINATION ${BIN_INSTALL_DIR})
+
+
   include_directories(
+    ${PROJECT_SOURCE_DIR}/deps
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_BINARY_DIR}/include
   )
@@ -249,8 +260,10 @@ else (build_errors)
 
   if (BUILD_ROBOCUP3DS)
     set(TEST_TYPE "UNIT")
-    add_subdirectory(src)
+    add_subdirectory(deps)
+    add_subdirectory(gui)
     add_subdirectory(include)
+    add_subdirectory(src)
     add_subdirectory(test)
     add_subdirectory(worlds)
     add_subdirectory(models)
@@ -261,8 +274,9 @@ else (build_errors)
   configure_file(
     ${CMAKE_SOURCE_DIR}/cmake/pkgconfig/robocup3ds.in
     ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc @ONLY)
+
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/pkgconfig/${PROJECT_NAME_LOWER}.pc
-    DESTINATION ${LIB_INSTALL_DIR_ARCH_INDEPENDENT}/pkgconfig
+    DESTINATION ${LIB_INSTALL_DIR}/pkgconfig
     COMPONENT pkgconfig)
 
   ########################################

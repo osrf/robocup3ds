@@ -23,14 +23,15 @@
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <mutex>
 
 #include "robocup3ds/SocketParser.hh"
 #include "robocup3ds/Server.hh"
 
 //////////////////////////////////////////////////
-RCPServer::RCPServer(const int _port, const std::shared_ptr<SocketParser>
-                     &_parser):
+RCPServer::RCPServer(const int _port,
+                     const std::shared_ptr<SocketParser> &_parser):
   port(_port),
   masterSocket(-1),
   parser(_parser),
@@ -52,12 +53,33 @@ void RCPServer::Start()
 {
   // The service is already running.
   if (this->enabled)
-  { return; }
+  {
+    return;
+  }
 
   this->enabled = true;
 
   // Start the thread that receives information.
   this->threadReception = std::thread(&RCPServer::RunReceptionTask, this);
+}
+
+//////////////////////////////////////////////////
+bool RCPServer::DisconnectClient(const int _socket)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  for (size_t i = 0; i < this->pollSockets.size(); ++i)
+  {
+    if (_socket == this->pollSockets.at(i).fd)
+    {
+      this->parser->OnDisconnection(_socket);
+      close(_socket);
+      this->pollSockets.at(i).events = 0;
+      this->pollSockets.erase(this->pollSockets.begin() + i);
+      return true;
+    }
+  }
+  return false;
 }
 
 //////////////////////////////////////////////////
@@ -154,7 +176,9 @@ bool RCPServer::InitializeSockets()
 void RCPServer::RunReceptionTask()
 {
   if (!this->InitializeSockets())
-  { return; }
+  {
+    return;
+  }
 
   // Add the master socket to the list of sockets.
   struct pollfd masterFd;
@@ -196,7 +220,9 @@ void RCPServer::RunReceptionTask()
 
   // About to leave, close pending sockets.
   for (size_t i = 1; i < this->pollSockets.size(); ++i)
-  { close(this->pollSockets.at(i).fd); }
+  {
+    close(this->pollSockets.at(i).fd);
+  }
 }
 
 //////////////////////////////////////////////////

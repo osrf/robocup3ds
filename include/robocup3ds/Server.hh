@@ -70,8 +70,8 @@ class RCPServer
   /// \param[in] _port TCP port for incoming connections.
   /// \param[in] _parser Parser in charge of reading incoming data from
   /// the sockets.
-  public: RCPServer(const int _port, const std::shared_ptr<SocketParser>
-    &_parser);
+  public: RCPServer(const int _port,
+                    const std::shared_ptr<SocketParser> &_parser);
 
   /// \brief Simple constructor for testing purposes
   public: RCPServer() {}

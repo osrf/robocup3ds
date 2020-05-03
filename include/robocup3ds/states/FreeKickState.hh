@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_FREE_KICK_STATE_HH_
-#define _GAZEBO_FREE_KICK_STATE_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_FREEKICK_STATE_HH_
+#define _GAZEBO_ROBOCUP3DS_FREEKICK_STATE_HH_
 
 #include <string>
 
@@ -29,7 +29,10 @@ namespace states
   /// \brief State that handles the free kick state.
   class FreeKickState : public State
   {
-    // Documentation inherited
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
+    /// \param[in] _side Side of state
     public: FreeKickState(const std::string &_name,
                           GameState *const _gameState,
                           const Team::Side _side);

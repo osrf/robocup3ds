@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_SOCCER_FIELD_PLUGIN_HH_
-#define _GAZEBO_SOCCER_FIELD_PLUGIN_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_SOCCERFIELD_HH_
+#define _GAZEBO_ROBOCUP3DS_SOCCERFIELD_HH_
 
 #include <ignition/math.hh>
 #include <map>

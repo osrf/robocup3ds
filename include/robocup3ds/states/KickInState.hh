@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_KICKIN_STATE_HH_
-#define _GAZEBO_KICKIN_STATE_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_KICKIN_STATE_HH_
+#define _GAZEBO_ROBOCUP3DS_KICKIN_STATE_HH_
 
 #include <string>
 
@@ -29,7 +29,10 @@ namespace states
   /// \brief State that handles the kick in state.
   class KickInState : public State
   {
-    // Documentation inherited
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
+    /// \param[in] _side Side of state
     public: KickInState(const std::string &_name,
                         GameState *const _gameState,
                         const Team::Side _side);
@@ -38,7 +41,7 @@ namespace states
     public: virtual void Initialize();
 
     // Documentation inherited
-    public: virtual void Update(); \
+    public: virtual void Update();
   };
 }
 
