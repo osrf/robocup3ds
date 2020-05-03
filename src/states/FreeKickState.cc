@@ -35,6 +35,7 @@ FreeKickState::FreeKickState(const std::string &_name,
 void FreeKickState::Initialize()
 {
   // Move ball in bounds
+  this->gameState->MoveBall(this->initBallPos);
   this->gameState->MoveBallInBounds();
   State::Initialize();
 }
@@ -51,7 +52,6 @@ void FreeKickState::Update()
     this->Initialize();
   }
 
-  // The right team is not allowed to be close to the ball.
   this->gameState->DropBallImpl(this->side);
   State::Update();
 

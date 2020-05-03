@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_GAMESTATE_HH_
-#define _GAZEBO_GAMESTATE_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
+#define _GAZEBO_ROBOCUP3DS_GAMESTATE_HH_
 
 #include <ignition/math.hh>
 #include <map>
@@ -80,7 +80,8 @@ class GameState
       gameState(_gameState),
       normalLevel(_normalLevel),
       errorLevel(_errorLevel)
-    {}
+    {
+    }
 
     /// \brief Print normal messages plus some game information
     /// \param[in] _message Normal message string
@@ -91,7 +92,7 @@ class GameState
       {
         std::cout << "[" << this->gameState->GetCycleCounter() << "]["
                   << this->gameState->GetGameTime() << "][lvl:" <<
-                  _level << "]\t" << _message.c_str();
+                  _level << "]\t" << _message.c_str() << std::endl;
       }
     }
 
@@ -104,7 +105,7 @@ class GameState
       {
         std::cout << "\033[31m[" << this->gameState->GetCycleCounter() << "]["
                   << this->gameState->GetGameTime() << "][lvl:" <<
-                  _level << "]\t" << _message.c_str();
+                  _level << "]\t" << _message.c_str() << std::endl;
       }
     }
 
@@ -127,13 +128,14 @@ class GameState
     /// \param[in] _contactTime time when ball was touched
     /// \param[in] _contactPos position where ball was touched
     public: BallContact(const int _uNum, const Team::Side _side,
-                          const double _contactTime,
-                          const ignition::math::Vector3<double> &_contactPos):
+                        const double _contactTime,
+                        const ignition::math::Vector3<double> &_contactPos):
       uNum(_uNum),
       side(_side),
       contactTime(_contactTime),
       contactPos(_contactPos)
-    {}
+    {
+    }
 
     /// \brief Unum of agent who touched ball
     public: int uNum;
@@ -161,7 +163,7 @@ class GameState
     const std::map<std::string, std::string> &_config) const;
 
   /// \brief Destructor.
-  public: virtual ~GameState();
+  public: virtual ~GameState() = default;
 
   /// \brief Clears the history of ball contacts
   public: void ClearBallContactHistory();
@@ -209,30 +211,30 @@ class GameState
 
   /// \brief Set the agent's position only
   /// \param[out] _agent Reference to agent object
-  /// \param[in] _pos New position of agent
+  /// \param[in] _pos New position of agent in meters
   public: void MoveAgent(Agent &_agent,
                          const ignition::math::Vector3<double> &_pos) const;
 
   /// \brief Set the agent's position and yaw (beaming the agent)
   /// \param[out] _agent Reference to agent object
-  /// \param[in] _x New X position of agent
-  /// \param[in] _y New Y position of agent
+  /// \param[in] _x New X position of agent in meters
+  /// \param[in] _y New Y position of agent in meters
   /// \param[in] yaw New yaw of agent
   public: void MoveAgent(Agent &_agent, const double _x, const double _y,
                          const double yaw) const;
 
   /// \brief Set the agent's position and yaw with some additional noise
   /// \param[out] _agent Reference to agent object
-  /// \param[in] _x New X position of agent
-  /// \param[in] _y New Y position of agent
+  /// \param[in] _x New X position of agent in meters
+  /// \param[in] _y New Y position of agent in meters
   /// \param[in] _yaw New yaw of agent
   public: void MoveAgentNoisy(Agent &_agent, const double _x, const double _y,
                               const double _yaw) const;
 
   /// \brief Set the agent's position and orientation
   /// \param[out] _agent Reference to agent object
-  /// \param[in] _pos New position of agent
-  /// \param[in] _rot New orientation of agent
+  /// \param[in] _pos New position of agent in meters
+  /// \param[in] _rot New orientation of agent in meters
   public: void MoveAgent(Agent &_agent,
                          const ignition::math::Vector3<double> &_pos,
                          const ignition::math::Quaternion<double> &_rot) const;
@@ -246,8 +248,7 @@ class GameState
   /// \param[out] _agent Reference to agent object
   public: void MoveOffSideAgent(Agent &_agent) const;
 
-  /// \brief Check if the first half or the game ends, also update
-  /// elapsed time.
+  /// \brief Check if the first half or the game ends, also update elapsed time.
   public: void CheckTiming();
 
   /// \brief Check the ball's position looking for goals or out of bounds.
@@ -284,15 +285,15 @@ class GameState
   public: void MoveBallInBounds();
 
   /// \brief Move the ball to a given position.
-  /// \param[in] _ballPos Target position.
+  /// \param[in] _ballPos Target position in meters
   public: void MoveBall(const ignition::math::Vector3<double> &_ballPos);
 
   /// \brief Set the linear velocity of the ball
-  /// \param[in] _ballVel Target linear velocity
+  /// \param[in] _ballVel Target linear velocity in m/s
   public: void SetBallVel(const ignition::math::Vector3<double> &_ballVel);
 
   /// \brief Set the angular velocity of the ball
-  /// \param[in] _ballAngVel Target angular velocity
+  /// \param[in] _ballAngVel Target angular velocity in m/s
   public: void SetBallAngVel(const ignition::math::Vector3<double>
                              &_ballAngVel);
 
@@ -571,8 +572,8 @@ class GameState
   /// transition from kick off to play on
   public: std::shared_ptr<BallContact> touchBallKickoff;
 
-  /// \brief All the teams.
-  public: std::vector <std::shared_ptr<Team> > teams;
+  /// \brief List of all the teams
+  public: std::vector <std::shared_ptr<Team>> teams;
 
   /// \brief Flag whether to update ball position in world to match game state.
   public: bool updateBallPose;
@@ -581,7 +582,7 @@ class GameState
   /// certain range
   public: AgentSay say;
 
-  /// \brief Position of ball
+  /// \brief Position of soccer ball
   private: ignition::math::Vector3<double> ballPos;
 
   /// \brief Angular velocity of soccer ball.

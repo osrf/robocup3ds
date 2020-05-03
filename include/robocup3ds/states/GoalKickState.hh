@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_GOAL_KICK_STATE_HH_
-#define _GAZEBO_GOAL_KICK_STATE_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_GOALKICK_STATE_HH_
+#define _GAZEBO_ROBOCUP3DS_GOALKICK_STATE_HH_
 
 #include <string>
 
@@ -29,7 +29,10 @@ namespace states
   /// \brief State that handles the goal kick state.
   class GoalKickState : public State
   {
-    // Documentation inherited
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
+    /// \param[in] _side Side of state
     public: GoalKickState(const std::string &_name,
                           GameState *const _gameState,
                           const Team::Side _side);

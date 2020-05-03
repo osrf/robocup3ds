@@ -21,16 +21,18 @@
 #include <cstring>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
 #include "robocup3ds/SocketParser.hh"
-#include "../../lib/sexpLibrary/sexp.h"
-#include "../../lib/sexpLibrary/sexp_ops.h"
+#include "sexpLibrary/sexp.h"
+#include "sexpLibrary/sexp_ops.h"
 
 #include "robocup3ds/Agent.hh"
 
 class GameState;
+class NaoBT;
 
 /// \brief This is a Effector class. It implemented Parse() method
 /// inherited from SocketParser class. Parse() method has been used
@@ -40,6 +42,7 @@ class GameState;
 class Effector: public SocketParser
 {
   /// \brief Class constructor.
+  /// \param[in] _gameState Pointer to GameState object
   public: Effector(GameState *const _gamestate);
 
   /// \brief Class destructor.
@@ -52,7 +55,7 @@ class Effector: public SocketParser
 
   /// \brief Update obtained effectors values using s-expression library and
   /// set them in agent.action
-  public: void Update();
+  public: virtual void Update();
 
   /// \brief Used in server class constructor as a callback function.
   /// \param[in] _socket the socket used for the server client communication.
@@ -65,59 +68,100 @@ class Effector: public SocketParser
   /// \brief Main procedure of extracting information
   /// in pile of S-expressions using the expression library.
   /// \param[in] _msg S-expression messages.
-  private: void ParseMessage(const std::string &_msg);
+  protected: void ParseMessage(const std::string &_msg);
+
+  /// \brief Used to parse each S-expression message.
+  /// \param[in] _exp pointer to a S-expression.
+  protected: virtual void ParseSexp(sexp_t *_exp);
+
+  /// \brief Used to retrieve information from Scene effector message.
+  /// \param[in] _exp Pointer to a S-expression message.
+  protected: void ParseScene(sexp_t *_exp);
+
+  /// \brief Used to retrieve information from Beam effector message.
+  /// \param[in] _exp Pointer to a S-expression message.
+  protected: void ParseBeam(sexp_t *_exp);
+
+  /// \brief Used to retrieve information from Init message.
+  /// \param[in] _exp Pointer to a S-expression.
+  protected: void ParseInit(sexp_t *_exp);
+
+  /// \brief Used to retrieve information from Say message. Accept the
+  /// say Message which consist of at most 20 ASCII printing characters
+  /// \param[in] _exp Pointer to a S-expression.
+  protected: void ParseSay(sexp_t *_exp);
+
+  /// \brief Used to parse the joints effector value in S-expression messages.
+  /// \param[in] _exp Pointer to a S-expression.
+  protected: void ParseHingeJoint(sexp_t *_exp);
+
+  /// \brief List of agents to add to gazebo world this update cycle.
+  public: std::vector<Agent*> agentsToAdd;
+
+  /// \brief List of agent names to remove from gazebo world this update cycle.
+  public: std::vector<std::string> agentsToRemove;
+
+  /// \brief List of sockets to disconnect this update cycle
+  public: std::vector<int> socketsToDisconnect;
+
+  /// \brief Map of socket ids and agent body types strings
+  public: std::map<int, std::shared_ptr<NaoBT>> socketIDbodyTypeMap;
+
+  /// \brief Maximum size of each message received.
+  protected: static const int kBufferSize = 16384;
+
+  /// \brief Pointer to gameState object
+  protected: GameState *const gameState;
+
+  /// \brief Protect concurrent access.
+  protected: mutable std::mutex mutex;
+
+  /// \brief Data Structure used to store Message received by sockets.
+  /// Here, the key of the map is the Socket IDs which is assigned in
+  /// OnConnection()
+  protected: std::map<int, std::string> socketIDMessageMap;
+
+  /// \brief Buffer for reading from socket
+  protected: char buffer[Effector::kBufferSize] = {0};
+
+  /// \brief Buffer for reading from socket
+  protected: char sexpBuffer[Effector::kBufferSize]= {0};
+
+  /// \brief Pointer to current agent whose message is being parsed
+  protected: Agent* currAgent;
+
+  /// \brief The socketID of currAgent
+  protected: int currSocketId;
+};
+
+class MonitorEffector : public Effector
+{
+  /// \brief Class constructor.
+  /// \param[in] _gameState Pointer to GameState object
+  public: MonitorEffector(GameState *const _gamestate);
+
+  /// \brief Iterate through all monitor messages and parse them
+  public: void Update();
 
   /// \brief Used to parse each S-expression message.
   /// \param[in] _exp pointer to a S-expression.
   private: void ParseSexp(sexp_t *_exp);
 
-  /// \brief Used to retrieve information from Scene effector message.
-  /// \param[in] _exp Pointer to a S-expression message.
-  private: void ParseScene(sexp_t *_exp);
+  /// \brief Used to parse each move agent S-expression
+  /// \param[in] _exp pointer to a S-expression.
+  private: void ParseMoveAgent(sexp_t *_exp);
 
-  /// \brief Used to retrieve information from Beam effector message.
-  /// \param[in] _exp Pointer to a S-expression message.
-  private: void ParseBeam(sexp_t *_exp);
+  /// \brief Used to parse each move ball S-expression
+  /// \param[in] _exp pointer to a S-expression.
+  private: void ParseMoveBall(sexp_t *_exp);
 
-  /// \brief Used to retrieve information from Init message.
-  /// \param[in] _exp Pointer to a S-expression.
-  private: void ParseInit(sexp_t *_exp);
+  /// \brief Used to parse each change playMode S-expression.
+  /// \param[in] _exp pointer to a S-expression.
+  private: void ParsePlayMode(sexp_t *_exp);
 
-  /// \brief Used to parse the joints effector value in S-expression messages.
-  /// \param[in] _exp Pointer to a S-expression.
-  private: void ParseHingeJoint(sexp_t *_exp);
-
-  /// \brief data structure used for init information.
-  public: std::vector<AgentId> agentsToAdd;
-
-  /// \brief data structure used for init information.
-  public: std::vector<AgentId> agentsToRemove;
-
-  /// \brief Data Structure used to store Message received by sockets.
-  /// Here, the key of the map is the Socket IDs which is assigned in
-  /// OnConnection()
-  private: std::map<int, std::string> socketIDMessageMap;
-
-  /// \brief Maximum size of each message received.
-  private: static const int kBufferSize;
-
-  /// \brief Protect concurrent access.
-  private: mutable std::mutex mutex;
-
-  /// \brief Buffer for reading from socket
-  private: char *buffer;
-
-  /// \brief Buffer for reading from socket
-  private: char *sexpBuffer;
-
-  /// \brief Pointer to current agent whose message is being parsed
-  private: Agent* currAgent;
-
-  /// \brief The socketID of currAgent
-  private: int currSocketId;
-
-  /// \brief Pointer to gameState object
-  private: GameState *const gameState;
+  /// \brief Used to parse each remove agent S-expression.
+  /// \param[in] _exp pointer to a S-expression.
+  private: void ParseRemoveAgent(sexp_t *_exp);
 };
 
 #endif /* _GAZEBO_ROBOCUP3DS_EFFECTOR_HH_ */

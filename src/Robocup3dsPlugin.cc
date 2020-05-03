@@ -21,10 +21,12 @@
 #include <cstdlib>
 #include <map>
 #include <memory>
+#include <gazebo/common/ModelDatabase.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/Collision.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
+#include <gazebo/physics/PhysicsEngine.hh>
 #include <gazebo/physics/World.hh>
 #include <ignition/math.hh>
 #include <string>
@@ -41,23 +43,32 @@
 #include "robocup3ds/Util.hh"
 
 using namespace gazebo;
+using namespace common;
 
+int Robocup3dsPlugin::clientPort        = 3100;
+int Robocup3dsPlugin::monitorPort       = 3200;
+bool Robocup3dsPlugin::syncMode         = false;
 const int Robocup3dsPlugin::kBufferSize = 16384;
-const int Robocup3dsPlugin::kPort       = 3100;
 
 GZ_REGISTER_WORLD_PLUGIN(Robocup3dsPlugin)
 
 /////////////////////////////////////////////////
 Robocup3dsPlugin::Robocup3dsPlugin():
+  naoSdf(new sdf::Element()),
   gameState(std::make_shared<GameState>()),
   effector(std::make_shared<Effector>(this->gameState.get())),
+  monitorEffector(std::make_shared<MonitorEffector>(this->gameState.get())),
   perceptor(std::make_shared<Perceptor>(this->gameState.get())),
-  server(std::make_shared<RCPServer>(Robocup3dsPlugin::kPort, this->effector)),
+  clientServer(std::make_shared<RCPServer>(
+                 Robocup3dsPlugin::clientPort,
+                 this->effector)),
+  monitorServer(std::make_shared<RCPServer>(
+                  Robocup3dsPlugin::monitorPort,
+                  this->monitorEffector)),
   lastUpdateTime(-GameState::counterCycleTime)
 {
-  GameState::useCounterForGameTime = false;
-  this->server->Start();
   this->buffer = new char[Robocup3dsPlugin::kBufferSize];
+  gzmsg << "Starting Robocup Plugin for Gazebo" << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -67,14 +78,88 @@ Robocup3dsPlugin::~Robocup3dsPlugin()
 }
 
 /////////////////////////////////////////////////
+void Robocup3dsPlugin::LoadConfiguration(
+  const std::map<std::string, std::string> &_config) const
+{
+  double value;
+  bool boolValue;
+  if (LoadConfigParameter(_config, "robocup3dsplugin_monitorport", value))
+  {
+    Robocup3dsPlugin::monitorPort = static_cast<int>(value);
+  }
+  if (LoadConfigParameter(_config, "robocup3dsplugin_clientport", value))
+  {
+    Robocup3dsPlugin::clientPort = static_cast<int>(value);
+  }
+  if (LoadConfigParameterBool(_config, "robocup3dsplugin_syncmode", boolValue))
+  {
+    Robocup3dsPlugin::syncMode = boolValue;
+  }
+}
+
+/////////////////////////////////////////////////
 void Robocup3dsPlugin::Load(physics::WorldPtr _world,
                             sdf::ElementPtr _sdf)
 {
-  // Connect to the update event.
-  this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-                             boost::bind(&Robocup3dsPlugin::Update, this, _1));
+  // set world sdf and nao sdf
   this->world = _world;
   this->sdf = _sdf;
+  std::string filePath = ModelDatabase::Instance()->GetModelFile("model://nao");
+  // gzmsg << "nao filepath: " << filePath << std::endl;
+  const sdf::SDFPtr naoSDF(new sdf::SDF());
+  sdf::init(naoSDF);
+  sdf::readFile(filePath, naoSDF);
+  this->naoSdf->Copy(naoSDF->Root());
+
+  // load config parameters
+  std::map<std::string, std::string> config;
+  _sdf = _sdf->GetFirstElement();
+  while (_sdf)
+  {
+    const auto &param = _sdf->GetValue();
+    if (param)
+    {
+      config[param->GetKey()] = param->GetAsString();
+    }
+    _sdf = _sdf->GetNextElement();
+  }
+
+  gzmsg << "************loading config**************" << std::endl;
+  this->gameState->LoadConfiguration(config);
+  this->LoadConfiguration(config);
+  gzmsg << "************finished loading************" << std::endl;
+
+  gzmsg << "client port: " << Robocup3dsPlugin::clientPort << std::endl;
+  gzmsg << "monitor port: " << Robocup3dsPlugin::monitorPort << std::endl;
+  gzmsg << "syncmode status: " << Robocup3dsPlugin::syncMode << std::endl;
+
+  // connect to the update event.
+  if (!Robocup3dsPlugin::syncMode)
+  {
+    this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+                               boost::bind(&Robocup3dsPlugin::Update,
+                                           this, _1));
+    // this->world->GetPhysicsEngine()->SetRealTimeUpdateRate(0.004);
+  }
+  else
+  {
+    this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+                               boost::bind(&Robocup3dsPlugin::UpdateSync,
+                                           this, _1));
+    this->world->GetPhysicsEngine()->SetRealTimeUpdateRate(0);
+  }
+
+  // start server
+  if (this->clientServer->GetPort() != Robocup3dsPlugin::clientPort)
+  {
+    this->clientServer->SetPort(Robocup3dsPlugin::clientPort);
+  }
+  if (this->monitorServer->GetPort() != Robocup3dsPlugin::monitorPort)
+  {
+    this->monitorServer->SetPort(Robocup3dsPlugin::monitorPort);
+  }
+  this->clientServer->Start();
+  this->monitorServer->Start();
 }
 
 /////////////////////////////////////////////////
@@ -94,9 +179,46 @@ void Robocup3dsPlugin::Update(const common::UpdateInfo & /*_info*/)
     return;
   }
 
-  this->UpdateEffector();
+  // gzerr << "update() called at " << this->world->GetSimTime().Double()
+  //       << std::endl;
+
   this->UpdateGameState();
   this->UpdatePerceptor();
+  this->UpdateEffector();
+  this->UpdateMonitorEffector();
+  this->lastUpdateTime = this->world->GetSimTime().Double();
+}
+
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateSync(const common::UpdateInfo & /*_info*/)
+{
+  this->world->SetPaused(true);
+  this->UpdateEffector();
+  for (const auto &team : this->gameState->teams)
+  {
+    for (const auto &agent : team->members)
+    {
+      if (!agent.syn)
+      {
+        return;
+      }
+    }
+  }
+
+  this->world->SetPaused(false);
+  for (const auto &team : this->gameState->teams)
+  {
+    for (auto &agent : team->members)
+    {
+      agent.syn = false;
+    }
+  }
+
+  this->UpdateMonitorEffector();
+  this->UpdateGameState();
+  this->UpdatePerceptor();
+  // gzerr << "updatesync() called at " << this->world->GetSimTime().Double()
+  //       << std::endl;
   this->lastUpdateTime = this->world->GetSimTime().Double();
 }
 
@@ -107,21 +229,28 @@ void Robocup3dsPlugin::UpdateEffector()
   this->effector->Update();
 
   // insert models into world that need to be inserted
-  for (auto &agentInfo : this->effector->agentsToAdd)
+  for (const auto &agentName : this->effector->agentsToAdd)
   {
-    std::string agentName = std::to_string(agentInfo.first) + "_" +
-                            agentInfo.second;
-    this->world->InsertModelFile("model://nao");
-    const auto &model = this->world->GetModel(NaoRobot::defaultModelName);
-    model->SetName(agentName);
+    sdf::ElementPtr modelRootNode(new sdf::Element());
+    modelRootNode->Copy(this->naoSdf);
+    const auto &nameAttribute =
+      modelRootNode->GetElement("model")->GetAttribute("name");
+    nameAttribute->SetFromString(agentName);
+    sdf::SDF modelSDF;
+    modelSDF.Root(modelRootNode);
+
+    this->world->InsertModelSDF(modelSDF);
+    // const auto &model = this->world->GetModel(NaoRobot::defaultModelName);
+    // model->SetName(agentName);
   }
 
   // remove models that need to be removed from world
-  for (auto &agentInfo : this->effector->agentsToRemove)
+  for (const auto &agentName : this->effector->agentsToRemove)
   {
-    std::string agentName = std::to_string(agentInfo.first) + "_" +
-                            agentInfo.second;
     this->world->RemoveModel(agentName);
+    gzmsg << "(" << this->world->GetSimTime().Double() <<
+          ") agent removed from game world by client: " <<
+          agentName << std::endl;
   }
 
   // set joint velocities of agent model
@@ -129,17 +258,38 @@ void Robocup3dsPlugin::UpdateEffector()
   {
     for (auto &agent : team->members)
     {
-      if (agent.status == Agent::Status::STOPPED)
-      { continue; }
       const auto &model = this->world->GetModel(agent.GetName());
+      if (agent.status == Agent::Status::STOPPED || !agent.inSimWorld)
+      {
+        continue;
+      }
+
       for (auto &kv : agent.action.jointEffectors)
       {
-        model->GetJoint(kv.first)->SetVelocity(0, kv.second);
+        std::string naoJointName = NaoRobot::hingeJointEffectorMap.find(
+                                     std::string(kv.first))->second;
+        model->GetJoint(naoJointName)->SetVelocity(0, kv.second);
       }
+      agent.action.jointEffectors.clear();
     }
   }
 }
 
+/////////////////////////////////////////////////
+void Robocup3dsPlugin::UpdateMonitorEffector()
+{
+  // update monitor effector
+  this->monitorEffector->Update();
+
+  // remove models that need to be removed from world
+  for (const auto &agentName : this->monitorEffector->agentsToRemove)
+  {
+    this->world->RemoveModel(agentName);
+    gzmsg << "(" << this->world->GetSimTime().Double() <<
+          ") agent removed from game world by monitor: " <<
+          agentName << std::endl;
+  }
+}
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateBallContactHistory()
 {
@@ -189,6 +339,9 @@ void Robocup3dsPlugin::UpdateBallContactHistory()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdateGameState()
 {
+  // gzmsg << "
+  // UpdateGameState()" << std::endl;
+
   // sync gameState time and gaezbo world time
   this->gameState->SetGameTime(this->world->GetSimTime().Double());
 
@@ -197,10 +350,21 @@ void Robocup3dsPlugin::UpdateGameState()
   {
     for (auto &agent : team->members)
     {
-      // set agent pose in gameState
-      if (agent.updatePose || agent.status == Agent::Status::STOPPED)
-      { continue; }
       const auto &model = this->world->GetModel(agent.GetName());
+      if (model && !agent.inSimWorld)
+      {
+        agent.inSimWorld = true;
+        gzmsg << "(" << this->world->GetSimTime().Double() <<
+              ") agent added to game world: " <<
+              model->GetName() << std::endl;
+      }
+
+      // set agent pose in gameState
+      if (agent.updatePose || agent.status == Agent::Status::STOPPED
+          || !agent.inSimWorld)
+      {
+        continue;
+      }
       const auto &modelPose = model->GetWorldPose();
       agent.pos = G2I(modelPose.pos);
       agent.rot = G2I(modelPose.rot);
@@ -228,32 +392,38 @@ void Robocup3dsPlugin::UpdateGameState()
   {
     for (auto &agent : team->members)
     {
+      if (!agent.inSimWorld)
+      {
+        continue;
+      }
+
       const auto &model = this->world->GetModel(agent.GetName());
-      const auto &modelPose = model->GetWorldPose();
 
       // if agent is in STOPPED state but somehow the model drifts from its
       // gamestate position, it gets moved back
-      bool correctModelDrift = agent.status == Agent::Status::STOPPED
-                               && agent.pos.Distance(G2I(modelPose.pos))
-                               > NaoRobot::torsoHeight;
+      // const auto &modelPose = model->GetWorldPose();
+      // bool correctModelDrift = agent.status == Agent::Status::STOPPED
+      //                          && agent.pos.Distance(G2I(modelPose.pos))
+      //                          > NaoRobot::torsoHeight;
 
-      if (!agent.updatePose && !correctModelDrift)
-      { continue; }
+      if (!agent.updatePose && agent.status != Agent::Status::STOPPED)
+      {
+        continue;
+      }
 
       ignition::math::Pose3<double> pose(agent.pos, agent.rot);
       model->SetWorldPose(I2G(pose));
       agent.updatePose = false;
 
-      if ((agent.status == Agent::Status::STOPPED
-           && agent.prevStatus == Agent::Status::RELEASED)
-          || correctModelDrift)
+      if (agent.status == Agent::Status::STOPPED)
       {
         // reset joint angles, velocity, and acceleration to zero
+        // gzmsg << "resetting model!" << std::endl;
         model->ResetPhysicsStates();
-        for (const auto &joint : model->GetJoints())
-        {
-          joint->Reset();
-        }
+        // for (const auto &joint : model->GetJoints())
+        // {
+        //   joint->Reset();
+        // }
       }
     }
   }
@@ -273,11 +443,27 @@ void Robocup3dsPlugin::UpdateGameState()
 /////////////////////////////////////////////////
 void Robocup3dsPlugin::UpdatePerceptor()
 {
+  // update send information to the agent that sends the Scene message
+  for (const auto &socketId : this->effector->sceneMessagesSocketIDs)
+  {
+    int len = snprintf(this->buffer + 4, Robocup3dsPlugin::kBufferSize - 4,
+                       "(time (now %.2f))",
+                       this->gameState->GetGameTime());
+    unsigned int netlen = htonl(static_cast<unsigned int>(len));
+    memcpy(this->buffer, &netlen, 4);
+    this->clientServer->Send(socketId, this->buffer, len + 4);
+  }
+
   // update perception related info using gazebo world model
   for (const auto &team : this->gameState->teams)
   {
     for (auto &agent : team->members)
     {
+      if (!agent.inSimWorld)
+      {
+        continue;
+      }
+
       const auto &model = this->world->GetModel(agent.GetName());
 
       // update agent's camera pose
@@ -292,7 +478,6 @@ void Robocup3dsPlugin::UpdatePerceptor()
         agent.selfBodyMap[kv.first] =
           G2I(model->GetLink(kv.second)->GetWorldPose().pos);
       }
-
       // update agent's percept joints angles
       for (const auto &kv : NaoRobot::hingeJointPerceptorMap)
       {
@@ -327,6 +512,11 @@ void Robocup3dsPlugin::UpdatePerceptor()
   {
     for (const auto &agent : team->members)
     {
+      if (!agent.inSimWorld)
+      {
+        continue;
+      }
+
       int cx = perceptor->Serialize(agent, &(this->buffer[4]),
                                     Robocup3dsPlugin::kBufferSize - 4);
       unsigned int _cx = htonl(static_cast<unsigned int>(cx));
@@ -334,7 +524,7 @@ void Robocup3dsPlugin::UpdatePerceptor()
       this->buffer[1] = (_cx >>  8) & 0xff;
       this->buffer[2] = (_cx >> 16) & 0xff;
       this->buffer[3] = (_cx >> 24) & 0xff;
-      server->Send(agent.socketID, this->buffer, cx + 4);
+      this->clientServer->Send(agent.socketID, this->buffer, cx + 4);
     }
   }
 }

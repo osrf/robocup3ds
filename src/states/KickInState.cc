@@ -36,7 +36,7 @@ KickInState::KickInState(const std::string &_name,
 void KickInState::Initialize()
 {
   // Move the ball to the sideline.
-  this->gameState->MoveBall(initBallPos);
+  this->gameState->MoveBall(this->initBallPos);
   this->gameState->MoveBallInBounds();
   State::Initialize();
 }
@@ -52,7 +52,7 @@ void KickInState::Update()
   {
     this->Initialize();
   }
-  // The right team is not allowed to be close to the ball.
+
   this->gameState->DropBallImpl(this->side);
   State::Update();
 

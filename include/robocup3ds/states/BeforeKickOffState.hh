@@ -15,8 +15,8 @@
  *
 */
 
-#ifndef _GAZEBO_BEFORE_KICKOFF_STATE_PLUGIN_HH_
-#define _GAZEBO_BEFORE_KICKOFF_STATE_PLUGIN_HH_
+#ifndef _GAZEBO_ROBOCUP3DS_BEFOREKICKOFF_STATE_PLUGIN_HH_
+#define _GAZEBO_ROBOCUP3DS_BEFOREKICKOFF_STATE_PLUGIN_HH_
 
 #include <string>
 
@@ -29,7 +29,9 @@ namespace states
   /// \brief State that handles the initial state.
   class BeforeKickOffState : public State
   {
-    // Documentation inherited
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
     public: BeforeKickOffState(const std::string &_name,
                                GameState *const _gameState);
 

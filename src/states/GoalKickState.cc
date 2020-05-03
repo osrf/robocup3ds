@@ -38,8 +38,8 @@ GoalKickState::GoalKickState(const std::string &_name,
 void GoalKickState::Initialize()
 {
   // Move the ball.
-  this->gameState->MoveBall(initBallPos);
-  this->gameState->MoveBallForGoalKick();
+  this->gameState->MoveBall(this->initBallPos);
+  this->gameState->MoveBallForGoalKick(this->side);
   State::Initialize();
 }
 
@@ -55,16 +55,16 @@ void GoalKickState::Update()
     this->Initialize();
   }
 
-  this->gameState->DropBallImpl(this->side);
   this->gameState->CheckGoalKickIllegalDefense(this->side);
+  this->gameState->DropBallImpl(this->side);
   math::Box penaltyBox;
   if (this->side == Team::Side::LEFT)
   {
-    penaltyBox = SoccerField::PenaltyBoxLeft;
+    penaltyBox = SoccerField::kPenaltyBoxLeft;
   }
   else
   {
-    penaltyBox = SoccerField::PenaltyBoxRight;
+    penaltyBox = SoccerField::kPenaltyBoxRight;
   }
   State::Update();
 
