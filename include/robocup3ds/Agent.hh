@@ -29,12 +29,6 @@
 
 class Agent;
 
-/// \brief Typedef for map of agent's body parts and positions
-using AgentBodyMap = std::map<std::string, ignition::math::Vector3<double>>;
-
-/// \brief Typedef for uNum, teamName pairs for identifying agents
-using AgentId = std::pair<int, std::string>;
-
 /// \brief Team class for GameState
 class Team
 {
@@ -73,32 +67,6 @@ class Team
     return this == &_team;
   }
 
-  /// \brief Get the string version of side
-  /// \brief _side Enum version of side
-  /// \return String version of side
-  public: static std::string GetSideAsString(const Side _side)
-  {
-    if (_side == Side::LEFT)
-      return "left";
-    else if (_side == Side::RIGHT)
-      return "right";
-    else
-      return "neither";
-  }
-
-  /// \brief Get the enum version of side
-  /// \brief _side String version of side
-  /// \return Enum version of side
-  public: static Side GetSideAsEnum(const std::string &_side)
-  {
-    if (_side == "Right" || _side == "right")
-      return Side::RIGHT;
-    else if (_side == "Left" || _side == "left")
-      return Side::LEFT;
-    else
-      return Side::NEITHER;
-  }
-
   /// \brief Name of the team.
   public: std::string name;
 
@@ -118,6 +86,12 @@ class Team
   public: bool canScore;
 };
 
+/// \brief Typedef for map of agent's body parts and positions
+using AgentBodyMap = std::map<std::string, ignition::math::Vector3<double>>;
+
+/// \brief Typedef for uNum, teamName pairs for identifying agents
+using AgentId = std::pair<int, std::string>;
+
 /// \brief Container that contains info for hear perceptor
 class AgentHear
 {
@@ -127,8 +101,7 @@ class AgentHear
     yaw(-1),
     self(false),
     isValid(false)
-  {
-  }
+  {}
 
   /// \brief Time when the message was sent
   public: double gameTime;
@@ -156,54 +129,24 @@ class AgentPerceptions
     this->fieldLines.reserve(SoccerField::FieldLines.size());
   }
 
-  /// \brief Map of landmarks that have been transformed to agent's cood
-  /// frame
+  /// \Brief Map of landmarks that have been transformed to agent's cood frame
   public: std::map<std::string, ignition::math::Vector3<double>> landMarks;
 
-  /// \brief Vector of lines that have been transformed to agent's cood
-  /// frame
+  /// \Brief Vector of lines that have been transformed to agent's cood frame
   public: std::vector<ignition::math::Line3<double>> fieldLines;
 
-  /// \brief Map of agent's perceptions of other agent's body parts
+  /// \Brief Map of agent's perceptions of other agent's body parts
   /// Implemented as a nested map
   public: std::map<AgentId, AgentBodyMap> otherAgentBodyMap;
 
-  /// \brief Hear perceptor
+  /// \Brief Hear perceptor
   public: AgentHear hear;
-
-  /// \brief Map of hinge joints and their angles
-  public: std::map<std::string, double> hingeJoints;
-
-  /// \brief Gyro information of torso
-  public: ignition::math::Vector3<double> gyroRate;
-
-  /// \brief Acceleration of torso
-  public: ignition::math::Vector3<double> accel;
-
-  /// \brief Force information for left foot of nao
-  public: std::pair<ignition::math::Vector3<double>,
-  ignition::math::Vector3<double>> leftFootFR;
-
-  /// \brief Force information for right foot of nao
-  public: std::pair<ignition::math::Vector3<double>,
-  ignition::math::Vector3<double>> rightFootFR;
-};
-
-/// \brief This class serves as an container for the information by the
-/// the agent
-class AgentActions
-{
-  /// \brief Constructor
-  public: AgentActions() {}
-
-  /// \brief Stores the velocity and angle information
-  public: std::map<std::string, double> jointEffectors;
 };
 
 /// \brief Agent class for GameState
 class Agent
 {
-  /// \brief Enum for the agent status and whether movement is allowed
+  /// \brief Enum for the agent status
   public: enum class Status
   {
     /// \brief Agent is allowed to move
@@ -215,22 +158,17 @@ class Agent
   /// \brief Constructor for Agent object
   /// \param[in] _uNum Unique identifier for agent
   /// \param[in] _team Pointer to team of the agent
-  /// \param[in] _socketID Socket ID for agent
-  public: Agent(const int _uNum, const std::shared_ptr<Team> &_team,
-    const int _socketID = -1):
+  public: Agent(const int _uNum, const std::shared_ptr<Team> &_team):
     uNum(_uNum),
     team(_team)
   {
-    this->socketID = _socketID;
-    this->syn = false;
-    this->inSimWorld = false;
+    this->pos.Set(0, 0, 0);
+    this->prevPos.Set(0, 0, 0);
     this->status = Status::RELEASED;
-    this->prevStatus = this->status;
     this->updatePose = false;
     this->inPenaltyBox = false;
     this->timeImmobilized = 0;
     this->timeFallen = 0;
-    this->pos.Set(0, SoccerField::HalfFieldHeight, 1);
   }
 
   /// \brief Equality operator for agents
@@ -241,65 +179,12 @@ class Agent
     return this == &_agent;
   }
 
-  /// \brief Return AgentId of agent
-  /// \return AgentId, a pair of unum and team name
-  public: AgentId GetAgentID() const
-  {
-    if (!this->team)
-      return std::make_pair(this->uNum, "");
-    return std::make_pair(this->uNum, this->team->name);
-  }
-
-  /// \brief Return name of agent
-  /// \return A String that is composed of unum and team name
-  public: std::string GetName() const
-  {
-    if (!this->team)
-      return std::to_string(this->uNum);
-    return std::to_string(this->uNum) + "_" + this->team->name;
-  }
-
-  /// \brief Return name of agent
-  /// \param[in] _uNum uNum of agent
-  /// \param[in] _teamname Teamname of agent
-  /// \return A String that is composed of unum and team name
-  public: static std::string GetName(const int uNum,
-    const std::string &_teamName)
-  {
-    return std::to_string(uNum) + "_" + _teamName;
-  }
-
-
-  /// \brief Checks if agent name is valid
-  /// \param[in] _agentName Agent name string to check
-  /// \param[out] _uNum uNum parsed from agent name
-  /// \param[out] _teamName Name of team parsed from agent name
-  /// \return True if agent name is valid
-  public: static bool CheckAgentName(const std::string &_agentName,
-    int &_uNum, std::string &_teamName)
-  {
-    try
-    {
-      size_t sepIndex = _agentName.find_first_of("_");
-      _uNum = std::stoi(_agentName.substr(0, sepIndex));
-      _teamName = _agentName.substr(0, sepIndex + 1);
-      return true;
-    }
-    catch (const std::exception &exc)
-    {
-      return false;
-    }
-  }
-
   /// \brief Flag whether player is goalkeeper
   /// \return True if player is goalkeeper
   public: bool IsGoalKeeper()
   {
     return this->uNum == 1;
   }
-
-  /// \brief Agent socket id
-  public: int socketID;
 
   /// \brief Agent unique id
   public: int uNum;
@@ -310,23 +195,17 @@ class Agent
   /// \brief Agent status
   public: Status status;
 
-  /// \brief Agent status in prev cycle
-  public: Status prevStatus;
-
   /// \brief Agent position
   public: ignition::math::Vector3<double> pos;
 
   /// \brief Agent position in previous cycle
   public: ignition::math::Vector3<double> prevPos;
 
-  /// \brief Agent orientation in radians
-  public: ignition::math::Quaternion<double> rot;
-
-  /// \brief Agent camera orientation in radians
+  /// \brief Agent camera orientation
   public: ignition::math::Quaternion<double> cameraRot;
 
-  /// \brief Agent camera position
-  public: ignition::math::Vector3<double> cameraPos;
+  /// \brief Agent orientation in radians
+  public: ignition::math::Quaternion<double> rot;
 
   /// \brief Flag whether to update agent pose in world to match gamestate.
   public: bool updatePose;
@@ -337,9 +216,6 @@ class Agent
   /// \brief Container for an agent's perceptions
   public: AgentPerceptions percept;
 
-  /// \brief Container for agent's effector actions
-  public: AgentActions action;
-
   /// \brief Flag whether agent is in penalty box
   public: bool inPenaltyBox;
 
@@ -348,13 +224,6 @@ class Agent
 
   /// \brief Stores duration in seconds the agent has fallen
   public: double timeFallen;
-
-  /// \brief Flag whether agent has finished syncing messages
-  public: bool syn;
-
-  /// \brief Flag whether the agent has been successfully load into gazebo
-  /// simulation world
-  public: bool inSimWorld;
 };
 
 /// \brief Container that contains info for say effector
@@ -364,8 +233,7 @@ class AgentSay
   public: AgentSay():
     agentId(std::make_pair(-1, "")),
     isValid(false)
-  {
-  }
+  {}
 
   /// \brief AgentId of agent who said message
   public: AgentId agentId;

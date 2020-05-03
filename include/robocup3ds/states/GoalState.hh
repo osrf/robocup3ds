@@ -29,7 +29,10 @@ namespace states
   /// \brief State that handles the goal state.
   class GoalState : public State
   {
-    // Documentation inherited
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
+    /// \param[in] _side Side of state
     public: GoalState(const std::string &_name,
                       GameState *const _gameState,
                       const Team::Side _side);

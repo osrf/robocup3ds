@@ -53,12 +53,33 @@ void RCPServer::Start()
 {
   // The service is already running.
   if (this->enabled)
-  { return; }
+  {
+    return;
+  }
 
   this->enabled = true;
 
   // Start the thread that receives information.
   this->threadReception = std::thread(&RCPServer::RunReceptionTask, this);
+}
+
+//////////////////////////////////////////////////
+bool RCPServer::DisconnectClient(const int _socket)
+{
+  std::lock_guard<std::mutex> lock(this->mutex);
+
+  for (size_t i = 0; i < this->pollSockets.size(); ++i)
+  {
+    if (_socket == this->pollSockets.at(i).fd)
+    {
+      this->parser->OnDisconnection(_socket);
+      close(_socket);
+      this->pollSockets.at(i).events = 0;
+      this->pollSockets.erase(this->pollSockets.begin() + i);
+      return true;
+    }
+  }
+  return false;
 }
 
 //////////////////////////////////////////////////
@@ -155,7 +176,9 @@ bool RCPServer::InitializeSockets()
 void RCPServer::RunReceptionTask()
 {
   if (!this->InitializeSockets())
-  { return; }
+  {
+    return;
+  }
 
   // Add the master socket to the list of sockets.
   struct pollfd masterFd;
@@ -163,14 +186,12 @@ void RCPServer::RunReceptionTask()
   masterFd.events = POLLIN;
   this->pollSockets.push_back(masterFd);
 
-  // std::cerr << "RCPServer::RunReceptionTask() is running" << std::endl;
   while (this->enabled)
   {
     // Block until we receive a datagram from the network
     // (from anyone including ourselves).
     int pollReturnCode =
       poll(&this->pollSockets[0], this->pollSockets.size(), 500);
-
     if (pollReturnCode == -1)
     {
       std::cerr << "RCPServer::RunReceptionTask(): Polling error!" << std::endl;
@@ -199,7 +220,9 @@ void RCPServer::RunReceptionTask()
 
   // About to leave, close pending sockets.
   for (size_t i = 1; i < this->pollSockets.size(); ++i)
-  { close(this->pollSockets.at(i).fd); }
+  {
+    close(this->pollSockets.at(i).fd);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -223,7 +246,7 @@ void RCPServer::DispatchRequestOnMasterSocket()
   // Add the new socket to the list of sockets to poll.
   this->pollSockets.push_back(newSocketPollItem);
 
-  // Call OnConnection().
+  // Call connectCb().
   this->parser->OnConnection(newSocketFd);
 }
 
@@ -241,7 +264,7 @@ void RCPServer::DispatchRequestOnClientSocket()
       {
         int socket = this->pollSockets.at(i).fd;
 
-        // Call OnDisconnection().
+        // Call disconnectCb().
         this->parser->OnDisconnection(this->pollSockets.at(i).fd);
 
         // Remove the client from the list used by poll.
@@ -264,16 +287,4 @@ void RCPServer::DispatchRequestOnClientSocket()
       continue;
     }
   }
-}
-
-//////////////////////////////////////////////////
-int RCPServer::GetPort() const
-{
-  return this->port;
-}
-
-//////////////////////////////////////////////////
-void RCPServer::SetPort(const int _port)
-{
-  this->port = _port;
 }

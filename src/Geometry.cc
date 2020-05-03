@@ -23,12 +23,12 @@
 using namespace ignition;
 
 /////////////////////////////////////////////////
-bool Geometry::IntersectionCircunferenceLine(
-  const math::Line3<double> &_line, const math::Vector3<double> &_pc, double _r,
-  math::Vector3<double> &_int1, math::Vector3<double> &_int2)
+bool Geometry::IntersectionCircumferenceLine(
+  const math::Line3<double> &_line, const math::Vector3<double> &_circleCenter,
+  double _r, math::Vector3<double> &_int1, math::Vector3<double> &_int2)
 {
-  math::Vector3<double> localP1 = _line[0] - _pc;
-  math::Vector3<double> localP2 = _line[1] - _pc;
+  math::Vector3<double> localP1 = _line[0] - _circleCenter;
+  math::Vector3<double> localP2 = _line[1] - _circleCenter;
   math::Vector3<double> localDir = localP2 - localP1;
 
   double a = G_SQUARE(localDir.X()) + G_SQUARE(localDir.Y());
@@ -36,10 +36,7 @@ bool Geometry::IntersectionCircunferenceLine(
   double c = G_SQUARE(localP1.X()) + G_SQUARE(localP1.Y()) - G_SQUARE(_r);
 
   double delta = G_SQUARE(b) - (4 * a * c);
-  // std::cout << localP1 << std::endl;
-  // std::cout << localP2 << std::endl;
-  // std::cout << localDir << std::endl;
-  // std::cout << delta << " " << b << " " << a << " " << c << std::endl;
+
   if (delta < DBL_EPSILON)
   {
     return false;
@@ -64,7 +61,7 @@ bool Geometry::IntersectionCircunferenceLine(
 bool Geometry::PointAbovePlane(const math::Vector3<double> &_pt,
                                const math::Plane<double> &_plane)
 {
-  return (_plane.Normal().Dot(_pt) + _plane.Offset()) > DBL_EPSILON;
+  return _plane.Side(_pt) == math::Plane<double>::POSITIVE_SIDE;
 }
 
 /////////////////////////////////////////////////
@@ -102,7 +99,6 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
 
   bool isPt1AbovePlane = PointAbovePlane(_line[0], _plane);
   bool isPt2AbovePlane = PointAbovePlane(_line[1], _plane);
-  // std::cout << isPt1AbovePlane << " " << isPt2AbovePlane << std::endl;
 
   if (isPt1AbovePlane && isPt2AbovePlane)
   {
@@ -111,12 +107,16 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
   else if (!isPt1AbovePlane && isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
-    { _line.SetA(pt); }
+    {
+      _line.SetA(pt);
+    }
   }
   else if (isPt1AbovePlane && !isPt2AbovePlane)
   {
     if (IntersectionPlaneLine(_line, _plane, t, pt))
-    { _line.SetB(pt); }
+    {
+      _line.SetB(pt);
+    }
   }
   else if (!isPt1AbovePlane && !isPt2AbovePlane)
   {
@@ -127,14 +127,14 @@ bool Geometry::ClipPlaneLine(math::Line3<double> &_line,
 }
 
 /////////////////////////////////////////////////
-math::Vector3<double> Geometry::CartToPolar(const math::Vector3<double> &_pt)
+math::Vector3<double> Geometry::CartToSphere(const math::Vector3<double> &_pt)
 {
   double r = _pt.Length() + DBL_EPSILON;
   return math::Vector3<double>(r, atan2(_pt.Y(), _pt.X()), acos(_pt.Z() / r));
 }
 
 /////////////////////////////////////////////////
-math::Vector3<double> Geometry::PolarToCart(const math::Vector3<double> &_pt)
+math::Vector3<double> Geometry::SphereToCart(const math::Vector3<double> &_pt)
 {
   return math::Vector3<double>(_pt.X() * sin(_pt.Z()) * cos(_pt.Y()),
                                _pt.X() * sin(_pt.Z()) * sin(_pt.Y()),

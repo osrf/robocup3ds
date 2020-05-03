@@ -28,7 +28,7 @@ class GameState;
 
 namespace states
 {
-  /// \brief State pattern used for the game modes.
+  /// \brief State pattern used for the game mode.
   class State
   {
     /// \brief Class constructor.

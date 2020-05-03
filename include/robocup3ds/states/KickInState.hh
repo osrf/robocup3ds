@@ -29,7 +29,10 @@ namespace states
   /// \brief State that handles the kick in state.
   class KickInState : public State
   {
-    // Documentation inherited
+    /// \brief Class constructor.
+    /// \param[in] _name Name of the state.
+    /// \param[in] _gameState Reference to the GameState
+    /// \param[in] _side Side of state
     public: KickInState(const std::string &_name,
                         GameState *const _gameState,
                         const Team::Side _side);

@@ -44,10 +44,7 @@ using namespace states;
 class GameStateTest_basic : public ::testing::Test
 {
   protected:
-    virtual void SetUp()
-    {
-      GameState::useCounterForGameTime = true;
-    }
+    virtual void SetUp() {}
 
   protected:
     virtual void TearDown() {}
@@ -116,11 +113,6 @@ TEST_F(GameStateTest_basic, GameState_LoadConfiguration)
 /// \brief Test for adding teams and agents
 TEST_F(GameStateTest_basic, GameState_add_teams_agents)
 {
-  // cannot add agent in incorrect play mode
-  gameState.SetCurrent(gameState.playOnState);
-  EXPECT_FALSE(gameState.AddAgent(0, "red"));
-  gameState.SetCurrent(gameState.beforeKickOffState);
-
   // make sure that agents with bad unums or teams cannot be added
   for (int i = 0; i < 3; ++i)
   {
@@ -358,10 +350,10 @@ TEST_F(GameStateTest_basic, GameState_move_agent)
   EXPECT_EQ(rot, gameState.teams.at(0)->members.at(0).rot);
 
   pos.Set(7, 8, GameState::beamHeight);
-  rot.Euler(0, 0, RAD(50));
+  rot.Euler(0, 0, 1.25);
   for (int i = 0; i < 100; ++i)
   {
-    bool result = gameState.BeamAgent(1, "blue", 7, 8, 50);
+    bool result = gameState.BeamAgent(1, "blue", 7, 8, 1.25);
     EXPECT_TRUE(result);
     EXPECT_LE(agent.pos.Distance(pos), 0.15);
     EXPECT_LE(fabs(agent.rot.Euler().Z() - rot.Euler().Z()), 0.1);
@@ -379,7 +371,6 @@ class GameStateTest_fullTeams : public GameStateTest_basic
   protected:
     virtual void SetUp()
     {
-      GameState::useCounterForGameTime = true;
       GameStateTest_basic::SetUp();
       for (int i = 0; i < 2; ++i)
       {
@@ -583,7 +574,7 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_kickOff_playOn)
     gameState.ClearBallContactHistory();
     EXPECT_FALSE(gameState.GetLastBallContact());
     EXPECT_EQ(gameState.GetLastSideTouchedBall(),
-              Team::Side::NEITHER);
+      Team::Side::NEITHER);
   }
 }
 
@@ -691,33 +682,6 @@ TEST_F(GameStateTest_fullTeams, GameState_transition_playOn_goal)
 
     gameState.MoveBall(ballPositions.at(i));
     gameState.Update();
-    EXPECT_EQ(states.at((i + 1) % 2)->name, gameState.GetCurrentState()->name);
-  }
-
-  ballPositions.clear();
-  ballPositions.push_back(math::Vector3<double>(
-                            -(SoccerField::HalfFieldWidth + 2.0),
-                            1, SoccerField::BallRadius));
-  ballPositions.push_back(math::Vector3<double>(
-                            SoccerField::HalfFieldWidth + 2.0,
-                            -1, SoccerField::BallRadius));
-  std::vector<math::Vector3<double>> ballVelocities;
-  ballVelocities.push_back(math::Vector3<double>(-1000, 0, 0));
-  ballVelocities.push_back(math::Vector3<double>(1000, 0, 0));
-
-  for (size_t i = 0; i < states.size(); ++i)
-  {
-    gameState.MoveBall(math::Vector3<double>::Zero);
-    gameState.SetCurrent(gameState.playOnState);
-    gameState.Update();
-    EXPECT_EQ("PlayOn", gameState.GetCurrentState()->name);
-
-    gameState.MoveBall(ballPositions.at(i));
-    gameState.SetBallVel(ballVelocities.at(i));
-
-    gameState.Update();
-    // std::cout << gameState.IsBallInGoal(gameState.teams.at(i)->side)
-    //           << std::endl;
     EXPECT_EQ(states.at((i + 1) % 2)->name, gameState.GetCurrentState()->name);
   }
 }
@@ -1306,9 +1270,7 @@ TEST_F(GameStateTest_basic, GameState_CheckImmobilityFallen)
 
   // check immobility and fallen for non-goalie
   gameState.SetCycleCounter(0);
-  gameState.SetCurrent(gameState.beforeKickOffState);
   gameState.AddAgent(2, "blue");
-  gameState.SetCurrent(gameState.playOnState);
   Agent &agent2 = gameState.teams.at(0)->members.at(1);
   agent2.pos = agent2.prevPos = pos;
   while (gameState.GetGameTime() < GameState::immobilityTimeLimit)
@@ -1403,7 +1365,7 @@ TEST_F(GameStateTest_fullTeams, GameState_CheckOffSidesOnKickOff)
   {
     Agent &ourAgent = gameState.teams.at(i)->members.at(0);
     Agent &theirAgent = gameState.teams.at(
-                          (i + 1) % 2)->members.at(0);
+                                     (i + 1) % 2)->members.at(0);
 
     resetPositionsForKickOff();
     gameState.SetCurrent(states.at(i));

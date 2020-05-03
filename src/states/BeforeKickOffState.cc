@@ -34,6 +34,7 @@ BeforeKickOffState::BeforeKickOffState(const std::string &_name,
 /////////////////////////////////////////////////
 void BeforeKickOffState::Initialize()
 {
+  this->gameState->StopPlayers();
   State::Initialize();
 }
 
@@ -44,24 +45,13 @@ void BeforeKickOffState::Update()
   {
     this->Initialize();
   }
-
-  bool agentOnField = false;
-  for (const auto &team : this->gameState->teams)
-  {
-    if (team->members.size() > 0u)
-    { agentOnField = true; }
-  }
-  if (!agentOnField)
-  { this->initTime = this->gameState->GetGameTime(); }
-
-  // resets getElapsedGameTime() back to zero
-  this->gameState->SetStartGameTime(this->gameState->GetGameTime());
-
-  this->gameState->StopPlayers();
   if (this->gameState->GetBall() != SoccerField::BallCenterPosition)
   {
     this->gameState->MoveBallToCenter();
   }
+
+  // resets getElapsedGameTime() back to zero
+  this->gameState->SetStartGameTime(this->gameState->GetGameTime());
 
   // After some time, go to play mode.
   if (this->GetElapsedTime() >= GameState::SecondsBeforeKickOff)

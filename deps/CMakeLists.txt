@@ -1,0 +1,19 @@
+set(PARSER_SOURCE
+  sexpLibrary/parser.c
+  sexpLibrary/sexp.c
+  sexpLibrary/event_temp.c
+  sexpLibrary/sexp_ops.c
+  sexpLibrary/cstring.c
+  sexpLibrary/faststack.c
+  PARENT_SCOPE
+)
+
+set(PARSER_HEADER
+  sexpLibrary/sexp.h
+  sexpLibrary/cstring.h
+  sexpLibrary/faststack.h
+  sexpLibrary/sexp_errors.h
+  sexpLibrary/sexp_ops.h
+  sexpLibrary/sexp_memory.h
+  PARENT_SCOPE
+)
